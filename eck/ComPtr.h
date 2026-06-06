@@ -1,0 +1,169 @@
+﻿#pragma once
+#include "ECK.h"
+
+ECK_NAMESPACE_BEGIN
+template <CcpComInterface T>
+class ComPtr
+{
+    template<CcpComInterface U>
+    friend class ComPtr;
+public:
+    using TInterface = T;
+private:
+    TInterface* p{};
+
+    EckInline void ReleaseIt() noexcept
+    {
+        if (p)
+        {
+            p->Release();
+            p = nullptr;
+        }
+    }
+public:
+    ComPtr() = default;
+
+    constexpr ComPtr(std::nullptr_t) noexcept {}
+
+    template<CcpComInterface U>
+        requires std::is_convertible_v<U*, TInterface*>
+    ComPtr(U* x) noexcept :p{ x }
+    {
+        if (p)
+            p->AddRef();
+    }
+
+    ComPtr(const ComPtr& x) noexcept : p{ x.p }
+    {
+        if (p)
+            p->AddRef();
+    }
+
+    constexpr ComPtr(ComPtr&& x) noexcept { std::swap(p, x.p); }
+
+    template<CcpComInterface U>
+        requires std::is_convertible_v<U*, TInterface*>
+    ComPtr(const ComPtr<U>& x) noexcept : p{ x.p }
+    {
+        if (p)
+            p->AddRef();
+    }
+
+    template<CcpComInterface U>
+        requires std::is_convertible_v<U*, TInterface*>
+    constexpr ComPtr(ComPtr<U>&& x) noexcept
+    {
+        std::swap(p, x.p);
+    }
+
+    ComPtr(REFCLSID clsid, HRESULT* phr = nullptr)
+    {
+        const auto hr = CoCreateInstance(clsid, nullptr,
+            CLSCTX_ALL, IID_PPV_ARGS(&p));
+        if (phr) *phr = hr;
+    }
+
+    ~ComPtr() noexcept { ReleaseIt(); }
+
+    ComPtr& operator=(std::nullptr_t) noexcept
+    {
+        ReleaseIt();
+        return *this;
+    }
+
+    template<CcpComInterface U>
+        requires std::is_convertible_v<U*, TInterface*>
+    ComPtr& operator=(U* x) noexcept
+    {
+        ComPtr{ x }.Swap(*this);
+        return *this;
+    }
+
+    ComPtr& operator=(const ComPtr& x) noexcept
+    {
+        ComPtr{ x }.Swap(*this);
+        return *this;
+    }
+
+    constexpr ComPtr& operator=(ComPtr&& x) noexcept
+    {
+        std::swap(p, x.p);
+        return *this;
+    }
+
+    template<CcpComInterface U>
+        requires std::is_convertible_v<U*, TInterface*>
+    ComPtr& operator=(const ComPtr<U>& x) noexcept
+    {
+        ComPtr{ x }.Swap(*this);
+        return *this;
+    }
+
+    EckInlineNdCe explicit operator bool() const noexcept { return !!p; }
+
+    EckInlineNdCe TInterface* const* operator&() const noexcept { return &p; }
+    EckInlineNdCe TInterface** operator&() noexcept { return &p; }
+
+    EckInlineNdCe TInterface* Get() const noexcept { return p; }
+    EckInlineNdCe TInterface* operator->() const noexcept { return p; }
+
+    EckInlineNdCe TInterface* const* At() const noexcept { return &p; }
+    EckInlineNdCe TInterface** At() noexcept { return &p; }
+    EckInline [[nodiscard]] TInterface** AtClear() noexcept
+    {
+        ReleaseIt();
+        return &p;
+    }
+
+    EckInlineNdCe TInterface*& AtSelf() noexcept { return p; }
+    EckInlineNdCe TInterface*& AtSelfClear() noexcept
+    {
+        ReleaseIt();
+        return p;
+    }
+
+    EckInlineNdCe TInterface* Detach() noexcept
+    {
+        const auto t = p;
+        p = nullptr;
+        return t;
+    }
+    EckInline void Attach(TInterface* x) noexcept
+    {
+        if (p && p != x)
+            p->Release();
+        p = x;
+    }
+
+    EckInline ULONG Clear() noexcept
+    {
+        if (p)
+        {
+            const auto r = p->Release();
+            p = nullptr;
+            return r;
+        }
+        return 0;
+    }
+
+    template<CcpComInterface U>
+    EckInline HRESULT As(ComPtr<U>& x) const noexcept
+    {
+        return p->QueryInterface(__uuidof(U), (void**)x.AtClear());
+    }
+    template<CcpComInterface U>
+    EckInline HRESULT As(U*& x) const noexcept
+    {
+        return p->QueryInterface(&x);
+    }
+
+    EckInlineCe void Swap(ComPtr& x) noexcept { std::swap(p, x.p); }
+    EckInlineCe void Swap(ComPtr&& x) noexcept { std::swap(p, x.p); }
+
+    HRESULT CreateInstance(REFCLSID clsid) noexcept
+    {
+        ReleaseIt();
+        return CoCreateInstance(clsid, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&p));
+    }
+};
+ECK_NAMESPACE_END

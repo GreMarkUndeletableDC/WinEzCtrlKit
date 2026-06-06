@@ -1,0 +1,132 @@
+﻿#pragma once
+#include "CIPEdit.h"
+
+ECK_NAMESPACE_BEGIN
+class CIPEditExt : public CIPEdit
+{
+public:
+    ECK_RTTI(CIPEditExt, CIPEdit);
+private:
+    HFONT m_hFont{};
+    int m_cxEdit{};
+    int m_cxDot{};
+    HWND m_hEdit[4]{};
+
+    void UpdateEditMetrics(int cxClient) noexcept
+    {
+        const auto hDC = GetDC(Handle);
+        const auto hOld = SelectObject(hDC, m_hFont);
+        GetCharWidth32W(hDC, L'.', L'.', &m_cxDot);
+        SelectObject(hDC, hOld);
+        ReleaseDC(Handle, hDC);
+        m_cxEdit = (cxClient - 3 - m_cxDot * 3) / 4;
+    }
+
+    void InternalAttachNew() noexcept
+    {
+        HWND hEdit{};
+        EckCounter(4, i)
+        {
+            hEdit = FindWindowExW(Handle, hEdit, L"Edit", nullptr);
+            m_hEdit[i] = hEdit;
+        }
+        UpdateEditMetrics();
+    }
+public:
+    void AttachNew(HWND hWnd) noexcept override
+    {
+        __super::AttachNew(hWnd);
+        InternalAttachNew();
+    }
+
+    LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
+    {
+        switch (uMsg)
+        {
+        case WM_PAINT:
+        case WM_PRINTCLIENT:
+        {
+            if (!ShouldAppsUseDarkMode())
+                break;
+            PAINTSTRUCT ps;
+            BeginPaint(Handle, wParam, ps);
+            const auto* const ptc = PtcCurrent();
+            SetDCBrushColor(ps.hdc, ptc->crDefBkg);
+            FillRect(ps.hdc, &ps.rcPaint, (HBRUSH)GetStockObject(DC_BRUSH));
+
+            SetBkMode(ps.hdc, TRANSPARENT);
+            SetTextColor(ps.hdc, ptc->crDefText);
+
+            const auto hOld = SelectObject(ps.hdc, m_hFont);
+            int x{ 3 + m_cxEdit };
+            EckCounterNV(3)
+            {
+                TextOutW(ps.hdc, x, 1, L".", 1);
+                x += (m_cxEdit + m_cxDot);
+            }
+            SelectObject(ps.hdc, hOld);
+
+            EndPaint(Handle, wParam, ps);
+        }
+        return 0;
+
+        case WM_CTLCOLOREDIT:
+        {
+            const auto* const ptc = PtcCurrent();
+            SetTextColor((HDC)wParam, ptc->crDefText);
+            SetBkMode((HDC)wParam, TRANSPARENT);
+            SetDCBrushColor((HDC)wParam, ptc->crDefBkg);
+            return (LRESULT)GetStockObject(DC_BRUSH);
+        }
+        break;
+
+        // 大小变化时并不会改变编辑框尺寸。。。
+        case WM_SIZE:
+        {
+            const auto lResult = __super::OnMessage(uMsg, wParam, lParam);
+            UpdateEditMetrics(LOWORD(lParam));
+            int x{ 3 };
+            EckCounter(4, i)
+            {
+                SetWindowPos(m_hEdit[i], nullptr,
+                    x, 1, m_cxEdit, HIWORD(lParam), SWP_NOZORDER | SWP_NOACTIVATE);
+                x += (m_cxEdit + m_cxDot);
+            }
+            return lResult;
+        }
+        break;
+
+        case WM_SETFONT:
+        {
+            const auto lResult = __super::OnMessage(uMsg, wParam, lParam);
+            m_hFont = (HFONT)wParam;
+            RECT rc;
+            GetClientRect(Handle, &rc);
+            UpdateEditMetrics(rc.right - rc.left);
+            return lResult;
+        }
+        break;
+
+        // IP编辑框忽略此消息
+        case WM_GETFONT: return (LRESULT)m_hFont;
+
+        case WM_CREATE:
+        {
+            const auto lResult = __super::OnMessage(uMsg, wParam, lParam);
+            InternalAttachNew();
+            return lResult;
+        }
+        }
+        return __super::OnMessage(uMsg, wParam, lParam);
+    }
+
+    void UpdateEditMetrics() noexcept
+    {
+        RECT rc;
+        GetClientRect(Handle, &rc);
+        UpdateEditMetrics(rc.right - rc.left);
+    }
+
+    EckInlineNdCe HWND GetEdit(size_t i) const noexcept { return m_hEdit[i]; }
+};
+ECK_NAMESPACE_END

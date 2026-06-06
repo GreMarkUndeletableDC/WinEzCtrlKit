@@ -1,0 +1,46 @@
+﻿#pragma once
+#include "ECK.h"
+
+ECK_NAMESPACE_BEGIN
+template<class TDeleter>
+using UniquePtr = std::unique_ptr<typename TDeleter::T, TDeleter>;
+
+#define ECK_DECL_HANDLE_DELETER(Name, Type, DelFunc) \
+    struct Del##Name {                          \
+        using T = std::remove_pointer_t<Type>;  \
+        void operator()(Type h) { DelFunc(h); } \
+    };                                          \
+    using UnqPtr##Name = UniquePtr<Del##Name>;  \
+
+ECK_DECL_HANDLE_DELETER(HImageList, HIMAGELIST, ImageList_Destroy);
+ECK_DECL_HANDLE_DELETER(HIcon, HICON, DestroyIcon);
+ECK_DECL_HANDLE_DELETER(HCursor, HCURSOR, DestroyCursor);
+ECK_DECL_HANDLE_DELETER(HMenu, HMENU, DestroyMenu);
+ECK_DECL_HANDLE_DELETER(HGdiObject, HGDIOBJ, DeleteObject);
+ECK_DECL_HANDLE_DELETER(HFont, HFONT, DeleteObject);
+ECK_DECL_HANDLE_DELETER(HBitmap, HBITMAP, DeleteObject);
+ECK_DECL_HANDLE_DELETER(HBrush, HBRUSH, DeleteObject);
+ECK_DECL_HANDLE_DELETER(HPen, HPEN, DeleteObject);
+ECK_DECL_HANDLE_DELETER(HNtObject, HANDLE, CloseHandle);// 不使用NtClose，CloseHandle进行必要的无效检查
+ECK_DECL_HANDLE_DELETER(HTheme, HTHEME, CloseThemeData);
+
+template<class T_ = void>
+struct DelMA
+{
+    using T = T_;
+    void operator()(std::remove_extent_t<T>* p) { free(p); }
+};
+
+template<class T = void>
+using UniquePtrMA = UniquePtr<DelMA<T>>;
+
+// WARNING 函数使用字节数
+template<class T>
+    requires std::is_trivial<T>::value
+EckInlineNd UniquePtr<DelMA<T>> CrtMakeTrivialUnique(size_t cb) noexcept
+{
+    using U = std::remove_extent_t<T>;
+    EckAssert(cb >= sizeof(U));
+    return UniquePtr<DelMA<T>>{ (U*)malloc(cb) };
+}
+ECK_NAMESPACE_END

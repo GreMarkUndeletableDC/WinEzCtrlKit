@@ -1,0 +1,149 @@
+﻿#pragma once
+#include "CSrwLock.h"
+#include "Utility.h"
+#include "NativeWrapper.h"
+
+ECK_NAMESPACE_BEGIN
+class CMemorySet
+{
+    template<class T>
+    friend class CFixedMemorySet;
+private:
+    struct BLOCK
+    {
+        BLOCK* pNext;
+        BYTE* pFreeBegin;
+        size_t cbBlock;
+    };
+
+    BLOCK* m_pHead{};
+    size_t m_cbPage{ 4096 };
+    CSrwLock m_Lk{};
+public:
+    [[nodiscard]] void* Allocate(size_t cbSize,
+        size_t cbAlign = sizeof(void*), BOOL bOnlySearchTop = TRUE) noexcept
+    {
+        if (cbSize == 0)
+            return nullptr;
+        CSrwWriteGuard _{ m_Lk };
+        auto p{ m_pHead };
+        while (p)
+        {
+            const auto pNew = StepToNextAlignmentBoundary((BYTE*)p, p->pFreeBegin, cbAlign);
+            if (pNew + cbSize <= (BYTE*)p + p->cbBlock)
+            {
+                p->pFreeBegin = pNew + cbSize;
+                return pNew;
+            }
+            if (bOnlySearchTop)
+                break;
+            p = p->pNext;
+        }
+
+        const size_t cbBlock = AlignedSize(
+            std::max(m_cbPage, cbSize + sizeof(BLOCK) + cbAlign), 4096);
+        const auto pBlock = (BLOCK*)VAllocate(cbBlock);
+        if (!pBlock)
+            return nullptr;
+        pBlock->pNext = m_pHead;
+        pBlock->pFreeBegin = StepToNextAlignmentBoundary((BYTE*)pBlock,
+            (BYTE*)pBlock + sizeof(BLOCK), cbAlign) + cbSize;
+        pBlock->cbBlock = cbBlock;
+        m_pHead = pBlock;
+        return pBlock->pFreeBegin - cbSize;
+    }
+
+    void Clear() noexcept
+    {
+        CSrwWriteGuard _{ m_Lk };
+        auto p{ m_pHead };
+        while (p)
+        {
+            auto pNext{ p->pNext };
+            VFree(p);
+            p = pNext;
+        }
+        m_pHead = nullptr;
+    }
+
+    void ClearRecord() noexcept
+    {
+        CSrwWriteGuard _{ m_Lk };
+        auto p{ m_pHead };
+        while (p)
+        {
+            p->pFreeBegin = (BYTE*)p + sizeof(BLOCK);
+            p = p->pNext;
+        }
+    }
+
+    EckInline void SetPageSize(size_t cbPage) noexcept
+    {
+        CSrwWriteGuard _{ m_Lk };
+        m_cbPage = cbPage;
+    }
+
+    EckInline size_t GetPageSize() noexcept
+    {
+        CSrwReadGuard _{ m_Lk };
+        return m_cbPage;
+    }
+};
+
+template<class T_>
+class CFixedMemorySet
+{
+public:
+    using T = T_;
+    using TPointer = T*;
+private:
+    struct PAGE
+    {
+        TPointer p;
+        size_t cbSize;
+        size_t cAlloc;
+    };
+
+    CMemorySet m_MemSet{};
+public:
+    template<class... TParam>
+    EckInline TPointer New(TParam&&... Args) noexcept
+    {
+        const auto p = m_MemSet.Allocate(sizeof(T), alignof(T));
+        if (!p)
+            return nullptr;
+        return std::construct_at((T*)p, std::forward<TParam>(Args)...);
+    }
+
+    template<class... TParam>
+    EckInline TPointer NewN(size_t cBlock, TParam&&... Args) noexcept
+    {
+        const auto p = m_MemSet.Allocate(cBlock * sizeof(T), alignof(T));
+        if (!p)
+            return nullptr;
+        for (auto p0 = (TPointer)p; p0 < (TPointer)p + cBlock; ++p0)
+            std::construct_at(p0, Args...);
+        return p;
+    }
+
+    void Delete() noexcept
+    {
+        auto pBlock{ m_MemSet.m_pHead };
+        while (pBlock)
+        {
+            BYTE* p = StepToNextAlignmentBoundary((BYTE*)pBlock,
+                (BYTE*)pBlock + sizeof(CMemorySet::BLOCK), alignof(T));
+            while (p + sizeof(T) <= pBlock->pFreeBegin)
+            {
+                std::destroy_at((T*)p);
+                p += sizeof(T);
+                p = StepToNextAlignmentBoundary((BYTE*)pBlock, p, alignof(T));
+            }
+            pBlock = pBlock->pNext;
+        }
+        m_MemSet.ClearRecord();
+    }
+
+    EckInlineNdCe auto& GetMemorySet() const noexcept { return m_MemSet; }
+};
+ECK_NAMESPACE_END
