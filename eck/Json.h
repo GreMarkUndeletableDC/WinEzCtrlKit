@@ -71,18 +71,18 @@ namespace Detail
         {
             return This.AtValue((PCSTR)x);
         }
-        //else if constexpr (
-        //    IsSameTemplate<CStringT, T1>::V &&
-        //    sizeof(typename T1::TChar) == 1)
-        //    return This.AtValue((PCCH)x.Data(), (size_t)x.Size());
+        else if constexpr (IsSameTemplate_V<CStringT, T1>)
+        {
+            static_assert(sizeof(typename T1::TChar) == 1);
+            return This.AtValue((PCCH)x.Data(), (size_t)x.Size());
+        }
         else if constexpr (
-            IsSameTemplate<std::basic_string, T1>::V &&
-            sizeof(typename T1::value_type) == 1)
+            IsSameTemplate_V<std::basic_string, T1> ||
+            IsSameTemplate_V<std::basic_string_view, T1>)
+        {
+            static_assert(sizeof(typename T1::value_type) == 1);
             return This.AtValue((PCCH)x.data(), x.size());
-        else if constexpr (
-            IsSameTemplate<std::basic_string_view, T1>::V &&
-            sizeof(typename T1::value_type) == 1)
-            return This.AtValue((PCCH)x.data(), x.size());
+        }
         else
             static_assert(!sizeof(T), "Unsupported type.");
     }

@@ -1649,6 +1649,15 @@ public:
         Assert::IsTrue(v.IsBool());
     }
 
+    TEST_METHOD(JsonValueAtType_CString)
+    {
+        CDocument doc(k_JsonObject);
+        CStringA s("/c");
+
+        CValue v = doc.GetRoot()[s];
+        Assert::IsTrue(v.IsBool());
+    }
+
     // CMutableDocument 的 NewStringCopy(PCWSTR) 重载
     TEST_METHOD(NewStringCopy_WideOverload)
     {

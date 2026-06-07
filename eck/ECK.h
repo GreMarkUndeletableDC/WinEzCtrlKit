@@ -184,35 +184,35 @@ struct UnderlyingType<T, false>
 template<CcpIntOrEnum T>
 using UnderlyingType_T = UnderlyingType<T>::Type;
 
-template<
-    template<class...> class TTemplate,
-    class T
->
-struct IsSameTemplate
-{
-    template<class... T>
-    struct U : std::false_type {};
+template <template <class...> class TTemplate, class TTarget>
+struct IsSameTemplate : std::false_type {};
 
-    template<class... T>
-    struct U<TTemplate<T...>> : std::true_type {};
+template <template <class...> class TTemplate, class... Args>
+struct IsSameTemplate<TTemplate, TTemplate<Args...>> : std::true_type {};
 
-    constexpr static bool V = U<T>::value;
-};
+template <template <class...> class TTemplate, class TTarget>
+constexpr bool IsSameTemplate_V = IsSameTemplate<TTemplate, TTarget>::value;
+
 // 支持一个类型形参和一个非类型形参的版本
+
 template<
     template<class, auto> class TTemplate,
-    class T
+    class TTarget
 >
-struct IsSameTemplate_TV
-{
-    template<class... T>
-    struct U : std::false_type {};
+struct IsSameTemplateTV : std::false_type {};
 
-    template<class T, auto V>
-    struct U<TTemplate<T, V>> : std::true_type {};
+template<
+    template<class, auto> class TTemplate,
+    class T,
+    auto V
+>
+struct IsSameTemplateTV<TTemplate, TTemplate<T, V>> : std::true_type {};
 
-    constexpr static bool V = U<T>::value;
-};
+template<
+    template<class, auto> class TTemplate,
+    class TTarget
+>
+constexpr bool IsSameTemplateTV_V = IsSameTemplateTV<TTemplate, TTarget>::value;
 ECK_NAMESPACE_END
 #pragma endregion Template
 
