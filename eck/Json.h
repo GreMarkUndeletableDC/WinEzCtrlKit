@@ -71,10 +71,10 @@ namespace Detail
         {
             return This.AtValue((PCSTR)x);
         }
-        else if constexpr (
-            IsSameTemplate<CStringT, T1>::V &&
-            sizeof(typename T1::TChar) == 1)
-            return This.AtValue((PCCH)x.Data(), (size_t)x.Size());
+        //else if constexpr (
+        //    IsSameTemplate<CStringT, T1>::V &&
+        //    sizeof(typename T1::TChar) == 1)
+        //    return This.AtValue((PCCH)x.Data(), (size_t)x.Size());
         else if constexpr (
             IsSameTemplate<std::basic_string, T1>::V &&
             sizeof(typename T1::value_type) == 1)
@@ -91,21 +91,6 @@ namespace Detail
     EckInline auto JsonValueAtType(TThis& This, const T(&x)[N]) noexcept
     {
         return This.AtValue((PCCH)&x, N - 1);
-    }
-
-    template<class T>
-    EckInline bool EqualIterator(const T& x, const T& y) noexcept
-    {
-        if (x.m_Iter.cur)
-            if (y.m_Iter.cur)
-                return x.m_Iter.cur == y.m_Iter.cur;
-            else
-                return !x.HasNext();
-        else
-            if (y.m_Iter.cur)
-                return !y.HasNext();
-            else
-                return true;
     }
 
     // NOTE 函数返回后，pszU8已被释放
@@ -400,9 +385,22 @@ struct ArrayIterator
     YyArrayIterator m_Iter{};
 
     ArrayIterator() = default;
-    constexpr ArrayIterator(YyArrayIterator Iter) noexcept : m_Iter{ Iter } {}
-    ArrayIterator(CValue Val) noexcept : m_Iter{ yyjson_arr_iter_with(Val.GetPointer()) } {}
-
+    ArrayIterator(YyArrayIterator Iter) noexcept : m_Iter{ Iter }
+    {
+        CheckValid();
+    }
+    ArrayIterator(CValue Val) noexcept
+        : m_Iter{ yyjson_arr_iter_with(Val.GetPointer()) }
+    {
+        CheckValid();
+    }
+private:
+    void CheckValid() noexcept
+    {
+        if (!HasNext())
+            m_Iter.cur = nullptr;
+    }
+public:
     EckInline void FromValue(CValue Val) noexcept
     {
         m_Iter = yyjson_arr_iter_with(Val.GetPointer());
@@ -413,15 +411,17 @@ struct ArrayIterator
     }
     EckInlineNd CValue Next() noexcept
     {
-        return CValue(yyjson_arr_iter_next(&m_Iter));
+        const auto pVal = yyjson_arr_iter_next(&m_Iter);
+        CheckValid();
+        return pVal;
     }
     EckInlineCe CValue GetCurrent() const noexcept { return m_Iter.cur; }
     EckInline ArrayIterator& operator++() noexcept { Next(); return *this; }
     EckInlineCe CValue operator*() const noexcept { return GetCurrent(); }
 };
-EckInlineNd bool operator==(const ArrayIterator& x, const ArrayIterator& y) noexcept
+EckInlineNdCe bool operator==(const ArrayIterator& x, const ArrayIterator& y) noexcept
 {
-    return Detail::EqualIterator<ArrayIterator>(x, y);
+    return x.m_Iter.cur == y.m_Iter.cur;
 }
 
 struct ObjectIterator
@@ -429,9 +429,22 @@ struct ObjectIterator
     YyObjectIterator m_Iter{};
 
     ObjectIterator() = default;
-    constexpr ObjectIterator(YyObjectIterator Iter) noexcept : m_Iter{ Iter } {}
-    ObjectIterator(CValue Val) noexcept : m_Iter{ yyjson_obj_iter_with(Val.GetPointer()) } {}
-
+    ObjectIterator(YyObjectIterator Iter) noexcept : m_Iter{ Iter }
+    {
+        CheckValid();
+    }
+    ObjectIterator(CValue Val) noexcept
+        : m_Iter{ yyjson_obj_iter_with(Val.GetPointer()) }
+    {
+        CheckValid();
+    }
+private:
+    void CheckValid() noexcept
+    {
+        if (!HasNext())
+            m_Iter.cur = nullptr;
+    }
+public:
     EckInline void FromValue(CValue Val) noexcept
     {
         m_Iter = yyjson_obj_iter_with(Val.GetPointer());
@@ -442,7 +455,9 @@ struct ObjectIterator
     }
     EckInlineNd CValue Next() noexcept
     {
-        return CValue(yyjson_obj_iter_next(&m_Iter));
+        const auto pVal = yyjson_obj_iter_next(&m_Iter);
+        CheckValid();
+        return pVal;
     }
     EckInlineNd CValue Get(_In_z_ PCSTR pszKey) noexcept
     {
@@ -456,22 +471,22 @@ struct ObjectIterator
     EckInline ObjectIterator& operator++() noexcept { Next(); return *this; }
     EckInlineCe CValue operator*() const noexcept { return GetCurrent(); }
 };
-EckInlineNd bool operator==(const ObjectIterator& x, const ObjectIterator& y) noexcept
+EckInlineNdCe bool operator==(const ObjectIterator& x, const ObjectIterator& y) noexcept
 {
-    return Detail::EqualIterator<ObjectIterator>(x, y);
+    return x.m_Iter.cur == y.m_Iter.cur;
 }
 
 struct ArrayProxy
 {
     CValue Val{ nullptr };
-    EckInline ArrayIterator begin() const noexcept { return ArrayIterator{ Val }; }
-    EckInline ArrayIterator end() const noexcept { return ArrayIterator{}; }
+    EckInline ArrayIterator begin() const noexcept { return { Val }; }
+    EckInline ArrayIterator end() const noexcept { return {}; }
 };
 struct ObjectProxy
 {
     CValue Val{ nullptr };
-    EckInline ObjectIterator begin() const noexcept { return ObjectIterator{ Val }; }
-    EckInline ObjectIterator end() const noexcept { return ObjectIterator{}; }
+    EckInline ObjectIterator begin() const noexcept { return { Val }; }
+    EckInline ObjectIterator end() const noexcept { return {}; }
 };
 
 class CMutableValue : public Detail::CValueBase
@@ -851,6 +866,7 @@ public:
     }
 
     EckInline void ProxyReplace(Detail::JsonProxy x, BOOL bCopyString = FALSE) const noexcept;
+    EckInline const CMutableDocument& operator=(Detail::JsonProxy x) const noexcept;
 };
 
 namespace Detail
@@ -904,29 +920,27 @@ namespace Detail
         JsonProxy(std::initializer_list<JsonProxy> x) noexcept : m_Val{ x } {}
         JsonProxy(const CMutableValue& x) noexcept : m_Val{ x.GetPointer() } {}
 
-        JsonProxy(unsigned int x) noexcept : JsonProxy{ (unsigned long long)x } {}
-        JsonProxy(unsigned long x) noexcept : JsonProxy{ (unsigned long long)x } {}
-        JsonProxy(std::integral auto x) noexcept : JsonProxy{ (int)x } {}
+        JsonProxy(unsigned int x) noexcept : JsonProxy((unsigned long long)x) {}
+        JsonProxy(unsigned long x) noexcept : JsonProxy((unsigned long long)x) {}
+        JsonProxy(std::integral auto x) noexcept : JsonProxy((int)x) {}
         template<CcpEnum T>
-        JsonProxy(T x) noexcept : JsonProxy{ std::underlying_type_t<T>(x) } {}
+        JsonProxy(T x) noexcept : JsonProxy(std::underlying_type_t<T>(x)) {}
 
         template<size_t N>
-        JsonProxy(const char(&x)[N]) noexcept : JsonProxy{ std::string_view{ x, N - 1 } } {}
+        JsonProxy(const char(&x)[N]) noexcept : JsonProxy(std::string_view{ x, N - 1 }) {}
         template<size_t N>
-        JsonProxy(const char8_t(&x)[N]) noexcept : JsonProxy{ std::string_view{ (PCCH)x, N - 1 } } {}
+        JsonProxy(const char8_t(&x)[N]) noexcept : JsonProxy(std::string_view{ (PCCH)x, N - 1 }) {}
         template<size_t N>
-        JsonProxy(const wchar_t(&x)[N]) noexcept : JsonProxy{ std::wstring_view{ x, N - 1 } } {}
-        JsonProxy(const char* x) noexcept : JsonProxy{ std::string_view(x) } {}
-        JsonProxy(const char8_t* x) noexcept : JsonProxy{ std::string_view((PCCH)x) } {}
-        JsonProxy(const wchar_t* x) noexcept : JsonProxy{ std::wstring_view(x) } {}
+        JsonProxy(const wchar_t(&x)[N]) noexcept : JsonProxy(std::wstring_view{ x, N - 1 }) {}
+
         template<class U>
-        JsonProxy(std::basic_string_view<char8_t, U> x) noexcept : JsonProxy{ std::basic_string_view{ (PCCH)x.data(), x.size() } } {}
+        JsonProxy(std::basic_string_view<char8_t, U> x) noexcept : JsonProxy(std::basic_string_view{ (PCCH)x.data(), x.size() }) {}
         template<CcpJsonChar T, class U, class V>
-        JsonProxy(const std::basic_string<T, U, V>& x) noexcept : JsonProxy{ std::basic_string_view{ x.data(), x.size() } } {}
+        JsonProxy(const std::basic_string<T, U, V>& x) noexcept : JsonProxy(std::basic_string_view{ x.data(), x.size() }) {}
         template<CcpJsonChar T, class U, class V>
-        JsonProxy(const CStringT<T, U, V>& x) noexcept : JsonProxy{ std::basic_string_view{ x.Data(), (size_t)x.Size() } } {}
+        JsonProxy(const CStringT<T, U, V>& x) noexcept : JsonProxy(std::basic_string_view{ x.Data(), (size_t)x.Size() }) {}
         template<class U>
-        JsonProxy(const CByteBufferT<U>& rb) noexcept : JsonProxy{ std::string_view{ (PCCH)rb.Data(), rb.Size() } } {}
+        JsonProxy(const CByteBufferT<U>& rb) noexcept : JsonProxy(std::string_view{ (PCCH)rb.Data(), rb.Size() }) {}
 
         EckInlineNdCe Type GetType() const noexcept { return (Type)m_Val.index(); };
         template<Type E>
@@ -1079,22 +1093,41 @@ struct MutableArrayIterator
     YyMutableArrayIterator m_Iter{};
 
     MutableArrayIterator() = default;
-    constexpr MutableArrayIterator(const YyMutableArrayIterator& Iter) : m_Iter{ Iter } {}
-    MutableArrayIterator(CMutableValue Val) :m_Iter{ yyjson_mut_arr_iter_with(Val.GetPointer()) } {}
+    constexpr MutableArrayIterator(const YyMutableArrayIterator& Iter) noexcept : m_Iter{ Iter } {}
+    MutableArrayIterator(CMutableValue Val) noexcept
+        : m_Iter{ yyjson_mut_arr_iter_with(Val.GetPointer()) }
+    {
+        Next();
+    }
 
-    EckInline void FromValue(CMutableValue Val) { m_Iter = yyjson_mut_arr_iter_with(Val.GetPointer()); }
-    EckInlineNd BOOL HasNext() const noexcept { return yyjson_mut_arr_iter_has_next((YyMutableArrayIterator*)&m_Iter); }
-    EckInlineNd CMutableValue Next() { return yyjson_mut_arr_iter_next(&m_Iter); }
-    EckInline CMutableValue Remove() { return yyjson_mut_arr_iter_remove(&m_Iter); }
+    EckInline void FromValue(CMutableValue Val) noexcept
+    {
+        m_Iter = yyjson_mut_arr_iter_with(Val.GetPointer());
+        Next();
+    }
+    EckInlineNd BOOL HasNext() const noexcept
+    {
+        return yyjson_mut_arr_iter_has_next((YyMutableArrayIterator*)&m_Iter);
+    }
+    EckInlineNd CMutableValue Next() noexcept
+    {
+        const auto pVal = yyjson_mut_arr_iter_next(&m_Iter);
+        if (pVal)
+            return pVal;
+        m_Iter.cur = nullptr;
+        return nullptr;
+    }
+    EckInline CMutableValue Remove()  noexcept
+    {
+        return yyjson_mut_arr_iter_remove(&m_Iter);
+    }
     EckInlineCe CMutableValue GetCurrent() const noexcept { return m_Iter.cur; }
     EckInline MutableArrayIterator& operator++() { Next(); return *this; }
     EckInlineCe CMutableValue operator*() const noexcept { return GetCurrent(); }
 };
-EckInlineNd bool operator==(
-    const MutableArrayIterator& x,
-    const MutableArrayIterator& y) noexcept
+EckInlineNd bool operator==(const MutableArrayIterator& x, const MutableArrayIterator& y) noexcept
 {
-    return Detail::EqualIterator<MutableArrayIterator>(x, y);
+    return x.m_Iter.cur == y.m_Iter.cur;
 }
 
 struct MutableObjectIterator
@@ -1104,11 +1137,15 @@ struct MutableObjectIterator
     MutableObjectIterator() = default;
     constexpr MutableObjectIterator(const YyMutableObjectIterator& Iter) noexcept : m_Iter{ Iter } {}
     MutableObjectIterator(CMutableValue Val) noexcept
-        : m_Iter{ yyjson_mut_obj_iter_with(Val.GetPointer()) } {}
+        : m_Iter{ yyjson_mut_obj_iter_with(Val.GetPointer()) }
+    {
+        Next();
+    }
 
     EckInline void FromValue(CMutableValue Val) noexcept
     {
         m_Iter = yyjson_mut_obj_iter_with(Val.GetPointer());
+        Next();
     }
     EckInlineNd BOOL HasNext() const noexcept
     {
@@ -1116,7 +1153,11 @@ struct MutableObjectIterator
     }
     EckInlineNd CMutableValue Next() noexcept
     {
-        return yyjson_mut_obj_iter_next(&m_Iter);
+        const auto pVal = yyjson_mut_obj_iter_next(&m_Iter);
+        if (pVal)
+            return pVal;
+        m_Iter.cur = nullptr;
+        return nullptr;
     }
     EckInlineNd CMutableValue Get(_In_z_ PCSTR pszKey) noexcept
     {
@@ -1136,30 +1177,28 @@ struct MutableObjectIterator
     EckInline MutableObjectIterator& operator++() noexcept { Next(); return *this; }
     EckInlineCe CMutableValue operator*() const noexcept { return GetCurrent(); }
 };
-EckInlineNd bool operator==(
-    const MutableObjectIterator& x,
-    const MutableObjectIterator& y) noexcept
+EckInlineNdCe bool operator==(const MutableObjectIterator& x, const MutableObjectIterator& y) noexcept
 {
-    return Detail::EqualIterator<MutableObjectIterator>(x, y);
+    return x.m_Iter.cur == y.m_Iter.cur;
 }
 
 struct MutableArrayProxy
 {
     CMutableValue Val{ nullptr };
-    EckInline MutableArrayIterator begin() const noexcept { return MutableArrayIterator{ Val }; }
-    EckInline MutableArrayIterator end() const noexcept { return MutableArrayIterator{}; }
+    EckInline MutableArrayIterator begin() const noexcept { return { Val }; }
+    EckInline MutableArrayIterator end() const noexcept { return {}; }
 };
 struct MutableObjectProxy
 {
     CMutableValue Val{ nullptr };
-    EckInline MutableObjectIterator begin() const noexcept { return MutableObjectIterator{ Val }; }
-    EckInline MutableObjectIterator end() const noexcept { return MutableObjectIterator{}; }
+    EckInline MutableObjectIterator begin() const noexcept { return { Val }; }
+    EckInline MutableObjectIterator end() const noexcept { return {}; }
 };
 
 EckInline void CMutableValue::ProxyReplace(
     Detail::JsonProxy x,
     const CMutableDocument& Doc,
-    BOOL bCopyString = FALSE) const noexcept
+    BOOL bCopyString) const noexcept
 {
     x.ReplaceMutValue(Doc, *this, bCopyString);
 }
@@ -1167,11 +1206,16 @@ EckInline void CMutableDocument::ProxyReplace(Detail::JsonProxy x, BOOL bCopyStr
 {
     SetRoot(x.ToMutableValue(*this));
 }
-EckInlineNd CMutableDocument CDocument::Clone(const YyAllocator* pAlc) const noexcept { return CMutableDocument(yyjson_doc_mut_copy(m_pDoc, pAlc)); }
-EckInlineNd ArrayProxy CValue::AsArray() const noexcept { return ArrayProxy(*this); }
-EckInlineNd ObjectProxy CValue::AsObject() const noexcept { return ObjectProxy(*this); }
-EckInlineNd MutableArrayProxy CMutableValue::AsArray() const noexcept { return MutableArrayProxy(*this); }
-EckInlineNd MutableObjectProxy CMutableValue::AsObject() const noexcept { return MutableObjectProxy(*this); }
+EckInline const CMutableDocument& CMutableDocument::operator=(Detail::JsonProxy x) const noexcept
+{
+    ProxyReplace(x, FALSE);
+    return *this;
+}
+EckInlineNd CMutableDocument CDocument::Clone(const YyAllocator* pAlc) const noexcept { return CMutableDocument{ yyjson_doc_mut_copy(m_pDoc, pAlc) }; }
+EckInlineNd ArrayProxy CValue::AsArray() const noexcept { return { *this }; }
+EckInlineNd ObjectProxy CValue::AsObject() const noexcept { return { *this }; }
+EckInlineNd MutableArrayProxy CMutableValue::AsArray() const noexcept { return { *this }; }
+EckInlineNd MutableObjectProxy CMutableValue::AsObject() const noexcept { return { *this }; }
 ECK_JSON_NAMESPACE_END
 ECK_NAMESPACE_END
 
