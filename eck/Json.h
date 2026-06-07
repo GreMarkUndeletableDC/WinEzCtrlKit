@@ -200,18 +200,18 @@ public:
     }
 
     EckInlineNd size_t ArrSize() const noexcept { return yyjson_arr_size(GetPointer()); }
-    EckInlineNd CValue ArrAt(size_t idx) const noexcept { return CValue(yyjson_arr_get(GetPointer(), idx)); }
-    EckInlineNd CValue ArrFront() const noexcept { return CValue(yyjson_arr_get_first(GetPointer())); }
-    EckInlineNd CValue ArrBack() const noexcept { return CValue(yyjson_arr_get_last(GetPointer())); }
+    EckInlineNd CValue ArrAt(size_t idx) const noexcept { return yyjson_arr_get(GetPointer(), idx); }
+    EckInlineNd CValue ArrFront() const noexcept { return yyjson_arr_get_first(GetPointer()); }
+    EckInlineNd CValue ArrBack() const noexcept { return yyjson_arr_get_last(GetPointer()); }
     EckInlineNd size_t ObjSize() const noexcept { return yyjson_obj_size(GetPointer()); }
-    EckInlineNd CValue ObjAt(_In_z_ PCSTR pszKey) const noexcept { return CValue(yyjson_obj_get(GetPointer(), pszKey)); }
+    EckInlineNd CValue ObjAt(_In_z_ PCSTR pszKey) const noexcept { return yyjson_obj_get(GetPointer(), pszKey); }
     EckInlineNd CValue ObjAt(
         _In_reads_(cchKey) PCSTR pszKey,
         size_t cchKey) const noexcept
     {
-        return CValue(yyjson_obj_getn(GetPointer(), pszKey, cchKey));
+        return yyjson_obj_getn(GetPointer(), pszKey, cchKey);
     }
-    EckInlineNd CValue ObjGetVal(CValue Key) const noexcept { return CValue(yyjson_obj_iter_get_val(Key.GetPointer())); }
+    EckInlineNd CValue ObjGetVal(CValue Key) const noexcept { return yyjson_obj_iter_get_val(Key.GetPointer()); }
 
     EckInlineNd PSTR Write(
         _Out_opt_ size_t* pcchOut,
@@ -244,8 +244,8 @@ public:
         size_t cchPtr = MaxSizeT,
         _Out_opt_ YyPointerError* pErr = nullptr) const noexcept
     {
-        return CValue(yyjson_ptr_getx(GetPointer(), pszPtr,
-            cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pErr));
+        return yyjson_ptr_getx(GetPointer(), pszPtr,
+            cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pErr);
     }
 
     EckInlineNd CValue operator[](const auto& x) const noexcept
@@ -351,7 +351,7 @@ public:
         return pOldDoc;
     }
 
-    EckInlineNd CValue GetRoot() const noexcept { return CValue(yyjson_doc_get_root(m_pDoc)); }
+    EckInlineNd CValue GetRoot() const noexcept { return yyjson_doc_get_root(m_pDoc); }
     EckInlineNd size_t GetReadSize() const noexcept { return yyjson_doc_get_read_size(m_pDoc); }
     EckInlineNd size_t GetValueCount() const noexcept { return yyjson_doc_get_val_count(m_pDoc); }
     EckInlineNd CValue AtValue(
@@ -359,8 +359,8 @@ public:
         size_t cchPtr = MaxSizeT,
         _Out_opt_ YyPointerError* pErr = nullptr) const noexcept
     {
-        return CValue(yyjson_doc_ptr_getx(m_pDoc, pszPtr,
-            cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pErr));
+        return yyjson_doc_ptr_getx(m_pDoc, pszPtr,
+            cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pErr);
     }
     EckInlineNd PSTR Write(
         _Out_opt_ size_t* pcchOut,
@@ -415,7 +415,7 @@ struct ArrayIterator
     {
         return CValue(yyjson_arr_iter_next(&m_Iter));
     }
-    EckInlineCe CValue GetCurrent() const noexcept { return CValue(m_Iter.cur); }
+    EckInlineCe CValue GetCurrent() const noexcept { return m_Iter.cur; }
     EckInline ArrayIterator& operator++() noexcept { Next(); return *this; }
     EckInlineCe CValue operator*() const noexcept { return GetCurrent(); }
 };
@@ -452,7 +452,7 @@ struct ObjectIterator
     {
         return yyjson_obj_iter_getn(&m_Iter, pszKey, cchKey);
     }
-    EckInlineCe CValue GetCurrent() const noexcept { return CValue(m_Iter.cur); }
+    EckInlineCe CValue GetCurrent() const noexcept { return m_Iter.cur; }
     EckInline ObjectIterator& operator++() noexcept { Next(); return *this; }
     EckInlineCe CValue operator*() const noexcept { return GetCurrent(); }
 };
@@ -463,24 +463,23 @@ EckInlineNd bool operator==(const ObjectIterator& x, const ObjectIterator& y) no
 
 struct ArrayProxy
 {
-    CValue Val;
+    CValue Val{ nullptr };
     EckInline ArrayIterator begin() const noexcept { return ArrayIterator{ Val }; }
     EckInline ArrayIterator end() const noexcept { return ArrayIterator{}; }
 };
 struct ObjectProxy
 {
-    CValue Val;
+    CValue Val{ nullptr };
     EckInline ObjectIterator begin() const noexcept { return ObjectIterator{ Val }; }
     EckInline ObjectIterator end() const noexcept { return ObjectIterator{}; }
 };
 
 class CMutableValue : public Detail::CValueBase
 {
-private:
-    const CMutableDocument* m_pDoc{};
 public:
-    constexpr CMutableValue(YyMutableValue* pVal, const CMutableDocument* pDoc = nullptr) noexcept
-        : CValueBase{ pVal }, m_pDoc{ pDoc }
+    constexpr CMutableValue(
+        YyMutableValue* pVal,
+        _In_opt_ const CMutableDocument* pDoc = nullptr) noexcept : CValueBase{ pVal }
     {}
     EckInlineNdCe auto GetPointer() const noexcept { return (YyMutableValue*)m_pVal; }
     EckInlineNdCe BOOL IsValid() const noexcept { return !!m_pVal; }
@@ -504,20 +503,13 @@ public:
     {
         return unsafe_yyjson_set_strn(GetPointer(), pszVal, cchVal);
     }
-    EckInline void SetStringCopy(
-        _In_reads_(cchVal) PCSTR pszVal,
-        size_t cchVal) const noexcept
-    {
-        const auto pNew = unsafe_yyjson_mut_strncpy(m_pDoc->GetPointer(), pszVal, cchVal);
-        return unsafe_yyjson_set_strn(GetPointer(), pNew, cchVal);
-    }
     EckInline void SetArray(size_t c = 0) const noexcept { return unsafe_yyjson_set_arr(GetPointer(), c); }
     EckInline void SetObject(size_t c = 0) const noexcept { return unsafe_yyjson_set_obj(GetPointer(), c); }
 
     EckInlineNd size_t ArrSize() const noexcept { return yyjson_mut_arr_size(GetPointer()); }
-    EckInlineNd CMutableValue ArrAt(size_t idx) const noexcept { return CMutableValue(yyjson_mut_arr_get(GetPointer(), idx), m_pDoc); }
-    EckInlineNd CMutableValue ArrFront() const noexcept { return CMutableValue(yyjson_mut_arr_get_first(GetPointer()), m_pDoc); }
-    EckInlineNd CMutableValue ArrBack() const noexcept { return CMutableValue(yyjson_mut_arr_get_last(GetPointer()), m_pDoc); }
+    EckInlineNd CMutableValue ArrAt(size_t idx) const noexcept { return yyjson_mut_arr_get(GetPointer(), idx); }
+    EckInlineNd CMutableValue ArrFront() const noexcept { return yyjson_mut_arr_get_first(GetPointer()); }
+    EckInlineNd CMutableValue ArrBack() const noexcept { return yyjson_mut_arr_get_last(GetPointer()); }
     EckInline BOOL ArrInsert(size_t idx, CMutableValue Val) const noexcept
     {
         return yyjson_mut_arr_insert(GetPointer(), Val.GetPointer(), idx);
@@ -526,25 +518,25 @@ public:
     EckInline BOOL ArrPushFront(CMutableValue Val) const noexcept { return yyjson_mut_arr_prepend(GetPointer(), Val.GetPointer()); }
     EckInline CMutableValue ArrReplace(size_t idx, CMutableValue Val) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_replace(GetPointer(), idx, Val.GetPointer()), m_pDoc);
+        return yyjson_mut_arr_replace(GetPointer(), idx, Val.GetPointer());
     }
-    EckInline CMutableValue ArrRemove(size_t idx) const noexcept { return CMutableValue(yyjson_mut_arr_remove(GetPointer(), idx), m_pDoc); }
+    EckInline CMutableValue ArrRemove(size_t idx) const noexcept { return yyjson_mut_arr_remove(GetPointer(), idx); }
     EckInline BOOL ArrRemove(size_t idx, size_t c) const noexcept
     {
         return yyjson_mut_arr_remove_range(GetPointer(), idx, c);
     }
-    EckInline CMutableValue ArrPopBack() const noexcept { return CMutableValue(yyjson_mut_arr_remove_last(GetPointer()), m_pDoc); }
-    EckInline CMutableValue ArrPopFront() const noexcept { return CMutableValue(yyjson_mut_arr_remove_first(GetPointer()), m_pDoc); }
+    EckInline CMutableValue ArrPopBack() const noexcept { return yyjson_mut_arr_remove_last(GetPointer()); }
+    EckInline CMutableValue ArrPopFront() const noexcept { return yyjson_mut_arr_remove_first(GetPointer()); }
     EckInline BOOL ArrClear() const noexcept { return yyjson_mut_arr_clear(GetPointer()); }
     EckInline BOOL ArrRotate(size_t idx) const noexcept { return yyjson_mut_arr_rotate(GetPointer(), idx); }
 
     EckInlineNd size_t ObjSize() const noexcept { return yyjson_mut_obj_size(GetPointer()); }
-    EckInlineNd CMutableValue ObjAt(_In_z_ PCSTR pszKey) const noexcept { return CMutableValue(yyjson_mut_obj_get(GetPointer(), pszKey), m_pDoc); }
+    EckInlineNd CMutableValue ObjAt(_In_z_ PCSTR pszKey) const noexcept { return yyjson_mut_obj_get(GetPointer(), pszKey); }
     EckInlineNd CMutableValue ObjAt(
         _In_reads_(cchKey) PCSTR pszKey,
         size_t cchKey) const noexcept
     {
-        return CMutableValue(yyjson_mut_obj_getn(GetPointer(), pszKey, cchKey), m_pDoc);
+        return yyjson_mut_obj_getn(GetPointer(), pszKey, cchKey);
     }
     EckInline BOOL ObjInsert(size_t idx, CMutableValue Key, CMutableValue Val) const noexcept
     {
@@ -552,11 +544,11 @@ public:
     }
     EckInline CMutableValue ObjRemove(CMutableValue Key) const noexcept
     {
-        return CMutableValue(yyjson_mut_obj_remove(GetPointer(), Key.GetPointer()), m_pDoc);
+        return yyjson_mut_obj_remove(GetPointer(), Key.GetPointer());
     }
     EckInline CMutableValue ObjRemove(_In_z_ PCSTR pszKey) const noexcept
     {
-        return CMutableValue(yyjson_mut_obj_remove_key(GetPointer(), pszKey), m_pDoc);
+        return yyjson_mut_obj_remove_key(GetPointer(), pszKey);
     }
     EckInline BOOL ObjClear() const noexcept { return yyjson_mut_obj_clear(GetPointer()); }
     EckInline BOOL ObjReplace(CMutableValue Key, CMutableValue Val) const noexcept
@@ -597,16 +589,18 @@ public:
         _Out_opt_ YyPointerContext* pCtx = nullptr,
         _Out_opt_ YyPointerError* pErr = nullptr) const noexcept
     {
-        return CMutableValue(yyjson_mut_ptr_getx(GetPointer(), pszPtr,
-            cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pCtx, pErr));
+        return yyjson_mut_ptr_getx(GetPointer(), pszPtr,
+            cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pCtx, pErr);
     }
 
     EckInlineNd CMutableValue operator[](const auto& x) const noexcept
     {
         return Detail::JsonValueAtType(*this, x);
     }
-    EckInline const CMutableValue& operator=(Detail::JsonProxy x) const noexcept;
-    EckInlineCe void SetParentDocument(const CMutableDocument* pDoc) { m_pDoc = pDoc; }
+    EckInline void ProxyReplace(
+        Detail::JsonProxy x,
+        const CMutableDocument& Doc,
+        BOOL bCopyString = FALSE) const noexcept;
 
     EckInlineNd MutableArrayProxy AsArray() const noexcept;
     EckInlineNd MutableObjectProxy AsObject() const noexcept;
@@ -684,7 +678,7 @@ public:
         return pOldDoc;
     }
 
-    EckInlineNd CMutableValue GetRoot() const noexcept { return CMutableValue(yyjson_mut_doc_get_root(m_pDoc)); }
+    EckInlineNd CMutableValue GetRoot() const noexcept { return yyjson_mut_doc_get_root(m_pDoc); }
     EckInline void SetRoot(CMutableValue Val) const noexcept { yyjson_mut_doc_set_root(m_pDoc, Val.GetPointer()); }
     EckInline BOOL SetStringPoolSize(size_t cb) const noexcept { return yyjson_mut_doc_set_str_pool_size(m_pDoc, cb); }
     EckInline BOOL SetValuePoolSize(size_t cb) const noexcept { return yyjson_mut_doc_set_val_pool_size(m_pDoc, cb); }
@@ -694,8 +688,8 @@ public:
         _Out_opt_ YyPointerContext* pCtx = nullptr,
         _Out_opt_ YyPointerError* pErr = nullptr) const noexcept
     {
-        return CMutableValue(yyjson_mut_doc_ptr_getx(m_pDoc, pszPtr,
-            cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pCtx, pErr), this);
+        return yyjson_mut_doc_ptr_getx(m_pDoc, pszPtr,
+            cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pCtx, pErr);
     }
     EckInlineNd PSTR Write(
         _Out_opt_ size_t* pcchOut,
@@ -730,33 +724,33 @@ public:
         _In_reads_or_z_(cchRaw) PCSTR pszRaw,
         size_t cchRaw = MaxSizeT) const noexcept
     {
-        return CMutableValue(yyjson_mut_rawn(m_pDoc, pszRaw, cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw), this);
+        return yyjson_mut_rawn(m_pDoc, pszRaw, cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw);
     }
     EckInlineNd CMutableValue NewRawCopy(
         _In_reads_or_z_(cchRaw) PCSTR pszRaw,
         size_t cchRaw = MaxSizeT) const noexcept
     {
-        return CMutableValue(yyjson_mut_rawncpy(m_pDoc, pszRaw, cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw), this);
+        return yyjson_mut_rawncpy(m_pDoc, pszRaw, cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw);
     }
-    EckInlineNd CMutableValue NewNull() const noexcept { return CMutableValue(yyjson_mut_null(m_pDoc), this); }
-    EckInlineNd CMutableValue NewTrue() const noexcept { return CMutableValue(yyjson_mut_true(m_pDoc), this); }
-    EckInlineNd CMutableValue NewFalse() const noexcept { return CMutableValue(yyjson_mut_false(m_pDoc), this); }
-    EckInlineNd CMutableValue NewBool(bool bVal) const noexcept { return CMutableValue(yyjson_mut_bool(m_pDoc, bVal), this); }
-    EckInlineNd CMutableValue NewUInt64(uint64_t uVal) const noexcept { return CMutableValue(yyjson_mut_uint(m_pDoc, uVal), this); }
-    EckInlineNd CMutableValue NewInt64(int64_t iVal) const noexcept { return CMutableValue(yyjson_mut_sint(m_pDoc, iVal), this); }
-    EckInlineNd CMutableValue NewInt(int iVal) const noexcept { return CMutableValue(yyjson_mut_int(m_pDoc, iVal), this); }
-    EckInlineNd CMutableValue NewReal(double dVal) const noexcept { return CMutableValue(yyjson_mut_real(m_pDoc, dVal), this); }
+    EckInlineNd CMutableValue NewNull() const noexcept { return yyjson_mut_null(m_pDoc); }
+    EckInlineNd CMutableValue NewTrue() const noexcept { return yyjson_mut_true(m_pDoc); }
+    EckInlineNd CMutableValue NewFalse() const noexcept { return yyjson_mut_false(m_pDoc); }
+    EckInlineNd CMutableValue NewBool(bool bVal) const noexcept { return yyjson_mut_bool(m_pDoc, bVal); }
+    EckInlineNd CMutableValue NewUInt64(uint64_t uVal) const noexcept { return yyjson_mut_uint(m_pDoc, uVal); }
+    EckInlineNd CMutableValue NewInt64(int64_t iVal) const noexcept { return yyjson_mut_sint(m_pDoc, iVal); }
+    EckInlineNd CMutableValue NewInt(int iVal) const noexcept { return yyjson_mut_int(m_pDoc, iVal); }
+    EckInlineNd CMutableValue NewReal(double dVal) const noexcept { return yyjson_mut_real(m_pDoc, dVal); }
     EckInlineNd CMutableValue NewString(
         _In_reads_or_z_(cchVal) PCSTR pszVal,
         size_t cchVal = MaxSizeT) const noexcept
     {
-        return CMutableValue(yyjson_mut_strn(m_pDoc, pszVal, cchVal == MaxSizeT ? strlen(pszVal) : cchVal), this);
+        return yyjson_mut_strn(m_pDoc, pszVal, cchVal == MaxSizeT ? strlen(pszVal) : cchVal);
     }
     EckInlineNd CMutableValue NewStringCopy(
         _In_reads_or_z_(cchVal) PCSTR pszVal,
         size_t cchVal = MaxSizeT) const noexcept
     {
-        return CMutableValue(yyjson_mut_strncpy(m_pDoc, pszVal, cchVal == MaxSizeT ? strlen(pszVal) : cchVal), this);
+        return yyjson_mut_strncpy(m_pDoc, pszVal, cchVal == MaxSizeT ? strlen(pszVal) : cchVal);
     }
     EckInlineNd CMutableValue NewStringCopy(
         _In_reads_or_z_(cchVal) PCWSTR pszVal,
@@ -767,81 +761,88 @@ public:
         const auto u8 = EcdWideToMultiByte(pszVal, (int)cchVal, CP_UTF8);
         return NewStringCopy(u8.Data(), u8.Size());
     }
-    EckInlineNd CMutableValue NewArray() const noexcept { return CMutableValue(yyjson_mut_arr(m_pDoc), this); }
+    EckInlineNd CMutableValue NewArray() const noexcept { return yyjson_mut_arr(m_pDoc); }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const bool* pbVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_bool(m_pDoc, pbVals, cVals), this);
+        return yyjson_mut_arr_with_bool(m_pDoc, pbVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const int8_t* piVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_sint8(m_pDoc, piVals, cVals), this);
+        return yyjson_mut_arr_with_sint8(m_pDoc, piVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const int16_t* piVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_sint16(m_pDoc, piVals, cVals), this);
+        return yyjson_mut_arr_with_sint16(m_pDoc, piVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const int32_t* piVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_sint32(m_pDoc, piVals, cVals), this);
+        return yyjson_mut_arr_with_sint32(m_pDoc, piVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const int64_t* piVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_sint64(m_pDoc, piVals, cVals), this);
+        return yyjson_mut_arr_with_sint64(m_pDoc, piVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const uint8_t* puVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_uint8(m_pDoc, puVals, cVals), this);
+        return yyjson_mut_arr_with_uint8(m_pDoc, puVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const uint16_t* puVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_uint16(m_pDoc, puVals, cVals), this);
+        return yyjson_mut_arr_with_uint16(m_pDoc, puVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const uint32_t* puVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_uint32(m_pDoc, puVals, cVals), this);
+        return yyjson_mut_arr_with_uint32(m_pDoc, puVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const uint64_t* puVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_uint64(m_pDoc, puVals, cVals), this);
+        return yyjson_mut_arr_with_uint64(m_pDoc, puVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const float* pVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_float(m_pDoc, pVals, cVals), this);
+        return yyjson_mut_arr_with_float(m_pDoc, pVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const double* pdVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_real(m_pDoc, pdVals, cVals), this);
+        return yyjson_mut_arr_with_real(m_pDoc, pdVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const char** ppszVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_str(m_pDoc, ppszVals, cVals), this);
+        return yyjson_mut_arr_with_str(m_pDoc, ppszVals, cVals);
     }
     EckInlineNd CMutableValue NewArray(_In_reads_(cVals) const char** ppszVals, _In_reads_(cVals) const size_t* pcch, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_strn(m_pDoc, ppszVals, pcch, cVals), this);
+        return yyjson_mut_arr_with_strn(m_pDoc, ppszVals, pcch, cVals);
     }
     EckInlineNd CMutableValue NewArrayCopy(_In_reads_(cVals) const char** ppszVals, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_strcpy(m_pDoc, ppszVals, cVals), this);
+        return yyjson_mut_arr_with_strcpy(m_pDoc, ppszVals, cVals);
     }
     EckInlineNd CMutableValue NewArrayCopy(_In_reads_(cVals) const char** ppszVals, _In_reads_(cVals) const size_t* pcch, size_t cVals) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_with_strncpy(m_pDoc, ppszVals, pcch, cVals), this);
+        return yyjson_mut_arr_with_strncpy(m_pDoc, ppszVals, pcch, cVals);
     }
 
-    EckInlineNd CMutableValue NewObject() const noexcept { return CMutableValue(yyjson_mut_obj(m_pDoc), this); }
+    EckInlineNd CMutableValue NewObject() const noexcept { return yyjson_mut_obj(m_pDoc); }
     EckInlineNd CMutableValue NewObject(
         _In_reads_(cPairs) const char** ppszKeys,
         _In_reads_(cPairs) const char** pVals,
         size_t cPairs) const noexcept
     {
-        return CMutableValue(yyjson_mut_obj_with_str(m_pDoc, ppszKeys, pVals, cPairs), this);
+        return yyjson_mut_obj_with_str(m_pDoc, ppszKeys, pVals, cPairs);
     }
     EckInlineNd CMutableValue NewObject(
         _In_reads_(cPairs * 2) const char** ppszKV,
         size_t cPairs) const noexcept
     {
-        return CMutableValue(yyjson_mut_obj_with_kv(m_pDoc, ppszKV, cPairs), this);
+        return yyjson_mut_obj_with_kv(m_pDoc, ppszKV, cPairs);
+    }
+
+    EckInline PSTR AllocateString(
+        _In_reads_(cchVal) PCSTR pszVal,
+        size_t cchVal) const noexcept
+    {
+        return unsafe_yyjson_mut_strncpy(m_pDoc, pszVal, cchVal);
     }
 
     EckInlineNd CMutableValue operator[](const auto& x) const noexcept
@@ -849,7 +850,7 @@ public:
         return Detail::JsonValueAtType(*this, x);
     }
 
-    EckInline const CMutableDocument& operator=(Detail::JsonProxy x) const noexcept;
+    EckInline void ProxyReplace(Detail::JsonProxy x, BOOL bCopyString = FALSE) const noexcept;
 };
 
 namespace Detail
@@ -990,7 +991,7 @@ namespace Detail
             }
             ECK_UNREACHABLE;
             case Type::JsonMutableValue:
-                return CMutableValue{ Get<Type::JsonMutableValue>() };
+                return Get<Type::JsonMutableValue>();
             case Type::JsonProxy:
             {
                 const auto& v = Get<Type::JsonProxy>();
@@ -1033,7 +1034,10 @@ namespace Detail
                 if (v.empty())
                     Val.SetString("", 0);
                 else if (bCopyString)
-                    Val.SetStringCopy(v.data(), v.size());
+                {
+                    const auto p = Doc.AllocateString(v.data(), v.size());
+                    Val.SetString(p, v.size());
+                }
                 else
                     Val.SetString(v.data(), v.size());
             }
@@ -1042,7 +1046,8 @@ namespace Detail
             {
                 const auto& v = Get<Type::StringW>();
                 const auto u8 = EcdWideToMultiByte(v.data(), (int)v.size(), CP_UTF8);
-                Val.SetStringCopy(u8.Data(), u8.Size());
+                const auto p = Doc.AllocateString(u8.Data(), u8.Size());
+                Val.SetString(p, u8.Size());
             }
             break;
             case Type::JsonProxy:
@@ -1079,9 +1084,9 @@ struct MutableArrayIterator
 
     EckInline void FromValue(CMutableValue Val) { m_Iter = yyjson_mut_arr_iter_with(Val.GetPointer()); }
     EckInlineNd BOOL HasNext() const noexcept { return yyjson_mut_arr_iter_has_next((YyMutableArrayIterator*)&m_Iter); }
-    EckInlineNd CMutableValue Next() { return CMutableValue(yyjson_mut_arr_iter_next(&m_Iter)); }
+    EckInlineNd CMutableValue Next() { return yyjson_mut_arr_iter_next(&m_Iter); }
     EckInline CMutableValue Remove() { return yyjson_mut_arr_iter_remove(&m_Iter); }
-    EckInlineCe CMutableValue GetCurrent() const noexcept { return CMutableValue(m_Iter.cur); }
+    EckInlineCe CMutableValue GetCurrent() const noexcept { return m_Iter.cur; }
     EckInline MutableArrayIterator& operator++() { Next(); return *this; }
     EckInlineCe CMutableValue operator*() const noexcept { return GetCurrent(); }
 };
@@ -1094,7 +1099,7 @@ EckInlineNd bool operator==(
 
 struct MutableObjectIterator
 {
-    YyMutableObjectIterator m_Iter;
+    YyMutableObjectIterator m_Iter{};
 
     MutableObjectIterator() = default;
     constexpr MutableObjectIterator(const YyMutableObjectIterator& Iter) noexcept : m_Iter{ Iter } {}
@@ -1111,7 +1116,7 @@ struct MutableObjectIterator
     }
     EckInlineNd CMutableValue Next() noexcept
     {
-        return CMutableValue(yyjson_mut_obj_iter_next(&m_Iter));
+        return yyjson_mut_obj_iter_next(&m_Iter);
     }
     EckInlineNd CMutableValue Get(_In_z_ PCSTR pszKey) noexcept
     {
@@ -1127,7 +1132,7 @@ struct MutableObjectIterator
     {
         return yyjson_mut_obj_iter_remove(&m_Iter);
     }
-    EckInlineCe CMutableValue GetCurrent() const noexcept { return CMutableValue(m_Iter.cur); }
+    EckInlineCe CMutableValue GetCurrent() const noexcept { return m_Iter.cur; }
     EckInline MutableObjectIterator& operator++() noexcept { Next(); return *this; }
     EckInlineCe CMutableValue operator*() const noexcept { return GetCurrent(); }
 };
@@ -1140,26 +1145,27 @@ EckInlineNd bool operator==(
 
 struct MutableArrayProxy
 {
-    CMutableValue Val;
+    CMutableValue Val{ nullptr };
     EckInline MutableArrayIterator begin() const noexcept { return MutableArrayIterator{ Val }; }
     EckInline MutableArrayIterator end() const noexcept { return MutableArrayIterator{}; }
 };
 struct MutableObjectProxy
 {
-    CMutableValue Val;
+    CMutableValue Val{ nullptr };
     EckInline MutableObjectIterator begin() const noexcept { return MutableObjectIterator{ Val }; }
     EckInline MutableObjectIterator end() const noexcept { return MutableObjectIterator{}; }
 };
 
-EckInline const CMutableValue& CMutableValue::operator=(Detail::JsonProxy x) const noexcept
+EckInline void CMutableValue::ProxyReplace(
+    Detail::JsonProxy x,
+    const CMutableDocument& Doc,
+    BOOL bCopyString = FALSE) const noexcept
 {
-    x.ReplaceMutValue(*m_pDoc, *this);
-    return *this;
+    x.ReplaceMutValue(Doc, *this, bCopyString);
 }
-EckInline const CMutableDocument& CMutableDocument::operator=(Detail::JsonProxy x) const noexcept
+EckInline void CMutableDocument::ProxyReplace(Detail::JsonProxy x, BOOL bCopyString) const noexcept
 {
     SetRoot(x.ToMutableValue(*this));
-    return *this;
 }
 EckInlineNd CMutableDocument CDocument::Clone(const YyAllocator* pAlc) const noexcept { return CMutableDocument(yyjson_doc_mut_copy(m_pDoc, pAlc)); }
 EckInlineNd ArrayProxy CValue::AsArray() const noexcept { return ArrayProxy(*this); }
