@@ -16,22 +16,22 @@
 ECK_NAMESPACE_BEGIN
 ECK_JSON_NAMESPACE_BEGIN
 using YyReadFlag = yyjson_read_flag;
-using YyReadErr = yyjson_read_err;
-using YyAlc = yyjson_alc;
-using YyDoc = yyjson_doc;
-using YyMutDoc = yyjson_mut_doc;
-using YyVal = yyjson_val;
-using YyMutVal = yyjson_mut_val;
+using YyReadError = yyjson_read_err;
+using YyAllocator = yyjson_alc;
+using YyDocument = yyjson_doc;
+using YyMutableDocument = yyjson_mut_doc;
+using YyValue = yyjson_val;
+using YyMutableValue = yyjson_mut_val;
 using YyType = yyjson_type;
 using YySubType = yyjson_subtype;
 using YyWriteFlag = yyjson_write_flag;
-using YyWriteErr = yyjson_write_err;
-using YyArrIter = yyjson_arr_iter;
-using YyMutArrIter = yyjson_mut_arr_iter;
-using YyObjIter = yyjson_obj_iter;
-using YyMutObjIter = yyjson_mut_obj_iter;
-using YyPtrErr = yyjson_ptr_err;
-using YyPtrCtx = yyjson_ptr_ctx;
+using YyWriteError = yyjson_write_err;
+using YyArrayIterator = yyjson_arr_iter;
+using YyMutableArrayIterator = yyjson_mut_arr_iter;
+using YyObjectIterator = yyjson_obj_iter;
+using YyMutableObjectIterator = yyjson_mut_obj_iter;
+using YyPointerError = yyjson_ptr_err;
+using YyPointerContext = yyjson_ptr_ctx;
 
 class CValue;
 class CDocument;
@@ -41,12 +41,17 @@ struct ArrayProxy;
 struct ObjectProxy;
 struct MutableArrayProxy;
 struct MutableObjectProxy;
-namespace Detail { struct InitializeProxy; }
+namespace Detail { struct JsonProxy; }
 
 struct Array_T {};
 
-EckInline BOOL YyLocateStringPosition(PCSTR pszText, size_t cchText, size_t ocbPos,
-    _Out_ size_t& nLine, _Out_ size_t& nCol, _Out_ size_t& nChar) noexcept
+EckInline BOOL YyLocateStringPosition(
+    _In_reads_(cchText) PCSTR pszText,
+    size_t cchText,
+    size_t ocbPos,
+    _Out_ size_t& nLine,
+    _Out_ size_t& nCol,
+    _Out_ size_t& nChar) noexcept
 {
     return yyjson_locate_pos(pszText, cchText, ocbPos, &nLine, &nCol, &nChar);
 }
@@ -97,7 +102,7 @@ namespace Detail
                 return true;
     }
 
-    inline CStringW WriteW(PSTR pszU8, size_t cchU8, _In_opt_ YyAlc* pAlc) noexcept
+    inline CStringW WriteW(PSTR pszU8, size_t cchU8, _In_opt_ YyAllocator* pAlc) noexcept
     {
         if (!pszU8)
             return {};
@@ -155,8 +160,8 @@ namespace Detail
 class CValue : public Detail::CValueBase
 {
 public:
-    constexpr CValue(YyVal* pVal) noexcept : CValueBase{ (void*)pVal } {}
-    EckInlineNdCe auto GetPointer() const noexcept { return (YyVal*)m_pVal; }
+    constexpr CValue(YyValue* pVal) noexcept : CValueBase{ (void*)pVal } {}
+    EckInlineNdCe auto GetPointer() const noexcept { return (YyValue*)m_pVal; }
     EckInlineNdCe BOOL IsValid() const noexcept { return !!m_pVal; }
 
     EckInline bool SetRaw(PCSTR pszRaw, size_t cchRaw) const noexcept { return yyjson_set_raw(GetPointer(), pszRaw, cchRaw); }
@@ -179,17 +184,17 @@ public:
     EckInlineNd CValue ObjGetVal(CValue Key) const noexcept { return CValue(yyjson_obj_iter_get_val(Key.GetPointer())); }
 
     EckInlineNd PSTR Write(size_t* pcchOut, YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) noexcept
     {
         return yyjson_val_write_opts(GetPointer(), uFlags, pAlc, pcchOut, pErr);
     }
     EckInline BOOL Write(PCSTR pszFile, YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) noexcept
     {
         return yyjson_val_write_file(pszFile, GetPointer(), uFlags, pAlc, pErr);
     }
     CStringW WriteW(YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) noexcept
     {
         size_t cchU8{};
         PSTR pszU8 = Write(&cchU8, uFlags, pAlc, pErr);
@@ -197,7 +202,7 @@ public:
     }
 
     EckInlineNd CValue AtValue(PCSTR pszPtr, size_t cchPtr = MaxSizeT,
-        YyPtrErr* pErr = nullptr) const noexcept
+        YyPointerError* pErr = nullptr) const noexcept
     {
         return CValue(yyjson_ptr_getx(GetPointer(), pszPtr,
             cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pErr));
@@ -211,11 +216,11 @@ public:
 class CDocument
 {
 private:
-    YyDoc* m_pDoc{};
+    YyDocument* m_pDoc{};
 public:
     ECK_DISABLE_COPY_DEF_CONS(CDocument);
     CDocument(PCSTR pszJson, size_t cchJson = MaxSizeT, YyReadFlag uFlags = 0,
-        const YyAlc* pAlc = nullptr, YyReadErr* pErr = nullptr) noexcept
+        const YyAllocator* pAlc = nullptr, YyReadError* pErr = nullptr) noexcept
     {
         m_pDoc = yyjson_read_opts((PSTR)pszJson, cchJson == MaxSizeT ? strlen(pszJson) : cchJson,
             uFlags, pAlc, pErr);
@@ -223,34 +228,34 @@ public:
 
     template<class TAllocator>
     CDocument(const CByteBufferT<TAllocator>& rb, YyReadFlag uFlags = 0,
-        const YyAlc* pAlc = nullptr, YyReadErr* pErr = nullptr) noexcept
+        const YyAllocator* pAlc = nullptr, YyReadError* pErr = nullptr) noexcept
         : CDocument((PCSTR)rb.Data(), rb.Size(), uFlags, pAlc, pErr)
     {}
 
     template<class TTraits, class TAllocator>
     CDocument(const CStringT<CHAR, TTraits, TAllocator>& rs, YyReadFlag uFlags = 0,
-        const YyAlc* pAlc = nullptr, YyReadErr* pErr = nullptr) noexcept
+        const YyAllocator* pAlc = nullptr, YyReadError* pErr = nullptr) noexcept
         : CDocument(rs.Data(), rs.Size(), uFlags, pAlc, pErr)
     {}
 
     template<class TTraits, class TAllocator>
     CDocument(const std::basic_string<CHAR, TTraits, TAllocator>& s, YyReadFlag uFlags = 0,
-        const YyAlc* pAlc = nullptr, YyReadErr* pErr = nullptr) noexcept
+        const YyAllocator* pAlc = nullptr, YyReadError* pErr = nullptr) noexcept
         : CDocument(s.data(), s.size(), uFlags, pAlc, pErr)
     {}
 
     template<class TTraits>
     CDocument(const std::basic_string_view<CHAR, TTraits>& sv, YyReadFlag uFlags = 0,
-        const YyAlc* pAlc = nullptr, YyReadErr* pErr = nullptr) noexcept
+        const YyAllocator* pAlc = nullptr, YyReadError* pErr = nullptr) noexcept
         : CDocument(sv.data(), sv.size(), uFlags, pAlc, pErr)
     {}
 
     CDocument(const char8_t* pszJson, size_t cchJson = MaxSizeT, YyReadFlag uFlags = 0,
-        const YyAlc* pAlc = nullptr, YyReadErr* pErr = nullptr) noexcept
+        const YyAllocator* pAlc = nullptr, YyReadError* pErr = nullptr) noexcept
         :CDocument((PCSTR)pszJson, cchJson, uFlags, pAlc, pErr)
     {}
 
-    constexpr CDocument(YyDoc* pDoc) noexcept : m_pDoc{ pDoc } {}
+    constexpr CDocument(YyDocument* pDoc) noexcept : m_pDoc{ pDoc } {}
     constexpr CDocument(CDocument&& x) noexcept : m_pDoc{ x.Detach() } {}
     constexpr CDocument& operator=(CDocument&& x) noexcept
     {
@@ -260,7 +265,7 @@ public:
     ~CDocument() { Free(); }
 
     EckInlineNdCe BOOL IsValid() const noexcept { return !!m_pDoc; }
-    EckInlineNdCe YyDoc* GetPointer() const noexcept { return m_pDoc; }
+    EckInlineNdCe YyDocument* GetPointer() const noexcept { return m_pDoc; }
     EckInline void Free() noexcept
     {
         if (m_pDoc)
@@ -269,15 +274,15 @@ public:
             m_pDoc = nullptr;
         }
     }
-    EckInlineNdCe YyDoc* Detach() noexcept
+    EckInlineNdCe YyDocument* Detach() noexcept
     {
-        YyDoc* pDoc = m_pDoc;
+        YyDocument* pDoc = m_pDoc;
         m_pDoc = nullptr;
         return pDoc;
     }
-    EckInlineCe YyDoc* Attach(YyDoc* pDoc) noexcept
+    EckInlineCe YyDocument* Attach(YyDocument* pDoc) noexcept
     {
-        YyDoc* pOldDoc = m_pDoc;
+        YyDocument* pOldDoc = m_pDoc;
         m_pDoc = pDoc;
         return pOldDoc;
     }
@@ -286,29 +291,29 @@ public:
     EckInlineNd size_t GetReadSize() const noexcept { return yyjson_doc_get_read_size(m_pDoc); }
     EckInlineNd size_t GetValueCount() const noexcept { return yyjson_doc_get_val_count(m_pDoc); }
     EckInlineNd CValue AtValue(PCSTR pszPtr, size_t cchPtr = MaxSizeT,
-        YyPtrErr* pErr = nullptr) const noexcept
+        YyPointerError* pErr = nullptr) const noexcept
     {
         return CValue(yyjson_doc_ptr_getx(m_pDoc, pszPtr,
             cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pErr));
     }
     EckInlineNd PSTR Write(size_t* pcchOut, YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
         return yyjson_write_opts(m_pDoc, uFlags, pAlc, pcchOut, pErr);
     }
     EckInline BOOL Write(PCSTR pszFile, YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
         return yyjson_write_file(pszFile, m_pDoc, uFlags, pAlc, pErr);
     }
     CStringW WriteW(YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
         size_t cchU8{};
         PSTR pszU8 = Write(&cchU8, uFlags, pAlc, pErr);
         return Detail::WriteW(pszU8, cchU8, pAlc);
     }
-    EckInlineNd CMutableDocument Clone(const YyAlc* pAlc = nullptr) const noexcept;
+    EckInlineNd CMutableDocument Clone(const YyAllocator* pAlc = nullptr) const noexcept;
     EckInlineNd CValue operator[](PCSTR pszKey) const noexcept
     {
         return Detail::JsonValueAt(*this, pszKey);
@@ -317,14 +322,14 @@ public:
 
 struct ArrayIterator
 {
-    YyArrIter m_Iter{};
+    YyArrayIterator m_Iter{};
 
     ArrayIterator() = default;
-    constexpr ArrayIterator(YyArrIter iter) noexcept : m_Iter{ iter } {}
+    constexpr ArrayIterator(YyArrayIterator Iter) noexcept : m_Iter{ Iter } {}
     ArrayIterator(CValue val) noexcept : m_Iter{ yyjson_arr_iter_with(val.GetPointer()) } {}
 
     EckInline void FromValue(CValue val) noexcept { m_Iter = yyjson_arr_iter_with(val.GetPointer()); }
-    EckInlineNd BOOL HasNext() const noexcept { return yyjson_arr_iter_has_next((YyArrIter*)&m_Iter); }
+    EckInlineNd BOOL HasNext() const noexcept { return yyjson_arr_iter_has_next((YyArrayIterator*)&m_Iter); }
     EckInlineNd CValue Next() noexcept { return CValue(yyjson_arr_iter_next(&m_Iter)); }
     EckInlineCe CValue GetCurrent() const noexcept { return CValue(m_Iter.cur); }
     EckInline ArrayIterator& operator++() noexcept { Next(); return *this; }
@@ -337,14 +342,14 @@ EckInlineNd bool operator==(const ArrayIterator& x, const ArrayIterator& y) noex
 
 struct ObjectIterator
 {
-    YyObjIter m_Iter{};
+    YyObjectIterator m_Iter{};
 
     ObjectIterator() = default;
-    constexpr ObjectIterator(YyObjIter iter) noexcept : m_Iter{ iter } {}
+    constexpr ObjectIterator(YyObjectIterator Iter) noexcept : m_Iter{ Iter } {}
     ObjectIterator(CValue val) noexcept : m_Iter{ yyjson_obj_iter_with(val.GetPointer()) } {}
 
     EckInline void FromValue(CValue val) noexcept { m_Iter = yyjson_obj_iter_with(val.GetPointer()); }
-    EckInlineNd BOOL HasNext() const noexcept { return yyjson_obj_iter_has_next((YyObjIter*)&m_Iter); }
+    EckInlineNd BOOL HasNext() const noexcept { return yyjson_obj_iter_has_next((YyObjectIterator*)&m_Iter); }
     EckInlineNd CValue Next() noexcept { return CValue(yyjson_obj_iter_next(&m_Iter)); }
     EckInlineNd CValue Get(PCSTR pszKey) noexcept { return yyjson_obj_iter_get(&m_Iter, pszKey); }
     EckInlineNd CValue Get(PCSTR pszKey, size_t cchKey) noexcept { return yyjson_obj_iter_getn(&m_Iter, pszKey, cchKey); }
@@ -375,85 +380,85 @@ class CMutableValue : public Detail::CValueBase
 private:
     const CMutableDocument* m_pDoc{};
 public:
-    constexpr CMutableValue(YyMutVal* pVal, const CMutableDocument* pDoc = nullptr) noexcept
+    constexpr CMutableValue(YyMutableValue* pVal, const CMutableDocument* pDoc = nullptr) noexcept
         : CValueBase{ pVal }, m_pDoc{ pDoc }
     {}
-    EckInlineNdCe auto Ptr() const noexcept { return (YyMutVal*)m_pVal; }
+    EckInlineNdCe auto GetPointer() const noexcept { return (YyMutableValue*)m_pVal; }
     EckInlineNdCe BOOL IsValid() const noexcept { return !!m_pVal; }
 
-    EckInline void SetRaw(PCSTR pszRaw, size_t cchRaw) const noexcept { return unsafe_yyjson_set_raw(Ptr(), pszRaw, cchRaw); }
-    EckInline void SetNull() const noexcept { return unsafe_yyjson_set_null(Ptr()); }
-    EckInline void SetBool(bool bVal) const noexcept { return unsafe_yyjson_set_bool(Ptr(), bVal); }
-    EckInline void SetUInt64(uint64_t uVal) const noexcept { return unsafe_yyjson_set_uint(Ptr(), uVal); }
-    EckInline void SetInt64(int64_t iVal) const noexcept { return unsafe_yyjson_set_sint(Ptr(), iVal); }
-    EckInline void SetInt(int iVal) const noexcept { return unsafe_yyjson_set_sint(Ptr(), iVal); }
-    EckInline void SetReal(double dVal) const noexcept { return unsafe_yyjson_set_real(Ptr(), dVal); }
-    EckInline void SetString(PCSTR pszVal) const noexcept { return unsafe_yyjson_set_str(Ptr(), pszVal); }
-    EckInline void SetString(PCSTR pszVal, size_t cchVal) const noexcept { return unsafe_yyjson_set_strn(Ptr(), pszVal, cchVal); }
-    EckInline void SetArray(size_t c = 0) const noexcept { return unsafe_yyjson_set_arr(Ptr(), c); }
-    EckInline void SetObject(size_t c = 0) const noexcept { return unsafe_yyjson_set_obj(Ptr(), c); }
+    EckInline void SetRaw(PCSTR pszRaw, size_t cchRaw) const noexcept { return unsafe_yyjson_set_raw(GetPointer(), pszRaw, cchRaw); }
+    EckInline void SetNull() const noexcept { return unsafe_yyjson_set_null(GetPointer()); }
+    EckInline void SetBool(bool bVal) const noexcept { return unsafe_yyjson_set_bool(GetPointer(), bVal); }
+    EckInline void SetUInt64(uint64_t uVal) const noexcept { return unsafe_yyjson_set_uint(GetPointer(), uVal); }
+    EckInline void SetInt64(int64_t iVal) const noexcept { return unsafe_yyjson_set_sint(GetPointer(), iVal); }
+    EckInline void SetInt(int iVal) const noexcept { return unsafe_yyjson_set_sint(GetPointer(), iVal); }
+    EckInline void SetReal(double dVal) const noexcept { return unsafe_yyjson_set_real(GetPointer(), dVal); }
+    EckInline void SetString(PCSTR pszVal) const noexcept { return unsafe_yyjson_set_str(GetPointer(), pszVal); }
+    EckInline void SetString(PCSTR pszVal, size_t cchVal) const noexcept { return unsafe_yyjson_set_strn(GetPointer(), pszVal, cchVal); }
+    EckInline void SetArray(size_t c = 0) const noexcept { return unsafe_yyjson_set_arr(GetPointer(), c); }
+    EckInline void SetObject(size_t c = 0) const noexcept { return unsafe_yyjson_set_obj(GetPointer(), c); }
 
-    EckInlineNd size_t ArrSize() const noexcept { return yyjson_mut_arr_size(Ptr()); }
-    EckInlineNd CMutableValue ArrAt(size_t idx) const noexcept { return CMutableValue(yyjson_mut_arr_get(Ptr(), idx), m_pDoc); }
-    EckInlineNd CMutableValue ArrFront() const noexcept { return CMutableValue(yyjson_mut_arr_get_first(Ptr()), m_pDoc); }
-    EckInlineNd CMutableValue ArrBack() const noexcept { return CMutableValue(yyjson_mut_arr_get_last(Ptr()), m_pDoc); }
+    EckInlineNd size_t ArrSize() const noexcept { return yyjson_mut_arr_size(GetPointer()); }
+    EckInlineNd CMutableValue ArrAt(size_t idx) const noexcept { return CMutableValue(yyjson_mut_arr_get(GetPointer(), idx), m_pDoc); }
+    EckInlineNd CMutableValue ArrFront() const noexcept { return CMutableValue(yyjson_mut_arr_get_first(GetPointer()), m_pDoc); }
+    EckInlineNd CMutableValue ArrBack() const noexcept { return CMutableValue(yyjson_mut_arr_get_last(GetPointer()), m_pDoc); }
     EckInline BOOL ArrInsert(size_t idx, CMutableValue Val) const noexcept
     {
-        return yyjson_mut_arr_insert(Ptr(), Val.Ptr(), idx);
+        return yyjson_mut_arr_insert(GetPointer(), Val.GetPointer(), idx);
     }
-    EckInline BOOL ArrPushBack(CMutableValue Val) const noexcept { return yyjson_mut_arr_append(Ptr(), Val.Ptr()); }
-    EckInline BOOL ArrPushFront(CMutableValue Val) const noexcept { return yyjson_mut_arr_prepend(Ptr(), Val.Ptr()); }
+    EckInline BOOL ArrPushBack(CMutableValue Val) const noexcept { return yyjson_mut_arr_append(GetPointer(), Val.GetPointer()); }
+    EckInline BOOL ArrPushFront(CMutableValue Val) const noexcept { return yyjson_mut_arr_prepend(GetPointer(), Val.GetPointer()); }
     EckInline CMutableValue ArrReplace(size_t idx, CMutableValue Val) const noexcept
     {
-        return CMutableValue(yyjson_mut_arr_replace(Ptr(), idx, Val.Ptr()), m_pDoc);
+        return CMutableValue(yyjson_mut_arr_replace(GetPointer(), idx, Val.GetPointer()), m_pDoc);
     }
-    EckInline CMutableValue ArrRemove(size_t idx) const noexcept { return CMutableValue(yyjson_mut_arr_remove(Ptr(), idx), m_pDoc); }
+    EckInline CMutableValue ArrRemove(size_t idx) const noexcept { return CMutableValue(yyjson_mut_arr_remove(GetPointer(), idx), m_pDoc); }
     EckInline BOOL ArrRemove(size_t idx, size_t c) const noexcept
     {
-        return yyjson_mut_arr_remove_range(Ptr(), idx, c);
+        return yyjson_mut_arr_remove_range(GetPointer(), idx, c);
     }
-    EckInline CMutableValue ArrPopBack() const noexcept { return CMutableValue(yyjson_mut_arr_remove_last(Ptr()), m_pDoc); }
-    EckInline CMutableValue ArrPopFront() const noexcept { return CMutableValue(yyjson_mut_arr_remove_first(Ptr()), m_pDoc); }
-    EckInline BOOL ArrClear() const noexcept { return yyjson_mut_arr_clear(Ptr()); }
-    EckInline BOOL ArrRotate(size_t idx) const noexcept { return yyjson_mut_arr_rotate(Ptr(), idx); }
+    EckInline CMutableValue ArrPopBack() const noexcept { return CMutableValue(yyjson_mut_arr_remove_last(GetPointer()), m_pDoc); }
+    EckInline CMutableValue ArrPopFront() const noexcept { return CMutableValue(yyjson_mut_arr_remove_first(GetPointer()), m_pDoc); }
+    EckInline BOOL ArrClear() const noexcept { return yyjson_mut_arr_clear(GetPointer()); }
+    EckInline BOOL ArrRotate(size_t idx) const noexcept { return yyjson_mut_arr_rotate(GetPointer(), idx); }
 
-    EckInlineNd size_t ObjSize() const noexcept { return yyjson_mut_obj_size(Ptr()); }
-    EckInlineNd CMutableValue ObjAt(PCSTR pszKey) const noexcept { return CMutableValue(yyjson_mut_obj_get(Ptr(), pszKey), m_pDoc); }
+    EckInlineNd size_t ObjSize() const noexcept { return yyjson_mut_obj_size(GetPointer()); }
+    EckInlineNd CMutableValue ObjAt(PCSTR pszKey) const noexcept { return CMutableValue(yyjson_mut_obj_get(GetPointer(), pszKey), m_pDoc); }
     EckInlineNd CMutableValue ObjAt(PCSTR pszKey, size_t cchKey) const noexcept
     {
-        return CMutableValue(yyjson_mut_obj_getn(Ptr(), pszKey, cchKey), m_pDoc);
+        return CMutableValue(yyjson_mut_obj_getn(GetPointer(), pszKey, cchKey), m_pDoc);
     }
     EckInline BOOL ObjInsert(size_t idx, CMutableValue Key, CMutableValue Val) const noexcept
     {
-        return yyjson_mut_obj_insert(Ptr(), Key.Ptr(), Val.Ptr(), idx);
+        return yyjson_mut_obj_insert(GetPointer(), Key.GetPointer(), Val.GetPointer(), idx);
     }
     EckInline CMutableValue ObjRemove(CMutableValue Key) const noexcept
     {
-        return CMutableValue(yyjson_mut_obj_remove(Ptr(), Key.Ptr()), m_pDoc);
+        return CMutableValue(yyjson_mut_obj_remove(GetPointer(), Key.GetPointer()), m_pDoc);
     }
     EckInline CMutableValue ObjRemove(PCSTR pszKey) const noexcept
     {
-        return CMutableValue(yyjson_mut_obj_remove_key(Ptr(), pszKey), m_pDoc);
+        return CMutableValue(yyjson_mut_obj_remove_key(GetPointer(), pszKey), m_pDoc);
     }
-    EckInline BOOL ObjClear() const noexcept { return yyjson_mut_obj_clear(Ptr()); }
+    EckInline BOOL ObjClear() const noexcept { return yyjson_mut_obj_clear(GetPointer()); }
     EckInline BOOL ObjReplace(CMutableValue Key, CMutableValue Val) const noexcept
     {
-        return yyjson_mut_obj_replace(Ptr(), Key.Ptr(), Val.Ptr());
+        return yyjson_mut_obj_replace(GetPointer(), Key.GetPointer(), Val.GetPointer());
     }
-    EckInline BOOL ObjRotate(size_t idx) const noexcept { return yyjson_mut_obj_rotate(Ptr(), idx); }
+    EckInline BOOL ObjRotate(size_t idx) const noexcept { return yyjson_mut_obj_rotate(GetPointer(), idx); }
 
     EckInlineNd PSTR Write(size_t& cchOut, YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
-        return yyjson_mut_val_write_opts(Ptr(), uFlags, pAlc, &cchOut, pErr);
+        return yyjson_mut_val_write_opts(GetPointer(), uFlags, pAlc, &cchOut, pErr);
     }
     EckInline BOOL Write(PCSTR pszFile, YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
-        return yyjson_mut_val_write_file(pszFile, Ptr(), uFlags, pAlc, pErr);
+        return yyjson_mut_val_write_file(pszFile, GetPointer(), uFlags, pAlc, pErr);
     }
     EckInlineNd CStringW WriteW(YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
         size_t cchOut;
         const auto pszU8 = Write(cchOut, uFlags, pAlc, pErr);
@@ -461,14 +466,14 @@ public:
     }
 
     EckInlineNd CMutableValue AtValue(PCSTR pszPtr, size_t cchPtr = MaxSizeT,
-        YyPtrCtx* pCtx = nullptr, YyPtrErr* pErr = nullptr) const noexcept
+        YyPointerContext* pCtx = nullptr, YyPointerError* pErr = nullptr) const noexcept
     {
-        return CMutableValue(yyjson_mut_ptr_getx(Ptr(), pszPtr,
+        return CMutableValue(yyjson_mut_ptr_getx(GetPointer(), pszPtr,
             cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pCtx, pErr));
     }
 
     EckInlineNd CMutableValue operator[](const auto& x) const noexcept { return Detail::JsonValueAtType(*this, x); }
-    EckInline const CMutableValue& operator=(Detail::InitializeProxy x) const noexcept;
+    EckInline const CMutableValue& operator=(Detail::JsonProxy x) const noexcept;
     EckInlineCe void SetParentDocument(const CMutableDocument* pDoc) { m_pDoc = pDoc; }
 
     EckInlineNd MutableArrayProxy AsArray() const noexcept;
@@ -478,18 +483,18 @@ public:
 class CMutableDocument
 {
 private:
-    YyMutDoc* m_pDoc{};
+    YyMutableDocument* m_pDoc{};
 public:
     ECK_DISABLE_COPY(CMutableDocument);
 
     CMutableDocument() : m_pDoc{ yyjson_mut_doc_new(nullptr) } {}
-    explicit CMutableDocument(const CDocument& Doc, const YyAlc* pAlc = nullptr) noexcept
+    explicit CMutableDocument(const CDocument& Doc, const YyAllocator* pAlc = nullptr) noexcept
         : m_pDoc{ yyjson_doc_mut_copy(Doc.GetPointer(), pAlc) }
     {}
-    explicit CMutableDocument(const CMutableDocument& Doc, const YyAlc* pAlc = nullptr) noexcept
+    explicit CMutableDocument(const CMutableDocument& Doc, const YyAllocator* pAlc = nullptr) noexcept
         : m_pDoc{ yyjson_mut_doc_mut_copy(Doc.GetPointer(), pAlc) }
     {}
-    explicit constexpr CMutableDocument(YyMutDoc* pDoc) noexcept : m_pDoc{ pDoc } {}
+    explicit constexpr CMutableDocument(YyMutableDocument* pDoc) noexcept : m_pDoc{ pDoc } {}
 
     constexpr CMutableDocument(CMutableDocument&& x) noexcept : m_pDoc{ x.Detach() } {}
     CMutableDocument& operator=(CMutableDocument&& x) noexcept
@@ -499,24 +504,24 @@ public:
     }
     ~CMutableDocument() { Free(); }
 
-    EckInline void Create(const YyAlc* pAlc = nullptr) noexcept
+    EckInline void Create(const YyAllocator* pAlc = nullptr) noexcept
     {
         Free();
         m_pDoc = yyjson_mut_doc_new(pAlc);
     }
-    EckInline void Create(const CDocument& Doc, const YyAlc* pAlc = nullptr) noexcept
+    EckInline void Create(const CDocument& Doc, const YyAllocator* pAlc = nullptr) noexcept
     {
         Free();
         m_pDoc = yyjson_doc_mut_copy(Doc.GetPointer(), pAlc);
     }
-    EckInline void Create(const CMutableDocument& Doc, const YyAlc* pAlc = nullptr) noexcept
+    EckInline void Create(const CMutableDocument& Doc, const YyAllocator* pAlc = nullptr) noexcept
     {
         Free();
         m_pDoc = yyjson_mut_doc_mut_copy(Doc.GetPointer(), pAlc);
     }
 
     EckInlineNdCe BOOL IsValid() const noexcept { return !!m_pDoc; }
-    EckInlineNdCe YyMutDoc* GetPointer() const noexcept { return m_pDoc; }
+    EckInlineNdCe YyMutableDocument* GetPointer() const noexcept { return m_pDoc; }
 
     void Free() noexcept
     {
@@ -526,13 +531,13 @@ public:
             m_pDoc = nullptr;
         }
     }
-    EckInlineNdCe YyMutDoc* Detach()
+    EckInlineNdCe YyMutableDocument* Detach()
     {
         const auto pDoc = m_pDoc;
         m_pDoc = nullptr;
         return pDoc;
     }
-    EckInlineCe YyMutDoc* Attach(YyMutDoc* pDoc)
+    EckInlineCe YyMutableDocument* Attach(YyMutableDocument* pDoc)
     {
         const auto pOldDoc = m_pDoc;
         m_pDoc = pDoc;
@@ -540,27 +545,27 @@ public:
     }
 
     EckInlineNd CMutableValue GetRoot() const noexcept { return CMutableValue(yyjson_mut_doc_get_root(m_pDoc)); }
-    EckInline void SetRoot(CMutableValue Val) const noexcept { yyjson_mut_doc_set_root(m_pDoc, Val.Ptr()); }
+    EckInline void SetRoot(CMutableValue Val) const noexcept { yyjson_mut_doc_set_root(m_pDoc, Val.GetPointer()); }
     EckInline BOOL SetStringPoolSize(size_t cb) const noexcept { return yyjson_mut_doc_set_str_pool_size(m_pDoc, cb); }
     EckInline BOOL SetValuePoolSize(size_t cb) const noexcept { return yyjson_mut_doc_set_val_pool_size(m_pDoc, cb); }
     EckInlineNd CMutableValue AtValue(PCSTR pszPtr, size_t cchPtr = MaxSizeT,
-        YyPtrCtx* pCtx = nullptr, YyPtrErr* pErr = nullptr) const noexcept
+        YyPointerContext* pCtx = nullptr, YyPointerError* pErr = nullptr) const noexcept
     {
         return CMutableValue(yyjson_mut_doc_ptr_getx(m_pDoc, pszPtr,
             cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pCtx, pErr), this);
     }
     EckInlineNd PSTR Write(size_t& cchOut, YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
         return yyjson_mut_write_opts(m_pDoc, uFlags, pAlc, &cchOut, pErr);
     }
     EckInline BOOL Write(PCSTR pszFile, YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
         return yyjson_mut_write_file(pszFile, m_pDoc, uFlags, pAlc, pErr);
     }
     EckInlineNd CStringW WriteW(YyWriteFlag uFlags = 0,
-        YyAlc* pAlc = nullptr, YyWriteErr* pErr = nullptr) const noexcept
+        YyAllocator* pAlc = nullptr, YyWriteError* pErr = nullptr) const noexcept
     {
         size_t cchOut;
         const auto pszU8 = Write(cchOut, uFlags, pAlc, pErr);
@@ -677,12 +682,12 @@ public:
     {
         return Detail::JsonValueAt(*this, pszKey);
     }
-    EckInline const CMutableDocument& operator=(Detail::InitializeProxy x) const noexcept;
+    EckInline const CMutableDocument& operator=(Detail::JsonProxy x) const noexcept;
 };
 
 namespace Detail
 {
-    struct InitializeProxy
+    struct JsonProxy
     {
         enum class Type : UINT
         {
@@ -711,74 +716,74 @@ namespace Detail
             double d;
             PCSTR s;
             PCWSTR ws;
-            const std::initializer_list<InitializeProxy>* pObj;
-            YyMutVal* jVal;
+            const std::initializer_list<JsonProxy>* pObj;
+            YyMutableValue* jVal;
         } v;
 
-        InitializeProxy(std::nullptr_t) noexcept : eType{ Type::Null } { v.pObj = nullptr; }
-        InitializeProxy(bool b) noexcept : eType{ Type::Bool } { v.b = b; }
-        InitializeProxy(uint64_t u64) noexcept : eType{ Type::UInt64 } { v.u64 = u64; }
-        InitializeProxy(int64_t i64) noexcept : eType{ Type::Int64 } { v.i64 = i64; }
-        InitializeProxy(int i) noexcept : eType{ Type::Int } { v.i = i; }
-        InitializeProxy(UINT i) noexcept : InitializeProxy(uint64_t(i)) {}
-        InitializeProxy(double d) noexcept : eType{ Type::Real } { v.d = d; }
-        InitializeProxy(const char* s) noexcept : eType{ Type::String } { v.s = s; }
-        InitializeProxy(const char8_t* s) noexcept : eType{ Type::String } { v.s = (PCSTR)s; }
-        InitializeProxy(const wchar_t* ws) noexcept : eType{ Type::StringW } { v.ws = ws; }
-        InitializeProxy(Array_T) noexcept : eType{ Type::ArrayMark } { v.pObj = nullptr; }
-        InitializeProxy(const CMutableValue& Val) noexcept : eType{ Type::JVal } { v.jVal = Val.Ptr(); }
-        InitializeProxy(const std::initializer_list<InitializeProxy>& il) noexcept : eType{ Type::Object } { v.pObj = &il; }
+        JsonProxy(std::nullptr_t) noexcept : eType{ Type::Null } { v.pObj = nullptr; }
+        JsonProxy(bool b) noexcept : eType{ Type::Bool } { v.b = b; }
+        JsonProxy(uint64_t u64) noexcept : eType{ Type::UInt64 } { v.u64 = u64; }
+        JsonProxy(int64_t i64) noexcept : eType{ Type::Int64 } { v.i64 = i64; }
+        JsonProxy(int i) noexcept : eType{ Type::Int } { v.i = i; }
+        JsonProxy(UINT i) noexcept : JsonProxy(uint64_t(i)) {}
+        JsonProxy(double d) noexcept : eType{ Type::Real } { v.d = d; }
+        JsonProxy(const char* s) noexcept : eType{ Type::String } { v.s = s; }
+        JsonProxy(const char8_t* s) noexcept : eType{ Type::String } { v.s = (PCSTR)s; }
+        JsonProxy(const wchar_t* ws) noexcept : eType{ Type::StringW } { v.ws = ws; }
+        JsonProxy(Array_T) noexcept : eType{ Type::ArrayMark } { v.pObj = nullptr; }
+        JsonProxy(const CMutableValue& Val) noexcept : eType{ Type::JVal } { v.jVal = Val.GetPointer(); }
+        JsonProxy(const std::initializer_list<JsonProxy>& il) noexcept : eType{ Type::Object } { v.pObj = &il; }
 
         template<CcpEnum T>
-        InitializeProxy(T e) noexcept : InitializeProxy(std::underlying_type_t<T>(e)) {}
+        JsonProxy(T e) noexcept : JsonProxy(std::underlying_type_t<T>(e)) {}
 
         template<class TTraits, class TAllocator>
-        InitializeProxy(const std::basic_string<char, TTraits, TAllocator>& s) noexcept : eType{ Type::String }
+        JsonProxy(const std::basic_string<char, TTraits, TAllocator>& s) noexcept : eType{ Type::String }
         {
             v.s = s.data(); cch = (UINT)s.size();
         }
         template<class TTraits, class TAllocator>
-        InitializeProxy(const std::basic_string<char8_t, TTraits, TAllocator>& s) noexcept : eType{ Type::String }
+        JsonProxy(const std::basic_string<char8_t, TTraits, TAllocator>& s) noexcept : eType{ Type::String }
         {
             v.s = (PCSTR)s.data(); cch = (UINT)s.size();
         }
         template<class TTraits, class TAllocator>
-        InitializeProxy(const std::basic_string<WCHAR, TTraits, TAllocator>& s) noexcept : eType{ Type::StringW }
+        JsonProxy(const std::basic_string<WCHAR, TTraits, TAllocator>& s) noexcept : eType{ Type::StringW }
         {
             v.ws = s.data(); cch = (UINT)s.size();
         }
         template<class TTraits>
-        InitializeProxy(const std::basic_string_view<char, TTraits>& s) noexcept : eType{ Type::String }
+        JsonProxy(const std::basic_string_view<char, TTraits>& s) noexcept : eType{ Type::String }
         {
             v.s = s.data(); cch = (UINT)s.size();
         }
         template<class TTraits>
-        InitializeProxy(const std::basic_string_view<char8_t, TTraits>& s) noexcept : eType{ Type::String }
+        JsonProxy(const std::basic_string_view<char8_t, TTraits>& s) noexcept : eType{ Type::String }
         {
             v.s = (PCSTR)s.data(); cch = (UINT)s.size();
         }
         template<class TTraits>
-        InitializeProxy(const std::basic_string_view<WCHAR, TTraits>& s) noexcept : eType{ Type::StringW }
+        JsonProxy(const std::basic_string_view<WCHAR, TTraits>& s) noexcept : eType{ Type::StringW }
         {
             v.ws = s.data(); cch = (UINT)s.size();
         }
         template<class TTraits, class TAllocator>
-        InitializeProxy(const CStringT<char, TTraits, TAllocator>& rs) noexcept : eType{ Type::String }
+        JsonProxy(const CStringT<char, TTraits, TAllocator>& rs) noexcept : eType{ Type::String }
         {
             v.s = rs.Data(); cch = (UINT)rs.Size();
         }
         template<class TTraits, class TAllocator>
-        InitializeProxy(const CStringT<char8_t, TTraits, TAllocator>& rs) noexcept : eType{ Type::String }
+        JsonProxy(const CStringT<char8_t, TTraits, TAllocator>& rs) noexcept : eType{ Type::String }
         {
             v.s = (PCSTR)rs.Data(); cch = (UINT)rs.Size();
         }
         template<class TTraits, class TAllocator>
-        InitializeProxy(const CStringT<WCHAR, TTraits, TAllocator>& rs) noexcept : eType{ Type::StringW }
+        JsonProxy(const CStringT<WCHAR, TTraits, TAllocator>& rs) noexcept : eType{ Type::StringW }
         {
             v.ws = rs.Data(); cch = (UINT)rs.Size();
         }
         template<class TAllocator>
-        InitializeProxy(const CByteBufferT<TAllocator>& rb) noexcept : eType{ Type::String }
+        JsonProxy(const CByteBufferT<TAllocator>& rb) noexcept : eType{ Type::String }
         {
             v.s = (PCSTR)rb.Data(); cch = (UINT)rb.Size();
         }
@@ -892,21 +897,22 @@ namespace Detail
 
 struct MutableArrayIterator
 {
-    YyMutArrIter m_Iter{};
+    YyMutableArrayIterator m_Iter{};
 
     MutableArrayIterator() = default;
-    constexpr MutableArrayIterator(const YyMutArrIter& iter) : m_Iter{ iter } {}
-    MutableArrayIterator(CMutableValue val) :m_Iter{ yyjson_mut_arr_iter_with(val.Ptr()) } {}
+    constexpr MutableArrayIterator(const YyMutableArrayIterator& Iter) : m_Iter{ Iter } {}
+    MutableArrayIterator(CMutableValue val) :m_Iter{ yyjson_mut_arr_iter_with(val.GetPointer()) } {}
 
-    EckInline void FromValue(CMutableValue val) { m_Iter = yyjson_mut_arr_iter_with(val.Ptr()); }
-    EckInlineNd BOOL HasNext() const noexcept { return yyjson_mut_arr_iter_has_next((YyMutArrIter*)&m_Iter); }
+    EckInline void FromValue(CMutableValue val) { m_Iter = yyjson_mut_arr_iter_with(val.GetPointer()); }
+    EckInlineNd BOOL HasNext() const noexcept { return yyjson_mut_arr_iter_has_next((YyMutableArrayIterator*)&m_Iter); }
     EckInlineNd CMutableValue Next() { return CMutableValue(yyjson_mut_arr_iter_next(&m_Iter)); }
     EckInline CMutableValue Remove() { return yyjson_mut_arr_iter_remove(&m_Iter); }
     EckInlineCe CMutableValue GetCurrent() const noexcept { return CMutableValue(m_Iter.cur); }
     EckInline MutableArrayIterator& operator++() { Next(); return *this; }
     EckInlineCe CMutableValue operator*() const noexcept { return GetCurrent(); }
 };
-EckInlineNd bool operator==(const MutableArrayIterator& x,
+EckInlineNd bool operator==(
+    const MutableArrayIterator& x,
     const MutableArrayIterator& y) noexcept
 {
     return Detail::EqualIterator<MutableArrayIterator>(x, y);
@@ -914,14 +920,14 @@ EckInlineNd bool operator==(const MutableArrayIterator& x,
 
 struct MutableObjectIterator
 {
-    YyMutObjIter m_Iter;
+    YyMutableObjectIterator m_Iter;
 
     MutableObjectIterator() = default;
-    constexpr MutableObjectIterator(const YyMutObjIter& iter) : m_Iter{ iter } {}
-    MutableObjectIterator(CMutableValue val) :m_Iter{ yyjson_mut_obj_iter_with(val.Ptr()) } {}
+    constexpr MutableObjectIterator(const YyMutableObjectIterator& Iter) : m_Iter{ Iter } {}
+    MutableObjectIterator(CMutableValue val) :m_Iter{ yyjson_mut_obj_iter_with(val.GetPointer()) } {}
 
-    EckInline void FromValue(CMutableValue val) { m_Iter = yyjson_mut_obj_iter_with(val.Ptr()); }
-    EckInlineNd BOOL HasNext() const noexcept { return yyjson_mut_obj_iter_has_next((YyMutObjIter*)&m_Iter); }
+    EckInline void FromValue(CMutableValue val) { m_Iter = yyjson_mut_obj_iter_with(val.GetPointer()); }
+    EckInlineNd BOOL HasNext() const noexcept { return yyjson_mut_obj_iter_has_next((YyMutableObjectIterator*)&m_Iter); }
     EckInlineNd CMutableValue Next() { return CMutableValue(yyjson_mut_obj_iter_next(&m_Iter)); }
     EckInlineNd CMutableValue Get(PCSTR pszKey) { return yyjson_mut_obj_iter_get(&m_Iter, pszKey); }
     EckInlineNd CMutableValue Get(PCSTR pszKey, size_t cchKey) { return yyjson_mut_obj_iter_getn(&m_Iter, pszKey, cchKey); }
@@ -949,17 +955,17 @@ struct MutableObjectProxy
     EckInline MutableObjectIterator end() const noexcept { return MutableObjectIterator{}; }
 };
 
-EckInline const CMutableValue& CMutableValue::operator=(Detail::InitializeProxy x) const noexcept
+EckInline const CMutableValue& CMutableValue::operator=(Detail::JsonProxy x) const noexcept
 {
     x.ReplaceMutValue(*m_pDoc, *this);
     return *this;
 }
-EckInline const CMutableDocument& CMutableDocument::operator=(Detail::InitializeProxy x) const noexcept
+EckInline const CMutableDocument& CMutableDocument::operator=(Detail::JsonProxy x) const noexcept
 {
     SetRoot(x.ToMutableValue(*this));
     return *this;
 }
-EckInlineNd CMutableDocument CDocument::Clone(const YyAlc* pAlc) const noexcept { return CMutableDocument(yyjson_doc_mut_copy(m_pDoc, pAlc)); }
+EckInlineNd CMutableDocument CDocument::Clone(const YyAllocator* pAlc) const noexcept { return CMutableDocument(yyjson_doc_mut_copy(m_pDoc, pAlc)); }
 EckInlineNd ArrayProxy CValue::AsArray() const noexcept { return ArrayProxy(*this); }
 EckInlineNd ObjectProxy CValue::AsObject() const noexcept { return ObjectProxy(*this); }
 EckInlineNd MutableArrayProxy CMutableValue::AsArray() const noexcept { return MutableArrayProxy(*this); }
