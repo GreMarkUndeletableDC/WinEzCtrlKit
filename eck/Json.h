@@ -1204,7 +1204,7 @@ EckInline void CMutableValue::ProxyReplace(
 }
 EckInline void CMutableDocument::ProxyReplace(Detail::JsonProxy x, BOOL bCopyString) const noexcept
 {
-    SetRoot(x.ToMutableValue(*this));
+    SetRoot(x.ToMutableValue(*this, bCopyString));
 }
 EckInline const CMutableDocument& CMutableDocument::operator=(Detail::JsonProxy x) const noexcept
 {
