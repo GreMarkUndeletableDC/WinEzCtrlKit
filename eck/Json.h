@@ -69,27 +69,28 @@ namespace Detail
             std::is_convertible_v<T1, PCBYTE> ||
             std::is_convertible_v<T1, const char8_t*>)
         {
-            return This.AtValue(This, (PCSTR)x);
+            return This.AtValue((PCSTR)x);
         }
-        else if (sizeof(T1) == 1)
-        {
-            if constexpr (IsSameTemplate<CStringT, T1>::V)
-                return JsonValueAt(This, (PCCH)x.Data(), (size_t)x.Size());
-            else if constexpr (IsSameTemplate<std::basic_string, T1>::V)
-                return JsonValueAt(This, (PCCH)x.data(), x.size());
-            else if constexpr (IsSameTemplate<std::basic_string_view, T1>::V)
-                return JsonValueAt(This, (PCCH)x.data(), x.size());
-            else
-                static_assert(!sizeof(T1), "Unsupported type.");
-        }
+        else if constexpr (
+            IsSameTemplate<CStringT, T1>::V &&
+            sizeof(typename T1::TChar) == 1)
+            return This.AtValue((PCCH)x.Data(), (size_t)x.Size());
+        else if constexpr (
+            IsSameTemplate<std::basic_string, T1>::V &&
+            sizeof(typename T1::value_type) == 1)
+            return This.AtValue((PCCH)x.data(), x.size());
+        else if constexpr (
+            IsSameTemplate<std::basic_string_view, T1>::V &&
+            sizeof(typename T1::value_type) == 1)
+            return This.AtValue((PCCH)x.data(), x.size());
         else
-            static_assert(!sizeof(T1), "Unsupported type.");
+            static_assert(!sizeof(T), "Unsupported type.");
     }
     template<class TThis, class T, size_t N>
         requires (sizeof(std::remove_cvref_t<T>) == 1)
     EckInline auto JsonValueAtType(TThis& This, const T(&x)[N]) noexcept
     {
-        return This.AtValue(This, (PCCH)&x, N - 1);
+        return This.AtValue((PCCH)&x, N - 1);
     }
 
     template<class T>
@@ -247,7 +248,7 @@ public:
             cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pErr));
     }
 
-    EckInlineNd CMutableValue operator[](const auto& x) const noexcept
+    EckInlineNd CValue operator[](const auto& x) const noexcept
     {
         return Detail::JsonValueAtType(*this, x);
     }
