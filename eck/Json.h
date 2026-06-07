@@ -58,33 +58,38 @@ EckInline BOOL YyLocateStringPosition(
 
 namespace Detail
 {
-    EckInline auto JsonValueAt(auto& This, PCSTR pszKey, size_t cchKey = MaxSizeT) noexcept
-    {
-        return This.AtValue(pszKey, cchKey);
-    }
-
     template<class TThis, class T>
     EckInline auto JsonValueAtType(TThis& This, const T& x) noexcept
     {
         using T1 = std::remove_cvref_t<T>;
         if constexpr (std::is_integral_v<T1>)
             return This.ArrAt(x);
-        else if constexpr (std::is_convertible_v<T1, PCCH> ||
+        else if constexpr (
+            std::is_convertible_v<T1, PCCH> ||
             std::is_convertible_v<T1, PCBYTE> ||
             std::is_convertible_v<T1, const char8_t*>)
         {
-            return JsonValueAt(This, (PCSTR)x);
+            return This.AtValue(This, (PCSTR)x);
         }
-        else if constexpr (IsSameTemplate<CStringT, T1>::V)
-            return JsonValueAt(This, x.Data(), x.Size());
-        else if constexpr (IsSameTemplate<std::basic_string, T1>::V &&
-            sizeof(typename T1::value_type) == 1)
-            return JsonValueAt(This, x.data(), x.size());
-        else if constexpr (IsSameTemplate<std::basic_string_view, T1>::V &&
-            sizeof(typename T1::value_type) == 1)
-            return JsonValueAt(This, x.data(), x.size());
+        else if (sizeof(T1) == 1)
+        {
+            if constexpr (IsSameTemplate<CStringT, T1>::V)
+                return JsonValueAt(This, (PCCH)x.Data(), (size_t)x.Size());
+            else if constexpr (IsSameTemplate<std::basic_string, T1>::V)
+                return JsonValueAt(This, (PCCH)x.data(), x.size());
+            else if constexpr (IsSameTemplate<std::basic_string_view, T1>::V)
+                return JsonValueAt(This, (PCCH)x.data(), x.size());
+            else
+                static_assert(!sizeof(T1), "Unsupported type.");
+        }
         else
-            static_assert(false, "Unsupported type.");
+            static_assert(!sizeof(T1), "Unsupported type.");
+    }
+    template<class TThis, class T, size_t N>
+        requires (sizeof(std::remove_cvref_t<T>) == 1)
+    EckInline auto JsonValueAtType(TThis& This, const T(&x)[N]) noexcept
+    {
+        return This.AtValue(This, (PCCH)&x, N - 1);
     }
 
     template<class T>
@@ -241,7 +246,11 @@ public:
         return CValue(yyjson_ptr_getx(GetPointer(), pszPtr,
             cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pErr));
     }
-    [[nodiscard]] CValue operator[](const auto& x) const noexcept { return Detail::JsonValueAtType(*this, x); }
+
+    EckInlineNd CMutableValue operator[](const auto& x) const noexcept
+    {
+        return Detail::JsonValueAtType(*this, x);
+    }
 
     EckInlineNd ArrayProxy AsArray() const noexcept;
     EckInlineNd ObjectProxy AsObject() const noexcept;
@@ -378,9 +387,10 @@ public:
         return Detail::WriteW(pszU8, cchU8, pAlc);
     }
     EckInlineNd CMutableDocument Clone(const YyAllocator* pAlc = nullptr) const noexcept;
-    EckInlineNd CValue operator[](_In_z_ PCSTR pszKey) const noexcept
+
+    EckInlineNd CValue operator[](const auto& x) const noexcept
     {
-        return Detail::JsonValueAt(*this, pszKey);
+        return Detail::JsonValueAtType(*this, x);
     }
 };
 
@@ -493,6 +503,13 @@ public:
     {
         return unsafe_yyjson_set_strn(GetPointer(), pszVal, cchVal);
     }
+    EckInline void SetStringCopy(
+        _In_reads_(cchVal) PCSTR pszVal,
+        size_t cchVal) const noexcept
+    {
+        const auto pNew = unsafe_yyjson_mut_strncpy(m_pDoc->GetPointer(), pszVal, cchVal);
+        return unsafe_yyjson_set_strn(GetPointer(), pNew, cchVal);
+    }
     EckInline void SetArray(size_t c = 0) const noexcept { return unsafe_yyjson_set_arr(GetPointer(), c); }
     EckInline void SetObject(size_t c = 0) const noexcept { return unsafe_yyjson_set_obj(GetPointer(), c); }
 
@@ -583,7 +600,10 @@ public:
             cchPtr == MaxSizeT ? strlen(pszPtr) : cchPtr, pCtx, pErr));
     }
 
-    EckInlineNd CMutableValue operator[](const auto& x) const noexcept { return Detail::JsonValueAtType(*this, x); }
+    EckInlineNd CMutableValue operator[](const auto& x) const noexcept
+    {
+        return Detail::JsonValueAtType(*this, x);
+    }
     EckInline const CMutableValue& operator=(Detail::JsonProxy x) const noexcept;
     EckInlineCe void SetParentDocument(const CMutableDocument* pDoc) { m_pDoc = pDoc; }
 
@@ -823,18 +843,23 @@ public:
         return CMutableValue(yyjson_mut_obj_with_kv(m_pDoc, ppszKV, cPairs), this);
     }
 
-    [[nodiscard]] CMutableValue operator[](_In_z_ PCSTR pszKey) const noexcept
+    EckInlineNd CMutableValue operator[](const auto& x) const noexcept
     {
-        return Detail::JsonValueAt(*this, pszKey);
+        return Detail::JsonValueAtType(*this, x);
     }
+
     EckInline const CMutableDocument& operator=(Detail::JsonProxy x) const noexcept;
 };
 
 namespace Detail
 {
+    template<class T>
+    concept CcpJsonChar = std::same_as<T, char> ||
+        std::same_as<T, wchar_t> || std::same_as<T, char8_t>;
+
     struct JsonProxy
     {
-        enum class Type : UINT
+        enum class Type
         {
             Invalid,
             Null,
@@ -845,192 +870,195 @@ namespace Detail
             Real,
             String,
             StringW,
-            Object,
+            JsonProxy,
             ArrayMark,
-            JVal,
+            JsonMutableValue,
         };
 
-        Type eType{};
-        UINT cch{ UINT_MAX };
-        union
-        {
-            bool b;
-            uint64_t u64;
-            int64_t i64;
-            int i;
-            double d;
-            PCSTR s;
-            PCWSTR ws;
-            const std::initializer_list<JsonProxy>* pObj;
-            YyMutableValue* jVal;
-        } v;
+        std::variant<
+            std::monostate,
+            std::nullptr_t,
+            bool,
+            int,
+            long long,
+            unsigned long long,
+            double,
+            std::string_view,
+            std::wstring_view,
+            std::initializer_list<JsonProxy>,
+            Array_T,
+            YyMutableValue*
+        > m_Val{};
 
-        JsonProxy(std::nullptr_t) noexcept : eType{ Type::Null } { v.pObj = nullptr; }
-        JsonProxy(bool b) noexcept : eType{ Type::Bool } { v.b = b; }
-        JsonProxy(uint64_t u64) noexcept : eType{ Type::UInt64 } { v.u64 = u64; }
-        JsonProxy(int64_t i64) noexcept : eType{ Type::Int64 } { v.i64 = i64; }
-        JsonProxy(int i) noexcept : eType{ Type::Int } { v.i = i; }
-        JsonProxy(UINT i) noexcept : JsonProxy(uint64_t(i)) {}
-        JsonProxy(double d) noexcept : eType{ Type::Real } { v.d = d; }
-        JsonProxy(const char* s) noexcept : eType{ Type::String } { v.s = s; }
-        JsonProxy(const char8_t* s) noexcept : eType{ Type::String } { v.s = (PCSTR)s; }
-        JsonProxy(const wchar_t* ws) noexcept : eType{ Type::StringW } { v.ws = ws; }
-        JsonProxy(Array_T) noexcept : eType{ Type::ArrayMark } { v.pObj = nullptr; }
-        JsonProxy(const CMutableValue& Val) noexcept : eType{ Type::JVal } { v.jVal = Val.GetPointer(); }
-        JsonProxy(const std::initializer_list<JsonProxy>& il) noexcept : eType{ Type::Object } { v.pObj = &il; }
+        JsonProxy(std::nullptr_t) noexcept : m_Val{ nullptr } {}
+        JsonProxy(bool x) noexcept : m_Val{ x } {}
+        JsonProxy(int x) noexcept : m_Val{ x } {}
+        JsonProxy(long long x) noexcept : m_Val{ x } {}
+        JsonProxy(unsigned long long x) noexcept : m_Val{ x } {}
+        JsonProxy(double x) noexcept : m_Val{ x } {}
+        template<CcpChar T, class U>
+        JsonProxy(std::basic_string_view<T, U> x) noexcept : m_Val{ std::basic_string_view{ x.data(), x.size() } } {}
+        JsonProxy(Array_T) noexcept : m_Val{ Array_T{} } {}
+        JsonProxy(std::initializer_list<JsonProxy> x) noexcept : m_Val{ x } {}
+        JsonProxy(const CMutableValue& x) noexcept : m_Val{ x.GetPointer() } {}
 
+        JsonProxy(unsigned int x) noexcept : JsonProxy{ (unsigned long long)x } {}
+        JsonProxy(unsigned long x) noexcept : JsonProxy{ (unsigned long long)x } {}
+        JsonProxy(std::integral auto x) noexcept : JsonProxy{ (int)x } {}
         template<CcpEnum T>
-        JsonProxy(T e) noexcept : JsonProxy(std::underlying_type_t<T>(e)) {}
+        JsonProxy(T x) noexcept : JsonProxy{ std::underlying_type_t<T>(x) } {}
 
-        template<class TTraits, class TAllocator>
-        JsonProxy(const std::basic_string<char, TTraits, TAllocator>& s) noexcept : eType{ Type::String }
+        template<size_t N>
+        JsonProxy(const char(&x)[N]) noexcept : JsonProxy{ std::string_view{ x, N - 1 } } {}
+        template<size_t N>
+        JsonProxy(const char8_t(&x)[N]) noexcept : JsonProxy{ std::string_view{ (PCCH)x, N - 1 } } {}
+        template<size_t N>
+        JsonProxy(const wchar_t(&x)[N]) noexcept : JsonProxy{ std::wstring_view{ x, N - 1 } } {}
+        JsonProxy(const char* x) noexcept : JsonProxy{ std::string_view(x) } {}
+        JsonProxy(const char8_t* x) noexcept : JsonProxy{ std::string_view((PCCH)x) } {}
+        JsonProxy(const wchar_t* x) noexcept : JsonProxy{ std::wstring_view(x) } {}
+        template<class U>
+        JsonProxy(std::basic_string_view<char8_t, U> x) noexcept : JsonProxy{ std::basic_string_view{ (PCCH)x.data(), x.size() } } {}
+        template<CcpJsonChar T, class U, class V>
+        JsonProxy(const std::basic_string<T, U, V>& x) noexcept : JsonProxy{ std::basic_string_view{ x.data(), x.size() } } {}
+        template<CcpJsonChar T, class U, class V>
+        JsonProxy(const CStringT<T, U, V>& x) noexcept : JsonProxy{ std::basic_string_view{ x.Data(), (size_t)x.Size() } } {}
+        template<class U>
+        JsonProxy(const CByteBufferT<U>& rb) noexcept : JsonProxy{ std::string_view{ (PCCH)rb.Data(), rb.Size() } } {}
+
+        EckInlineNdCe Type GetType() const noexcept { return (Type)m_Val.index(); };
+        template<Type E>
+        EckInlineNdCe auto& Get() const noexcept { return std::get<(size_t)E>(m_Val); }
+
+        void AppendArray(
+            const CMutableDocument& Doc,
+            const CMutableValue& Arr,
+            BOOL bCopyString = FALSE) const noexcept
         {
-            v.s = s.data(); cch = (UINT)s.size();
+            const auto& v = Get<Type::JsonProxy>();
+            EckAssert(v.begin()->GetType() == Type::ArrayMark);
+            for (auto it = v.begin() + 1; it != v.end(); ++it)
+                Arr.ArrPushBack(it->ToMutableValue(Doc, bCopyString));
         }
-        template<class TTraits, class TAllocator>
-        JsonProxy(const std::basic_string<char8_t, TTraits, TAllocator>& s) noexcept : eType{ Type::String }
+        void AppendObject(
+            const CMutableDocument& Doc,
+            const CMutableValue& Obj,
+            BOOL bCopyString = FALSE) const noexcept
         {
-            v.s = (PCSTR)s.data(); cch = (UINT)s.size();
-        }
-        template<class TTraits, class TAllocator>
-        JsonProxy(const std::basic_string<WCHAR, TTraits, TAllocator>& s) noexcept : eType{ Type::StringW }
-        {
-            v.ws = s.data(); cch = (UINT)s.size();
-        }
-        template<class TTraits>
-        JsonProxy(const std::basic_string_view<char, TTraits>& s) noexcept : eType{ Type::String }
-        {
-            v.s = s.data(); cch = (UINT)s.size();
-        }
-        template<class TTraits>
-        JsonProxy(const std::basic_string_view<char8_t, TTraits>& s) noexcept : eType{ Type::String }
-        {
-            v.s = (PCSTR)s.data(); cch = (UINT)s.size();
-        }
-        template<class TTraits>
-        JsonProxy(const std::basic_string_view<WCHAR, TTraits>& s) noexcept : eType{ Type::StringW }
-        {
-            v.ws = s.data(); cch = (UINT)s.size();
-        }
-        template<class TTraits, class TAllocator>
-        JsonProxy(const CStringT<char, TTraits, TAllocator>& rs) noexcept : eType{ Type::String }
-        {
-            v.s = rs.Data(); cch = (UINT)rs.Size();
-        }
-        template<class TTraits, class TAllocator>
-        JsonProxy(const CStringT<char8_t, TTraits, TAllocator>& rs) noexcept : eType{ Type::String }
-        {
-            v.s = (PCSTR)rs.Data(); cch = (UINT)rs.Size();
-        }
-        template<class TTraits, class TAllocator>
-        JsonProxy(const CStringT<WCHAR, TTraits, TAllocator>& rs) noexcept : eType{ Type::StringW }
-        {
-            v.ws = rs.Data(); cch = (UINT)rs.Size();
-        }
-        template<class TAllocator>
-        JsonProxy(const CByteBufferT<TAllocator>& rb) noexcept : eType{ Type::String }
-        {
-            v.s = (PCSTR)rb.Data(); cch = (UINT)rb.Size();
+            const auto& v = Get<Type::JsonProxy>();
+            EckAssert(!(v.size() & 1));
+            CMutableValue Key{ nullptr };
+            size_t i{};
+            for (auto it = v.begin(); it != v.end(); ++it)
+            {
+                Key = it->ToMutableValue(Doc, bCopyString);
+                ++it;
+                Obj.ObjInsert(i, Key, it->ToMutableValue(Doc, bCopyString));
+                ++i;
+            }
         }
 
-        inline CMutableValue ToMutableValue(const CMutableDocument& Doc) const noexcept
+        CMutableValue ToMutableValue(
+            const CMutableDocument& Doc,
+            BOOL bCopyString = FALSE) const noexcept
         {
-            switch (eType)
+            switch (GetType())
             {
             case Type::Null:    return Doc.NewNull();
-            case Type::Bool:    return Doc.NewBool(v.b);
-            case Type::Int:     return Doc.NewInt(v.i);
-            case Type::Int64:   return Doc.NewInt64(v.i64);
-            case Type::UInt64:  return Doc.NewUInt64(v.u64);
-            case Type::Real:    return Doc.NewReal(v.d);
+            case Type::Bool:    return Doc.NewBool(Get<Type::Bool>());
+            case Type::Int:     return Doc.NewInt(Get<Type::Int>());
+            case Type::Int64:   return Doc.NewInt64(Get<Type::Int64>());
+            case Type::UInt64:  return Doc.NewUInt64(Get<Type::UInt64>());
+            case Type::Real:    return Doc.NewReal(Get<Type::Real>());
             case Type::String:
-                if (!v.s || !cch)
+            {
+                const auto& v = Get<Type::String>();
+                if (v.empty())
                     return Doc.NewString("", 0);
+                else if (bCopyString)
+                    return Doc.NewStringCopy(v.data(), v.size());
                 else
-                    return Doc.NewStringCopy(v.s, cch == UINT_MAX ? strlen(v.s) : cch);
+                    return Doc.NewString(v.data(), v.size());
+            }
+            ECK_UNREACHABLE;
             case Type::StringW:
             {
-                const auto u8 = EcdWideToMultiByte(v.ws, (int)cch, CP_UTF8);
+                const auto& v = Get<Type::StringW>();
+                const auto u8 = EcdWideToMultiByte(v.data(), (int)v.size(), CP_UTF8);
                 return Doc.NewStringCopy(u8.Data(), u8.Size());
             }
             ECK_UNREACHABLE;
-            case Type::JVal:    return CMutableValue{ v.jVal };
-            case Type::Object:
+            case Type::JsonMutableValue:
+                return CMutableValue{ Get<Type::JsonMutableValue>() };
+            case Type::JsonProxy:
             {
-                if (v.pObj->begin()->eType == Type::ArrayMark)
+                const auto& v = Get<Type::JsonProxy>();
+                if (v.begin()->GetType() == Type::ArrayMark)
                 {
                     CMutableValue Ret{ Doc.NewArray() };
-                    for (auto it = v.pObj->begin() + 1; it != v.pObj->end(); ++it)
-                        Ret.ArrPushBack(it->ToMutableValue(Doc));
+                    AppendArray(Doc, Ret, bCopyString);
+                    return Ret;
+                }
+                else if (!(v.size() & 1))
+                {
+                    CMutableValue Ret{ Doc.NewObject() };
+                    AppendObject(Doc, Ret, bCopyString);
                     return Ret;
                 }
                 else
-                {
-                    EckAssert(v.pObj->size() % 2 == 0);// 必须为偶数
-                    CMutableValue Ret{ Doc.NewObject() };
-                    CMutableValue Key{ nullptr };
-                    for (size_t i{}; const auto& e : *v.pObj)
-                    {
-                        if (i % 2 == 0)
-                            Key = e.ToMutableValue(Doc);
-                        else
-                            Ret.ObjInsert(i / 2, Key, e.ToMutableValue(Doc));
-                        ++i;
-                    }
-                    return Ret;
-                }
+                    EckDbgBreak();
             }
             ECK_UNREACHABLE;
             }
-            ECK_UNREACHABLE;
             return { nullptr };
         }
-        inline void ReplaceMutValue(const CMutableDocument& Doc, const CMutableValue& Val) const noexcept
+
+        void ReplaceMutValue(
+            const CMutableDocument& Doc,
+            const CMutableValue& Val,
+            BOOL bCopyString = FALSE) const noexcept
         {
-            switch (eType)
+            switch (GetType())
             {
-            case Type::Null:    Val.SetNull();         break;
-            case Type::Bool:    Val.SetBool(v.b);      break;
-            case Type::Int:     Val.SetInt(v.i);       break;
-            case Type::Int64:   Val.SetInt64(v.i64);   break;
-            case Type::UInt64:  Val.SetUInt64(v.u64);  break;
-            case Type::Real:    Val.SetReal(v.d);      break;
+            case Type::Null:    Val.SetNull();                      break;
+            case Type::Bool:    Val.SetBool(Get<Type::Bool>());     break;
+            case Type::Int:     Val.SetInt(Get<Type::Int>());       break;
+            case Type::Int64:   Val.SetInt64(Get<Type::Int64>());   break;
+            case Type::UInt64:  Val.SetUInt64(Get<Type::UInt64>()); break;
+            case Type::Real:    Val.SetReal(Get<Type::Real>());     break;
             case Type::String:
             {
-                if (!v.s || !cch)
+                const auto& v = Get<Type::String>();
+                if (v.empty())
                     Val.SetString("", 0);
+                else if (bCopyString)
+                    Val.SetStringCopy(v.data(), v.size());
                 else
-                    Val.SetString(v.s, cch == UINT_MAX ? strlen(v.s) : cch);
+                    Val.SetString(v.data(), v.size());
             }
             break;
             case Type::StringW:
             {
-                const auto u8 = EcdWideToMultiByte(v.ws, (int)cch, CP_UTF8);
-                Val.SetString(u8.Data(), u8.Size());
+                const auto& v = Get<Type::StringW>();
+                const auto u8 = EcdWideToMultiByte(v.data(), (int)v.size(), CP_UTF8);
+                Val.SetStringCopy(u8.Data(), u8.Size());
             }
             break;
-            case Type::Object:
+            case Type::JsonProxy:
             {
-                if (v.pObj->begin()->eType == Type::ArrayMark)
+                const auto& v = Get<Type::JsonProxy>();
+                if (v.begin()->GetType() == Type::ArrayMark)
                 {
                     Val.SetArray();
-                    for (auto it = v.pObj->begin() + 1; it != v.pObj->end(); ++it)
-                        Val.ArrPushBack(it->ToMutableValue(Doc));
+                    AppendArray(Doc, Val, bCopyString);
+                }
+                else if (!(v.size() & 1))
+                {
+                    Val.SetObject();
+                    AppendObject(Doc, Val, bCopyString);
                 }
                 else
-                {
-                    EckAssert(v.pObj->size() % 2 == 0);// 必须为偶数
-                    Val.SetObject();
-                    CMutableValue Key{ nullptr };
-                    for (size_t i{}; const auto& e : *v.pObj)
-                    {
-                        if (i % 2 == 0)
-                            Key = e.ToMutableValue(Doc);
-                        else
-                            Val.ObjInsert(i / 2, Key, e.ToMutableValue(Doc));
-                        ++i;
-                    }
-                }
+                    EckDbgBreak();
             }
             break;
             default:
