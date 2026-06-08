@@ -275,7 +275,7 @@ public:
     void Flatten(
         CTrivialBuffer<Kw::Vec2>& vPoint,
         CTrivialBuffer<PathType>& vType,
-        float fTolerance = Kw::DefaultHfdTolerance) const noexcept
+        float fTolerance = Kw::DefaultTolerance) const noexcept
     {
         if (m_vPoint.IsEmpty() || m_vType.IsEmpty())
             return;
@@ -323,7 +323,7 @@ public:
     // 函数清除Data的内容
     void Flatten(
         PORTABLE_DATA& Data,
-        float fTolerance = Kw::DefaultHfdTolerance) const noexcept
+        float fTolerance = Kw::DefaultTolerance) const noexcept
     {
         Data.fTolerance = fTolerance;
         Data.eFillMode = (D2D1_FILL_MODE)m_eFillMode;
