@@ -51,6 +51,9 @@
     <ClInclude Include="eck\ServerHelper.h">
       <Filter>ECK Include</Filter>
     </ClInclude>
+    <ClInclude Include="eck\HttpStatus.h">
+      <Filter>ECK Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="eck\ECK.cpp">
