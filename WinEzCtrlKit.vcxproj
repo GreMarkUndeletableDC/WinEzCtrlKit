@@ -409,6 +409,7 @@
     <ClCompile Include="eck\GpPtr.h" />
     <ClCompile Include="eck\UiColor.h" />
     <ClCompile Include="eck\UiScroll.h" />
+    <ClInclude Include="eck\HttpStatus.h" />
     <ClInclude Include="eck\ServerHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
