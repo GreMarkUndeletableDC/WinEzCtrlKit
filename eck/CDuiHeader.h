@@ -32,9 +32,10 @@ public:
         int idxTo;
     };
 
-    const inline static UINT IdMeInsertMarkWidth = TmNextResourceId();
+    const static inline UINT IdMeInsertMarkWidth = TmNextResourceId();
 
     constexpr static float DividerHitTestWidthHalf = 4.f;
+    constexpr static float DefaultInsertMarkWidth = 3.f;
 private:
     struct ITEM
     {
@@ -64,7 +65,6 @@ private:
     BITBOOL m_bDragging : 1{};
     BITBOOL m_bDraggingDivider : 1{};
     BITBOOL m_bAnimating : 1{};
-    BITBOOL m_bLBtnDown : 1{};
 
     SimpleStyle m_Style[SsMax]
     {
@@ -351,8 +351,10 @@ public:
 
             if (m_bDragging && m_bDraggable && m_idxInsertMark >= 0)
             {
+                const auto cxMark = GetTheme()->GetMetric(
+                    IdMeInsertMarkWidth, DefaultInsertMarkWidth);
                 const float xMark = DragGetInsertMarkPosition();
-                D2D1_RECT_F rcMark{ xMark - 1.5f, 0.f, xMark + 1.5f, (float)GetHeight() };
+                D2D1_RECT_F rcMark{ xMark - cxMark / 2.f, 0.f, xMark + cxMark / 2.f, (float)GetHeight() };
                 ElementToClient(rcMark);
                 const auto pBrush = GetWindow().CcSetBrushColor(
                     ArgbToD2DColorF(GetTheme()->GetColor(IdCrAccent)));
@@ -461,13 +463,12 @@ public:
                 return 0;
 
             SetCapture();
-            if (!m_bAllowReSize)
-                ht.bHitDivider = FALSE;
             m_idxDrag = idx;
             m_idxPressed = idx;
             m_bAnimating = FALSE;
 
-            if (ht.bHitDivider && m_bAllowReSize)
+            if (ht.bHitDivider && m_bAllowReSize &&
+                uMsg == WM_LBUTTONDOWN)
             {
                 m_bDraggingDivider = TRUE;
                 m_xDragOffset = ht.pt.x - m_vItem[idx].x - m_vItem[idx].cx;
@@ -756,7 +757,11 @@ public:
 };
 inline RcPtr<CThemeBase> CHeader::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
-    return TmMakeTheme<CTmHeader>(bDark);
+    const auto pTheme = TmMakeTheme<CTmHeader>(bDark);
+    const auto pmc = TmsMakeMetricCollection();
+    pmc->Set(IdMeInsertMarkWidth, DefaultInsertMarkWidth);
+    pTheme->SetMetricCollection(pmc.Get());
+    return pTheme;
 }
 
 
