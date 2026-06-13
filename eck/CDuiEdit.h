@@ -91,16 +91,17 @@ public:
     HRESULT TxGetHorzExtent(LONG* plHorzExtent);
 };
 
-struct EVT_ED_TX : ELENMHDR
-{
-    int iNotify;
-    void* pData;
-};
 
 class CEdit : public CElement
 {
     friend class CEditTextHost;
 public:
+    struct EVT_TX : ELENMHDR
+    {
+        int iNotify;
+        void* pData;
+    };
+
     constexpr static DWORD DefaultTxProperty =
         TXTBIT_WORDWRAP | TXTBIT_MULTILINE | TXTBIT_DISABLEDRAG;
     constexpr static float
@@ -1453,7 +1454,7 @@ inline HRESULT CEditTextHost::TxGetPropertyBits(DWORD dwMask, DWORD* pdwBits)
 
 inline HRESULT CEditTextHost::TxNotify(DWORD iNotify, void* pv)
 {
-    EVT_ED_TX nm{ EDE_TXNOTIFY };
+    CEdit::EVT_TX nm{ EDE_TXNOTIFY };
     nm.iNotify = iNotify;
     nm.pData = pv;
     m_pEdit->SendNotify(&nm);

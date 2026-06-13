@@ -147,7 +147,7 @@ public:
                     Kw::MakeD2DPointF(pt),
                     m_pLayout.Get(),
                     GetWindow().CcSetBrushColor(
-                        ArgbToD2DColorF(GetTheme()->GetColor(Ss.CrFore))));
+                        ArgbToD2DColorF(GetTheme()->GetStyleColor(&Ss, SfFore))));
             }
 
             DbgDrawFrame();

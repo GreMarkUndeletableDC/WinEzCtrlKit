@@ -59,11 +59,11 @@ enum : UINT
     TBLE_GETDISPINFO,	// 【渲染线程】获取显示信息(NMTBLDISPINFO*)
     TBLE_SELCHANGED,	// 选项卡改变(NMTBLITEMINDEX*)
     // Header
-    HEE_GETDISPINFO,	// 【渲染线程】获取显示信息(NMHEDISPINFO*)
-    HEE_BEGINDRAG,		// 开始拖拽(NMHEDRAG*)
-    HEE_ENDDRAG,		// 结束拖拽(NMHEDRAG*)
-    HEE_WIDTHCHANGED,	// 宽度改变(NMHEITEMNOTIFY*)
-    HEE_ORDERCHANGED,	// 顺序改变(NMHEITEMNOTIFY*)
+    ENC_HD_BEGINDRAG,   // 开始拖拽(EVT_ITEM*)
+    ENC_HD_ENDDRAG,     // 结束拖拽(EVT_ITEM*)
+    ENC_HD_WIDTHCHANGED,// 宽度改变(EVT_ITEM*)
+    ENC_HD_ORDERCHANGED,// 顺序改变(EVT_ORDER*)
+    ENC_HD_DELETEITEM,  // 删除项(EVT_ITEM*)
     // Edit
     EDE_TXNOTIFY,		// 来自文本服务的通知(NMEDTXNOTIFY*)
     // TabHeader
@@ -225,5 +225,7 @@ public:
             return m_rcSource;
     }
 };
+
+EckInlineNdCe Kw::Vec2& EagPoint(LPARAM lParam) noexcept { return *(Kw::Vec2*)lParam; }
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END
