@@ -125,7 +125,7 @@ private:
         if (e.pLayout)
         {
             GetDC()->DrawTextLayout(
-                { rcItem.left + dOuter, rcItem.top },
+                { rcItem.left + dOuter, rcItem.top + dOuter },
                 e.pLayout.Get(),
                 GetWindow().CcSetBrushColor(
                     ArgbToD2DColorF(GetTheme()->GetStyleColor(&m_Style[iSs], SfFore))));

@@ -1756,10 +1756,10 @@ public:
             *pRetVal = {};
             return UIA_E_ELEMENTNOTAVAILABLE;
         }
-        auto rc{ ((CElement*)m_pEle)->GetWholeRectInClient() };
-        ((CElement*)m_pEle)->LogicalToPixel(rc);
+        auto rc{ GetElement()->GetWholeRectInClient() };
+        GetElement()->LogicalToPixel(rc);
         RECT rcInScr{ (int)rc.left, (int)rc.top, (int)rc.right, (int)rc.bottom };
-        ClientToScreen(((CElement*)m_pEle)->GetWindow().Handle, &rcInScr);
+        ClientToScreen(GetElement()->GetWindow().Handle, &rcInScr);
         pRetVal->left = (double)rcInScr.left;
         pRetVal->top = (double)rcInScr.top;
         pRetVal->width = double(rcInScr.right - rcInScr.left);
@@ -1767,7 +1767,7 @@ public:
         return S_OK;
     }
 
-    EckInlineNdCe auto GetElement() const noexcept { return (CElement*)m_pEle; }
+    EckInlineNdCe CElement* GetElement() const noexcept { return (CElement*)m_pEle; }
 };
 inline HRESULT CElement::EhUiaMakeInterface() noexcept
 {
