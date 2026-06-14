@@ -1,65 +1,59 @@
 ﻿#pragma once
 #include "DuiBase.h"
+#include "GraphicsHelper.h"
 
 ECK_NAMESPACE_BEGIN
 ECK_DUI_NAMESPACE_BEGIN
-enum : int
-{
-    CxLabelFade = 40,
-};
 class CLabel : public CElement
 {
-private:
-    IDWriteTextLayout* m_pLayout{};
-    union
-    {
-        ID2D1SolidColorBrush* m_pBrSolid{};
-        ID2D1LinearGradientBrush* m_pBrFade;
-    };
-    ID2D1Bitmap* m_pBmp{};
-    D2D1_COLOR_F m_crText{};
+public:
+    const static inline UINT IdMeFadeWidth = TmNextResourceId();
 
-    BOOLEAN m_bTransparent{ TRUE };
-    BOOLEAN m_bOnlyBitmap{};
-    BOOLEAN m_bFullElem{};
-    BOOLEAN m_bUserColor{};
-    BOOLEAN m_bFade{};
+    constexpr static float DefaultFadeWidth = 40.f;
+private:
+    ComPtr<IDWriteTextLayout> m_pLayout{};
+    ComPtr<ID2D1LinearGradientBrush> m_pBrushFade{};
+    CBitmap m_BmpIcon{};
+    CBitmap m_BmpBk{};
+
+    BITBOOL m_bTransparent : 1{ TRUE };
+    BITBOOL m_bOnlyBitmap : 1{};
+    BITBOOL m_bFullElem : 1{};
+    BITBOOL m_bUserColor : 1{};
+    BITBOOL m_bFade : 1{};
     ImageMode m_eBkImgMode{ ImageMode::TopLeft };
     BYTE m_eInterMode{ D2D1_INTERPOLATION_MODE_LINEAR };
 
-    void UpdateTextLayout(PCWSTR pszText, int cchText)
+    void UpdateTextLayout() noexcept
     {
-        SafeRelease(m_pLayout);
-        if (!pszText || !cchText || m_bOnlyBitmap)
-            return;
         float cx;
-        if (m_pBmp)
-            cx = GetWidth() - m_pBmp->GetSize().width -
-            GetTheme()->GetMetrics(Metrics::SmallPadding);
+        if (m_BmpIcon.Get())
+        {
+            const auto rc = m_BmpIcon.GetActualSourceRect();
+            cx = GetWidth() - (rc.right - rc.left) -
+                GetTheme()->GetMetric(IdMePaddingInner);
+        }
         else
             cx = GetWidth();
-        g_pDwFactory->CreateTextLayout(pszText, cchText,
-            GetTextFormat(), cx, GetHeight(), &m_pLayout);
+        cx -= (GetTheme()->GetMetric(IdMePaddingOuter) * 2.f);
+        g_pDwFactory->CreateTextLayout(
+            GetText().Data(), GetText().Size(),
+            GetTextFormat().Get(), cx, GetHeight(), m_pLayout.AtClear());
     }
 
-    EckInline void UpdateTextLayout()
+    void UpdateFadeBrush() noexcept
     {
-        UpdateTextLayout(GetText().Data(), GetText().Size());
-    }
-
-    void UpdateFadeBrush()
-    {
+        const auto cxFade = GetTheme()->GetMetric(IdMeFadeWidth, DefaultFadeWidth);
         const auto cx = GetWidth();
         const D2D1_GRADIENT_STOP Stop[]
         {
-            { (cx - (float)CxLabelFade) / cx,m_crText },
+            { (cx - cxFade) / cx, GetTheme()->GetColor(IdCrFore) },
             { 1.f }
         };
-        ComPtr<ID2D1GradientStopCollection> pStopColl;
-        m_pDC->CreateGradientStopCollection(Stop, 2, &pStopColl);
-        SafeRelease(m_pBrFade);
-        const D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES Prop{ {}, { cx,0.f } };
-        m_pDC->CreateLinearGradientBrush(Prop, pStopColl.Get(), &m_pBrFade);
+        ComPtr<ID2D1GradientStopCollection> pStopCollection;
+        GetDC()->CreateGradientStopCollection(Stop, 2, &pStopCollection);
+        const D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES Prop{ {}, { cx, 0.f } };
+        GetDC()->CreateLinearGradientBrush(Prop, pStopCollection.Get(), &m_pBrushFade);
     }
 public:
     LRESULT OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
@@ -73,52 +67,30 @@ public:
 
             if (m_bOnlyBitmap)
             {
-                DrawBackgroundImage(m_pDC, m_pBmp, GetViewRectF(), -1, -1,
-                    m_eBkImgMode, m_bFullElem, (D2D1_INTERPOLATION_MODE)m_eInterMode);
             }
             else
             {
-                float x{};
-                if (m_pBmp)
-                {
-                    const auto sz = m_pBmp->GetSize();
-                    D2D1_RECT_F rc;
-                    rc.left = x;
-                    rc.top = (GetHeight() - sz.height) / 2.f;
-                    rc.right = x + sz.width;
-                    rc.bottom = rc.top + sz.height;
-                    m_pDC->DrawBitmap(m_pBmp, rc);
-                    x += (sz.width + GetTheme()->GetMetrics(Metrics::SmallPadding));
-                }
-
                 if (m_pLayout)
                 {
-                    ID2D1Brush* pBr;
-                    if (m_bFade)
-                        pBr = m_pBrFade;
-                    else
-                    {
-                        if (m_bUserColor)
-                            m_pBrSolid->SetColor(m_crText);
-                        else
-                        {
-                            D2D1_COLOR_F cr;
-                            GetTheme()->GetSysColor(SysColor::Text, cr);
-                            m_pBrSolid->SetColor(cr);
-                        }
-                        pBr = m_pBrSolid;
-                    }
-                    m_pDC->DrawTextLayout({ x }, m_pLayout, pBr,
+                    const auto pBrush = (m_bFade ?
+                        static_cast<ID2D1Brush*>(m_pBrushFade.Get()) :
+                        GetWindow().CcSetBrushColor(ArgbToD2DColorF(
+                            GetTheme()->GetColor(IdCrFore))));
+                    GetDC()->DrawTextLayout(
+                        Kw::MakeD2DPointF(GetOffsetInClient()),
+                        m_pLayout.Get(),
+                        pBrush,
                         DrawTextLayoutFlags);
                 }
             }
-            ECK_DUI_DBG_DRAW_FRAME;
+
+            DbgDrawFrame();
             EndPaint(ps);
         }
         return 0;
 
         case WM_SETTEXT:
-            UpdateTextLayout((PCWSTR)lParam, (int)wParam);
+            UpdateTextLayout();
             return 0;
         case WM_SIZE:
             UpdateTextLayout();
@@ -131,82 +103,46 @@ public:
                 Invalidate();
             break;
 
-        case WM_ERASEBKGND:
-        {
-            const auto* const pps = (PAINTINFO*)lParam;
-            if (!m_bTransparent)
-                GetTheme()->DrawBackground(Part::LabelBk, State::Normal,
-                    pps->rcfClipInElem, nullptr);
-        }
-        return 0;
-
         case WM_CREATE:
-            m_pDC->CreateSolidColorBrush({}, &m_pBrSolid);
             UpdateTextLayout();
             break;
-
-        case WM_DESTROY:
-            SafeRelease(m_pLayout);
-            SafeRelease(m_pBrSolid);
-            SafeRelease(m_pBmp);
-            break;
         }
-        return CElement::OnEvent(uMsg, wParam, lParam);
+        return __super::OnEvent(uMsg, wParam, lParam);
     }
 
-    void SetBitmap(ID2D1Bitmap* pBmp)
+    void SetIcon(const CBitmap& Bmp) noexcept
     {
-        ECK_DUILOCK;
-        std::swap(m_pBmp, pBmp);
-        if (m_pBmp)
-            m_pBmp->AddRef();
-        if (pBmp)
-            pBmp->Release();
+        m_BmpIcon = Bmp;
         UpdateTextLayout();
     }
-    EckInlineNdCe auto GetBitmap() const { return m_pBmp; }
+    EckInlineNdCe auto& GetIcon() const noexcept { return m_BmpIcon; }
 
-    void SetFade(BOOL b)
+    void SetFade(BOOL b) noexcept
     {
-        ECK_DUILOCK;
+        if (!!m_bFade == !!b)
+            return;
         m_bFade = b;
         if (m_bFade)
             UpdateFadeBrush();
         else
-        {
-            SafeRelease(m_pBrFade);
-            m_pDC->CreateSolidColorBrush({}, &m_pBrSolid);
-        }
+            m_pBrushFade.Clear();
     }
-    EckInlineNdCe BOOL GetFade() const { return m_bFade; }
+    EckInlineNdCe BOOL GetFade() const noexcept { return m_bFade; }
 
-    void UpdateFadeColor()
-    {
-        ECK_DUILOCK;
-        if (m_bFade)
-            UpdateFadeBrush();
-    }
+    EckInlineCe void SetTransparent(BOOL b) noexcept { m_bTransparent = b; }
+    EckInlineNdCe BOOL GetTransparent() const noexcept { return m_bTransparent; }
 
-    EckInlineCe void SetTransparent(BOOL b) { m_bTransparent = b; }
-    EckInlineNdCe BOOL GetTransparent() const { return m_bTransparent; }
+    EckInlineCe void SetOnlyBitmap(BOOL b) noexcept { m_bOnlyBitmap = b; }
+    EckInlineNdCe BOOL GetOnlyBitmap() const noexcept { return m_bOnlyBitmap; }
 
-    EckInlineCe void SetOnlyBitmap(BOOL b) { m_bOnlyBitmap = b; }
-    EckInlineNdCe BOOL GetOnlyBitmap() const { return m_bOnlyBitmap; }
+    EckInlineCe void SetFullElement(BOOL b) noexcept { m_bFullElem = b; }
+    EckInlineNdCe BOOL GetFullElement() const noexcept { return m_bFullElem; }
 
-    EckInlineCe void SetFullElem(BOOL b) { m_bFullElem = b; }
-    EckInlineNdCe BOOL GetFullElem() const { return m_bFullElem; }
+    EckInlineCe void SetBackgroundMode(ImageMode e) noexcept { m_eBkImgMode = e; }
+    EckInlineNdCe ImageMode GetBackgroundMode() const noexcept { return m_eBkImgMode; }
 
-    EckInlineCe void SetBackgroundMode(ImageMode e) { m_eBkImgMode = e; }
-    EckInlineNdCe ImageMode GetBackgroundMode() const { return m_eBkImgMode; }
-
-    EckInlineCe void SetInterMode(D2D1_INTERPOLATION_MODE e) { m_eInterMode = e; }
-    EckInlineNdCe D2D1_INTERPOLATION_MODE GetInterMode() const { return (D2D1_INTERPOLATION_MODE)m_eInterMode; }
-
-    EckInlineCe void SetUserColor(BOOL b) { m_bUserColor = b; }
-    EckInlineNdCe BOOL GetUserColor() const { return m_bUserColor; }
-
-    EckInlineCe void SetColor(const D2D1_COLOR_F& cr) { m_crText = cr; }
-    EckInlineNdCe const auto& GetColor() const { return m_crText; }
+    EckInlineCe void SetInterpolationMode(D2D1_INTERPOLATION_MODE e) noexcept { m_eInterMode = (BYTE)e; }
+    EckInlineNdCe D2D1_INTERPOLATION_MODE GetInterpolationMode() const noexcept { return (D2D1_INTERPOLATION_MODE)m_eInterMode; }
 };
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END
