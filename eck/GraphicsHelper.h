@@ -15,16 +15,11 @@ enum class GradientMode :BYTE
     TR2BL	// 从右上到左下↙
 };
 
-/// <summary>
-/// 填充渐变矩形
-/// </summary>
-/// <param name="hDC">设备场景</param>
-/// <param name="rc">矩形</param>
-/// <param name="crGradient">渐变色，至少指向3个COLORREF</param>
-/// <param name="eMode">渐变模式</param>
-/// <returns>GradientFill的返回值</returns>
-inline BOOL FillGradientRect(HDC hDC, const RECT& rc,
-    _In_reads_(3) COLORREF* crGradient, GradientMode eMode) noexcept
+inline BOOL FillGradientRect(
+    HDC hDC,
+    const RECT& rc,
+    _In_reads_(3) const COLORREF* crGradient,
+    GradientMode eMode) noexcept
 {
     TRIVERTEX tv[4];
     COLORREF cr1, cr2, cr3;
@@ -216,8 +211,12 @@ inline BOOL FillGradientRect(HDC hDC, const RECT& rc,
     return FALSE;
 }
 
-inline BOOL FillGradientRect(HDC hDC, const RECT& rc,
-    COLORREF cr1, COLORREF cr2, BOOL bVertical) noexcept
+inline BOOL FillGradientRect(
+    HDC hDC,
+    const RECT& rc,
+    COLORREF cr1,
+    COLORREF cr2,
+    BOOL bVertical) noexcept
 {
     TRIVERTEX tv[2];
     tv[0].x = rc.left;
@@ -233,430 +232,278 @@ inline BOOL FillGradientRect(HDC hDC, const RECT& rc,
     tv[1].Blue = GetBValue(cr2) << 8;
 
     GRADIENT_RECT gr;
-    gr.UpperLeft = 0;	// 左上角坐标为第一个成员
-    gr.LowerRight = 1;	// 右下角坐标为第二个成员
+    gr.UpperLeft = 0;   // 左上角坐标为第一个成员
+    gr.LowerRight = 1;  // 右下角坐标为第二个成员
 
     return GradientFill(hDC, tv, 2, &gr, 1,
         bVertical ? GRADIENT_FILL_RECT_V : GRADIENT_FILL_RECT_H);
 }
 
-enum class ImageMode : BYTE
+inline BOOL DrawBackgroundImage(
+    _In_ HDC hDC,
+    _In_ HDC hdcBitmap,
+    ImageMode eMode,
+    const RECT& rc,
+    _In_opt_ const RECT* prcSrc = nullptr,
+    BOOL bAlphaBlend = FALSE,
+    BYTE byAlpha = 255) noexcept
 {
-    TopLeft,// 左上
-    Tile,	// 平铺
-    Center,	// 居中
-    Stretch,// 缩放
-    StretchKeepAspectRatio,// 缩放保持纵横比
-};
-
-/// <summary>
-/// 画背景图像。
-/// 通用背景图像绘制函数，支持32位位图
-/// </summary>
-/// <param name="hDC">设备场景</param>
-/// <param name="hdcBitmap">图像场景</param>
-/// <param name="rc">矩形</param>
-/// <param name="cxImage">图像宽度</param>
-/// <param name="cyImage">图像高度</param>
-/// <param name="iMode">模式，DBGIF_常量</param>
-/// <param name="bFullRgnImage">是否尽量充满目标区域</param>
-/// <returns>AlphaBlend的返回值</returns>
-inline BOOL DrawBackgroundImage32(HDC hDC, HDC hdcBitmap,
-    const RECT& rc, int cxImage, int cyImage,
-    ImageMode iMode, BOOL bFullRgnImage) noexcept
-{
-    constexpr BLENDFUNCTION bf{ AC_SRC_OVER,0,255,AC_SRC_ALPHA };
-    const int
-        cx = rc.right - rc.left,
-        cy = rc.bottom - rc.top;
-    if (cxImage <= 0 || cyImage <= 0)
+    const BLENDFUNCTION bf{ AC_SRC_OVER, 0, byAlpha, AC_SRC_ALPHA };
+    RCWH rcSrc;
+    if (prcSrc)
     {
-        BITMAP bmp;
-        if (!GetObjectW(GetCurrentObject(hdcBitmap, OBJ_BITMAP), sizeof(bmp), &bmp))
+        rcSrc.x = prcSrc->left;
+        rcSrc.y = prcSrc->top;
+        rcSrc.cx = prcSrc->right - prcSrc->left;
+        rcSrc.cy = prcSrc->bottom - prcSrc->top;
+    }
+    else
+    {
+        BITMAP bm;
+        if (!GetObjectW(GetCurrentObject(hdcBitmap, OBJ_BITMAP), sizeof(bm), &bm))
             return FALSE;
-        cxImage = bmp.bmWidth;
-        cyImage = bmp.bmHeight;
+        rcSrc = { 0, 0, bm.bmWidth, bm.bmHeight };
     }
 
-    switch (iMode)
+#undef ECK_BLIT
+#define ECK_BLIT(x_, y_, cx_, cy_) \
+    (bAlphaBlend ?                 \
+        AlphaBlend(hDC, x_, y_, cx_, cy_, hdcBitmap,    \
+            rcSrc.x, rcSrc.y, rcSrc.cx, rcSrc.cy, bf) : \
+        BitBlt(hDC, x_, y_, cx_, cy_, hdcBitmap, rcSrc.x, rcSrc.y, SRCCOPY))
+
+    switch (eMode)
     {
-    case ImageMode::TopLeft:// 居左上
+    case ImageMode::TopLeft:
+        return ECK_BLIT(rc.left, rc.top, rcSrc.cx, rcSrc.cy);
+    case ImageMode::TopLeftUniform:
+    case ImageMode::TopLeftUniformFill:
     {
-        if (bFullRgnImage)
-        {
-            RECT rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            return AlphaBlend(hDC, rc.left, rc.top, rc1.right - rc1.left, rc1.bottom - rc1.top,
-                hdcBitmap, 0, 0, cxImage, cyImage, bf);
-        }
+        const auto rcRef{ MakeRcwh(rc) };
+        auto rcNew{ rcSrc };
+        if (eMode == ImageMode::TopLeftUniform)
+            AdjustRectToFitAnother(rcNew, rcRef);
         else
-            return AlphaBlend(hDC, rc.left, rc.top, cxImage, cyImage,
-                hdcBitmap, 0, 0, cxImage, cyImage, bf);
+            AdjustRectToFillAnother(rcNew, rcRef);
+        return ECK_BLIT(rc.left, rc.top, rcNew.cx, rcNew.cy);
     }
     ECK_UNREACHABLE;
-
-    case ImageMode::Tile:// 平铺
+    case ImageMode::Center:
+        return ECK_BLIT(
+            rc.left + (rc.right - rc.left - rcSrc.cx) / 2,
+            rc.top + (rc.bottom - rc.top - rcSrc.cy) / 2, rcSrc.cx, rcSrc.cy);
+    case ImageMode::CenterUniform:
+    case ImageMode::CenterUniformFill:
     {
-        EckCounter(CeilDivide(cx, cxImage), i)
+        const auto rcRef{ MakeRcwh(rc) };
+        auto rcNew{ rcSrc };
+        if (eMode == ImageMode::CenterUniform)
+            AdjustRectToFitAnother(rcNew, rcRef);
+        else
+            AdjustRectToFillAnother(rcNew, rcRef);
+        return ECK_BLIT(rcNew.x, rcNew.y, rcNew.cx, rcNew.cy);
+    }
+    ECK_UNREACHABLE;
+    case ImageMode::Tile:
+    {
+        const auto cH = CeilDivide<int>(rc.right - rc.left, rcSrc.cx);
+        const auto cV = CeilDivide<int>(rc.bottom - rc.top, rcSrc.cy);
+        EckCounter(cH, i)
         {
-            EckCounter(CeilDivide(cy, cyImage), j)
-                if (!AlphaBlend(hDC, rc.left + i * cxImage, rc.top + j * cyImage, cxImage, cyImage,
-                    hdcBitmap, 0, 0, cxImage, cyImage, bf))
+            EckCounter(cV, j)
+                if (!ECK_BLIT(
+                    rc.left + i * rcSrc.cx,
+                    rc.top + j * rcSrc.cy, rcSrc.cx, rcSrc.cy))
                     return FALSE;
         }
         return TRUE;
     }
     ECK_UNREACHABLE;
-
-    case ImageMode::Center:// 居中
-    {
-        if (bFullRgnImage)
-        {
-            RECT rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            return AlphaBlend(hDC, rc1.left, rc1.top, rc1.right - rc1.left, rc1.bottom - rc1.top,
-                hdcBitmap, 0, 0, cxImage, cyImage, bf);
-        }
-        else
-            return AlphaBlend(hDC, rc.left + (cx - cxImage) / 2, rc.top + (cy - cyImage) / 2, cxImage, cyImage,
-                hdcBitmap, 0, 0, cxImage, cyImage, bf);
-    }
-    ECK_UNREACHABLE;
-
     case ImageMode::Stretch:// 缩放
-        return AlphaBlend(hDC, rc.left, rc.top, cx, cy, hdcBitmap, 0, 0, cxImage, cyImage, bf);
-
-    case ImageMode::StretchKeepAspectRatio:// 缩放保持纵横比
-    {
-        RECT rc1{ 0,0,cxImage,cyImage };
-        AdjustRectToFitAnother(rc1, rc);
-        return AlphaBlend(hDC, rc1.left, rc1.top, rc1.right - rc1.left, rc1.bottom - rc1.top,
-            hdcBitmap, 0, 0, cxImage, cyImage, bf);
+        return ECK_BLIT(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
     }
-    ECK_UNREACHABLE;
-    }
-    ECK_UNREACHABLE;
-}
-
-/// <summary>
-/// 画背景图像。
-/// 通用背景图像绘制函数
-/// </summary>
-/// <param name="hDC">设备场景</param>
-/// <param name="hdcBitmap">图像场景</param>
-/// <param name="rc">矩形</param>
-/// <param name="cxImage">图像宽度</param>
-/// <param name="cyImage">图像高度</param>
-/// <param name="iMode">模式，DBGIF_常量</param>
-/// <param name="bFullRgnImage">是否尽量充满目标区域</param>
-/// <returns>BitBlt的返回值</returns>
-inline BOOL DrawBackgroundImage(HDC hDC, HDC hdcBitmap,
-    const RECT& rc, int cxImage, int cyImage,
-    ImageMode iMode, BOOL bFullRgnImage) noexcept
-{
-    const int
-        cx = rc.right - rc.left,
-        cy = rc.bottom - rc.top;
-    if (cxImage <= 0 || cyImage <= 0)
-    {
-        BITMAP bmp;
-        if (!GetObjectW(GetCurrentObject(hdcBitmap, OBJ_BITMAP), sizeof(bmp), &bmp))
-            return FALSE;
-        cxImage = bmp.bmWidth;
-        cyImage = bmp.bmHeight;
-    }
-
-    switch (iMode)
-    {
-    case ImageMode::TopLeft:// 居左上
-    {
-        if (bFullRgnImage)
-        {
-            RECT rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            return BitBlt(hDC, rc.left, rc.top, rc1.right - rc1.left, rc1.bottom - rc1.top,
-                hdcBitmap, 0, 0, SRCCOPY);
-        }
-        else
-            return BitBlt(hDC, rc.left, rc.top, cxImage, cyImage, hdcBitmap, 0, 0, SRCCOPY);
-    }
-    ECK_UNREACHABLE;
-
-    case ImageMode::Tile:// 平铺
-    {
-        EckCounter(CeilDivide(cx, cxImage), i)
-        {
-            EckCounter(CeilDivide(cy, cyImage), j)
-                if (!BitBlt(hDC, rc.left + i * cxImage, rc.top + j * cyImage, cxImage, cyImage,
-                    hdcBitmap, 0, 0, SRCCOPY))
-                    return FALSE;
-        }
-        return TRUE;
-    }
-    ECK_UNREACHABLE;
-
-    case ImageMode::Center:// 居中
-    {
-        if (bFullRgnImage)
-        {
-            RECT rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            return BitBlt(hDC, rc1.left, rc1.top, rc1.right - rc1.left, rc1.bottom - rc1.top,
-                hdcBitmap, 0, 0, SRCCOPY);
-        }
-        else
-            return BitBlt(hDC, (cx - cxImage) / 2, (cy - cyImage) / 2, cxImage, cyImage,
-                hdcBitmap, 0, 0, SRCCOPY);
-    }
-    ECK_UNREACHABLE;
-
-    case ImageMode::Stretch:// 缩放
-        return BitBlt(hDC, rc.left, rc.top, cx, cy, hdcBitmap, 0, 0, SRCCOPY);
-
-    case ImageMode::StretchKeepAspectRatio:// 缩放保持纵横比
-    {
-        RECT rc1{ 0,0,cxImage,cyImage };
-        AdjustRectToFitAnother(rc1, rc);
-        return BitBlt(hDC, rc1.left, rc1.top, rc1.right - rc1.left, rc1.bottom - rc1.top,
-            hdcBitmap, 0, 0, SRCCOPY);
-    }
-    ECK_UNREACHABLE;
-    }
-    ECK_UNREACHABLE;
+    return FALSE;
+#undef ECK_BLIT
 }
 
 #if !ECK_OPT_NO_GDIPLUS
-/// <summary>
-/// 画背景图像。
-/// 通用背景图像绘制函数
-/// </summary>
-/// <param name="hDC">设备场景</param>
-/// <param name="hdcBitmap">图像场景</param>
-/// <param name="rc">矩形</param>
-/// <param name="cxImage">图像宽度</param>
-/// <param name="cyImage">图像高度</param>
-/// <param name="iMode">模式，DBGIF_常量</param>
-/// <param name="bFullRgnImage">是否尽量充满目标区域</param>
-/// <returns>BitBlt的返回值</returns>
-inline GpStatus DrawBackgroundImage(GpGraphics* pGraphics, GpImage* pImage,
-    const RECT& rc, int cxImage, int cyImage,
-    ImageMode iMode, BOOL bFullRgnImage) noexcept
+inline GpStatus DrawBackgroundImage(
+    _In_ GpGraphics* pGraphics,
+    _In_ GpImage* pImage,
+    ImageMode eMode,
+    const GpRectF& rc,
+    _In_opt_ const GpRectF* prcSrc = nullptr) noexcept
 {
-    const int
-        cx = rc.right - rc.left,
-        cy = rc.bottom - rc.top;
-    if (cxImage <= 0 || cyImage <= 0)
+    // 巧妙利用 MakeRcwh 推导浮点版本 RCWH 结构体类型（如 RCWHF）
+    auto rcSrc{ MakeRcwhF(rc) };
+    if (prcSrc)
     {
-        GdipGetImageWidth(pImage, (UINT*)&cxImage);
-        GdipGetImageHeight(pImage, (UINT*)&cyImage);
+        rcSrc.x = prcSrc->X;
+        rcSrc.y = prcSrc->Y;
+        rcSrc.cx = prcSrc->Width;
+        rcSrc.cy = prcSrc->Height;
+    }
+    else
+    {
+        UINT w, h;
+        GdipGetImageWidth(pImage, &w);
+        GdipGetImageHeight(pImage, &h);
+        rcSrc = { 0.f, 0.f, (float)w, (float)h };
     }
 
-    switch (iMode)
+#undef ECK_BLIT
+#define ECK_BLIT(x_, y_, cx_, cy_) \
+    GdipDrawImageRectRect(pGraphics, pImage, \
+        float(x_), float(y_), float(cx_), float(cy_), \
+        (float)rcSrc.x, (float)rcSrc.y, (float)rcSrc.cx, (float)rcSrc.cy, \
+        Gdiplus::UnitPixel, nullptr, nullptr, nullptr)
+
+    switch (eMode)
     {
-    case ImageMode::TopLeft:// 居左上
+    case ImageMode::TopLeft:
+        return ECK_BLIT(rc.X, rc.Y, rcSrc.cx, rcSrc.cy);
+    case ImageMode::TopLeftUniform:
+    case ImageMode::TopLeftUniformFill:
     {
-        if (bFullRgnImage)
-        {
-            RECT rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            return GdipDrawImageRectI(pGraphics, pImage,
-                rc.left, rc.top, rc1.right - rc1.left, rc1.bottom - rc1.top);
-        }
+        const auto rcRef{ MakeRcwhF(rc) };
+        auto rcNew{ rcSrc };
+        if (eMode == ImageMode::TopLeftUniform)
+            AdjustRectToFitAnother(rcNew, rcRef);
         else
-            return GdipDrawImageRectI(pGraphics, pImage, rc.left, rc.top, cxImage, cyImage);
+            AdjustRectToFillAnother(rcNew, rcRef);
+        return ECK_BLIT(rc.X, rc.Y, rcNew.cx, rcNew.cy);
     }
     ECK_UNREACHABLE;
-
-    case ImageMode::Tile:// 平铺
+    case ImageMode::Center:
+        return ECK_BLIT(
+            rc.X + (rc.Width - rcSrc.cx) / 2.f,
+            rc.Y + (rc.Height - rcSrc.cy) / 2.f, rcSrc.cx, rcSrc.cy);
+    case ImageMode::CenterUniform:
+    case ImageMode::CenterUniformFill:
     {
-        GpStatus gps;
-        EckCounter(CeilDivide(cx, cxImage), i)
+        const auto rcRef{ MakeRcwhF(rc) };
+        auto rcNew{ rcSrc };
+        if (eMode == ImageMode::CenterUniform)
+            AdjustRectToFitAnother(rcNew, rcRef);
+        else
+            AdjustRectToFillAnother(rcNew, rcRef);
+        return ECK_BLIT(rcNew.x, rcNew.y, rcNew.cx, rcNew.cy);
+    }
+    ECK_UNREACHABLE;
+    case ImageMode::Tile:
+    {
+        const auto cH = CeilDivide<int>((int)rc.Width, (int)rcSrc.cx);
+        const auto cV = CeilDivide<int>((int)rc.Height, (int)rcSrc.cy);
+        EckCounter(cH, i)
         {
-            EckCounter(CeilDivide(cy, cyImage), j)
-                if ((gps = GdipDrawImageRectI(pGraphics, pImage,
-                    i * cxImage, j * cyImage, cxImage, cyImage)) != Gdiplus::Ok)
-                    return gps;
+            EckCounter(cV, j)
+            {
+                const auto status = ECK_BLIT(
+                    rc.X + i * rcSrc.cx,
+                    rc.Y + j * rcSrc.cy, rcSrc.cx, rcSrc.cy);
+                if (status != Gdiplus::Ok)
+                    return status;
+            }
         }
         return Gdiplus::Ok;
     }
     ECK_UNREACHABLE;
-
-    case ImageMode::Center:// 居中
-    {
-        if (bFullRgnImage)
-        {
-            RECT rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            return GdipDrawImageRectI(pGraphics, pImage,
-                rc1.left, rc1.top, rc1.right - rc1.left, rc1.bottom - rc1.top);
-        }
-        else
-            return GdipDrawImageRectI(pGraphics, pImage,
-                rc.left + (cx - cxImage) / 2, rc.top + (cy - cyImage) / 2, cxImage, cyImage);
+    case ImageMode::Stretch: // 缩放
+        return ECK_BLIT(rc.X, rc.Y, rc.Width, rc.Height);
     }
-    ECK_UNREACHABLE;
-
-    case ImageMode::Stretch:// 缩放
-        return GdipDrawImageRectI(pGraphics, pImage, rc.left, rc.top, cx, cy);
-
-    case ImageMode::StretchKeepAspectRatio:// 缩放保持纵横比
-    {
-        RECT rc1{ 0,0,cxImage,cyImage };
-        AdjustRectToFitAnother(rc1, rc);
-        return GdipDrawImageRectI(pGraphics, pImage,
-            rc1.left, rc1.top, rc1.right - rc1.left, rc1.bottom - rc1.top);
-    }
-    ECK_UNREACHABLE;
-    }
-    ECK_UNREACHABLE;
+    return Gdiplus::GenericError;
+#undef ECK_BLIT
 }
 #endif // !ECK_OPT_NO_GDIPLUS
 
 #if !ECK_OPT_NO_D2D
-inline void DrawBackgroundImage(ID2D1RenderTarget* pRT, ID2D1Bitmap* pBmp,
-    const D2D1_RECT_F& rc, float cxImage, float cyImage,
-    ImageMode iMode, BOOL bFullRgnImage,
-    D2D1_BITMAP_INTERPOLATION_MODE eInterp = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR) noexcept
+inline void DrawBackgroundImage(
+    _In_ ID2D1DeviceContext* pDC,
+    _In_ ID2D1Bitmap* pBmp,
+    ImageMode eMode,
+    const D2D1_RECT_F& rc,
+    _In_opt_ const D2D1_RECT_F* prcSrc = nullptr,
+    float fAlpha = 1.f,
+    D2D1_INTERPOLATION_MODE eInterMode = D2D1_INTERPOLATION_MODE_LINEAR) noexcept
 {
-    const float
-        cx = rc.right - rc.left,
-        cy = rc.bottom - rc.top;
-    if (cxImage <= 0 || cyImage <= 0)
+    auto rcSrc{ MakeRcwhF(rc) };
+    D2D1_RECT_F rcSrcD2D;
+    if (prcSrc)
     {
-        D2D1_SIZE_F sz = pBmp->GetSize();
-        cxImage = sz.width;
-        cyImage = sz.height;
+        rcSrc.x = prcSrc->left;
+        rcSrc.y = prcSrc->top;
+        rcSrc.cx = prcSrc->right - prcSrc->left;
+        rcSrc.cy = prcSrc->bottom - prcSrc->top;
+        rcSrcD2D = *prcSrc;
+    }
+    else
+    {
+        const auto size = pBmp->GetSize();
+        rcSrc = { 0.f, 0.f, size.width, size.height };
+        rcSrcD2D = { 0.f, 0.f, size.width, size.height };
     }
 
-    switch (iMode)
-    {
-    case ImageMode::TopLeft:// 居左上
-    {
-        if (bFullRgnImage)
-        {
-            D2D1_RECT_F rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            pRT->DrawBitmap(pBmp, rc1, 1.f, eInterp);
-        }
-        else
-            pRT->DrawBitmap(pBmp, rc, 1.f, eInterp);
-    }
-    return;
+#undef ECK_BLIT
+#define ECK_BLIT(x_, y_, cx_, cy_) \
+    pDC->DrawBitmap(pBmp, \
+        { float(x_), float(y_), float((x_) + (cx_)), float((y_) + (cy_)) }, \
+        fAlpha, eInterMode, &rcSrcD2D)
 
-    case ImageMode::Tile:// 平铺
+    switch (eMode)
     {
-        EckCounter((int)ceilf(cx / cxImage), i)
-        {
-            EckCounter((int)ceilf(cy / cyImage), j)
-                pRT->DrawBitmap(pBmp,
-                    D2D1::RectF(i * cxImage, j * cyImage, (i + 1) * cxImage, (j + 1) * cyImage),
-                    1.f, eInterp);
-        }
-    }
-    return;
-
-    case ImageMode::Center:// 居中
-    {
-        if (bFullRgnImage)
-        {
-            D2D1_RECT_F rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            pRT->DrawBitmap(pBmp, rc1, 1.f, eInterp);
-        }
-        else
-            pRT->DrawBitmap(pBmp,
-                D2D1::RectF(rc.left + (cx - cxImage) / 2, rc.top + (cy - cyImage) / 2,
-                    rc.left + (cx + cxImage) / 2, rc.top + (cy + cyImage) / 2),
-                1.f, eInterp);
-    }
-    return;
-
-    case ImageMode::Stretch:// 缩放
-        pRT->DrawBitmap(pBmp, rc, 1.f, eInterp);
+    case ImageMode::TopLeft:
+        ECK_BLIT(rc.left, rc.top, rcSrc.cx, rcSrc.cy);
         return;
-
-    case ImageMode::StretchKeepAspectRatio:// 缩放保持纵横比
+    case ImageMode::TopLeftUniform:
+    case ImageMode::TopLeftUniformFill:
     {
-        D2D1_RECT_F rc1{ 0,0,cxImage,cyImage };
-        AdjustRectToFitAnother(rc1, rc);
-        pRT->DrawBitmap(pBmp, rc1, 1.f, eInterp);
-    }
-    return;
+        const auto rcRef{ MakeRcwhF(rc) };
+        auto rcNew{ rcSrc };
+        if (eMode == ImageMode::TopLeftUniform)
+            AdjustRectToFitAnother(rcNew, rcRef);
+        else
+            AdjustRectToFillAnother(rcNew, rcRef);
+        ECK_BLIT(rc.left, rc.top, rcNew.cx, rcNew.cy);
+        return;
     }
     ECK_UNREACHABLE;
-}
-
-inline void DrawBackgroundImage(ID2D1DeviceContext* pRT, ID2D1Bitmap* pBmp,
-    const D2D1_RECT_F& rc, float cxImage, float cyImage,
-    ImageMode iMode, BOOL bFullRgnImage,
-    D2D1_INTERPOLATION_MODE eInterp = D2D1_INTERPOLATION_MODE_LINEAR) noexcept
-{
-    const float
-        cx = rc.right - rc.left,
-        cy = rc.bottom - rc.top;
-    if (cxImage <= 0 || cyImage <= 0)
-    {
-        D2D1_SIZE_F sz = pBmp->GetSize();
-        cxImage = sz.width;
-        cyImage = sz.height;
-    }
-
-    switch (iMode)
-    {
-    case ImageMode::TopLeft:// 居左上
-    {
-        if (bFullRgnImage)
-        {
-            D2D1_RECT_F rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            pRT->DrawBitmap(pBmp, rc1, 1.f, eInterp);
-        }
-        else
-            pRT->DrawBitmap(pBmp, rc, 1.f, eInterp);
-    }
-    return;
-
-    case ImageMode::Tile:// 平铺
-    {
-        EckCounter((int)ceilf(cx / cxImage), i)
-        {
-            EckCounter((int)ceilf(cy / cyImage), j)
-                pRT->DrawBitmap(pBmp,
-                    D2D1::RectF(i * cxImage, j * cyImage, (i + 1) * cxImage, (j + 1) * cyImage),
-                    1.f, eInterp);
-        }
-    }
-    return;
-
-    case ImageMode::Center:// 居中
-    {
-        if (bFullRgnImage)
-        {
-            D2D1_RECT_F rc1{ 0,0,cxImage,cyImage };
-            AdjustRectToFillAnother(rc1, rc);
-            pRT->DrawBitmap(pBmp, rc1, 1.f, eInterp);
-        }
-        else
-            pRT->DrawBitmap(pBmp,
-                D2D1::RectF(rc.left + (cx - cxImage) / 2, rc.top + (cy - cyImage) / 2,
-                    rc.left + (cx + cxImage) / 2, rc.top + (cy + cyImage) / 2),
-                1.f, eInterp);
-    }
-    return;
-
-    case ImageMode::Stretch:// 缩放
-        pRT->DrawBitmap(pBmp, rc, 1.f, eInterp);
+    case ImageMode::Center:
+        ECK_BLIT(
+            rc.left + (rc.right - rc.left - rcSrc.cx) / 2.f,
+            rc.top + (rc.bottom - rc.top - rcSrc.cy) / 2.f, rcSrc.cx, rcSrc.cy);
         return;
-
-    case ImageMode::StretchKeepAspectRatio:// 缩放保持纵横比
+    case ImageMode::CenterUniform:
+    case ImageMode::CenterUniformFill:
     {
-        D2D1_RECT_F rc1{ 0,0,cxImage,cyImage };
-        AdjustRectToFitAnother(rc1, rc);
-        pRT->DrawBitmap(pBmp, rc1, 1.f, eInterp);
-    }
-    return;
+        const auto rcRef{ MakeRcwhF(rc) };
+        auto rcNew{ rcSrc };
+        if (eMode == ImageMode::CenterUniform)
+            AdjustRectToFitAnother(rcNew, rcRef);
+        else
+            AdjustRectToFillAnother(rcNew, rcRef);
+        ECK_BLIT(rcNew.x, rcNew.y, rcNew.cx, rcNew.cy);
+        return;
     }
     ECK_UNREACHABLE;
+    case ImageMode::Tile:
+    {
+        const auto cH = CeilDivide<int>((int)(rc.right - rc.left), (int)rcSrc.cx);
+        const auto cV = CeilDivide<int>((int)(rc.bottom - rc.top), (int)rcSrc.cy);
+        EckCounter(cH, i)
+        {
+            EckCounter(cV, j)
+                ECK_BLIT(
+                    rc.left + i * rcSrc.cx,
+                    rc.top + j * rcSrc.cy, rcSrc.cx, rcSrc.cy);
+        }
+        return;
+    }
+    ECK_UNREACHABLE;
+    case ImageMode::Stretch: // 缩放
+        ECK_BLIT(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
+        return;
+    }
+#undef ECK_BLIT
 }
 #endif // !ECK_OPT_NO_D2D
 
@@ -691,50 +538,6 @@ EckInline int IntersectClipRect(HDC hDC, const RECT& rc) noexcept
 }
 
 #if !ECK_OPT_NO_D2D
-inline void DrawImageFromGrid(ID2D1RenderTarget* pRT, ID2D1Bitmap* pBmp,
-    const D2D1_RECT_F& rcDst, const D2D1_RECT_F& rcSrc, const D2D1_RECT_F& rcMargins,
-    D2D1_BITMAP_INTERPOLATION_MODE eInterpolationMode = D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
-    float fAlpha = 1.f) noexcept
-{
-    D2D1_RECT_F rcDstTmp, rcSrcTmp;
-    // 左上
-    rcDstTmp = { rcDst.left, rcDst.top, rcDst.left + rcMargins.left, rcDst.top + rcMargins.top };
-    rcSrcTmp = { rcSrc.left, rcSrc.top, rcSrc.left + rcMargins.left, rcSrc.top + rcMargins.top };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-    // 上
-    rcDstTmp = { rcDst.left + rcMargins.left, rcDst.top, rcDst.right - rcMargins.right, rcDst.top + rcMargins.top };
-    rcSrcTmp = { rcSrc.left + rcMargins.left, rcSrc.top, rcSrc.right - rcMargins.right, rcSrc.top + rcMargins.top };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-    // 右上
-    rcDstTmp = { rcDst.right - rcMargins.right, rcDst.top, rcDst.right, rcDst.top + rcMargins.top };
-    rcSrcTmp = { rcSrc.right - rcMargins.right, rcSrc.top, rcSrc.right, rcSrc.top + rcMargins.top };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-    // 左
-    rcDstTmp = { rcDst.left, rcDst.top + rcMargins.top, rcDst.left + rcMargins.left, rcDst.bottom - rcMargins.bottom };
-    rcSrcTmp = { rcSrc.left, rcSrc.top + rcMargins.top, rcSrc.left + rcMargins.left, rcSrc.bottom - rcMargins.bottom };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-    // 右
-    rcDstTmp = { rcDst.right - rcMargins.right, rcDst.top + rcMargins.top, rcDst.right, rcDst.bottom - rcMargins.bottom };
-    rcSrcTmp = { rcSrc.right - rcMargins.right, rcSrc.top + rcMargins.top, rcSrc.right, rcSrc.bottom - rcMargins.bottom };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-    // 左下
-    rcDstTmp = { rcDst.left, rcDst.bottom - rcMargins.bottom, rcDst.left + rcMargins.left, rcDst.bottom };
-    rcSrcTmp = { rcSrc.left, rcSrc.bottom - rcMargins.bottom, rcSrc.left + rcMargins.left, rcSrc.bottom };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-    // 下
-    rcDstTmp = { rcDst.left + rcMargins.left, rcDst.bottom - rcMargins.bottom, rcDst.right - rcMargins.right, rcDst.bottom };
-    rcSrcTmp = { rcSrc.left + rcMargins.left, rcSrc.bottom - rcMargins.bottom, rcSrc.right - rcMargins.right, rcSrc.bottom };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-    // 右下
-    rcDstTmp = { rcDst.right - rcMargins.right, rcDst.bottom - rcMargins.bottom, rcDst.right, rcDst.bottom };
-    rcSrcTmp = { rcSrc.right - rcMargins.right, rcSrc.bottom - rcMargins.bottom, rcSrc.right, rcSrc.bottom };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-    // 中
-    rcDstTmp = { rcDst.left + rcMargins.left, rcDst.top + rcMargins.top, rcDst.right - rcMargins.right, rcDst.bottom - rcMargins.bottom };
-    rcSrcTmp = { rcSrc.left + rcMargins.left, rcSrc.top + rcMargins.top, rcSrc.right - rcMargins.right, rcSrc.bottom - rcMargins.bottom };
-    pRT->DrawBitmap(pBmp, rcDstTmp, fAlpha, eInterpolationMode, rcSrcTmp);
-}
-
 inline void DrawImageFromGrid(ID2D1DeviceContext* pDC, ID2D1Bitmap* pBmp,
     const D2D1_RECT_F& rcDst, const D2D1_RECT_F& rcSrc, const D2D1_RECT_F& rcMargins,
     D2D1_INTERPOLATION_MODE eInterpolationMode = D2D1_INTERPOLATION_MODE_LINEAR,
