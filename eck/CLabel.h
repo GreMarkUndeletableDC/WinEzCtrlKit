@@ -61,7 +61,6 @@ private:
     Prefix m_ePrefixMode{};			// 前缀模式
     MouseOption m_eMouseOption{};		// 鼠标穿透
     BITBOOL m_bAutoWrap : 1{};		// 自动换行
-    BITBOOL m_bFillWndImg : 1{};	// 底图尽量充满控件
     BITBOOL m_bTransparent : 1{};	// 透明标签
     BITBOOL m_bImgAlpha : 1{};		// 图片需要Alpha混合
     BITBOOL m_bBkImgAlpha : 1{};	// 底图需要Alpha混合
@@ -132,12 +131,8 @@ private:
         else if (m_hbmBkImg)
         {
             SelectObject(hCDC, m_hbmBkImg);
-            if (m_bBkImgAlpha)
-                DrawBackgroundImage32(hDC, hCDC, rc, m_cxBkImg, m_cyBkImg,
-                    m_eBkImgMode, m_bFillWndImg);
-            else
-                DrawBackgroundImage(hDC, hCDC, rc, m_cxBkImg, m_cyBkImg,
-                    m_eBkImgMode, m_bFillWndImg);
+            const RECT rcSrc{ 0, 0 , m_cxBkImg, m_cyBkImg };
+            DrawBackgroundImage(hDC, hCDC, m_eBkImgMode, rc, &rcSrc, m_bBkImgAlpha);
         }
         // 画图片
         if (m_hbmImg)
@@ -416,7 +411,7 @@ public:
             m_eEllipsisMode = Ellipsis::None;
             m_ePrefixMode = Prefix::Normal;
             m_eMouseOption = MouseOption::None;
-            m_bAutoWrap = m_bFillWndImg = m_bTransparent =
+            m_bAutoWrap = m_bTransparent =
                 m_bImgAlpha = m_bBkImgAlpha = FALSE;
             m_bPartMetricsDirty = TRUE;
             m_crText = m_crTextBk = m_crBk = CLR_DEFAULT;
@@ -563,9 +558,6 @@ public:
         ModifyStyle(bTransparent ? WS_EX_TRANSPARENT : 0, WS_EX_TRANSPARENT, GWL_EXSTYLE);
     }
     EckInlineNdCe BOOL GetTransparent() const noexcept { return m_bTransparent; }
-
-    EckInlineCe void SetBackgroundFillWindow(BOOL bFullWndPic) noexcept { m_bFillWndImg = bFullWndPic; }
-    EckInlineNdCe BOOL GetBackgroundFillWindow() const noexcept { return m_bFillWndImg; }
 
     EckInlineCe void SetMouseOption(MouseOption eOption) noexcept { m_eMouseOption = eOption; }
     EckInlineNdCe MouseOption GetMouseOption() const noexcept { return m_eMouseOption; }

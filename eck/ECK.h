@@ -429,6 +429,13 @@ struct RCWH
     int cx;
     int cy;
 };
+struct RCWHF
+{
+    float x;
+    float y;
+    float cx;
+    float cy;
+};
 
 // NMCD扩展
 struct NMCUSTOMDRAWEXT : NMCUSTOMDRAW
@@ -802,6 +809,18 @@ enum : BYTE
     // EckWndProc不应调用CWindow::BubbleMessage，由应用程序自行处理
     // 此时上述所有标志失效
     BBWM_DEF_NO_BUBBLE = 1u << 3,
+};
+
+enum class ImageMode : BYTE
+{
+    TopLeft,
+    TopLeftUniform,
+    TopLeftUniformFill,
+    Center,
+    CenterUniform,
+    CenterUniformFill,
+    Tile,
+    Stretch,
 };
 #pragma endregion Enum
 

@@ -173,6 +173,7 @@ EckInlineNdCe BOOL PointInRect(const RECT& rc, POINT pt) noexcept
     return ((pt.x >= rc.left) && (pt.x < rc.right) &&
         (pt.y >= rc.top) && (pt.y < rc.bottom));
 }
+#if !ECK_OPT_NO_D2D
 EckInlineNdCe BOOL PointInRect(const D2D1_RECT_F& rc, D2D1_POINT_2F pt) noexcept
 {
     return ((pt.x >= rc.left) && (pt.x < rc.right) &&
@@ -197,6 +198,8 @@ EckInlineNdCe RECT MakeRect(const D2D1_RECT_F& rc) noexcept
 {
     return { (LONG)rc.left, (LONG)rc.top, (LONG)rc.right, (LONG)rc.bottom };
 }
+#endif // !ECK_OPT_NO_D2D
+
 EckInlineNdCe RECT MakeRect(int x, int y, int cx, int cy) noexcept
 {
     return { x, y, x + cx, y + cy };
@@ -216,13 +219,27 @@ EckInlineNd GpRectF MakeGpRectF(const RECT& rc) noexcept
 
 EckInlineNdCe RCWH MakeRcwh(const RECT& rc) noexcept
 {
-    return RCWH{ rc.left,rc.top,rc.right - rc.left,rc.bottom - rc.top };
+    return RCWH{ rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top };
+}
+
+#if !ECK_OPT_NO_GDIPLUS
+EckInlineNdCe RCWHF MakeRcwhF(const GpRectF& rc) noexcept
+{
+    return RCWHF{ rc.X, rc.Y, rc.Width, rc.Height };
+}
+#endif // !ECK_OPT_NO_GDIPLUS
+
+#if !ECK_OPT_NO_D2D
+EckInlineNdCe RCWHF MakeRcwhF(const D2D1_RECT_F& rc) noexcept
+{
+    return RCWHF{ rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top };
 }
 
 EckInlineNdCe D2D1_POINT_2F MakeD2DPointF(POINT pt) noexcept
 {
-    return { (float)pt.x,(float)pt.y };
+    return { (float)pt.x, (float)pt.y };
 }
+#endif // !ECK_OPT_NO_D2D
 
 template<CcpRect T>
 EckInlineNdCe BOOL IsRectsIntersect(const T& rc1, const T& rc2) noexcept

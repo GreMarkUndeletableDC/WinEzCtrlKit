@@ -30,12 +30,11 @@ private:
 
     COLORREF m_crBk{ CLR_DEFAULT };
 
-    ImageMode m_iViewMode{ ImageMode::TopLeft };
+    ImageMode m_eViewMode{ ImageMode::TopLeft };
 
     BITBOOL m_bScalable : 1 = FALSE;
     BITBOOL m_b32BppHBitmap : 1 = FALSE;
     BITBOOL m_bOwnerDraw : 1 = FALSE;
-    BITBOOL m_bFillWndImage : 1 = TRUE;
     BITBOOL m_bAutoScaleToFit : 1 = TRUE;
     BITBOOL m_bLBtnDown : 1 = TRUE;
     BITBOOL m_bCurrFit : 1 = FALSE;
@@ -70,24 +69,22 @@ public:
                 }
                 else if (m_pGpImage)
                 {
-                    const RECT rcClient{ 0,0,m_cxClient,m_cyClient };
                     GpGraphics* pGraphics;
                     GdipCreateFromHDC(ps.hdc, &pGraphics);
-                    DrawBackgroundImage(pGraphics, m_pGpImage, rcClient, m_cxImage, m_cyImage,
-                        m_iViewMode, m_bFillWndImage);
+                    const GpRectF rcClient{ 0.f, 0.f, (float)m_cxClient, (float)m_cyClient };
+                    const GpRectF rcSrc{ 0.f, 0.f, (float)m_cxImage, (float)m_cyImage };
+                    DrawBackgroundImage(pGraphics, m_pGpImage, m_eViewMode,
+                        rcClient, &rcSrc);
                     GdipDeleteGraphics(pGraphics);
                 }
                 else if (m_hBitmap)
                 {
-                    const RECT rcClient{ 0,0,m_cxClient,m_cyClient };
                     const auto hCDC = CreateCompatibleDC(ps.hdc);
                     SelectObject(hCDC, m_hBitmap);
-                    if (m_b32BppHBitmap)
-                        DrawBackgroundImage32(ps.hdc, hCDC, rcClient, m_cxImage, m_cyImage,
-                            m_iViewMode, m_bFillWndImage);
-                    else
-                        DrawBackgroundImage32(ps.hdc, hCDC, rcClient, m_cxImage, m_cyImage,
-                            m_iViewMode, m_bFillWndImage);
+                    const RECT rcClient{ 0, 0, m_cxClient, m_cyClient };
+                    const RECT rcSrc{ 0, 0, m_cxImage, m_cyImage };
+                    DrawBackgroundImage(ps.hdc, hCDC, m_eViewMode,
+                        rcClient, &rcSrc, m_b32BppHBitmap);
                     DeleteDC(hCDC);
                 }
             }
@@ -127,11 +124,8 @@ public:
         return Gdiplus::Ok;
     }
 
-    EckInlineCe void SetViewMode(ImageMode i) noexcept { m_iViewMode = i; }
-    EckInlineNdCe ImageMode GetViewMode() const noexcept { return m_iViewMode; }
-
-    EckInlineCe void SetFillImage(BOOL b) noexcept { m_bFillWndImage = b; }
-    EckInlineNdCe BOOL GetFillImage() const noexcept { return m_bFillWndImage; }
+    EckInlineCe void SetViewMode(ImageMode i) noexcept { m_eViewMode = i; }
+    EckInlineNdCe ImageMode GetViewMode() const noexcept { return m_eViewMode; }
 
     EckInlineCe void SetBackgroundColor(COLORREF cr) noexcept { m_crBk = cr; }
     EckInlineNdCe COLORREF GetBkgColor() const noexcept { return m_crBk; }

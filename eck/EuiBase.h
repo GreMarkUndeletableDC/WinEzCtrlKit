@@ -385,9 +385,9 @@ inline TmResult TmGenericDrawBackground(
                 pImg && pImg->GdiGet())
             {
                 const auto hOld = SelectObject(Stock.hCDC, pImg->GdiGet());
-                DrawBackgroundImage32(hDC, Stock.hCDC,
-                    rc, pImg->GdiGetWidth(), pImg->GdiGetHeight(),
-                    pStyle->eImgModeBack, TRUE);
+                const RECT rcSrc{ 0, 0, pImg->GdiGetWidth(), pImg->GdiGetHeight() };
+                DrawBackgroundImage(hDC, Stock.hCDC, pStyle->eImgModeBack,
+                    rc, &rcSrc, TRUE);
                 SelectObject(Stock.hCDC, hOld);
             }
             SetDCBrushColor(hDC, ArgbToColorref(pStyle->argbBorder));
@@ -435,9 +435,10 @@ inline TmResult TmGenericDrawBackground(
                 UINT cx, cy;
                 GdipGetImageWidth(pImg->GpGet(), &cx);
                 GdipGetImageHeight(pImg->GpGet(), &cy);
-                DrawBackgroundImage(pGraphics, pImg->GpGet(),
-                    rc, (int)cx, (int)cy,
-                    pStyle->eImgModeBack, TRUE);
+                const GpRectF rcF{ MakeGpRectF(rc) };
+                const GpRectF rcSrc{ 0.f, 0.f, (float)cx, (float)cy };
+                DrawBackgroundImage(pGraphics, pImg->GpGet(), pStyle->eImgModeBack,
+                    rcF, &rcSrc);
             }
             if (pStyle->dLeft)
                 GdipFillRectangle(pGraphics, Stock.pBrush.Get(),

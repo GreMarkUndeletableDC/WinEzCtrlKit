@@ -105,11 +105,11 @@ public:
             FillRect(ps.hdc, &ps.rcPaint, GetStockBrush(DC_BRUSH));
             if (m_hbmBk)
             {
-                HDC hCDC = CreateCompatibleDC(ps.hdc);
+                const auto hCDC = CreateCompatibleDC(ps.hdc);
                 SelectObject(hCDC, m_hbmBk);
-                const RECT rc{ 0,0,m_cxClient,m_cyClient };
-                DrawBackgroundImage32(ps.hdc, hCDC, rc, m_cxImage, m_cyImage,
-                    m_eBkImageMode, m_bFillWndImage);
+                const RECT rcDst{ 0, 0, m_cxClient, m_cyClient };
+                const RECT rcSrc{ 0, 0, m_cxImage, m_cyImage };
+                DrawBackgroundImage(ps.hdc, hCDC, m_eBkImageMode, rcDst, &rcSrc);
                 DeleteDC(hCDC);
             }
             EndPaint(Handle, wParam, ps);
