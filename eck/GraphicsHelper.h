@@ -334,8 +334,7 @@ inline GpStatus DrawBackgroundImage(
     const GpRectF& rc,
     _In_opt_ const GpRectF* prcSrc = nullptr) noexcept
 {
-    // 巧妙利用 MakeRcwh 推导浮点版本 RCWH 结构体类型（如 RCWHF）
-    auto rcSrc{ MakeRcwhF(rc) };
+    RCWHF rcSrc;
     if (prcSrc)
     {
         rcSrc.x = prcSrc->X;
@@ -426,7 +425,7 @@ inline void DrawBackgroundImage(
     float fAlpha = 1.f,
     D2D1_INTERPOLATION_MODE eInterMode = D2D1_INTERPOLATION_MODE_LINEAR) noexcept
 {
-    auto rcSrc{ MakeRcwhF(rc) };
+    RCWHF rcSrc;
     D2D1_RECT_F rcSrcD2D, rcDst;
     if (prcSrc)
     {
@@ -511,7 +510,6 @@ inline void DrawBackgroundImage(
         pDC->DrawBitmap(pBmp, rc, fAlpha, eInterMode, rcSrcD2D);
         return;
     }
-#undef ECK_BLIT
 }
 #endif // !ECK_OPT_NO_D2D
 
