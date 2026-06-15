@@ -427,7 +427,7 @@ inline void DrawBackgroundImage(
     D2D1_INTERPOLATION_MODE eInterMode = D2D1_INTERPOLATION_MODE_LINEAR) noexcept
 {
     auto rcSrc{ MakeRcwhF(rc) };
-    D2D1_RECT_F rcSrcD2D;
+    D2D1_RECT_F rcSrcD2D, rcDst;
     if (prcSrc)
     {
         rcSrc.x = prcSrc->left;
@@ -443,16 +443,12 @@ inline void DrawBackgroundImage(
         rcSrcD2D = { 0.f, 0.f, size.width, size.height };
     }
 
-#undef ECK_BLIT
-#define ECK_BLIT(x_, y_, cx_, cy_) \
-    pDC->DrawBitmap(pBmp, \
-        { float(x_), float(y_), float((x_) + (cx_)), float((y_) + (cy_)) }, \
-        fAlpha, eInterMode, &rcSrcD2D)
-
     switch (eMode)
     {
     case ImageMode::TopLeft:
-        ECK_BLIT(rc.left, rc.top, rcSrc.cx, rcSrc.cy);
+        pDC->DrawBitmap(pBmp,
+            { rc.left, rc.top, rc.left + rcSrc.cx, rc.top + rcSrc.cy },
+            fAlpha, eInterMode, rcSrcD2D);
         return;
     case ImageMode::TopLeftUniform:
     case ImageMode::TopLeftUniformFill:
@@ -463,15 +459,21 @@ inline void DrawBackgroundImage(
             AdjustRectToFitAnother(rcNew, rcRef);
         else
             AdjustRectToFillAnother(rcNew, rcRef);
-        ECK_BLIT(rc.left, rc.top, rcNew.cx, rcNew.cy);
+        pDC->DrawBitmap(pBmp,
+            { rc.left, rc.top, rc.left + rcNew.cx, rc.top + rcNew.cy },
+            fAlpha, eInterMode, rcSrcD2D);
         return;
     }
     ECK_UNREACHABLE;
     case ImageMode::Center:
-        ECK_BLIT(
-            rc.left + (rc.right - rc.left - rcSrc.cx) / 2.f,
-            rc.top + (rc.bottom - rc.top - rcSrc.cy) / 2.f, rcSrc.cx, rcSrc.cy);
-        return;
+    {
+        rcDst.left = rc.left + (rc.right - rc.left - rcSrc.cx) / 2.f;
+        rcDst.top = rc.top + (rc.bottom - rc.top - rcSrc.cy) / 2.f;
+        rcDst.right = rcDst.left + rcSrc.cx;
+        rcDst.bottom = rcDst.top + rcSrc.cy;
+        pDC->DrawBitmap(pBmp, rcDst, fAlpha, eInterMode, rcSrcD2D);
+    }
+    return;
     case ImageMode::CenterUniform:
     case ImageMode::CenterUniformFill:
     {
@@ -481,7 +483,9 @@ inline void DrawBackgroundImage(
             AdjustRectToFitAnother(rcNew, rcRef);
         else
             AdjustRectToFillAnother(rcNew, rcRef);
-        ECK_BLIT(rcNew.x, rcNew.y, rcNew.cx, rcNew.cy);
+        pDC->DrawBitmap(pBmp,
+            { rc.left, rc.top, rc.left + rcNew.cx, rc.top + rcNew.cy },
+            fAlpha, eInterMode, rcSrcD2D);
         return;
     }
     ECK_UNREACHABLE;
@@ -492,15 +496,19 @@ inline void DrawBackgroundImage(
         EckCounter(cH, i)
         {
             EckCounter(cV, j)
-                ECK_BLIT(
-                    rc.left + i * rcSrc.cx,
-                    rc.top + j * rcSrc.cy, rcSrc.cx, rcSrc.cy);
+            {
+                rcDst.left = rc.left + i * rcSrc.cx;
+                rcDst.top = rc.top + j * rcSrc.cy;
+                rcDst.right = rcDst.left + rcSrc.cx;
+                rcDst.bottom = rcDst.top + rcSrc.cy;
+                pDC->DrawBitmap(pBmp, rcDst, fAlpha, eInterMode, rcSrcD2D);
+            }
         }
         return;
     }
     ECK_UNREACHABLE;
     case ImageMode::Stretch: // 缩放
-        ECK_BLIT(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
+        pDC->DrawBitmap(pBmp, rc, fAlpha, eInterMode, rcSrcD2D);
         return;
     }
 #undef ECK_BLIT
