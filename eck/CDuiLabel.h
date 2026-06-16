@@ -66,6 +66,8 @@ public:
         return bDark ? p1 : p2;
     }
 
+    HRESULT EhUiaMakeInterface() noexcept override;
+
     LRESULT OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {
         switch (uMsg)
@@ -225,6 +227,27 @@ public:
 inline RcPtr<CThemeBase> CLabel::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmLabel>(bDark);
+}
+
+class CUiaLabel : public CUiaBase
+{
+    STDMETHODIMP GetPropertyValue(PROPERTYID idProp, VARIANT* pRetVal) override
+    {
+        if (idProp == UIA_ControlTypePropertyId)
+        {
+            pRetVal->vt = VT_I4;
+            pRetVal->intVal = UIA_TextControlTypeId;
+            return S_OK;
+        }
+        return CUiaBase::GetPropertyValue(idProp, pRetVal);
+    }
+};
+inline HRESULT CLabel::EhUiaMakeInterface() noexcept
+{
+    const auto p = new CUiaLabel{};
+    UiaSetInterface(p);
+    p->Release();
+    return S_OK;
 }
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END
