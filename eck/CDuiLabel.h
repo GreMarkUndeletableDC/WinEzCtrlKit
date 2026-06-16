@@ -9,8 +9,8 @@ class CLabel : public CElement
 private:
     ComPtr<IDWriteTextLayout> m_pLayout{};
     ComPtr<ID2D1LinearGradientBrush> m_pBrushFade{};
-    CBitmap m_BmpIcon{};
-    CBitmap m_BmpBk{};
+    CBitmap m_BitmapIcon{};
+    CBitmap m_BitmapBk{};
 
     float m_cxFade{ 40.f };
 
@@ -26,10 +26,15 @@ private:
 
     void UpdateTextLayout() noexcept
     {
-        float cx;
-        if (m_BmpIcon.Get())
+        if (GetText().IsEmpty())
         {
-            const auto rc = m_BmpIcon.GetActualSourceRect();
+            m_pLayout.Clear();
+            return;
+        }
+        float cx;
+        if (m_BitmapIcon.Get())
+        {
+            const auto rc = m_BitmapIcon.GetActualSourceRect();
             cx = GetWidth() - (rc.right - rc.left) -
                 GetTheme()->GetMetric(IdMePaddingInner);
         }
@@ -70,24 +75,24 @@ public:
             PAINTINFO ps;
             BeginPaint(ps, wParam, lParam);
 
-            if (m_BmpBk.Get())
+            if (m_BitmapBk.Get())
             {
                 DrawBackgroundImage(
-                    GetDC(), m_BmpBk.Get(), m_eBkImgMode,
+                    GetDC(), m_BitmapBk.Get(), m_eBkImgMode,
                     GetRectInClientD2D(),
-                    m_BmpBk.GetSourceRect(),
+                    m_BitmapBk.GetSourceRect(),
                     m_byBkAlpha / 255.f,
                     (D2D1_INTERPOLATION_MODE)m_eInterMode);
             }
 
             if (m_bOnlyBitmap || !m_pLayout)
             {
-                if (m_BmpIcon.Get())
+                if (m_BitmapIcon.Get())
                 {
-                    auto rc{ m_BmpIcon.GetActualSourceRect() };
+                    auto rc{ m_BitmapIcon.GetActualSourceRect() };
                     CenterRect(rc, GetRectInClientD2D());
-                    GetDC()->DrawBitmap(m_BmpIcon.Get(), rc, m_byIconAlpha / 255.f,
-                        (D2D1_INTERPOLATION_MODE)m_eInterMode, m_BmpIcon.GetSourceRect());
+                    GetDC()->DrawBitmap(m_BitmapIcon.Get(), rc, m_byIconAlpha / 255.f,
+                        (D2D1_INTERPOLATION_MODE)m_eInterMode, m_BitmapIcon.GetSourceRect());
                 }
             }
             else
@@ -96,19 +101,19 @@ public:
                 DWRITE_TEXT_METRICS tm;
                 m_pLayout->GetMetrics(&tm);
 
-                if (m_BmpIcon.Get())
+                if (m_BitmapIcon.Get())
                 {
                     const auto dInner = GetTheme()->GetMetric(IdMePaddingInner);
 
-                    auto rc{ m_BmpIcon.GetActualSourceRect() };
+                    auto rc{ m_BitmapIcon.GetActualSourceRect() };
                     const auto cxIcon = rc.right - rc.left;
                     const auto cyIcon = rc.bottom - rc.top;
                     rc.left = (GetWidth() - cxIcon - dInner - tm.width) / 2.f;
                     rc.top = (GetHeight() - cyIcon) / 2.f;
                     rc.right = rc.left + cxIcon;
                     rc.bottom = rc.top + cyIcon;
-                    GetDC()->DrawBitmap(m_BmpIcon.Get(), rc, m_byIconAlpha / 255.f,
-                        (D2D1_INTERPOLATION_MODE)m_eInterMode, m_BmpIcon.GetSourceRect());
+                    GetDC()->DrawBitmap(m_BitmapIcon.Get(), rc, m_byIconAlpha / 255.f,
+                        (D2D1_INTERPOLATION_MODE)m_eInterMode, m_BitmapIcon.GetSourceRect());
 
                     pt.x += (cxIcon + dInner);
                 }
@@ -140,8 +145,6 @@ public:
             return 0;
         case WM_SIZE:
             UpdateTextLayout();
-            if (m_bFade)
-                UpdateFadeBrush();
             return 0;
         case WM_SETFONT:
             UpdateTextLayout();
@@ -153,18 +156,22 @@ public:
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
             UpdateTextLayout();
             break;
+        case WM_DESTROY:
+            m_pLayout.Clear();
+            m_pBrushFade.Clear();
+            break;
         }
         return __super::OnEvent(uMsg, wParam, lParam);
     }
 
     void SetBitmap(const CBitmap& Bmp) noexcept
     {
-        m_BmpIcon = Bmp;
+        m_BitmapIcon = Bmp;
         UpdateTextLayout();
     }
-    EckInlineNdCe auto& GetBitmap() const noexcept { return m_BmpIcon; }
-    void SetBackgroundBitmap(const CBitmap& Bmp) noexcept { m_BmpBk = Bmp; }
-    EckInlineNdCe auto& GetBackgroundBitmap() const noexcept { return m_BmpBk; }
+    EckInlineNdCe auto& GetBitmap() const noexcept { return m_BitmapIcon; }
+    void SetBackgroundBitmap(const CBitmap& Bmp) noexcept { m_BitmapBk = Bmp; }
+    EckInlineNdCe auto& GetBackgroundBitmap() const noexcept { return m_BitmapBk; }
 
     void SetFade(BOOL b) noexcept
     {
