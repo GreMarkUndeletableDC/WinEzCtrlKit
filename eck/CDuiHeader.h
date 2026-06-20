@@ -27,10 +27,10 @@ public:
         int idx;
     };
 
-    struct EVT_ORDER : ELENMHDR
+    struct EVT_ORDER : EVT_ITEM
     {
-        int idxFrom;
-        int idxTo;
+        int ioFrom;
+        int ioTo;
     };
 
     const static inline UINT IdMeInsertMarkWidth = TmNextResourceId();
@@ -113,16 +113,17 @@ private:
             UpdateTextLayout(i);
     }
 
-    void PaintItem(int idx, ITEM& e, const D2D1_RECT_F& rcClip) noexcept
+    void PaintItem(int idx, ITEM& e, const D2D1_RECT_F& rcClipInClient) noexcept
     {
+        D2D1_RECT_F rcItem{ e.x, 0.f, e.x + e.cx, GetHeight() };
+        ElementToClient(rcItem);
+        if (!IsRectsIntersect(rcItem, rcClipInClient))
+            return;
+
         const float dOuter = GetTheme()->GetMetric(IdMePaddingOuter);
         const auto iSs = TmSimpleStyleFromItemState(idx);
 
-        D2D1_RECT_F rcItem{ e.x, 0.f, e.x + e.cx, GetHeight() };
-        ElementToClient(rcItem);
-        if (!IsRectsIntersect(rcItem, rcClip))
-            return;
-        GetTheme()->Draw(this, &m_Style[iSs], IdPtNormal, rcItem, &rcClip);
+        GetTheme()->Draw(this, &m_Style[iSs], IdPtNormal, rcItem, &rcClipInClient);
 
         if (e.pLayout)
         {
@@ -225,10 +226,11 @@ private:
         m_bDraggingDivider = FALSE;
         m_bAnimating = FALSE;
 
+        GetWindow().RdLockUpdate();
         if (ioTo != ioDragOld)
         {
             DragMoveItem(ioDragOld, ioTo);
-            EvtOrderChanged(idxDragOld, ioTo);
+            EvtOrderChanged(idxDragOld, ioDragOld, ioTo);
             Invalidate();
         }
         else if (bWasDragging || bWasDraggingDivider)
@@ -241,6 +243,7 @@ private:
 
         if (bSendEndDrag)
             EvtEndDrag(idxDragOld);
+        GetWindow().RdUnlockUpdate();
     }
 
     int DragCalculateInsertOrder(float xRef) const noexcept
@@ -329,7 +332,7 @@ public:
                 if (e.x > ps.rcfClipInElem.right ||
                     e.x + e.cx < ps.rcfClipInElem.left)
                     continue;
-                PaintItem(i, e, ps.rcfClipInElem);
+                PaintItem(i, e, ps.rcfClip);
             }
 
             if (m_bDragging && m_bDraggable && m_ioInsertMark >= 0)
@@ -345,7 +348,7 @@ public:
             }
 
             if (m_bDragging && m_idxDrag >= 0 && m_idxDrag < GetItemCount())
-                PaintItem(m_idxDrag, m_vItem[m_idxDrag], ps.rcfClipInElem);
+                PaintItem(m_idxDrag, m_vItem[m_idxDrag], ps.rcfClip);
 
             DbgDrawFrame();
             EndPaint(ps);
@@ -474,6 +477,10 @@ public:
             DragEnd(FALSE);
             break;
 
+        case WM_SETFONT:
+            InvalidateCache();
+            break;
+
         case WM_SIZE:
             UpdateAllTextLayout();
             break;
@@ -544,11 +551,12 @@ public:
         nm.idx = idx;
         SendNotify(&nm);
     }
-    void EvtOrderChanged(int idxFrom, int idxTo) noexcept
+    void EvtOrderChanged(int idx, int ioFrom, int ioTo) noexcept
     {
         EVT_ORDER nm{ ENC_HD_ORDERCHANGED };
-        nm.idxFrom = idxFrom;
-        nm.idxTo = idxTo;
+        nm.idx = idx;
+        nm.ioFrom = ioFrom;
+        nm.ioTo = ioTo;
         SendNotify(&nm);
     }
     void EvtDeleteItem(int idx) noexcept
