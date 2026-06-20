@@ -91,6 +91,12 @@ protected:
 					idx.Item < 0 ? GetGroupTextFormat().Get() : GetTextFormat().Get(),
 					rcText.right - rcText.left,
 					rcText.bottom - rcText.top, &pTl);
+				if (pTl)
+				{
+					Data = pTl;
+                    m_Controller.GetAdapter()->LcaSet(idx, idxCol,
+						UiBasic::Lc::Property::UiTextLayout, Data);
+				}
 			}
 		}
 
@@ -106,6 +112,8 @@ protected:
 		Kw::Rect rcItem;
 		m_Controller.GetItemRect(idx, rcItem);
 		ElementToClient(rcItem);
+		if (!IsRectsIntersect(Kw::MakeD2DRectF(rcItem), rcClip))
+			return;
 
 		GetTheme()->Draw(
 			this,
@@ -149,6 +157,8 @@ protected:
 		m_Controller.GetGroupRect(idx.Group,
 			TController::Part::GroupHeader, rcItem);
 		ElementToClient(rcItem);
+		if (!IsRectsIntersect(Kw::MakeD2DRectF(rcItem), rcClip))
+			return;
 
 		GetTheme()->Draw(
 			this,
@@ -264,7 +274,10 @@ protected:
 		if (!m_pHeader)
 			m_pHeader = std::make_unique<CHeader>();
 		if (!m_pHeader->IsValid())
+		{
+            m_pHeader->TmSetDarkMode(TmIsDarkMode());
 			m_pHeader->Create({}, DES_VISIBLE, 0, 0, 0, 0, 0, this);
+		}
 	}
 public:
 	CListView() noexcept
@@ -333,6 +346,7 @@ public:
 		case WM_CREATE:
 			SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
 			ScbCreateElement(TRUE, FALSE);
+			CreateHeaderElement();
 			break;
 		case WM_DESTROY:
 			SccDisconnectEvent();
@@ -388,6 +402,8 @@ public:
 
 	EckInline void SetGroupTextFormat(IDWriteTextFormat* pTf) noexcept { m_pTfGroup = pTf; }
 	EckInlineNdCe const ComPtr<IDWriteTextFormat>& GetGroupTextFormat() const noexcept { return m_pTfGroup; }
+
+    EckInlineNdCe auto& GetHeader() const noexcept { return m_pHeader; }
 };
 
 

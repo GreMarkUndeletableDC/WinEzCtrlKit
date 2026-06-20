@@ -300,7 +300,7 @@ private:
 	TCoord m_cyGroupHeader{ 40 };   // 组头高度
 	TCoord m_cxGroupImage{};        // 组图片宽度
 	TCoord m_cyGroupImage{};        // 组图片高度
-	TCoord m_cyGroupItemTopPadding{};      // 组头与项目间的空白
+	TCoord m_cyGroupItemTopPadding{ 4 };      // 组头与项目间的空白
 	TCoord m_cyGroupItemBottomPadding{};   // 项目区底部空白
 
 	// -- 图标
@@ -684,7 +684,10 @@ public:
 	void InvalidateItem(const Index& idx) noexcept
 	{
 		TRect rc;
-		GetItemRect(idx, rc);
+		if (idx.Item < 0)
+			GetGroupRect(idx.Group, Part::GroupHeader, rc);
+		else
+			GetItemRect(idx, rc);
 		m_pHost->LchInvalidateRect(&rc);
 	}
 

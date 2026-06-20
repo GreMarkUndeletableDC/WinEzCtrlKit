@@ -195,31 +195,23 @@ private:
         ReCalculateItemPosition(std::min(io, ioNew));
     }
 
-    int IndexToOrder(int idx) const noexcept
-    {
-        EckCounter(GetItemCount(), io)
-            if (m_vItem[io].idxActual == idx)
-                return io;
-        return -1;
-    }
-
     void DragEnd(BOOL bCommitOrder) noexcept
     {
         if (m_idxDrag < 0)
             return;
 
         const auto idxDragOld = m_idxDrag;
+        const auto ioDragOld = m_ioDrag;
         const auto idxPressedOld = m_idxPressed;
         const auto bWasDragging = m_bDragging;
         const auto bWasDraggingDivider = m_bDraggingDivider;
         const auto bSendEndDrag = bWasDragging || bWasDraggingDivider;
 
-        const auto ioDrag = IndexToOrder(idxDragOld);
-        int ioTo = ioDrag;
+        int ioTo = ioDragOld;
         if (bWasDragging && bCommitOrder)
         {
             ioTo = m_ioInsertMark;
-            if (ioTo > ioDrag)
+            if (ioTo > ioDragOld)
                 --ioTo;
         }
 
@@ -233,10 +225,11 @@ private:
         m_bDraggingDivider = FALSE;
         m_bAnimating = FALSE;
 
-        if (ioTo != ioDrag)
+        if (ioTo != ioDragOld)
         {
-            DragMoveItem(ioDrag, ioTo);
+            DragMoveItem(ioDragOld, ioTo);
             EvtOrderChanged(idxDragOld, ioTo);
+            Invalidate();
         }
         else if (bWasDragging || bWasDraggingDivider)
         {
@@ -408,7 +401,7 @@ public:
                     m_xDragOffset = ht.pt.x - m_vItem[idx].x;
                     if (m_bDraggable)
                     {
-                        m_ioInsertMark = IndexToOrder(idx);
+                        m_ioInsertMark = ht.io;
                         DragReCalculateTargetPosition();
                     }
                     EvtBeginDrag(idx);
@@ -579,8 +572,6 @@ public:
             ++m_idxHot;
         if (m_idxPressed >= idx)
             ++m_idxPressed;
-        if (m_idxDrag >= idx)
-            ++m_idxDrag;
         UpdateTextLayout(idx);
         ReCalculateItemPosition(idx - 1);
         return idx;
@@ -711,6 +702,16 @@ public:
     }
 
     EckInlineNdCe int OrderToIndex(int io) const noexcept { return m_vItem[io].idxActual; }
+
+    EckInlineNdCe int IndexToOrder(int idx) const noexcept
+    {
+        EckCounter(GetItemCount(), io)
+        {
+            if (AtOrder(io).idxActual == idx)
+                return io;
+        }
+        return -1;
+    }
 };
 
 
