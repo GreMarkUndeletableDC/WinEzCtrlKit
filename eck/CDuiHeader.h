@@ -46,6 +46,7 @@ private:
         float xStart{}; // 拖动重排动画起始位置
         float xTarget{};// 拖动重排动画目标位置
         float cx{};
+        float fSavedXOrCx{};
         int idxActual{ -1 };
     };
 
@@ -230,14 +231,14 @@ private:
         if (ioTo != ioDragOld)
         {
             Kw::Rect rc, rc1;
-            GetItemRect(idxDragOld, rc);
+            InternalGetItemRect(idxDragOld, rc);
 
             DragMoveItem(ioDragOld, ioTo);
             EvtOrderChanged(idxDragOld, ioDragOld, ioTo);
 
-            GetItemRect(OrderToIndex(ioDragOld), rc1);
+            InternalGetItemRect(OrderToIndex(ioDragOld), rc1);
             UnionRect(rc, rc, rc1);
-            GetItemRect(OrderToIndex(ioTo), rc1);
+            InternalGetItemRect(OrderToIndex(ioTo), rc1);
             UnionRect(rc, rc, rc1);
 
             Invalidate(rc);
@@ -313,6 +314,21 @@ private:
             m_bAnimating = FALSE;
         }
         return bNeedAnimation;
+    }
+
+    void DragSavePositionOrWidth(BOOL bPosOrWidth) noexcept
+    {
+        for (auto& e : m_vItem)
+            e.fSavedXOrCx = bPosOrWidth ? e.x : e.cx;
+    }
+
+    void InternalGetItemRect(int idx, Kw::Rect& rcItem) const noexcept
+    {
+        const auto& e = m_vItem[idx];
+        rcItem.left = e.x;
+        rcItem.right = e.x + e.cx;
+        rcItem.top = 0;
+        rcItem.bottom = GetHeight();
     }
 public:
     static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
@@ -416,11 +432,12 @@ public:
                 }
                 else
                 {
-                    m_bDragging = TRUE;
-                    m_xDragOffset = ht.pt.x - m_vItem[idx].x;
                     if (m_bDraggable)
                     {
+                        m_bDragging = TRUE;
+                        m_xDragOffset = ht.pt.x - m_vItem[idx].x;
                         m_ioInsertMark = ht.io;
+                        DragSavePositionOrWidth(TRUE);
                         DragReCalculateTargetPosition();
                     }
                     EvtBeginDrag(idx);
@@ -469,13 +486,13 @@ public:
             m_ioDrag = ht.io;
             m_idxPressed = idx;
             m_bAnimating = FALSE;
-            EckDbgPrintFormat("idxDrag, ioDrag: %d, %d", m_idxDrag, m_ioDrag);
 
             if (ht.bHitDivider && m_bAllowReSize &&
                 uMsg == WM_LBUTTONDOWN)
             {
                 m_bDraggingDivider = TRUE;
                 m_xDragOffset = ht.pt.x - m_vItem[idx].x - m_vItem[idx].cx;
+                DragSavePositionOrWidth(FALSE);
             }
             InvalidateItem(idx);
         }
@@ -708,11 +725,24 @@ public:
 
     void GetItemRect(int idx, Kw::Rect& rcItem) const noexcept
     {
-        const auto& e = m_vItem[idx];
-        rcItem.left = e.x;
-        rcItem.right = e.x + e.cx;
-        rcItem.top = 0;
-        rcItem.bottom = GetHeight();
+        if (m_bDraggingDivider && m_idxDrag == idx)
+        {
+            const auto& e = m_vItem[idx];
+            rcItem.left = e.x;
+            rcItem.top = 0;
+            rcItem.right = rcItem.left + e.fSavedXOrCx;
+            rcItem.bottom = GetHeight();
+        }
+        else if (m_bDragging)
+        {
+            const auto& e = m_vItem[idx];
+            rcItem.left = e.fSavedXOrCx;
+            rcItem.top = 0;
+            rcItem.right = rcItem.left + e.cx;
+            rcItem.bottom = GetHeight();
+        }
+        else
+            InternalGetItemRect(idx, rcItem);
     }
 
     void InvalidateItem(int idx) noexcept
