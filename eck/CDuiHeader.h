@@ -138,7 +138,7 @@ private:
     EckInlineNdCe auto& AtOrder(int io) noexcept { return m_vItem[m_vItem[io].idxActual]; }
     EckInlineNdCe auto& AtOrder(int io) const noexcept { return m_vItem[m_vItem[io].idxActual]; }
 
-    // 为了方便起见，允许传入超出有效范围的索引，函数自动夹紧到[0, ItemCount)
+    // 为了方便起见，允许传入超出有效范围的序号，函数自动夹紧到[0, ItemCount)
     void ReCalculateItemPosition(int ioBegin = 0) noexcept
     {
         m_bAnimating = FALSE;
@@ -151,9 +151,9 @@ private:
             x = AtOrder(ioBegin - 1).x + AtOrder(ioBegin - 1).cx;
         else
             x = 0.f;
-        for (int i = ioBegin; i < GetItemCount(); ++i)
+        for (int io = ioBegin; io < GetItemCount(); ++io)
         {
-            auto& e = AtOrder(i);
+            auto& e = AtOrder(io);
             e.x = e.xStart = e.xTarget = x;
             x += e.cx;
         }
@@ -229,9 +229,18 @@ private:
         GetWindow().RdLockUpdate();
         if (ioTo != ioDragOld)
         {
+            Kw::Rect rc, rc1;
+            GetItemRect(idxDragOld, rc);
+
             DragMoveItem(ioDragOld, ioTo);
             EvtOrderChanged(idxDragOld, ioDragOld, ioTo);
-            Invalidate();
+
+            GetItemRect(OrderToIndex(ioDragOld), rc1);
+            UnionRect(rc, rc, rc1);
+            GetItemRect(OrderToIndex(ioTo), rc1);
+            UnionRect(rc, rc, rc1);
+
+            Invalidate(rc);
         }
         else if (bWasDragging || bWasDraggingDivider)
         {
@@ -375,11 +384,11 @@ public:
                 {
                     e.cx = cxNew;
                     UpdateTextLayout(m_idxDrag);
-                    ReCalculateItemPosition(m_idxDrag + 1);
+                    ReCalculateItemPosition(m_ioDrag + 1);
 
                     GetWindow().RdLockUpdate();
                     EvtWidthChanged(m_idxDrag);
-                    Invalidate();
+                    Invalidate(Kw::Rect{ e.x, 0, GetWidth(), GetHeight() });
                     GetWindow().RdUnlockUpdate();
                 }
             }
@@ -395,8 +404,15 @@ public:
                         DragBeginAnimation();
                     }
                     auto& e = m_vItem[m_idxDrag];
+                    const auto xOld = e.x;
                     e.xTarget = e.x = ht.pt.x - m_xDragOffset;
-                    Invalidate();
+                    Invalidate(
+                        Kw::Rect{
+                            std::min(e.x, xOld),
+                            0,
+                            std::max(e.x, xOld) + e.cx,
+                            GetHeight()
+                        });
                 }
                 else
                 {
@@ -494,7 +510,7 @@ public:
         break;
         case WM_DESTROY:
             GetWindow().KctUnregisterTimeLine(this);
-            DeleteAllItems();// 应用程序可能需要清理自定义数据
+            DeleteAllItems();
             break;
         }
         return __super::OnEvent(uMsg, wParam, lParam);
@@ -503,32 +519,37 @@ public:
     void TlTick(int iMs) noexcept override
     {
         m_msLastDuration = (USHORT)iMs;
-        const auto bRunning = m_ec.Tick((float)iMs, 200);
-
         if (!m_bDragging || m_idxDrag < 0 || m_idxDrag >= GetItemCount())
         {
             m_bAnimating = FALSE;
             return;
         }
 
+        m_bAnimating = m_ec.Tick((float)iMs, 200);
         EckCounter(GetItemCount(), i)
         {
+            auto& e = m_vItem[i];
+            if (FloatEqual(e.x, e.xTarget))
+            {
+                e.x = e.xTarget;
+                continue;
+            }
             if (i != m_idxDrag)
             {
-                auto& e = m_vItem[i];
-                e.x = e.xStart + (e.xTarget - e.xStart) * m_ec.K;
+                const auto xOld = e.x;
+                if (m_bAnimating)
+                    e.x = e.xStart + (e.xTarget - e.xStart) * m_ec.K;
+                else
+                    e.x = e.xTarget;
+                Invalidate(
+                    Kw::Rect{
+                        std::min(e.x, xOld),
+                        0,
+                        std::max(e.x, xOld) + e.cx,
+                        GetHeight()
+                    }, FALSE);
             }
         }
-        if (!bRunning)
-        {
-            EckCounter(GetItemCount(), i)
-            {
-                if (i != m_idxDrag)
-                    m_vItem[i].x = m_vItem[i].xTarget;
-            }
-            m_bAnimating = FALSE;
-        }
-        Invalidate(FALSE);
     }
     BOOL TlIsValid() noexcept override { return m_bAnimating; }
     int TlGetCurrentInterval() noexcept override { return (int)m_msLastDuration; }
