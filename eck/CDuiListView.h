@@ -67,12 +67,34 @@ private:
     BITBOOL m_bUseBuiltInScrollBar : 1{ TRUE };
 protected:
     void PaintText(
-        const D2D1_RECT_F& rcText,
+        const D2D1_RECT_F& rc,
         UiBasic::Lc::Index idx,
         int idxCol) noexcept
     {
-        ComPtr<IDWriteTextLayout> pTl;
         std::any Data{};
+        float x{ rc.left };
+        if (m_pImgList)
+        {
+            const auto Size = m_pImgList->GetTileSizeLogical();
+            std::any Data{};
+            m_Controller.GetAdapter()->LcaGet(idx, idxCol, UiBasic::Lc::Property::Image, Data);
+            if (Data.type() == typeid(int))
+            {
+                const auto idxImg = std::any_cast<int>(Data);
+                if (idxImg >= 0)
+                {
+                    Kw::Rect rcImg;
+                    rcImg.left = rc.left;
+                    rcImg.top = rc.top + (rc.bottom - rc.top - Size.height) / 2;
+                    rcImg.right = rcImg.left + Size.width;
+                    rcImg.bottom = rcImg.top + Size.height;
+                    m_pImgList->Draw(GetDC(), idxImg, Kw::MakeD2DRectF(rcImg));
+                    x += (Size.width + GetTheme()->GetMetric(IdMePaddingInner));
+                }
+            }
+        }
+
+        ComPtr<IDWriteTextLayout> pTl;
         m_Controller.GetAdapter()->LcaGet(idx, idxCol, UiBasic::Lc::Property::UiTextLayout, Data);
         if (Data.type() == typeid(ComPtr<IDWriteTextLayout>))
             pTl = std::move(std::any_cast<ComPtr<IDWriteTextLayout>&>(Data));
@@ -87,8 +109,8 @@ protected:
                 g_pDwFactory->CreateTextLayout(
                     svText.data(), (UINT)svText.size(),
                     idx.Item < 0 ? GetGroupTextFormat().Get() : GetTextFormat().Get(),
-                    rcText.right - rcText.left,
-                    rcText.bottom - rcText.top, &pTl);
+                    rc.right - x,
+                    rc.bottom - rc.top, &pTl);
                 if (pTl)
                 {
                     Data = pTl;
@@ -100,7 +122,7 @@ protected:
 
         if (pTl)
             GetDC()->DrawTextLayout(
-                { rcText.left, rcText.top },
+                { x, rc.top },
                 pTl.Get(),
                 GetWindow().CcSetBrushColor(ArgbToD2DColorF(GetTheme()->GetColor(IdCrFore))),
                 DrawTextLayoutFlags);
@@ -120,11 +142,15 @@ protected:
             Kw::MakeD2DRectF(rcItem),
             &rcClip);
 
+        const auto dOuter = GetTheme()->GetMetric(IdMePaddingOuter);
+        InflateRect(rcItem, -dOuter, -dOuter);
+
         switch (m_Controller.GetView())
         {
         case TController::View::Icon:
             break;
         case TController::View::List:
+        {
             if (m_pHeader && m_pHeader->IsValid())
             {
                 EckCounter(m_pHeader->GetItemCount(), io)
@@ -145,7 +171,8 @@ protected:
             }
             else
                 PaintText(Kw::MakeD2DRectF(rcItem), idx, 0);
-            break;
+        }
+        break;
         }
 
     }
@@ -201,7 +228,7 @@ protected:
         SccConnectEvent();
     }
 
-    void ScbOnSize() noexcept
+    void ScbLayout() noexcept
     {
         if ((!m_pSBHorz && !m_pSBVert) || !m_bUseBuiltInScrollBar)
             return;
@@ -326,7 +353,7 @@ public:
 
         case WM_SIZE:
         {
-            ScbOnSize();
+            ScbLayout();
             SccUpdatePage();
             if (m_Controller.GetAdapter())
                 m_Controller.ReCalculateScrollV();
@@ -460,6 +487,8 @@ public:
     EckInlineNdCe const ComPtr<IDWriteTextFormat>& GetGroupTextFormat() const noexcept { return m_pTfGroup; }
 
     EckInlineNd auto& GetHeader() noexcept { return *m_pHeader; }
+    EckInlineNdCe auto& GetController() const noexcept { return m_Controller; }
+    EckInlineNdCe auto& GetController() noexcept { return m_Controller; }
 
     EckInlineNd BOOL HdrIsEnabled() const noexcept { return m_pHeader && m_pHeader->IsValid(); }
     void HdrEnable(BOOL b) noexcept
@@ -471,15 +500,22 @@ public:
             {
                 HdrCreateElement();
                 HdrLayout();
+                ScbLayout();
                 m_Controller.ReCalculateScrollV();
             }
         }
         else
         {
             if (m_pHeader && m_pHeader->IsValid())
+            {
                 m_pHeader->Destroy();
+                ScbLayout();
+            }
         }
     }
+
+    EckInline void SetImageList(RefPtr<CD2DImageList> pil) noexcept { m_pImgList = std::move(pil); }
+    EckInlineNdCe const RefPtr<CD2DImageList>& GetImageList() const noexcept { return m_pImgList; }
 };
 
 

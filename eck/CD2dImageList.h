@@ -82,16 +82,11 @@ public:
 
     void Discard(UINT uId) noexcept { m_Packer.Free(uId); }
 
-    EckInlineNdCe D2D1_SIZE_U GetTilePixelSize() const noexcept
-    {
-        TCoord cxTile, cyTile;
-        m_Packer.GetTileSize(cxTile, cyTile);
-        return { cxTile - GetPadding(), cyTile - GetPadding() };
-    }
-
     // WARNING 数据应在右方和下方包含空白边界，边界大小由GetPadding()返回
-    HRESULT Upload(UINT uId, ID3D11DeviceContext* pContext,
-        PCVOID pData, UINT cbStride) const noexcept
+    HRESULT Upload(
+        UINT uId,
+        _In_ PCVOID pData,
+        UINT cbStride) const noexcept
     {
         TId idxPage;
         TCoord x, y;
@@ -136,11 +131,18 @@ public:
 
     const auto& GetPageTexture(UINT idxPage) const noexcept { return m_vItem[idxPage].pTex; }
 
-    EckInlineCe void GetTileSize(_Out_ TCoord& cx, _Out_ TCoord& cy) const noexcept
+    EckInlineNdCe D2D1_SIZE_U GetTileSizePixel() const noexcept
     {
+        TCoord cx, cy;
         m_Packer.GetTileSize(cx, cy);
         cx -= GetPadding();
         cy -= GetPadding();
+        return { cx, cy };
+    }
+    EckInlineNdCe D2D1_SIZE_F GetTileSizeLogical() const noexcept
+    {
+        const auto Size = GetTileSizePixel();
+        return { Size.width * 96.f / m_fDpi, Size.width * 96.f / m_fDpi };
     }
 
     EckInlineNdCe UINT GetPageCount() const noexcept { return m_Packer.GetPageCount(); }
@@ -151,8 +153,8 @@ public:
         D2D1_INTERPOLATION_MODE eInter = D2D1_INTERPOLATION_MODE_LINEAR) const noexcept
     {
         D2D1_RECT_F rcSrc;
-        GetTileRectLogical(uId, rcSrc);
-        pDC->DrawBitmap(GetPageTexture(uId).Get(),
+        const auto idxPage = GetTileRectLogical(uId, rcSrc);
+        pDC->DrawBitmap(GetPageTexture(idxPage).Get(),
             rcDst, fOpcity, eInter, &rcSrc);
     }
 };
