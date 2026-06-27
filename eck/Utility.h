@@ -167,6 +167,36 @@ EckNfInlineNdCe RECT MakeRect(POINT pt1, POINT pt2) noexcept
         rc.top = pt1.y, rc.bottom = pt2.y;
     return rc;
 }
+template<CcpRect TRect>
+EckNfInlineNdCe TRect MakeRect(
+    CcpNumber auto x1, CcpNumber auto y1,
+    CcpNumber auto x2, CcpNumber auto y2) noexcept
+{
+    TRect rc;
+    if constexpr (RectTraits<TRect>::IsRcwh)
+    {
+        if (x1 >= x2)
+            rc.x = x2, rc.cx = x1 - x2;
+        else
+            rc.x = x1, rc.cx = x2 - x1;
+        if (y1 >= y2)
+            rc.y = y2, rc.cy = y1 - y2;
+        else
+            rc.y = y1, rc.cy = y2 - y1;
+    }
+    else
+    {
+        if (x1 >= x2)
+            rc.left = x2, rc.right = x1;
+        else
+            rc.left = x1, rc.right = x2;
+        if (y1 >= y2)
+            rc.top = y2, rc.bottom = y1;
+        else
+            rc.top = y1, rc.bottom = y2;
+    }
+    return rc;
+}
 
 EckInlineNdCe BOOL PointInRect(const RECT& rc, POINT pt) noexcept
 {

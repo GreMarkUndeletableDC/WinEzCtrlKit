@@ -17,6 +17,14 @@ public:
 
     const static inline UINT IdPtItem = TmNextResourceId();
     const static inline UINT IdPtGroup = TmNextResourceId();
+    const static inline UINT IdPtDragSelectRect = TmNextResourceId();
+
+    constexpr static float DefaultInsertMarkWidth = 4.f;
+    constexpr static float DefaultGroupLineWidth = 1.f;
+
+    constexpr static float DefaultIndicatorWidth = 4.f;
+    constexpr static float DefaultIndicatorPaddingWidth = 4.f;
+    constexpr static float DefaultIndicatorPaddingHeight = 10.f;
 
     enum : UINT
     {
@@ -27,8 +35,16 @@ public:
         SsGroupHot,
         SsGroupSelected,
 
+        SsIndicator,
+
+        SsDragSelectRect,
+
         SsMax
     };
+
+    using TController = UiBasic::Lc::CControllerT;
+    using Selection = TController::Selection;
+    using View = TController::View;
 public:
     static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
     static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
@@ -38,7 +54,14 @@ public:
         return bDark ? p1 : p2;
     }
 private:
-    using TController = UiBasic::Lc::CControllerT;
+    struct Indicator
+    {
+        float cxIndicator{ DefaultIndicatorWidth };
+        float cxPadding{ DefaultIndicatorPaddingWidth };
+        float cyPadding{ DefaultIndicatorPaddingHeight };
+        EasingCurve<Easing::FOutExpo> ecIndicator1{};
+        EasingCurve<Easing::FOutExpo> ecIndicator2{};
+    };
 
     std::unique_ptr<CHeader> m_pHeader{};
     std::unique_ptr<CScrollBar> m_pSBHorz{};
@@ -54,6 +77,8 @@ private:
 
     CStringW m_rsDispBuffer{};
 
+    std::unique_ptr<Indicator> m_pIndicator{};
+
     SimpleStyle m_Style[SsMax]
     {
         { IdTmInvalid, IdTmInvalid, IdTmInvalid },
@@ -62,9 +87,14 @@ private:
         { IdTmInvalid, IdTmInvalid, IdTmInvalid },
         TmsSsMakeHot(),
         TmsSsMakePressed(),
+
+        { IdTmInvalid,  IdCrAccent, IdTmInvalid },
+        { IdTmInvalid,  IdTmInvalid, IdCrAccent, 0.f, 1.f },
     };
 
     BITBOOL m_bUseBuiltInScrollBar : 1{ TRUE };
+    BITBOOL m_bIndicator : 1{};
+    BITBOOL m_bCapturedMouse : 1{};
 protected:
     void PaintText(
         const D2D1_RECT_F& rc,
@@ -76,7 +106,6 @@ protected:
         if (m_pImgList)
         {
             const auto Size = m_pImgList->GetTileSizeLogical();
-            std::any Data{};
             m_Controller.GetAdapter()->LcaGet(idx, idxCol, UiBasic::Lc::Property::Image, Data);
             if (Data.type() == typeid(int))
             {
@@ -151,6 +180,11 @@ protected:
             break;
         case TController::View::List:
         {
+            if (m_bIndicator)
+            {
+
+            }
+
             if (m_pHeader && m_pHeader->IsValid())
             {
                 EckCounter(m_pHeader->GetItemCount(), io)
@@ -336,6 +370,7 @@ public:
             BeginPaint(ps, wParam, lParam);
 
             if (m_Controller.GetAdapter())
+            {
                 m_Controller.ForEachItem(
                     [&](const TController::FOR_ITEM& e)
                     {
@@ -345,6 +380,19 @@ public:
                     {
                         PaintGroup({ .Group = e.idxGroup }, ps.rcfClip);
                     }, Kw::MakeRect(ps.rcfClipInElem), TRUE);
+
+                if (m_Controller.IsDraggingSelect())
+                {
+                    auto rc{ Kw::MakeD2DRectF(m_Controller.GetDragSelectRect()) };
+                    ElementToClient(rc);
+                    GetTheme()->Draw(
+                        this,
+                        &m_Style[SsDragSelectRect],
+                        IdPtDragSelectRect,
+                        rc,
+                        &ps.rcfClip);
+                }
+            }
 
             DbgDrawFrame();
             EndPaint(ps);
@@ -371,12 +419,45 @@ public:
         return 0;
         case WM_LBUTTONDOWN:
         {
+            m_bCapturedMouse = TRUE;
+            SetCapture();
             const auto& pt = EagPoint(lParam);
             GetWindow().RdLockUpdate();
             m_Controller.OnLButtonDown(pt.x, pt.y, wParam);
             GetWindow().RdUnlockUpdate();
         }
         return 0;
+        case WM_LBUTTONUP:
+        {
+            if (m_bCapturedMouse)
+            {
+                m_bCapturedMouse = FALSE;
+                ReleaseCapture();
+                const auto& pt = EagPoint(lParam);
+                GetWindow().RdLockUpdate();
+                m_Controller.OnLButtonUp(pt.x, pt.y, wParam);
+                GetWindow().RdUnlockUpdate();
+            }
+        }
+        return 0;
+        case WM_MOUSELEAVE:
+        {
+            GetWindow().RdLockUpdate();
+            m_Controller.OnMouseLeave();
+            GetWindow().RdUnlockUpdate();
+        }
+        return 0;
+        case WM_CAPTURECHANGED:
+        {
+            if (m_bCapturedMouse)
+            {
+                m_bCapturedMouse = FALSE;
+                GetWindow().RdLockUpdate();
+                m_Controller.OnCaptureChanged();
+                GetWindow().RdUnlockUpdate();
+            }
+        }
+        break;
 
         case WM_MOUSEWHEEL:
         {
@@ -531,7 +612,8 @@ public:
     {
         if (idPart != IdPtNormal &&
             idPart != CListView::IdPtItem &&
-            idPart != CListView::IdPtGroup)
+            idPart != CListView::IdPtGroup &&
+            idPart != CListView::IdPtDragSelectRect)
             return TmResult::NotSupport;
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }

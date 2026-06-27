@@ -167,7 +167,6 @@ struct IAdapterT
         idx = {};
         if (pyAbs)
             *pyAbs = 0;
-
     }
 
     // --
@@ -225,6 +224,17 @@ struct IAdapterT
     }
 };
 
+/*
+* +---------绝对空间
+* | Item 1
+* +---------
+* | Item 2
+* +---------视图空间
+* | Item 3 (Top Item)
+* +---------
+* | ...
+*
+*/
 
 class CControllerT
 {
@@ -317,8 +327,9 @@ private:
 
     // --
 
-    TCoord m_xDragSelStart{}, m_yDragSelStart{};// 拖动选择起始点
-    TRect m_rcDragSel{};		// 当前选择矩形
+    // 拖动选择起始点，相对绝对空间
+    TCoord m_xDragSelStart{}, m_yDragSelStart{};
+    TRect m_rcDragSel{};		// 当前选择矩形，相对绝对空间
     TCoord m_dCursorToItemMax{};// 鼠标指针到项目的最大距离
 
     View m_eView{ View::List };
@@ -332,6 +343,80 @@ private:
 
     BITBOOL m_bDraggingSel : 1{};
     BITBOOL m_bPendingDragSel : 1{};
+
+    void DragBegin(TCoord x, TCoord y) noexcept
+    {
+        m_bDraggingSel = TRUE;
+        m_bPendingDragSel = FALSE;
+        m_xDragSelStart = x;
+        m_yDragSelStart = y + m_pHost->LchSccGetPosition(TRUE);
+        m_dCursorToItemMax = 0;
+    }
+    void DragEnd() noexcept
+    {
+        if (m_bPendingDragSel)
+        {
+            m_bPendingDragSel = FALSE;
+            return;
+        }
+        else if (!m_bDraggingSel)
+            return;
+        m_bPendingDragSel = m_bDraggingSel = FALSE;
+        TRect rcOld{ m_rcDragSel };
+        OffsetRect(rcOld, 0, -m_pHost->LchSccGetPosition(TRUE));
+        m_pHost->LchInvalidateRect(&rcOld);
+    }
+
+    void DragMouseMove(TCoord x, TCoord y, WPARAM wParam) noexcept
+    {
+        EckAssert(m_bDraggingSel);
+
+        const auto dy = m_pHost->LchSccGetPosition(TRUE);
+        TRect rcOld{ m_rcDragSel }, rcJudge, rcItem;
+        OffsetRect(rcOld, 0, -dy);
+        m_rcDragSel = MakeRect<TRect>(x, y, m_xDragSelStart, m_yDragSelStart - dy);
+        UnionRect(rcJudge, rcOld, m_rcDragSel);
+
+        std::any Data{};
+        ForEachItem(
+            [&](const FOR_ITEM& e)
+            {
+                GetItemRect(e.idx, rcItem);
+                const BOOL bIntersectOld = IsRectsIntersect(rcItem, rcOld);
+                const BOOL bIntersectNew = IsRectsIntersect(rcItem, m_rcDragSel);
+                if (wParam & MK_CONTROL)
+                {
+                    if (bIntersectOld != bIntersectNew)
+                        ItmpToggleSelect(e.idx, Data);// 翻转选中状态
+                }
+                else
+                {
+                    if (bIntersectOld && !bIntersectNew)
+                        ItmpSelect(e.idx, Data, FALSE);// 先前选中但是现在未选中，清除选中状态
+                    else if (!bIntersectOld && bIntersectNew)
+                        ItmpSelect(e.idx, Data, TRUE);// 先前未选中但是现在选中，设置选中状态
+                    // Mark设为离光标最远的选中项
+                    if (bIntersectNew && !(wParam & (MK_CONTROL | MK_SHIFT)))
+                    {
+                        const auto d =
+                            (x - rcItem.left) * (x - rcItem.left) +
+                            (y - rcItem.top) * (y - rcItem.top);
+                        if (d > m_dCursorToItemMax)
+                        {
+                            m_dCursorToItemMax = d;
+                            m_idxMark = e.idx.Item;
+                            m_idxMarkItemGroup = e.idx.Group;
+                        }
+                    }
+                }
+            },
+            [&](const FOR_GROUP& e)
+            {
+
+            }, rcJudge, FALSE);
+        OffsetRect(m_rcDragSel, 0.f, dy);
+        m_pHost->LchInvalidateRect(nullptr);
+    }
 public:
     CControllerT() = default;
     constexpr CControllerT(IHostT<TCoord>* pHost) noexcept : m_pHost(pHost) {}
@@ -691,22 +776,35 @@ public:
         return InvalidIndex;
     }
 
-    void InvalidateItem(const Index& idx) noexcept
+    void InvalidateItem(const Index& idx, BOOL bTestBounds = FALSE) noexcept
     {
         TRect rc;
         if (idx.Item < 0)
             GetGroupRect(idx.Group, Part::GroupHeader, rc);
         else
             GetItemRect(idx, rc);
-        m_pHost->LchInvalidateRect(&rc);
+        if (bTestBounds)
+        {
+            const TRect rcView
+            {
+                0,
+                0,
+                m_pHost->LchGetWidth(),
+                m_pHost->LchGetHeight()
+            };
+            if (IsRectsIntersect(rc, rcView))
+                m_pHost->LchInvalidateRect(&rc);
+        }
+        else
+            m_pHost->LchInvalidateRect(&rc);
     }
 
     void OnMouseMove(TCoord x, TCoord y, WPARAM uMk) noexcept
     {
-        if (m_bDraggingSel)
-        {
-
-        }
+        if (m_bPendingDragSel)
+            DragBegin(x, y);
+        else if (m_bDraggingSel)
+            DragMouseMove(x, y, uMk);
         else
         {
 
@@ -729,14 +827,10 @@ public:
         HT_INFO Info{ x, y };
         auto idx = HitTest(Info);
 
-        if (m_eSelection != Selection::Single &&
+        if (m_eSelection == Selection::Multiple &&
             m_bEnableDragSel &&
             !idx.IsValid())
-        {
             m_bPendingDragSel = TRUE;
-            m_xDragSelStart = x;
-            m_yDragSelStart = y;
-        }
 
         switch (m_eSelection)
         {
@@ -753,11 +847,12 @@ public:
             break;
         case Selection::Multiple:
         {
-            ItmDeselectAll();
+            ItmDeselectAll(TRUE);
             if (idx.IsValid())
             {
                 std::any Data{};
-                ItmpToggleSelect(idx, Data, TRUE);
+                if (ItmpSelect(idx, Data, TRUE))
+                    InvalidateItem(idx);
             }
         }
         break;
@@ -765,7 +860,20 @@ public:
     }
     void OnLButtonUp(TCoord x, TCoord y, WPARAM uMk) noexcept
     {
-        m_bDraggingSel = FALSE;
+        DragEnd();
+    }
+    void OnMouseLeave() noexcept
+    {
+        if (m_idxHot >= 0 || m_idxHotItemGroup >= 0)
+        {
+            const Index idx{ m_idxHot, m_idxHotItemGroup };
+            m_idxHot = m_idxHotItemGroup = -1;
+            InvalidateItem(idx);
+        }
+    }
+    void OnCaptureChanged() noexcept
+    {
+        DragEnd();
     }
 
     EckInlineNdCe int ItmGetHot() const noexcept { return m_idxHot; }
@@ -829,7 +937,7 @@ public:
         }
     }
 private:
-    void ItmpToggleSelect(Index idx, std::any& Data, BOOL bSelect) noexcept
+    BOOL ItmpSelect(Index idx, std::any& Data, BOOL bSelect) noexcept
     {
         m_pAdapter->LcaGet(idx, 0, Property::SystemState, Data);
         if (Data.type() == typeid(TState))
@@ -838,20 +946,32 @@ private:
             if (bSelect)
             {
                 if (u & LIF_SELECTED)
-                    return;
+                    return FALSE;
                 u |= LIF_SELECTED;
             }
             else
             {
                 if (!(u & LIF_SELECTED))
-                    return;
+                    return FALSE;
                 u &= ~LIF_SELECTED;
             }
+            m_pAdapter->LcaSet(idx, 0, Property::SystemState, Data);
+            return TRUE;
+        }
+        return FALSE;
+    }
+    void ItmpToggleSelect(Index idx, std::any& Data) noexcept
+    {
+        m_pAdapter->LcaGet(idx, 0, Property::SystemState, Data);
+        if (Data.type() == typeid(TState))
+        {
+            auto& u = std::any_cast<TState&>(Data);
+            u ^= LIF_SELECTED;
             m_pAdapter->LcaSet(idx, 0, Property::SystemState, Data);
         }
     }
 public:
-    void ItmDeselectAll() noexcept
+    void ItmDeselectAll(BOOL bRedraw) noexcept
     {
         if (m_eSelection == Selection::Single)
         {
@@ -867,10 +987,12 @@ public:
             for (idx.Group = 0; idx.Group < cGroup; ++idx.Group)
             {
                 idx.Item = -1;
-                ItmpToggleSelect(idx, Data, FALSE);
+                if (ItmpSelect(idx, Data, FALSE))
+                    InvalidateItem(idx, TRUE);
                 const auto cItem = m_pAdapter->LcaGetCount(idx.Group);
                 for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
-                    ItmpToggleSelect(idx, Data, FALSE);
+                    if (ItmpSelect(idx, Data, FALSE))
+                        InvalidateItem(idx, TRUE);
             }
         }
         else
@@ -878,7 +1000,8 @@ public:
             const auto cItem = m_pAdapter->LcaGetCount().Item;
             Index idx{};
             for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
-                ItmpToggleSelect(idx, Data, FALSE);
+                if (ItmpSelect(idx, Data, FALSE))
+                    InvalidateItem(idx, TRUE);
         }
     }
 
@@ -914,6 +1037,26 @@ public:
     EckInlineNdCe BOOL GetUseHeader() const noexcept { return m_bEnableHeader; }
 
     EckInlineNdCe View GetView() const noexcept { return m_eView; }
+    void SetView(View eView) noexcept
+    {
+        m_eView = eView;
+    }
+
+    EckInlineNdCe Selection GetSelectionType() const noexcept { return m_eSelection; }
+    void SetSelectionType(Selection eSel) noexcept
+    {
+        m_eSelection = eSel;
+    }
+
+    EckInlineNdCe BOOL IsDraggingSelect() const noexcept { return m_bDraggingSel; }
+    // WARNING 仅当IsDraggingSelect()返回TRUE时该函数有效
+    EckInlineNdCe TRect GetDragSelectRect() const noexcept
+    {
+        auto rc{ m_rcDragSel };
+        const auto dy = m_pHost->LchSccGetPosition(TRUE);
+        OffsetRect(rc, 0, -dy);
+        return rc;
+    }
 };
 ECK_LC_NAMESPACE_END
 ECK_UIBASIC_NAMESPACE_END
