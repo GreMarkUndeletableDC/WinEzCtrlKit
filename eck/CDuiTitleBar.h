@@ -78,12 +78,12 @@ private:
         {
             const auto* const pss = (STYLESTRUCT*)lParam;
             BOOL bUpdate{};
-            if ((pss->styleOld ^ pss->styleNew) == WS_MINIMIZEBOX)
+            if ((pss->styleOld ^ pss->styleNew) & WS_MINIMIZEBOX)
             {
                 m_bMinButton = !!(pss->styleNew & WS_MINIMIZEBOX);
                 bUpdate = TRUE;
             }
-            if ((pss->styleOld ^ pss->styleNew) == WS_MAXIMIZEBOX)
+            if ((pss->styleOld ^ pss->styleNew) & WS_MAXIMIZEBOX)
             {
                 m_bMaxButton = !!(pss->styleNew & WS_MAXIMIZEBOX);
                 bUpdate = TRUE;
@@ -102,28 +102,12 @@ private:
         return ePart != UdwPart::Invalid && ePart != UdwPart::Extra;
     }
 
-    float SnapToPixel(float f, int iDpi) noexcept
+    static void SnapToPixel(D2D1_RECT_F& rc) noexcept
     {
-        return roundf(f);
-        return DpiScale(roundf(DpiScale(f, 96, iDpi)), iDpi, 96);
-    }
-    template<CcpRect T>
-    void SnapToPixel(T& rc, int iDpi) noexcept
-    {
-        if constexpr (RectTraits<T>::IsRcwh)
-        {
-            rc.x = SnapToPixel(rc.x, iDpi);
-            rc.y = SnapToPixel(rc.y, iDpi);
-        }
-        else
-        {
-            const auto cx = rc.right - rc.left;
-            const auto cy = rc.bottom - rc.top;
-            rc.left = SnapToPixel(rc.left, iDpi);
-            rc.right = SnapToPixel(rc.right, iDpi);
-            rc.top = SnapToPixel(rc.top, iDpi);
-            rc.bottom = SnapToPixel(rc.bottom, iDpi);
-        }
+        rc.left = roundf(rc.left);
+        rc.right = roundf(rc.right);
+        rc.top = roundf(rc.top);
+        rc.bottom = roundf(rc.bottom);
     }
 
     BOOL PaintButton(UdwPart ePart, const D2D1_RECT_F& rcClip) noexcept
@@ -135,7 +119,7 @@ private:
             return FALSE;
 
         LogicalToPixel(rcDst);
-        SnapToPixel(rcDst, GetWindow().GetUserDpi());
+        SnapToPixel(rcDst);
 
         if (ePart == UdwPart::Max || ePart == UdwPart::Restore)
             ePart = (m_bMaximized ? UdwPart::Restore : UdwPart::Max);
@@ -160,7 +144,7 @@ private:
 
             auto rcIcon = MakeD2DRectF(rc);
             CenterRect(rcIcon, rcDst);
-            SnapToPixel(rcIcon, GetWindow().GetUserDpi());
+            SnapToPixel(rcIcon);
 
             GetDC()->DrawBitmap(m_pAtlas.Get(), rcIcon, 1.f,
                 GetIconInterpolationMode(), MakeD2DRectF(rc));
@@ -168,6 +152,8 @@ private:
         }
         return FALSE;
     }
+
+    EckInlineNd BOOL IsWindowThemeReady() const noexcept { return m_pUdwTheme && m_pAtlas; }
 public:
     static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
     static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
@@ -188,16 +174,21 @@ public:
             PAINTINFO ps;
             BeginPaint(ps, wParam, lParam);
 
-            GetDC()->SetDpi(96, 96);
-            GetDC()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
-            if (m_bCloseButton)
-                PaintButton(UdwPart::Close, ps.rcfClip);
-            if (m_bMaxButton)
-                PaintButton(UdwPart::Max, ps.rcfClip);
-            if (m_bMinButton)
-                PaintButton(UdwPart::Min, ps.rcfClip);
-            GetDC()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
-            GetDC()->SetDpi(144, 144);
+            if (IsWindowThemeReady())
+            {
+                float xDpi, yDpi;
+                GetDC()->GetDpi(&xDpi, &yDpi);
+                GetDC()->SetDpi(96, 96);
+                GetDC()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
+                if (m_bCloseButton)
+                    PaintButton(UdwPart::Close, ps.rcfClip);
+                if (m_bMaxButton)
+                    PaintButton(UdwPart::Max, ps.rcfClip);
+                if (m_bMinButton)
+                    PaintButton(UdwPart::Min, ps.rcfClip);
+                GetDC()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+                GetDC()->SetDpi(xDpi, yDpi);
+            }
 
             DbgDrawFrame();
             EndPaint(ps);
@@ -229,7 +220,7 @@ public:
                 else
                     return HTCAPTION;
             }
-            ECK_UNREACHABLE;
+            break;
             }
         }
         return HTTRANSPARENT;
@@ -338,6 +329,7 @@ public:
             GetWindow().GetEventChain().Connect(this, &CTitleBar::OnWindowMessage, MHI_DUI_TITLEBAR);
             m_bMaximized = IsZoomed(GetWindow().Handle);
             UpdateMetrics();
+            SynchronizeToSystemMenu();
         }
         break;
 
