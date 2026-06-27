@@ -422,29 +422,40 @@ public:
         const auto dGap = GetButtonGap();
         rc.top = 0;
         rc.bottom = m_cyBtn;
-        switch (ePart)
+        float x = GetWidth();
+
+        if (m_bCloseButton)
         {
-        case UdwPart::Close:
-            rc.left = GetWidth() - m_cxClose;
-            rc.right = GetWidth();
-            break;
-        case UdwPart::Max:
-        case UdwPart::Restore:
-            rc.left = GetWidth() - m_cxClose - dGap - m_cxMax;
-            rc.right = rc.left + m_cxMax;
-            break;
-        case UdwPart::Min:
-            rc.left = GetWidth() - m_cxClose - dGap - m_cxMax - dGap - m_cxMin;
-            rc.right = rc.left + m_cxMin;
-            break;
-        case UdwPart::Extra:
-            rc.left = 0;
-            rc.right = GetWidth() - m_cxClose - dGap - m_cxMax - dGap - m_cxMin;
-            break;
-        default:
-            rc.left = rc.right = rc.bottom = 0.f;
-            break;
+            rc.left = x - m_cxClose;
+            rc.right = x;
+            if (ePart == UdwPart::Close)
+                return;
+            x -= m_cxClose + dGap;
         }
+        if (m_bMaxButton)
+        {
+            rc.left = x - m_cxMax;
+            rc.right = x;
+            if (ePart == UdwPart::Max || ePart == UdwPart::Restore)
+                return;
+            x -= m_cxMax + dGap;
+        }
+        if (m_bMinButton)
+        {
+            rc.left = x - m_cxMin;
+            rc.right = x;
+            if (ePart == UdwPart::Min)
+                return;
+            x -= m_cxMin + dGap;
+        }
+
+        if (ePart == UdwPart::Extra)
+        {
+            rc.left = 0;
+            rc.right = x;
+        }
+        else
+            rc = {};
     }
     void GetPartRect(UdwPart ePart, _Out_ D2D1_RECT_F& rc) const noexcept
     {
@@ -453,8 +464,22 @@ public:
 
     void InvalidateButton(BOOL bUpdateNow = TRUE) noexcept
     {
-        const auto cxBtn = m_cxClose + m_cxMax + m_cxMin;
-        D2D1_RECT_F rc{ GetWidth() - cxBtn, 0, GetWidth(), m_cyBtn };
+        Kw::Rect rc{}, rc1;
+        if (m_bCloseButton)
+        {
+            GetPartRect(UdwPart::Close, rc1);
+            UnionRect(rc, rc, rc1);
+        }
+        if (m_bMaxButton)
+        {
+            GetPartRect(UdwPart::Max, rc1);
+            UnionRect(rc, rc, rc1);
+        }
+        if (m_bMinButton)
+        {
+            GetPartRect(UdwPart::Min, rc1);
+            UnionRect(rc, rc, rc1);
+        }
         Invalidate(rc, bUpdateNow);
     }
 
