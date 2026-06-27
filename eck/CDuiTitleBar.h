@@ -43,11 +43,11 @@ private:
             if (!m_bCloseButtonEnabled)
                 return UdwState::Disabled;
             break;
-        case UdwPart::Max:
+        case UdwPart::Maximize:
             if (!m_bMaxButtonEnabled)
                 return UdwState::Disabled;
             break;
-        case UdwPart::Min:
+        case UdwPart::Minimize:
             if (!m_bMinButtonEnabled)
                 return UdwState::Disabled;
             break;
@@ -70,12 +70,14 @@ private:
             if (m_bMaximized != bMax)
             {
                 m_bMaximized = bMax;
-                InvalidatePart(UdwPart::Max);
+                InvalidatePart(UdwPart::Maximize);
             }
         }
         break;
         case WM_STYLECHANGED:
         {
+            if (!m_bSyncToStyle)
+                break;
             const auto* const pss = (STYLESTRUCT*)lParam;
             BOOL bUpdate{};
             if ((pss->styleOld ^ pss->styleNew) & WS_MINIMIZEBOX)
@@ -121,8 +123,8 @@ private:
         LogicalToPixel(rcDst);
         SnapToPixel(rcDst);
 
-        if (ePart == UdwPart::Max || ePart == UdwPart::Restore)
-            ePart = (m_bMaximized ? UdwPart::Restore : UdwPart::Max);
+        if (ePart == UdwPart::Maximize || ePart == UdwPart::Restore)
+            ePart = (m_bMaximized ? UdwPart::Restore : UdwPart::Maximize);
 
         RECT rc, rcBkg;
         UDW_EXTRA Extra;
@@ -183,9 +185,9 @@ public:
                 if (m_bCloseButton)
                     PaintButton(UdwPart::Close, ps.rcfClip);
                 if (m_bMaxButton)
-                    PaintButton(UdwPart::Max, ps.rcfClip);
+                    PaintButton(UdwPart::Maximize, ps.rcfClip);
                 if (m_bMinButton)
-                    PaintButton(UdwPart::Min, ps.rcfClip);
+                    PaintButton(UdwPart::Minimize, ps.rcfClip);
                 GetDC()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
                 GetDC()->SetDpi(xDpi, yDpi);
             }
@@ -204,9 +206,9 @@ public:
             {
             case UdwPart::Close:
                 return HTCLOSE;
-            case UdwPart::Max:
+            case UdwPart::Maximize:
                 return HTMAXBUTTON;
-            case UdwPart::Min:
+            case UdwPart::Minimize:
                 return HTMINBUTTON;
             case UdwPart::Extra:
             {
@@ -262,13 +264,13 @@ public:
                     case UdwPart::Close:
                         GetWindow().PostMessageW(WM_SYSCOMMAND, SC_CLOSE, 0);
                         break;
-                    case UdwPart::Max:
+                    case UdwPart::Maximize:
                         if (m_bMaximized)
                             GetWindow().PostMessageW(WM_SYSCOMMAND, SC_RESTORE, 0);
                         else
                             GetWindow().PostMessageW(WM_SYSCOMMAND, SC_MAXIMIZE, 0);
                         break;
-                    case UdwPart::Min:
+                    case UdwPart::Minimize:
                         GetWindow().PostMessageW(WM_SYSCOMMAND, SC_MINIMIZE, 0);
                         break;
                     }
@@ -396,15 +398,15 @@ public:
         }
         if (m_bMaxButton)
         {
-            GetPartRect(UdwPart::Max, rc);
+            GetPartRect(UdwPart::Maximize, rc);
             if (PointInRect(rc, ptInEle))
-                return UdwPart::Max;
+                return UdwPart::Maximize;
         }
         if (m_bMinButton)
         {
-            GetPartRect(UdwPart::Min, rc);
+            GetPartRect(UdwPart::Minimize, rc);
             if (PointInRect(rc, ptInEle))
-                return UdwPart::Min;
+                return UdwPart::Minimize;
         }
         GetPartRect(UdwPart::Extra, rc);
         if (PointInRect(rc, ptInEle))
@@ -436,7 +438,7 @@ public:
         {
             rc.left = x - m_cxMax;
             rc.right = x;
-            if (ePart == UdwPart::Max || ePart == UdwPart::Restore)
+            if (ePart == UdwPart::Maximize || ePart == UdwPart::Restore)
                 return;
             x -= m_cxMax + dGap;
         }
@@ -444,7 +446,7 @@ public:
         {
             rc.left = x - m_cxMin;
             rc.right = x;
-            if (ePart == UdwPart::Min)
+            if (ePart == UdwPart::Minimize)
                 return;
             x -= m_cxMin + dGap;
         }
@@ -472,12 +474,12 @@ public:
         }
         if (m_bMaxButton)
         {
-            GetPartRect(UdwPart::Max, rc1);
+            GetPartRect(UdwPart::Maximize, rc1);
             UnionRect(rc, rc, rc1);
         }
         if (m_bMinButton)
         {
-            GetPartRect(UdwPart::Min, rc1);
+            GetPartRect(UdwPart::Minimize, rc1);
             UnionRect(rc, rc, rc1);
         }
         Invalidate(rc, bUpdateNow);
@@ -509,10 +511,65 @@ public:
     EckInlineCe void SetIconInterpolationMode(D2D1_INTERPOLATION_MODE e) noexcept { m_eInterModeIcon = (BYTE)e; }
     EckInlineNdCe D2D1_INTERPOLATION_MODE GetIconInterpolationMode() const noexcept { return (D2D1_INTERPOLATION_MODE)m_eInterModeIcon; }
 
+    EckInlineCe void SetSynchronizeToStyle(BOOL b) noexcept { m_bSyncToStyle = b; }
+    EckInlineNdCe BOOL GetSynchronizeToStyle() const noexcept { return m_bSyncToStyle; }
+
     EckInline void SetUxDwmWindowTheme(RefPtr<CUxDwmWindowTheme> p) noexcept { m_pUdwTheme = std::move(p); }
     EckInlineNdCe auto& GetUxDwmWindowTheme() const noexcept { return m_pUdwTheme; }
     EckInline void SetThemeAtlas(ComPtr<ID2D1Bitmap1> p) noexcept { m_pAtlas = std::move(p); }
     EckInlineNdCe auto& GetThemeAtlas() const noexcept { return m_pAtlas; }
+
+    EckInlineCe void SetButtonVisible(UdwPart ePart, BOOL b) noexcept
+    {
+        switch (ePart)
+        {
+        case UdwPart::Close:
+            m_bCloseButton = b;
+            break;
+        case UdwPart::Maximize:
+            m_bMaxButton = b;
+            break;
+        case UdwPart::Minimize:
+            m_bMinButton = b;
+            break;
+        }
+    }
+    EckInlineNdCe BOOL GetButtonVisible(UdwPart ePart) const noexcept
+    {
+        switch (ePart)
+        {
+        case UdwPart::Close:return m_bCloseButton;
+        case UdwPart::Maximize:  return m_bMaxButton;
+        case UdwPart::Minimize:  return m_bMinButton;
+        }
+        return FALSE;
+    }
+
+    EckInlineCe void EnableButton(UdwPart ePart, BOOL b) noexcept
+    {
+        switch (ePart)
+        {
+        case UdwPart::Close:
+            m_bCloseButtonEnabled = b;
+            break;
+        case UdwPart::Maximize:
+            m_bMaxButtonEnabled = b;
+            break;
+        case UdwPart::Minimize:
+            m_bMinButtonEnabled = b;
+            break;
+        }
+    }
+    EckInlineNdCe BOOL IsButtonEnabled(UdwPart ePart) const noexcept
+    {
+        switch (ePart)
+        {
+        case UdwPart::Close:return m_bCloseButtonEnabled;
+        case UdwPart::Maximize:  return m_bMaxButtonEnabled;
+        case UdwPart::Minimize:  return m_bMinButtonEnabled;
+        }
+        return FALSE;
+    }
 };
 
 
