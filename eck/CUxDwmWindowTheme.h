@@ -101,8 +101,8 @@ enum class UdwPart : BYTE
 {
     Close,
     Help,
-    Max,
-    Min,
+    Maximize,
+    Minimize,
     Restore,
 
     Invalid,// 用于命中测试
