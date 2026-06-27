@@ -343,7 +343,7 @@ public:
         return __super::OnEvent(uMsg, wParam, lParam);
     }
 
-    void UpdateMetrics()
+    void UpdateMetrics() noexcept
     {
         if (g_NtVersion.uBuild >= WINVER_11_21H2)
         {
@@ -383,7 +383,7 @@ public:
         }
     }
 
-    // 函数永不返回UdwPart::Restore，使用UdwPart::Max代替
+    // 函数永不返回UdwPart::Restore，使用UdwPart::Maximize代替
     UdwPart HitTest(Kw::Vec2 ptInEle) const noexcept
     {
         if (ptInEle.x < 0 || ptInEle.x > GetWidth() ||
@@ -527,6 +527,7 @@ public:
             m_bCloseButton = b;
             break;
         case UdwPart::Maximize:
+        case UdwPart::Restore:
             m_bMaxButton = b;
             break;
         case UdwPart::Minimize:
@@ -538,9 +539,13 @@ public:
     {
         switch (ePart)
         {
-        case UdwPart::Close:return m_bCloseButton;
-        case UdwPart::Maximize:  return m_bMaxButton;
-        case UdwPart::Minimize:  return m_bMinButton;
+        case UdwPart::Close:
+            return m_bCloseButton;
+        case UdwPart::Maximize:
+        case UdwPart::Restore:
+            return m_bMaxButton;
+        case UdwPart::Minimize:
+            return m_bMinButton;
         }
         return FALSE;
     }
@@ -553,6 +558,7 @@ public:
             m_bCloseButtonEnabled = b;
             break;
         case UdwPart::Maximize:
+        case UdwPart::Restore:
             m_bMaxButtonEnabled = b;
             break;
         case UdwPart::Minimize:
@@ -564,9 +570,13 @@ public:
     {
         switch (ePart)
         {
-        case UdwPart::Close:return m_bCloseButtonEnabled;
-        case UdwPart::Maximize:  return m_bMaxButtonEnabled;
-        case UdwPart::Minimize:  return m_bMinButtonEnabled;
+        case UdwPart::Close:
+            return m_bCloseButtonEnabled;
+        case UdwPart::Maximize:
+        case UdwPart::Restore:
+            return m_bMaxButtonEnabled;
+        case UdwPart::Minimize:
+            return m_bMinButtonEnabled;
         }
         return FALSE;
     }
