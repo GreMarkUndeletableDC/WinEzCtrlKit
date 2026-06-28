@@ -422,6 +422,7 @@ public:
             {
                 m_Controller.ReCalculateScrollV();
                 m_Controller.ReCalculateScrollH();
+                m_Controller.GetAdapter()->LcaColumnWidthChanged(-1, GetWidth());
             }
             HdrLayout();
             ScbLayout();
@@ -517,10 +518,15 @@ public:
                     rc.right = m_pHeader->GetContentWidth();
                     rc.top = m_Controller.MtGetHeaderHeight();
                     rc.bottom = GetHeight();
-                    m_Controller.ReCalculateScrollH();
-                    HdrLayout();
-                    ScbLayout();
-                    Invalidate(rc);
+                    if (m_Controller.GetAdapter())
+                    {
+                        m_Controller.ReCalculateScrollH();
+                        m_Controller.GetAdapter()->LcaColumnWidthChanged(
+                            p->idx, rc.right - rc.left);
+                        HdrLayout();
+                        ScbLayout();
+                        Invalidate(rc);
+                    }
                 }
                 return 0;
                 }

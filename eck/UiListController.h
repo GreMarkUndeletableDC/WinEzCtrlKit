@@ -175,6 +175,12 @@ struct IAdapterT
     virtual void LcaGet(const Index& idx, int idxCol, Property eProp, std::any& Data) const noexcept = 0;
     virtual void LcaSet(const Index& idx, int idxCol, Property eProp, std::any& Data, BOOL bMove = FALSE) noexcept = 0;
 
+    // 某列宽度改变，或仅单列列表的视图宽度改变时调用此方法
+    // 适配器应在此方法中清理与可用区域相关的缓存
+    // 如果多列不可用，idxCol总为0
+    // 宽度改变时总以idxCol = -1调用此方法，适配器可在此情况下清理组头相关的缓存
+    virtual void LcaColumnWidthChanged(int idxCol, float cxNew) noexcept {}
+
     EckInlineNd TCoord AptListGetGroupTop(int idxGroup) noexcept
     {
         std::any Data{};
@@ -352,6 +358,7 @@ private:
         m_xDragSelStart = x;
         m_yDragSelStart = y + m_pHost->LchSccGetPosition(TRUE);
         m_dCursorToItemMax = 0;
+        m_rcDragSel = {};
     }
     void DragEnd() noexcept
     {
