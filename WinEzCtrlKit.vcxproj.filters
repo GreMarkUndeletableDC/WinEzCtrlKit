@@ -30,30 +30,6 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="eck\CListBoxExt.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
-    <ClInclude Include="eck\CDuiHeader.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
-    <ClInclude Include="eck\CDuiLabel.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
-    <ClInclude Include="eck\CDuiTabHeader.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
-    <ClInclude Include="eck\CDuiTabList.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
-    <ClInclude Include="eck\CDuiTitleBar.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
-    <ClInclude Include="eck\ServerHelper.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
-    <ClInclude Include="eck\HttpStatus.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="eck\ECK.cpp">
@@ -750,6 +726,24 @@
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\UiScroll.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\CDuiHeader.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\CDuiLabel.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\CDuiTitleBar.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\HttpStatus.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\ServerHelper.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\CListBoxExt.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
   </ItemGroup>
