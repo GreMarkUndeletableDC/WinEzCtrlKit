@@ -114,7 +114,7 @@ private:
             UpdateTextLayout(i);
     }
 
-    void PaintItem(int idx, ITEM& e, const D2D1_RECT_F& rcClipInClient) noexcept
+    void PaintItem(int idx, const ITEM& e, const D2D1_RECT_F& rcClipInClient) noexcept
     {
         D2D1_RECT_F rcItem{ e.x, 0.f, e.x + e.cx, GetHeight() };
         ElementToClient(rcItem);
@@ -333,7 +333,7 @@ private:
             e.fSavedXOrCx = bPosOrWidth ? e.x : e.cx;
     }
 
-    void InternalGetItemRect(int idx, Kw::Rect& rcItem) const noexcept
+    void InternalGetItemRect(int idx, _Out_ Kw::Rect& rcItem) const noexcept
     {
         const auto& e = m_vItem[idx];
         rcItem.left = e.x;
@@ -739,7 +739,7 @@ public:
         return -1;
     }
 
-    void GetItemRect(int idx, Kw::Rect& rcItem) const noexcept
+    void GetItemRect(int idx, _Out_ Kw::Rect& rcItem) const noexcept
     {
         if (m_bDraggingDivider && m_idxDrag == idx)
         {

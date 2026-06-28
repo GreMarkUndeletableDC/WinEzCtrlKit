@@ -88,8 +88,8 @@ private:
         TmsSsMakeHot(),
         TmsSsMakePressed(),
 
-        { IdTmInvalid,  IdCrAccent, IdTmInvalid },
-        { IdTmInvalid,  IdTmInvalid, IdCrAccent, 0.f, 1.f },
+        { IdTmInvalid, IdCrAccent,  IdTmInvalid },
+        { IdTmInvalid, IdTmInvalid, IdCrFore, 0.f, 1.f },
     };
 
     BITBOOL m_bUseBuiltInScrollBar : 1{ TRUE };

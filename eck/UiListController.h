@@ -351,7 +351,7 @@ private:
     BITBOOL m_bDraggingSel : 1{};
     BITBOOL m_bPendingDragSel : 1{};
 
-    void DragBegin(TCoord x, TCoord y) noexcept
+    void DragBegin(TCoord x, TCoord y, WPARAM wParam) noexcept
     {
         m_bDraggingSel = TRUE;
         m_bPendingDragSel = FALSE;
@@ -359,6 +359,8 @@ private:
         m_yDragSelStart = y + m_pHost->LchSccGetPosition(TRUE);
         m_dCursorToItemMax = 0;
         m_rcDragSel = {};
+        if (!(wParam & (MK_CONTROL | MK_SHIFT)))
+            ItmDeselectAll(TRUE);
     }
     void DragEnd() noexcept
     {
@@ -422,6 +424,7 @@ private:
             {
 
             }, rcJudge, FALSE);
+        InflateRect(rcJudge, 1.f, 1.f);
         m_pHost->LchInvalidateRect(&rcJudge);
         OffsetRect(m_rcDragSel, 0.f, dy);
     }
@@ -826,7 +829,7 @@ public:
     void OnMouseMove(TCoord x, TCoord y, WPARAM uMk) noexcept
     {
         if (m_bPendingDragSel)
-            DragBegin(x, y);
+            DragBegin(x, y, uMk);
         else if (m_bDraggingSel)
             DragMouseMove(x, y, uMk);
         else
@@ -945,6 +948,10 @@ public:
     }
     void OnLButtonUp(TCoord x, TCoord y, WPARAM uMk) noexcept
     {
+        if (m_bPendingDragSel &&
+            !m_bDraggingSel &&
+            !(uMk & (MK_CONTROL | MK_SHIFT)))
+            ItmDeselectAll(TRUE);
         DragEnd();
     }
     void OnMouseLeave() noexcept
