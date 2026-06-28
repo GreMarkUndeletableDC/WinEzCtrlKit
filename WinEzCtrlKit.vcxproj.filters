@@ -707,7 +707,7 @@
     <ClCompile Include="eck\DuiCompositor.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\DuiDef.h">
+    <ClCompile Include="eck\DuiDefine.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\DuiSizeBox.h">

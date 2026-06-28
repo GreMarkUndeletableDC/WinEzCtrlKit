@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CReferenceCounted.h"
-#include "DuiDef.h"
+#include "DuiDefine.h"
 
 ECK_NAMESPACE_BEGIN
 ECK_DUI_NAMESPACE_BEGIN
