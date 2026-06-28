@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "LunarDateLib.h"
+#include "LunarDateTable.h"
 #include "DateTimeHelper.h"
 
 ECK_NAMESPACE_BEGIN
