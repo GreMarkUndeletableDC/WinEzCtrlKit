@@ -19,6 +19,7 @@ public:
     {
         Kw::Vec2 pt;
         BOOLEAN bHitDivider;
+        int io;
     };
 
     struct EVT_ITEM : ELENMHDR
@@ -26,10 +27,10 @@ public:
         int idx;
     };
 
-    struct EVT_ORDER : ELENMHDR
+    struct EVT_ORDER : EVT_ITEM
     {
-        int idxFrom;
-        int idxTo;
+        int ioFrom;
+        int ioTo;
     };
 
     const static inline UINT IdMeInsertMarkWidth = TmNextResourceId();
@@ -45,16 +46,21 @@ private:
         float xStart{}; // 拖动重排动画起始位置
         float xTarget{};// 拖动重排动画目标位置
         float cx{};
-        LPARAM lParam{};
+        float fSavedXOrCx{};
     };
 
     std::vector<ITEM> m_vItem{};
+    std::vector<int> m_vOrder{};// io -> idx
     EasingCurve<Easing::FOutCubic> m_ec{};
 
     int m_idxHot{ -1 };
     int m_idxPressed{ -1 };
     int m_idxDrag{ -1 };
-    int m_idxInsertMark{ -1 };// 拖动时被拖项的最终序号
+    int m_ioDrag{ -1 };
+    int m_ioInsertMark{ -1 };
+
+    float m_cxContent{};
+
     float m_xDragOffset{};
     USHORT m_msLastDuration{};
 
@@ -111,16 +117,17 @@ private:
             UpdateTextLayout(i);
     }
 
-    void PaintItem(int idx, ITEM& e, const D2D1_RECT_F& rcClip) noexcept
+    void PaintItem(int idx, const ITEM& e, const D2D1_RECT_F& rcClipInClient) noexcept
     {
+        D2D1_RECT_F rcItem{ e.x, 0.f, e.x + e.cx, GetHeight() };
+        ElementToClient(rcItem);
+        if (!IsRectsIntersect(rcItem, rcClipInClient))
+            return;
+
         const float dOuter = GetTheme()->GetMetric(IdMePaddingOuter);
         const auto iSs = TmSimpleStyleFromItemState(idx);
 
-        D2D1_RECT_F rcItem{ e.x, 0.f, e.x + e.cx, GetHeight() };
-        ElementToClient(rcItem);
-        if (!IsRectsIntersect(rcItem, rcClip))
-            return;
-        GetTheme()->Draw(this, &m_Style[iSs], IdPtNormal, rcItem, &rcClip);
+        GetTheme()->Draw(this, &m_Style[iSs], IdPtNormal, rcItem, &rcClipInClient);
 
         if (e.pLayout)
         {
@@ -132,22 +139,25 @@ private:
         }
     }
 
-    // 为了方便起见，允许传入超出有效范围的索引，函数自动夹紧到[0, ItemCount)
-    void ReCalculateItemPosition(int idxBegin = 0) noexcept
+    EckInlineNdCe auto& AtOrder(int io) noexcept { return m_vItem[m_vOrder[io]]; }
+    EckInlineNdCe auto& AtOrder(int io) const noexcept { return m_vItem[m_vOrder[io]]; }
+
+    // 为了方便起见，允许传入超出有效范围的序号，函数自动夹紧到[0, ItemCount)
+    void ReCalculateItemPosition(int ioBegin = 0) noexcept
     {
         m_bAnimating = FALSE;
-        if (idxBegin >= GetItemCount())
+        if (ioBegin >= GetItemCount())
             return;
-        if (idxBegin < 0)
-            idxBegin = 0;
+        if (ioBegin < 0)
+            ioBegin = 0;
         float x;
-        if (idxBegin)
-            x = m_vItem[idxBegin - 1].x + m_vItem[idxBegin - 1].cx;
+        if (ioBegin)
+            x = AtOrder(ioBegin - 1).x + AtOrder(ioBegin - 1).cx;
         else
             x = 0.f;
-        for (int i = idxBegin; i < GetItemCount(); ++i)
+        for (int io = ioBegin; io < GetItemCount(); ++io)
         {
-            auto& e = m_vItem[i];
+            auto& e = AtOrder(io);
             e.x = e.xStart = e.xTarget = x;
             x += e.cx;
         }
@@ -155,98 +165,97 @@ private:
 
     void DragReCalculateTargetPosition() noexcept
     {
-        const auto cItem = GetItemCount();
-        if (m_idxDrag < 0 || m_idxDrag >= cItem || cItem <= 0)
-            return;
-
-        const auto idxInsert = std::clamp(m_idxInsertMark, 0, cItem - 1);
         float x{};
-        int iSrc{};
-        EckCounter(cItem, i)
+        EckCounter(GetItemCount(), io)
         {
-            if (i == idxInsert)
+            if (io == m_ioInsertMark)
                 x += m_vItem[m_idxDrag].cx;
-            if (iSrc == m_idxDrag)
-                ++iSrc;
-            if (iSrc >= cItem)
-                break;
-            auto& e = m_vItem[iSrc++];
+            if (OrderToIndex(io) == m_idxDrag)
+                continue;
+            auto& e = AtOrder(io);
             e.xTarget = x;
             x += e.cx;
         }
         m_vItem[m_idxDrag].xTarget = m_vItem[m_idxDrag].x;
     }
 
-    float DragGetInsertMarkPosition() const noexcept
+    float DragCalculateInsertMarkPosition() const noexcept
     {
-        const auto cItem = GetItemCount();
-        if (m_idxDrag < 0 || m_idxDrag >= cItem || cItem <= 0)
-            return 0.f;
-
-        const auto idxInsert = std::clamp(m_idxInsertMark, 0, cItem - 1);
         float x{};
-        int iSrc{};
-        for (int iOrder{}; iOrder < idxInsert; ++iOrder)
-        {
-            while (iSrc == m_idxDrag)
-                ++iSrc;
-            if (iSrc >= cItem)
-                break;
-            x += m_vItem[iSrc++].cx;
-        }
+        EckCounter(m_ioInsertMark, io)
+            x += AtOrder(io).cx;
         return x;
     }
-
-    void DragMoveItem(int idxFrom, int idxTo) noexcept
+    void DragCalculateInsertMarkRect(_Out_ Kw::Rect& rc) const noexcept
     {
-        const auto cItem = GetItemCount();
-        if (idxFrom < 0 || idxFrom >= cItem || cItem <= 0)
-            return;
-        idxTo = std::clamp(idxTo, 0, cItem - 1);
-        if (idxFrom == idxTo)
-            return;
-
-        auto e = std::move(m_vItem[idxFrom]);
-        if (idxFrom < idxTo)
-        {
-            for (int i{ idxFrom }; i < idxTo; ++i)
-                m_vItem[i] = std::move(m_vItem[i + 1]);
-        }
-        else
-        {
-            for (int i{ idxFrom }; i > idxTo; --i)
-                m_vItem[i] = std::move(m_vItem[i - 1]);
-        }
-        m_vItem[idxTo] = std::move(e);
-        ReCalculateItemPosition();
+        const auto cxMark = GetTheme()->GetMetric(
+            IdMeInsertMarkWidth, DefaultInsertMarkWidth);
+        const float xMark = DragCalculateInsertMarkPosition();
+        rc = { xMark - cxMark / 2.f, 0.f, xMark + cxMark / 2.f, (float)GetHeight() };
     }
+    void DragCalculateInsertMarkRect(_Out_ D2D1_RECT_F& rc) const noexcept
+    {
+        DragCalculateInsertMarkRect(*(Kw::Rect*)&rc);
+    }
+
+    void DragMoveItem(int io, int ioNew) noexcept
+    {
+        const auto idx = m_vOrder[io];
+        if (io < ioNew)
+            for (int i = io; i < ioNew; ++i)
+                m_vOrder[i] = m_vOrder[i + 1];
+        else
+            for (int i = io; i > ioNew; --i)
+                m_vOrder[i] = m_vOrder[i - 1];
+        m_vOrder[ioNew] = idx;
+        ReCalculateItemPosition(std::min(io, ioNew));
+    }
+
     void DragEnd(BOOL bCommitOrder) noexcept
     {
         if (m_idxDrag < 0)
             return;
 
         const auto idxDragOld = m_idxDrag;
+        const auto ioDragOld = m_ioDrag;
         const auto idxPressedOld = m_idxPressed;
         const auto bWasDragging = m_bDragging;
         const auto bWasDraggingDivider = m_bDraggingDivider;
         const auto bSendEndDrag = bWasDragging || bWasDraggingDivider;
-        int idxTo = idxDragOld;
-        if (bWasDragging && bCommitOrder && m_bDraggable && GetItemCount() > 0)
-            idxTo = std::clamp(m_idxInsertMark, 0, GetItemCount() - 1);
+
+        int ioTo = ioDragOld;
+        if (bWasDragging && bCommitOrder)
+        {
+            ioTo = m_ioInsertMark;
+            if (ioTo > ioDragOld)
+                --ioTo;
+        }
 
         m_idxPressed = -1;
         m_idxDrag = -1;
-        m_idxInsertMark = -1;
+        m_ioDrag = -1;
+        m_ioInsertMark = -1;
         m_idxHot = -1;
         m_bHitDivider = FALSE;
         m_bDragging = FALSE;
         m_bDraggingDivider = FALSE;
         m_bAnimating = FALSE;
 
-        if (bWasDragging && bCommitOrder && idxTo != idxDragOld)
+        GetWindow().RdLockUpdate();
+        if (ioTo != ioDragOld)
         {
-            DragMoveItem(idxDragOld, idxTo);
-            EvtOrderChanged(idxDragOld, idxTo);
+            Kw::Rect rc, rc1;
+            InternalGetItemRect(idxDragOld, rc);
+
+            DragMoveItem(ioDragOld, ioTo);
+            EvtOrderChanged(idxDragOld, ioDragOld, ioTo);
+
+            InternalGetItemRect(OrderToIndex(ioDragOld), rc1);
+            UnionRect(rc, rc, rc1);
+            InternalGetItemRect(OrderToIndex(ioTo), rc1);
+            UnionRect(rc, rc, rc1);
+
+            Invalidate(rc);
         }
         else if (bWasDragging || bWasDraggingDivider)
         {
@@ -258,34 +267,35 @@ private:
 
         if (bSendEndDrag)
             EvtEndDrag(idxDragOld);
+        GetWindow().RdUnlockUpdate();
     }
 
-    int DragCalculateInsertIndex(float xMouse) const noexcept
+    int DragCalculateInsertOrder(float xRef) const noexcept
     {
         const auto cItem = GetItemCount();
         if (cItem <= 1)
             return 0;
-
-        int iBest{};
-        int iSlot{};
-        float dBest{ fabsf(xMouse) };
+        int ioBest{};
+        float dBest{ FLT_MAX }, dLast{ FLT_MAX }, d;
         float x{};
-
-        for (int iSrc{}; iSrc < cItem; ++iSrc)
+        EckCounter(cItem, io)
         {
-            if (iSrc == m_idxDrag)
-                continue;
-
-            x += m_vItem[iSrc].cx;
-            ++iSlot;
-            const auto d = fabsf(xMouse - x);
+            d = fabsf(xRef - x);
             if (d < dBest)
             {
                 dBest = d;
-                iBest = iSlot;
+                ioBest = io;
             }
+            x += AtOrder(io).cx;
+            if (d > dLast)
+                goto End;
+            dLast = d;
         }
-        return iBest;
+        d = fabsf(xRef - x);
+        if (d < dBest)
+            ioBest = cItem;
+    End:
+        return ioBest;
     }
 
     BOOL DragBeginAnimation() noexcept
@@ -319,6 +329,21 @@ private:
         }
         return bNeedAnimation;
     }
+
+    void DragSavePositionOrWidth(BOOL bPosOrWidth) noexcept
+    {
+        for (auto& e : m_vItem)
+            e.fSavedXOrCx = bPosOrWidth ? e.x : e.cx;
+    }
+
+    void InternalGetItemRect(int idx, _Out_ Kw::Rect& rcItem) const noexcept
+    {
+        const auto& e = m_vItem[idx];
+        rcItem.left = e.x;
+        rcItem.right = e.x + e.cx;
+        rcItem.top = 0;
+        rcItem.bottom = GetHeight();
+    }
 public:
     static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
     static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
@@ -338,7 +363,7 @@ public:
         {
             PAINTINFO ps;
             BeginPaint(ps, wParam, lParam);
-            for (int i{}; i < GetItemCount(); ++i)
+            EckCounter(GetItemCount(), i)
             {
                 if (m_bDragging && i == m_idxDrag)
                     continue;
@@ -346,15 +371,13 @@ public:
                 if (e.x > ps.rcfClipInElem.right ||
                     e.x + e.cx < ps.rcfClipInElem.left)
                     continue;
-                PaintItem(i, e, ps.rcfClipInElem);
+                PaintItem(i, e, ps.rcfClip);
             }
 
-            if (m_bDragging && m_bDraggable && m_idxInsertMark >= 0)
+            if (m_bDragging && m_bDraggable && m_ioInsertMark >= 0)
             {
-                const auto cxMark = GetTheme()->GetMetric(
-                    IdMeInsertMarkWidth, DefaultInsertMarkWidth);
-                const float xMark = DragGetInsertMarkPosition();
-                D2D1_RECT_F rcMark{ xMark - cxMark / 2.f, 0.f, xMark + cxMark / 2.f, (float)GetHeight() };
+                D2D1_RECT_F rcMark;
+                DragCalculateInsertMarkRect(rcMark);
                 ElementToClient(rcMark);
                 const auto pBrush = GetWindow().CcSetBrushColor(
                     ArgbToD2DColorF(GetTheme()->GetColor(IdCrAccent)));
@@ -362,7 +385,7 @@ public:
             }
 
             if (m_bDragging && m_idxDrag >= 0 && m_idxDrag < GetItemCount())
-                PaintItem(m_idxDrag, m_vItem[m_idxDrag], ps.rcfClipInElem);
+                PaintItem(m_idxDrag, m_vItem[m_idxDrag], ps.rcfClip);
 
             DbgDrawFrame();
             EndPaint(ps);
@@ -387,13 +410,14 @@ public:
                 const auto cxNew = ht.pt.x - e.x - m_xDragOffset;
                 if (cxNew != e.cx)
                 {
+                    m_cxContent += (cxNew - e.cx);
                     e.cx = cxNew;
                     UpdateTextLayout(m_idxDrag);
-                    ReCalculateItemPosition(m_idxDrag + 1);
+                    ReCalculateItemPosition(m_ioDrag + 1);
 
                     GetWindow().RdLockUpdate();
                     EvtWidthChanged(m_idxDrag);
-                    Invalidate();
+                    Invalidate(Kw::Rect{ e.x, 0, GetWidth(), GetHeight() });
                     GetWindow().RdUnlockUpdate();
                 }
             }
@@ -401,24 +425,39 @@ public:
             {
                 if (m_bDragging)
                 {
-                    const auto idxIns = DragCalculateInsertIndex(ht.pt.x);
-                    if (idxIns != m_idxInsertMark)
+                    GetWindow().RdLockUpdate();
+                    const auto ioIns = DragCalculateInsertOrder(ht.pt.x);
+                    if (ioIns != m_ioInsertMark)
                     {
-                        m_idxInsertMark = idxIns;
+                        Kw::Rect rcMark;
+                        DragCalculateInsertMarkRect(rcMark);
+                        Invalidate(rcMark);
+                        m_ioInsertMark = ioIns;
                         DragReCalculateTargetPosition();
                         DragBeginAnimation();
+                        DragCalculateInsertMarkRect(rcMark);
+                        Invalidate(rcMark);
                     }
                     auto& e = m_vItem[m_idxDrag];
+                    const auto xOld = e.x;
                     e.xTarget = e.x = ht.pt.x - m_xDragOffset;
-                    Invalidate();
+                    Invalidate(
+                        Kw::Rect{
+                            std::min(e.x, xOld),
+                            0,
+                            std::max(e.x, xOld) + e.cx,
+                            GetHeight()
+                        });
+                    GetWindow().RdUnlockUpdate();
                 }
                 else
                 {
-                    m_bDragging = TRUE;
-                    m_xDragOffset = ht.pt.x - m_vItem[idx].x;
                     if (m_bDraggable)
                     {
-                        m_idxInsertMark = idx;
+                        m_bDragging = TRUE;
+                        m_xDragOffset = ht.pt.x - m_vItem[idx].x;
+                        m_ioInsertMark = ht.io;
+                        DragSavePositionOrWidth(TRUE);
                         DragReCalculateTargetPosition();
                     }
                     EvtBeginDrag(idx);
@@ -464,6 +503,7 @@ public:
 
             SetCapture();
             m_idxDrag = idx;
+            m_ioDrag = ht.io;
             m_idxPressed = idx;
             m_bAnimating = FALSE;
 
@@ -472,6 +512,7 @@ public:
             {
                 m_bDraggingDivider = TRUE;
                 m_xDragOffset = ht.pt.x - m_vItem[idx].x - m_vItem[idx].cx;
+                DragSavePositionOrWidth(FALSE);
             }
             InvalidateItem(idx);
         }
@@ -489,6 +530,10 @@ public:
             DragEnd(FALSE);
             break;
 
+        case WM_SETFONT:
+            InvalidateCache();
+            break;
+
         case WM_SIZE:
             UpdateAllTextLayout();
             break;
@@ -502,7 +547,7 @@ public:
         break;
         case WM_DESTROY:
             GetWindow().KctUnregisterTimeLine(this);
-            DeleteAllItems();// 应用程序可能需要清理自定义数据
+            DeleteAllItems();
             break;
         }
         return __super::OnEvent(uMsg, wParam, lParam);
@@ -511,32 +556,37 @@ public:
     void TlTick(int iMs) noexcept override
     {
         m_msLastDuration = (USHORT)iMs;
-        const auto bRunning = m_ec.Tick((float)iMs, 200);
-
         if (!m_bDragging || m_idxDrag < 0 || m_idxDrag >= GetItemCount())
         {
             m_bAnimating = FALSE;
             return;
         }
 
+        m_bAnimating = m_ec.Tick((float)iMs, 200);
         EckCounter(GetItemCount(), i)
         {
+            auto& e = m_vItem[i];
+            if (FloatEqual(e.x, e.xTarget))
+            {
+                e.x = e.xTarget;
+                continue;
+            }
             if (i != m_idxDrag)
             {
-                auto& e = m_vItem[i];
-                e.x = e.xStart + (e.xTarget - e.xStart) * m_ec.K;
+                const auto xOld = e.x;
+                if (m_bAnimating)
+                    e.x = e.xStart + (e.xTarget - e.xStart) * m_ec.K;
+                else
+                    e.x = e.xTarget;
+                Invalidate(
+                    Kw::Rect{
+                        std::min(e.x, xOld),
+                        0,
+                        std::max(e.x, xOld) + e.cx,
+                        GetHeight()
+                    }, FALSE);
             }
         }
-        if (!bRunning)
-        {
-            EckCounter(GetItemCount(), i)
-            {
-                if (i != m_idxDrag)
-                    m_vItem[i].x = m_vItem[i].xTarget;
-            }
-            m_bAnimating = FALSE;
-        }
-        Invalidate(FALSE);
     }
     BOOL TlIsValid() noexcept override { return m_bAnimating; }
     int TlGetCurrentInterval() noexcept override { return (int)m_msLastDuration; }
@@ -559,11 +609,12 @@ public:
         nm.idx = idx;
         SendNotify(&nm);
     }
-    void EvtOrderChanged(int idxFrom, int idxTo) noexcept
+    void EvtOrderChanged(int idx, int ioFrom, int ioTo) noexcept
     {
         EVT_ORDER nm{ ENC_HD_ORDERCHANGED };
-        nm.idxFrom = idxFrom;
-        nm.idxTo = idxTo;
+        nm.idx = idx;
+        nm.ioFrom = ioFrom;
+        nm.ioTo = ioTo;
         SendNotify(&nm);
     }
     void EvtDeleteItem(int idx) noexcept
@@ -573,28 +624,31 @@ public:
         SendNotify(&nm);
     }
 
-    int InsertItem(
-        int idx,
-        std::wstring_view sv,
-        float cx = 100.f,
-        LPARAM lParam = 0) noexcept
+    int InsertItem(int idx, std::wstring_view sv, float cx = 100.f) noexcept
     {
+        DragEnd(FALSE);
+        m_bAnimating = FALSE;
+
         if (idx < 0 || idx > GetItemCount())
             idx = GetItemCount();
+
+        for (auto& e : m_vOrder)
+        {
+            if (e >= idx)
+                ++e;
+        }
+        m_vOrder.emplace(m_vOrder.begin() + idx, idx);
 
         auto& e = *m_vItem.emplace(m_vItem.begin() + idx);
         e.rsText = sv;
         e.cx = cx;
-        e.lParam = lParam;
+
+        m_cxContent += cx;
 
         if (m_idxHot >= idx)
             ++m_idxHot;
         if (m_idxPressed >= idx)
             ++m_idxPressed;
-        if (m_idxDrag >= idx)
-            ++m_idxDrag;
-        if (m_idxInsertMark >= idx)
-            ++m_idxInsertMark;
         UpdateTextLayout(idx);
         ReCalculateItemPosition(idx - 1);
         return idx;
@@ -602,6 +656,9 @@ public:
 
     void DeleteItem(int idx) noexcept
     {
+        DragEnd(FALSE);
+        m_bAnimating = FALSE;
+
         if (m_idxHot == idx)
             m_idxHot = -1;
         else if (m_idxHot > idx)
@@ -612,25 +669,31 @@ public:
         else if (m_idxPressed > idx)
             --m_idxPressed;
 
-        if (m_idxInsertMark == idx)
-            m_idxInsertMark = -1;
-        else if (m_idxInsertMark > idx)
-            --m_idxInsertMark;
-
-        if (m_idxDrag == idx)
+        m_cxContent -= m_vItem[idx].cx;
+        int ioChangedBegin{ -1 };
+        for (auto it = m_vOrder.begin(); it != m_vOrder.end(); )
         {
-            m_idxDrag = -1;
-            m_idxInsertMark = -1;
-            m_bDragging = FALSE;
-            m_bDraggingDivider = FALSE;
-            m_bAnimating = FALSE;
+            if ((*it) == idx)
+            {
+                if (ioChangedBegin < 0)
+                    ioChangedBegin = int(it - m_vOrder.begin());
+                it = m_vOrder.erase(it);
+            }
+            else
+            {
+                if ((*it) > idx)
+                {
+                    --(*it);
+                    if (ioChangedBegin < 0)
+                        ioChangedBegin = int(it - m_vOrder.begin());
+                }
+                ++it;
+            }
         }
-        else if (m_idxDrag > idx)
-            --m_idxDrag;
 
         EvtDeleteItem(idx);
         m_vItem.erase(m_vItem.begin() + idx);
-        ReCalculateItemPosition(idx);
+        ReCalculateItemPosition(ioChangedBegin);
     }
 
     void DeleteAllItems() noexcept
@@ -638,10 +701,12 @@ public:
         EckCounter(GetItemCount(), i)
             EvtDeleteItem(i);
         m_vItem.clear();
+        m_cxContent = 0.f;
         m_idxHot = -1;
         m_idxPressed = -1;
         m_idxDrag = -1;
-        m_idxInsertMark = -1;
+        m_ioDrag = -1;
+        m_ioInsertMark = -1;
         m_bHitDivider = FALSE;
         m_bDragging = FALSE;
         m_bDraggingDivider = FALSE;
@@ -657,13 +722,11 @@ public:
 
     void SetItemWidth(int idx, float cx) noexcept
     {
+        m_cxContent += (cx - m_vItem[idx].cx);
         m_vItem[idx].cx = cx;
         UpdateTextLayout(idx);
     }
     EckInlineNdCe float GetItemWidth(int idx) const noexcept { return m_vItem[idx].cx; }
-
-    EckInlineCe void SetItemUserData(int idx, LPARAM lParam) noexcept { m_vItem[idx].lParam = lParam; }
-    EckInlineNdCe LPARAM GetItemUserData(int idx) const noexcept { return m_vItem[idx].lParam; }
 
     EckInlineNdCe int GetItemCount() const noexcept { return (int)m_vItem.size(); }
 
@@ -687,11 +750,11 @@ public:
             m_vItem[idx].pLayout.Clear();
     }
 
-    [[nodiscard]] int HitTest(HITTEST& ht) const noexcept
+    [[nodiscard]] int HitTest(_Inout_ HITTEST& ht) const noexcept
     {
-        EckCounter(GetItemCount(), i)
+        EckCounter(GetItemCount(), io)
         {
-            const auto& e = m_vItem[i];
+            const auto& e = AtOrder(io);
             if (ht.pt.x >= e.x &&
                 ht.pt.x < e.x + e.cx + DividerHitTestWidthHalf)
             {
@@ -700,19 +763,35 @@ public:
                     ht.bHitDivider = TRUE;// 分隔条左界
                 else
                     ht.bHitDivider = FALSE;
-                return i;
+                ht.io = io;
+                return OrderToIndex(io);
             }
         }
+        ht.io = -1;
+        ht.bHitDivider = FALSE;
         return -1;
     }
 
-    void GetItemRect(int idx, Kw::Rect& rcItem) const noexcept
+    void GetItemRect(int idx, _Out_ Kw::Rect& rcItem) const noexcept
     {
-        const auto& e = m_vItem[idx];
-        rcItem.left = e.x;
-        rcItem.right = e.x + e.cx;
-        rcItem.top = 0;
-        rcItem.bottom = GetHeight();
+        if (m_bDraggingDivider && m_idxDrag == idx)
+        {
+            const auto& e = m_vItem[idx];
+            rcItem.left = e.x;
+            rcItem.top = 0;
+            rcItem.right = rcItem.left + e.fSavedXOrCx;
+            rcItem.bottom = GetHeight();
+        }
+        else if (m_bDragging)
+        {
+            const auto& e = m_vItem[idx];
+            rcItem.left = e.fSavedXOrCx;
+            rcItem.top = 0;
+            rcItem.right = rcItem.left + e.cx;
+            rcItem.bottom = GetHeight();
+        }
+        else
+            InternalGetItemRect(idx, rcItem);
     }
 
     void InvalidateItem(int idx) noexcept
@@ -724,10 +803,19 @@ public:
 
     float GetContentWidth() const noexcept
     {
-        float cx{};
-        for (const auto& e : m_vItem)
-            cx += e.cx;
-        return cx;
+        return m_cxContent;
+    }
+
+    EckInlineNdCe int OrderToIndex(int io) const noexcept { return m_vOrder[io]; }
+
+    EckInlineNdCe int IndexToOrder(int idx) const noexcept
+    {
+        EckCounter(GetItemCount(), io)
+        {
+            if (m_vOrder[io] == idx)
+                return io;
+        }
+        return -1;
     }
 };
 
