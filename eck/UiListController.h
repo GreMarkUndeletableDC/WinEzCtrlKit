@@ -99,6 +99,7 @@ struct IHostT
     virtual void LchSccSetRange(BOOL bVert, TCoord Min, TCoord Max) noexcept = 0;
     virtual TCoord LchGetHeight() const noexcept = 0;
     virtual TCoord LchGetWidth() const noexcept = 0;
+    virtual TCoord LchGetListContentWidth() const noexcept = 0;
     virtual void LchInvalidateRect(const TRect<TCoord>* prc) noexcept = 0;
 };
 
@@ -523,6 +524,12 @@ public:
         m_pHost->LchSccSetRange(TRUE, -MtRealTopExtra(), cyContent + m_cyBottomExtra);
     }
 
+    void ReCalculateScrollH() noexcept
+    {
+        if (m_eView == View::List)
+            m_pHost->LchSccSetRange(FALSE, 0, m_pHost->LchGetListContentWidth());
+    }
+
     void GroupFromY(
         _Inout_ Index& idx,
         TCoord y,
@@ -610,6 +617,8 @@ public:
 
     TCoord LvGetContentWidth() const noexcept
     {
+        if (m_eView == View::List)
+            return m_pHost->LchGetListContentWidth();
         return m_pHost->LchGetWidth();
     }
 
@@ -662,8 +671,10 @@ public:
         switch (m_eView)
         {
         case View::List:
-            rc.left = 0;
-            rc.right = LvGetContentWidth();
+        {
+            const auto posH = m_pHost->LchSccGetPosition(FALSE);
+            rc.left = -posH;
+            rc.right = rc.left + m_pHost->LchGetListContentWidth();
             if (m_bVarItemHeight)
             {
                 rc.top = m_pAdapter->AptListGetItemTop(idx) - posV;
@@ -681,7 +692,8 @@ public:
                     rc.top = idx.Item * (m_cyItem + m_cyPadding) - posV;
                 rc.bottom = rc.top + m_cyItem;
             }
-            break;
+        }
+        break;
         case View::Icon:
             rc = {};
             break;
@@ -696,12 +708,17 @@ public:
         switch (m_eView)
         {
         case View::List:
-            rc.left = 0;
-            rc.right = LvGetContentWidth();
+        {
+            const auto posH = m_pHost->LchSccGetPosition(FALSE);
+            rc.left = -posH;
+            rc.right = rc.left + std::max(
+                m_pHost->LchGetListContentWidth(),
+                m_pHost->LchGetWidth());
             rc.top = m_pAdapter->AptListGetGroupTop(idxGroup) -
                 m_pHost->LchSccGetPosition(TRUE);
             rc.bottom = rc.top + m_cyGroupHeader;
-            break;
+        }
+        break;
         case View::Icon:
             rc = {};
             break;
@@ -743,7 +760,7 @@ public:
 
     Index HitTest(HT_INFO& Info) const noexcept
     {
-        if (Info.x < 0 || Info.x > m_pHost->LchGetWidth() ||
+        if (Info.x < 0 || Info.x > LvGetContentWidth() ||
             Info.y < 0 || Info.y > m_pHost->LchGetHeight())
             return InvalidIndex;
         switch (m_eView)

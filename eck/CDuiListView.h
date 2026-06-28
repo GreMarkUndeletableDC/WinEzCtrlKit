@@ -96,7 +96,7 @@ private:
     BITBOOL m_bIndicator : 1{};
     BITBOOL m_bCapturedMouse : 1{};
 protected:
-    void PaintText(
+    void PaintCell(
         const D2D1_RECT_F& rc,
         UiBasic::Lc::Index idx,
         int idxCol) noexcept
@@ -193,6 +193,8 @@ protected:
                     Kw::Rect rcText;
                     m_pHeader->GetItemRect(idxCol, rcText);
                     ElementToClient(rcText);
+                    const auto dx = m_pSccH ? m_pSccH->SccGetPosition() : 0.f;
+                    OffsetRect(rcText, -dx, 0.f);
 
                     if (rcText.right <= rcClip.left)
                         continue;
@@ -200,11 +202,11 @@ protected:
                         break;
                     rcText.top = rcItem.top;
                     rcText.bottom = rcItem.bottom;
-                    PaintText(Kw::MakeD2DRectF(rcText), idx, idxCol);
+                    PaintCell(Kw::MakeD2DRectF(rcText), idx, idxCol);
                 }
             }
             else
-                PaintText(Kw::MakeD2DRectF(rcItem), idx, 0);
+                PaintCell(Kw::MakeD2DRectF(rcItem), idx, 0);
         }
         break;
         }
@@ -226,7 +228,7 @@ protected:
             Kw::MakeD2DRectF(rcItem),
             &rcClip);
 
-        PaintText(Kw::MakeD2DRectF(rcItem), idx, 0);
+        PaintCell(Kw::MakeD2DRectF(rcItem), idx, 0);
     }
 
     void ScbCreateElement(BOOL bVert, BOOL bHorz) noexcept
@@ -257,6 +259,7 @@ protected:
             {
                 m_pSBHorz->TmSetDarkMode(TmIsDarkMode());
                 m_pSBHorz->Create({}, Style, 0, 0, 0, 0, 0, this);
+                m_pSBHorz->SetVertical(FALSE);
             }
         }
         SccConnectEvent();
@@ -269,12 +272,22 @@ protected:
         const auto cx = GetWidth();
         const auto cy = GetHeight();
         const auto cxySB = GetTheme()->GetMetric(IdMeScrollBar);
-        if (m_pSBVert && m_pSBVert->IsValid())
+        const auto bVert = m_pSBVert && m_pSBVert->IsValid() &&
+            m_pSBVert->GetScrollView().IsValid();
+        const auto bHorz = m_pSBHorz && m_pSBHorz->IsValid() &&
+            m_pSBHorz->GetScrollView().IsValid();
+        if (bVert)
             m_pSBVert->SetRect({
                 GetWidth() - cxySB,
                 m_Controller.MtRealTopExtra(),
                 GetWidth(),
-                GetHeight() - m_Controller.MtGetBottomExtra() });
+                GetHeight() - m_Controller.MtGetBottomExtra() - (bHorz ? cxySB : 0) });
+        if (bHorz)
+            m_pSBHorz->SetRect({
+                0,
+                GetHeight() - cxySB,
+                GetWidth() - (bVert ? cxySB : 0),
+                GetHeight() });
     }
 
     void SccUpdatePage() noexcept
@@ -300,7 +313,10 @@ protected:
                 [](const IScrollController::SCC_CALLBACK_DATA& Data)
                 {
                     const auto p = (CListView*)Data.pUser;
+                    p->GetWindow().RdLockUpdate();
+                    p->HdrLayout();
                     p->Invalidate();
+                    p->GetWindow().RdUnlockUpdate();
                 }, this);
     }
     void SccDisconnectEvent() noexcept
@@ -348,7 +364,7 @@ protected:
             Kw::Rect rc;
             rc.left = m_pSccH ? -m_pSccH->SccGetPosition() : 0;
             rc.top = 0;
-            rc.right = GetWidth();
+            rc.right = rc.left + std::max(m_pHeader->GetContentWidth(), GetWidth());
             rc.bottom = rc.top + m_Controller.MtGetHeaderHeight();
             m_pHeader->SetRect(rc);
         }
@@ -401,11 +417,14 @@ public:
 
         case WM_SIZE:
         {
-            ScbLayout();
             SccUpdatePage();
             if (m_Controller.GetAdapter())
+            {
                 m_Controller.ReCalculateScrollV();
+                m_Controller.ReCalculateScrollH();
+            }
             HdrLayout();
+            ScbLayout();
         }
         break;
 
@@ -498,6 +517,9 @@ public:
                     rc.right = m_pHeader->GetContentWidth();
                     rc.top = m_Controller.MtGetHeaderHeight();
                     rc.bottom = GetHeight();
+                    m_Controller.ReCalculateScrollH();
+                    HdrLayout();
+                    ScbLayout();
                     Invalidate(rc);
                 }
                 return 0;
@@ -510,7 +532,7 @@ public:
 
         case WM_CREATE:
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
-            ScbCreateElement(TRUE, FALSE);
+            ScbCreateElement(TRUE, TRUE);
             break;
         case WM_DESTROY:
             SccDisconnectEvent();
@@ -541,6 +563,10 @@ public:
     }
     TCoord LchGetHeight() const noexcept override { return GetHeight(); }
     TCoord LchGetWidth() const noexcept override
+    {
+        return GetWidth();
+    }
+    TCoord LchGetListContentWidth() const noexcept override
     {
         if (m_pHeader && m_Controller.GetView() == TController::View::List)
             return m_pHeader->GetContentWidth();
