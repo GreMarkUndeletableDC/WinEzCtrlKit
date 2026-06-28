@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "DuiDef.h"
+#include "DuiDefine.h"
 #include "DuiCompositor.h"
 #include "DuiTheme.h"
 #include "CEasyD2D.h"
