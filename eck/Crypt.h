@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "BaseN.h"
 #include "MemWalker.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 #include "Check.h"
 
 ECK_NAMESPACE_BEGIN

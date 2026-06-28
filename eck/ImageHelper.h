@@ -7,7 +7,7 @@
 #include "GpPtr.h"
 #endif // !ECK_OPT_NO_GDIPLUS
 #include "CSrwLock.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 
 ECK_NAMESPACE_BEGIN
 enum class ImageType

@@ -2,7 +2,7 @@
 #include "NativeWrapper.h"
 #include "CByteBuffer.h"
 #include "CString.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 #include "CFile.h"
 
 ECK_NAMESPACE_BEGIN

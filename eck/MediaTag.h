@@ -3,7 +3,7 @@
 #include "MemWalker.h"
 #include "CBitSet.h"
 #include "Utility2.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 #include "ComPtr.h"
 #include "CStreamView.h"
 #include "Check.h"
