@@ -342,7 +342,7 @@
     <ClCompile Include="eck\CDataObjectHDrop.h" />
     <ClCompile Include="eck\PhysicalDriveId.h" />
     <ClCompile Include="eck\PrivateApi.h" />
-    <ClCompile Include="eck\PchInc.h" />
+    <ClCompile Include="eck\PchInclude.h" />
     <ClCompile Include="eck\CTab.h" />
     <ClCompile Include="eck\CTaskGroupList.h" />
     <ClCompile Include="eck\CHeader.h" />
