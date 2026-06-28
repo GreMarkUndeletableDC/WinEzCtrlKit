@@ -446,7 +446,7 @@
     <ClCompile Include="eck\EnDeCode.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\Env.h">
+    <ClCompile Include="eck\AutoLink.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\EzDx.h">

@@ -3,7 +3,7 @@
 #include "CApp.h"
 #include "CWindowMain.h"
 
-#include "eck\Env.h"
+#include "eck\AutoLink.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
     _In_ PWSTR pszCmdLine, _In_ int nCmdShow)
