@@ -425,7 +425,7 @@
     <ClCompile Include="eck\DistortImage.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\DlgTemplate.h">
+    <ClCompile Include="eck\DialogTemplate.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\DpiApi.h">
