@@ -89,7 +89,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>.\eck\Others\DpiAwarePreMonV2.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>.\eck\Others\CommonManifest.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,7 +118,7 @@
       <ImageHasSafeExceptionHandlers />
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>.\eck\Others\DpiAwarePreMonV2.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>.\eck\Others\CommonManifest.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -141,7 +141,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>.\eck\Others\DpiAwarePreMonV2.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>.\eck\Others\CommonManifest.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -170,7 +170,7 @@
     </Link>
     <Manifest>
       <EnableDpiAwareness>false</EnableDpiAwareness>
-      <AdditionalManifestFiles>.\eck\Others\DpiAwarePreMonV2.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>.\eck\Others\CommonManifest.manifest %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -185,9 +185,7 @@
     <ClCompile Include="eck\CColorReducing.h" />
     <ClCompile Include="eck\Archive.h" />
     <ClCompile Include="eck\CCowByteBuffer.h" />
-    <ClInclude Include="eck\CDuiHeader.h" />
-    <ClInclude Include="eck\CDuiTabHeader.h" />
-    <ClInclude Include="eck\CDuiTabList.h" />
+    <ClCompile Include="eck\CDuiHeader.h" />
     <ClCompile Include="eck\CDWriteFontFactory.h" />
     <ClCompile Include="eck\CFileEnumerator.h" />
     <ClCompile Include="eck\CHandleTable.h" />
@@ -276,10 +274,10 @@
     <ClCompile Include="eck\CDrawPanel.h" />
     <ClCompile Include="eck\CDuiButton.h" />
     <ClCompile Include="eck\CDuiEdit.h" />
-    <ClInclude Include="eck\CDuiLabel.h" />
+    <ClCompile Include="eck\CDuiLabel.h" />
     <ClCompile Include="eck\CDuiListView.h" />
     <ClCompile Include="eck\CDuiScrollBar.h" />
-    <ClInclude Include="eck\CDuiTitleBar.h" />
+    <ClCompile Include="eck\CDuiTitleBar.h" />
     <ClCompile Include="eck\CDuiTrackBar.h" />
     <ClCompile Include="eck\CUxDwmWindowTheme.h" />
     <ClCompile Include="eck\CEditNc.h" />
@@ -359,7 +357,7 @@
     <ClCompile Include="eck\CommDlg.h" />
     <ClCompile Include="eck\CLabel.h" />
     <ClCompile Include="eck\CListBox.h" />
-    <ClInclude Include="eck\CListBoxExt.h" />
+    <ClCompile Include="eck\CListBoxExt.h" />
     <ClCompile Include="eck\CString.h" />
     <ClCompile Include="eck\CStatic.h" />
     <ClCompile Include="eck\CToolBar.h" />
@@ -409,8 +407,8 @@
     <ClCompile Include="eck\GpPtr.h" />
     <ClCompile Include="eck\UiColor.h" />
     <ClCompile Include="eck\UiScroll.h" />
-    <ClInclude Include="eck\HttpStatus.h" />
-    <ClInclude Include="eck\ServerHelper.h" />
+    <ClCompile Include="eck\HttpStatus.h" />
+    <ClCompile Include="eck\ServerHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

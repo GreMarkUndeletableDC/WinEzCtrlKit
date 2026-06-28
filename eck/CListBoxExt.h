@@ -176,19 +176,19 @@ private:
                     break;
                 else
                     continue;
-            do
-            {
-                if (memcmp(wfd.cFileName, L".", 2 * sizeof(WCHAR)) == 0 ||
-                    memcmp(wfd.cFileName, L"..", 3 * sizeof(WCHAR)) == 0)
-                    continue;
-                if (!m_InfoEx.uFileAttr || wfd.dwFileAttributes & m_InfoEx.uFileAttr)
-                {
-                    if (m_InfoEx.ftMaxTime == m_InfoEx.ftMinTime || IsFILETIMEZero(m_InfoEx.ftMaxTime))
-                        AddString(wfd.cFileName, nullptr, CommInfo);
-                    else if (wfd.ftCreationTime > m_InfoEx.ftMinTime && wfd.ftCreationTime < m_InfoEx.ftMaxTime)
-                        AddString(wfd.cFileName, nullptr, CommInfo);
-                }
-            } while (FindNextFileW(hFind, &wfd));
+            //do
+            //{
+            //    if (memcmp(wfd.cFileName, L".", 2 * sizeof(WCHAR)) == 0 ||
+            //        memcmp(wfd.cFileName, L"..", 3 * sizeof(WCHAR)) == 0)
+            //        continue;
+            //    if (!m_InfoEx.uFileAttr || wfd.dwFileAttributes & m_InfoEx.uFileAttr)
+            //    {
+            //        if (m_InfoEx.ftMaxTime == m_InfoEx.ftMinTime || IsFILETIMEZero(m_InfoEx.ftMaxTime))
+            //            AddString(wfd.cFileName, nullptr, CommInfo);
+            //        else if (wfd.ftCreationTime > m_InfoEx.ftMinTime && wfd.ftCreationTime < m_InfoEx.ftMaxTime)
+            //            AddString(wfd.cFileName, nullptr, CommInfo);
+            //    }
+            //} while (FindNextFileW(hFind, &wfd));
             FindClose(hFind);
             if (!pszDivPos)
                 break;
@@ -212,7 +212,7 @@ private:
             return -1;
         rcItem.left += c_LBPadding;
         rcItem.right = rcItem.left + m_cxCheckBox;
-        if (PointInRect(&rcItem, pt))
+        if (PointInRect(rcItem, pt))
             return idx;
         else
             return -1;
