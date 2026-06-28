@@ -605,7 +605,7 @@
     <ClCompile Include="eck\SystemHelper.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\TextSrvDef.h">
+    <ClCompile Include="eck\TextServicesDefine.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\ThreadPool.h">

@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CDuiScrollBar.h"
-#include "TextSrvDef.h"
+#include "TextServicesDefine.h"
 
 #include <RichOle.h>
 

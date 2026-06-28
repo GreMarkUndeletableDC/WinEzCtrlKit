@@ -377,7 +377,7 @@
     <ClCompile Include="eck\StringConvert.h" />
     <ClCompile Include="eck\StringUtility.h" />
     <ClCompile Include="eck\SymbolHelper.h" />
-    <ClCompile Include="eck\TextSrvDef.h" />
+    <ClCompile Include="eck\TextServicesDefine.h" />
     <ClCompile Include="eck\ShellHelper.h" />
     <ClCompile Include="eck\SystemHelper.h" />
     <ClCompile Include="eck\ThreadPool.h" />
