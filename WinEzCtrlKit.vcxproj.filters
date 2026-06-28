@@ -560,7 +560,7 @@
     <ClCompile Include="eck\PathUtility.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\PchInc.h">
+    <ClCompile Include="eck\PchInclude.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\PhysicalDriveId.h">
