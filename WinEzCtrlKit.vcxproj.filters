@@ -665,7 +665,7 @@
     <ClCompile Include="eck\EuiBase.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\EuiDef.h">
+    <ClCompile Include="eck\EuiDefine.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\EuiTheme.h">

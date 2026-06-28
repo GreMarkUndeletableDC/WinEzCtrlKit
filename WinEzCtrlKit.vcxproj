@@ -403,7 +403,7 @@
     <ClCompile Include="eck\MediaTagID3v2Frame.h" />
     <ClCompile Include="eck\UiElement.h" />
     <ClCompile Include="eck\EuiBase.h" />
-    <ClCompile Include="eck\EuiDef.h" />
+    <ClCompile Include="eck\EuiDefine.h" />
     <ClCompile Include="eck\GpPtr.h" />
     <ClCompile Include="eck\UiColor.h" />
     <ClCompile Include="eck\UiScroll.h" />
