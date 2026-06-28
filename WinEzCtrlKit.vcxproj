@@ -364,7 +364,7 @@
     <ClCompile Include="eck\CTreeView.h" />
     <ClCompile Include="eck\CUpDown.h" />
     <ClCompile Include="eck\CWindow.h" />
-    <ClCompile Include="eck\DlgTemplate.h" />
+    <ClCompile Include="eck\DialogTemplate.h" />
     <ClCompile Include="eck\EasingCurve.h" />
     <ClCompile Include="eck\ECK.h" />
     <ClCompile Include="eck\Env.h" />
