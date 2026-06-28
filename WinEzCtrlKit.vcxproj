@@ -250,7 +250,7 @@
     <ClCompile Include="eck\DpiApi.h" />
     <ClCompile Include="eck\DuiCompositor.h" />
     <ClCompile Include="eck\DuiDefine.h" />
-    <ClCompile Include="eck\DuiStdCompositor.h" />
+    <ClCompile Include="eck\DuiBuiltinCompositor.h" />
     <ClCompile Include="eck\DuiTheme.h" />
     <ClCompile Include="eck\Calculator.h" />
     <ClCompile Include="eck\EzDx.h" />
