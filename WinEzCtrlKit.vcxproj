@@ -324,7 +324,7 @@
     <ClCompile Include="eck\CInputBox.h" />
     <ClCompile Include="eck\CListBoxNew.h" />
     <ClCompile Include="eck\CListViewExt.h" />
-    <ClCompile Include="eck\MemWalker.h" />
+    <ClCompile Include="eck\MemoryWalker.h" />
     <ClCompile Include="eck\CMenu.h" />
     <ClCompile Include="eck\CByteBufferStream.h" />
     <ClCompile Include="eck\CRegistryKey.h" />

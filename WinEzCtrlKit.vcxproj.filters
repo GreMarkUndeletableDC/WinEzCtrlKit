@@ -236,7 +236,7 @@
     <ClCompile Include="eck\CMemorySet.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\MemWalker.h">
+    <ClCompile Include="eck\MemoryWalker.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\CMenu.h">

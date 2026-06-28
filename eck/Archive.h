@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "MemWalker.h"
+#include "MemoryWalker.h"
 #include "Crc.h"
 
 ECK_NAMESPACE_BEGIN

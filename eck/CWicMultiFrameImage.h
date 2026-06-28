@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CStreamWalker.h"
-#include "MemWalker.h"
+#include "MemoryWalker.h"
 #include "Crc.h"
 #include "CByteBufferStream.h"
 
