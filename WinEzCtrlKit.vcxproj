@@ -252,7 +252,7 @@
     <ClCompile Include="eck\DuiDef.h" />
     <ClCompile Include="eck\DuiStdCompositor.h" />
     <ClCompile Include="eck\DuiTheme.h" />
-    <ClCompile Include="eck\CalcExp.h" />
+    <ClCompile Include="eck\Calculator.h" />
     <ClCompile Include="eck\EzDx.h" />
     <ClCompile Include="eck\GdipEffect.h" />
     <ClCompile Include="eck\CoroutineHelper.h" />
