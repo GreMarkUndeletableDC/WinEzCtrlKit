@@ -387,14 +387,14 @@ private:
                 if (wParam & MK_CONTROL)
                 {
                     if (bIntersectOld != bIntersectNew)
-                        ItmpToggleSelect(e.idx, Data);// 翻转选中状态
+                        ItmpToggleSelect(e.idx, Data, TRUE);// 翻转选中状态
                 }
                 else
                 {
                     if (bIntersectOld && !bIntersectNew)
-                        ItmpSelect(e.idx, Data, FALSE);// 先前选中但是现在未选中，清除选中状态
+                        ItmpSelect(e.idx, Data, FALSE, TRUE);// 先前选中但是现在未选中，清除选中状态
                     else if (!bIntersectOld && bIntersectNew)
-                        ItmpSelect(e.idx, Data, TRUE);// 先前未选中但是现在选中，设置选中状态
+                        ItmpSelect(e.idx, Data, TRUE, TRUE);// 先前未选中但是现在选中，设置选中状态
                     // Mark设为离光标最远的选中项
                     if (bIntersectNew && !(wParam & (MK_CONTROL | MK_SHIFT)))
                     {
@@ -414,8 +414,8 @@ private:
             {
 
             }, rcJudge, FALSE);
+        m_pHost->LchInvalidateRect(&rcJudge);
         OffsetRect(m_rcDragSel, 0.f, dy);
-        m_pHost->LchInvalidateRect(nullptr);
     }
 public:
     CControllerT() = default;
@@ -843,16 +843,77 @@ public:
                     InvalidateItem({ m_idxSel, m_idxSelItemGroup });
                 if (idx.IsValid())
                     InvalidateItem(idx);
+                m_idxMark = m_idxSel;
+                m_idxMarkItemGroup = m_idxSelItemGroup;
             }
             break;
         case Selection::Multiple:
         {
-            ItmDeselectAll(TRUE);
             if (idx.IsValid())
             {
                 std::any Data{};
-                if (ItmpSelect(idx, Data, TRUE))
-                    InvalidateItem(idx);
+                if (uMk & MK_CONTROL)
+                {
+                    ItmpToggleSelect(idx, Data, TRUE);
+                    m_idxMark = idx.Item;
+                    m_idxMarkItemGroup = idx.Group;
+                }
+                else if (uMk & MK_SHIFT)
+                {
+                    ItmDeselectAll(TRUE);
+                    if (m_idxMark < 0)
+                        goto CommonClick;
+                    if (m_bGroup)
+                    {
+                        if (m_idxMarkItemGroup < 0)
+                            goto CommonClick;
+                        int idx0, idx1, idxGroup0, idxGroup1;
+                        if (m_idxMarkItemGroup < idx.Group)
+                        {
+                            idxGroup0 = m_idxMarkItemGroup, idxGroup1 = idx.Group;
+                            idx0 = m_idxMark, idx1 = idx.Item;
+                        }
+                        else
+                        {
+                            idxGroup0 = idx.Group, idxGroup1 = m_idxMarkItemGroup;
+                            idx0 = idx.Item, idx1 = m_idxMark;
+                        }
+
+                        if (idxGroup0 == idxGroup1)
+                        {
+                            const auto j0 = std::min(idx0, idx1);
+                            const auto j1 = std::max(idx0, idx1);
+                            for (int j = j0; j <= j1; ++j)
+                                ItmpSelect({ j, idxGroup0 }, Data, TRUE, TRUE);
+                        }
+                        else
+                        {
+                            for (int i = idxGroup0; i <= idxGroup1; ++i)
+                            {
+                                const auto j0 = (i == idxGroup0) ? idx0 : 0;
+                                const auto j1 = (i == idxGroup1) ?
+                                    idx1 : (m_pAdapter->LcaGetCount(i) - 1);
+                                for (int j = j0; j <= j1; ++j)
+                                    ItmpSelect({ j, i }, Data, TRUE, TRUE);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        const auto idx0 = std::min(m_idxMark, idx.Item);
+                        const auto idx1 = std::max(m_idxMark, idx.Item);
+                        for (int i = idx0; i <= idx1; ++i)
+                            ItmpSelect({ i, -1 }, Data, TRUE, TRUE);
+                    }
+                }
+                else
+                {
+                    ItmDeselectAll(TRUE);
+                CommonClick:
+                    ItmpSelect(idx, Data, TRUE, TRUE);
+                    m_idxMark = idx.Item;
+                    m_idxMarkItemGroup = idx.Group;
+                }
             }
         }
         break;
@@ -937,7 +998,7 @@ public:
         }
     }
 private:
-    BOOL ItmpSelect(Index idx, std::any& Data, BOOL bSelect) noexcept
+    BOOL ItmpSelect(Index idx, std::any& Data, BOOL bSelect, BOOL bRedraw) noexcept
     {
         m_pAdapter->LcaGet(idx, 0, Property::SystemState, Data);
         if (Data.type() == typeid(TState))
@@ -956,11 +1017,13 @@ private:
                 u &= ~LIF_SELECTED;
             }
             m_pAdapter->LcaSet(idx, 0, Property::SystemState, Data);
+            if (bRedraw)
+                InvalidateItem(idx);
             return TRUE;
         }
         return FALSE;
     }
-    void ItmpToggleSelect(Index idx, std::any& Data) noexcept
+    void ItmpToggleSelect(Index idx, std::any& Data, BOOL bRedraw) noexcept
     {
         m_pAdapter->LcaGet(idx, 0, Property::SystemState, Data);
         if (Data.type() == typeid(TState))
@@ -968,6 +1031,8 @@ private:
             auto& u = std::any_cast<TState&>(Data);
             u ^= LIF_SELECTED;
             m_pAdapter->LcaSet(idx, 0, Property::SystemState, Data);
+            if (bRedraw)
+                InvalidateItem(idx);
         }
     }
 public:
@@ -987,12 +1052,10 @@ public:
             for (idx.Group = 0; idx.Group < cGroup; ++idx.Group)
             {
                 idx.Item = -1;
-                if (ItmpSelect(idx, Data, FALSE))
-                    InvalidateItem(idx, TRUE);
+                ItmpSelect(idx, Data, FALSE, TRUE);
                 const auto cItem = m_pAdapter->LcaGetCount(idx.Group);
                 for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
-                    if (ItmpSelect(idx, Data, FALSE))
-                        InvalidateItem(idx, TRUE);
+                    ItmpSelect(idx, Data, FALSE, TRUE);
             }
         }
         else
@@ -1000,8 +1063,7 @@ public:
             const auto cItem = m_pAdapter->LcaGetCount().Item;
             Index idx{};
             for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
-                if (ItmpSelect(idx, Data, FALSE))
-                    InvalidateItem(idx, TRUE);
+                ItmpSelect(idx, Data, FALSE, TRUE);
         }
     }
 
