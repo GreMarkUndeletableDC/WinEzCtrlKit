@@ -713,7 +713,7 @@
     <ClCompile Include="eck\DuiSizeBox.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\DuiStdCompositor.h">
+    <ClCompile Include="eck\DuiBuiltinCompositor.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\DuiTheme.h">
