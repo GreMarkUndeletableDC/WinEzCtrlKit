@@ -363,7 +363,7 @@ public:
             const auto& Ss = m_Style[TmSimpleStyleFromThemeState(TmGetState())];
             GetTheme()->Draw(this, &Ss, IdPtNormal, rcF, nullptr);
 
-            D2D1_RECT_F rcClipF{ ps.rcfClip };
+            D2D1_RECT_F rcClipF{ ps.rcClip };
             BOOL bNewClip{};
             if (rcClipF.top - rcF.top < m_mgTextAera.top)
             {

@@ -389,12 +389,12 @@ public:
                 m_Controller.ForEachItem(
                     [&](const TController::FOR_ITEM& e)
                     {
-                        PaintItem(e.idx, ps.rcfClip);
+                        PaintItem(e.idx, ps.rcClip);
                     },
                     [&](const TController::FOR_GROUP& e)
                     {
-                        PaintGroup({ .Group = e.idxGroup }, ps.rcfClip);
-                    }, Kw::MakeRect(ps.rcfClipInElem), TRUE);
+                        PaintGroup({ .Group = e.idxGroup }, ps.rcClip);
+                    }, Kw::MakeRect(ps.rcClipInEle), TRUE);
 
                 if (m_Controller.IsDraggingSelect())
                 {
@@ -405,7 +405,7 @@ public:
                         &m_Style[SsDragSelectRect],
                         IdPtDragSelectRect,
                         rc,
-                        &ps.rcfClip);
+                        &ps.rcClip);
                 }
             }
 

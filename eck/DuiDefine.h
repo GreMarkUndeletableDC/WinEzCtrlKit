@@ -13,7 +13,7 @@ class CElement;
 // 元素样式
 enum
 {
-    DES_BLURBKG = (1u << 31),	// 模糊背景
+    DES_BLUR_BACK = (1u << 31),	// 模糊背景
     // 元素的内容受周边其他内容影响，若无效区域与元素相交，
     // 则必须更新整个元素，设置时DES_BLURBKG强制设置此样式
     DES_CONTENT_EXPAND = (1u << 30),
@@ -79,7 +79,6 @@ enum class PresentMode : BYTE
     BitBltSwapChain,	// 支持透明混合，必须无WS_EX_NRB
     FlipSwapChain,		// 不支持透明混合
     WindowRenderTarget,	// 支持透明混合，必须无WS_EX_NRB
-    DxgiSurface,		// TODO
     UpdateLayeredWindow,
 };
 
@@ -159,8 +158,8 @@ namespace Detail
 
 struct PAINTINFO
 {
-    D2D1_RECT_F rcfClip;        // 剪裁矩形，相对客户区
-    D2D1_RECT_F rcfClipInElem;  // 剪裁矩形，相对元素
+    D2D1_RECT_F rcClip;        // 剪裁矩形，相对客户区
+    D2D1_RECT_F rcClipInEle;  // 剪裁矩形，相对元素
     float ox;
     float oy;
     BOOLEAN bClip;

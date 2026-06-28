@@ -183,11 +183,11 @@ public:
                 GetDC()->SetDpi(96, 96);
                 GetDC()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
                 if (m_bCloseButton)
-                    PaintButton(UdwPart::Close, ps.rcfClip);
+                    PaintButton(UdwPart::Close, ps.rcClip);
                 if (m_bMaxButton)
-                    PaintButton(UdwPart::Maximize, ps.rcfClip);
+                    PaintButton(UdwPart::Maximize, ps.rcClip);
                 if (m_bMinButton)
-                    PaintButton(UdwPart::Minimize, ps.rcfClip);
+                    PaintButton(UdwPart::Minimize, ps.rcClip);
                 GetDC()->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
                 GetDC()->SetDpi(xDpi, yDpi);
             }

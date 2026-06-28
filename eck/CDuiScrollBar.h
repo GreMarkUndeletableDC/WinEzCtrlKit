@@ -106,7 +106,7 @@ private:
                     &Style,
                     m_bVertical ? IdPtTrackV : IdPtTrackH,
                     GetRectInClientD2D(),
-                    &ps.rcfClip);
+                    &ps.rcClip);
 
                 if (m_bVertical)
                     rcThumb.left = rcThumb.right - cxyMin - cxyLeave * m_ec.K;
@@ -122,7 +122,7 @@ private:
                         &m_Style[SsTrackHot],
                         m_bVertical ? IdPtTrackV : IdPtTrackH,
                         GetRectInClientD2D(),
-                        &ps.rcfClip);
+                        &ps.rcClip);
                 }
                 else
                 {
@@ -139,7 +139,7 @@ private:
                 &m_Style[m_bThumbHot ? SsThumbHot : SsThumb],
                 m_bVertical ? IdPtThumbV : IdPtThumbH,
                 Kw::MakeD2DRectF(rcThumb),
-                &ps.rcfClip);
+                &ps.rcClip);
         }
 
         DbgDrawFrame();
