@@ -216,7 +216,7 @@
     <ClCompile Include="eck\FileHelper.h" />
     <ClCompile Include="eck\IGeometrySinkTransformer.h" />
     <ClCompile Include="eck\KwConvexPolygon.h" />
-    <ClCompile Include="eck\KwDef.h" />
+    <ClCompile Include="eck\KwDefine.h" />
     <ClCompile Include="eck\KwDwTextRenderer.h" />
     <ClCompile Include="eck\KwFlatten.h" />
     <ClCompile Include="eck\KwFontAtlasManager.h" />

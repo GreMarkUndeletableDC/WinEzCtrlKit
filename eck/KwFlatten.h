@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "KwDef.h"
+#include "KwDefine.h"
 #include "CTrivialBuffer.h"
 
 ECK_NAMESPACE_BEGIN
