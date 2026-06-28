@@ -367,7 +367,7 @@
     <ClCompile Include="eck\DialogTemplate.h" />
     <ClCompile Include="eck\EasingCurve.h" />
     <ClCompile Include="eck\ECK.h" />
-    <ClCompile Include="eck\Env.h" />
+    <ClCompile Include="eck\AutoLink.h" />
     <ClCompile Include="eck\ImageHelper.h" />
     <ClCompile Include="eck\LunarDateLib.h" />
     <ClCompile Include="eck\MathHelper.h" />

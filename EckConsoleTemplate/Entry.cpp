@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 
-#include "eck\Env.h"
+#include "eck\AutoLink.h"
 
 Cio::CReader<char> ConIn{};
 Cio::CWriter<char> ConOut{};
