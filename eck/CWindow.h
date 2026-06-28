@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "WndHelper.h"
-#include "MemWalker.h"
+#include "MemoryWalker.h"
 #include "ILayout.h"
 #include "CEventChain.h"
 #include "NativeWrapper.h"

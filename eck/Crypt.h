@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "BaseN.h"
-#include "MemWalker.h"
+#include "MemoryWalker.h"
 #include "AutoPointer.h"
 #include "Check.h"
 
