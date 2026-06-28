@@ -183,6 +183,17 @@ private:
             x += AtOrder(io).cx;
         return x;
     }
+    void DragCalculateInsertMarkRect(_Out_ Kw::Rect& rc) const noexcept
+    {
+        const auto cxMark = GetTheme()->GetMetric(
+            IdMeInsertMarkWidth, DefaultInsertMarkWidth);
+        const float xMark = DragCalculateInsertMarkPosition();
+        rc = { xMark - cxMark / 2.f, 0.f, xMark + cxMark / 2.f, (float)GetHeight() };
+    }
+    void DragCalculateInsertMarkRect(_Out_ D2D1_RECT_F& rc) const noexcept
+    {
+        DragCalculateInsertMarkRect(*(Kw::Rect*)&rc);
+    }
 
     void DragMoveItem(int io, int ioNew) noexcept
     {
@@ -362,10 +373,8 @@ public:
 
             if (m_bDragging && m_bDraggable && m_ioInsertMark >= 0)
             {
-                const auto cxMark = GetTheme()->GetMetric(
-                    IdMeInsertMarkWidth, DefaultInsertMarkWidth);
-                const float xMark = DragCalculateInsertMarkPosition();
-                D2D1_RECT_F rcMark{ xMark - cxMark / 2.f, 0.f, xMark + cxMark / 2.f, (float)GetHeight() };
+                D2D1_RECT_F rcMark;
+                DragCalculateInsertMarkRect(rcMark);
                 ElementToClient(rcMark);
                 const auto pBrush = GetWindow().CcSetBrushColor(
                     ArgbToD2DColorF(GetTheme()->GetColor(IdCrAccent)));
@@ -412,12 +421,18 @@ public:
             {
                 if (m_bDragging)
                 {
+                    GetWindow().RdLockUpdate();
                     const auto ioIns = DragCalculateInsertOrder(ht.pt.x);
                     if (ioIns != m_ioInsertMark)
                     {
+                        Kw::Rect rcMark;
+                        DragCalculateInsertMarkRect(rcMark);
+                        Invalidate(rcMark);
                         m_ioInsertMark = ioIns;
                         DragReCalculateTargetPosition();
                         DragBeginAnimation();
+                        DragCalculateInsertMarkRect(rcMark);
+                        Invalidate(rcMark);
                     }
                     auto& e = m_vItem[m_idxDrag];
                     const auto xOld = e.x;
@@ -429,6 +444,7 @@ public:
                             std::max(e.x, xOld) + e.cx,
                             GetHeight()
                         });
+                    GetWindow().RdUnlockUpdate();
                 }
                 else
                 {
