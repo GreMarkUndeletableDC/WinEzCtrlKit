@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Allocator.h"
-#include "MemUtility.h"
+#include "MemoryUtility.h"
 #include "Utility.h"
 
 #include <initializer_list>

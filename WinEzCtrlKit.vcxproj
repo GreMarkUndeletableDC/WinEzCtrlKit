@@ -299,7 +299,7 @@
     <ClCompile Include="eck\MediaTagID3v1.h" />
     <ClCompile Include="eck\MediaTagID3v2.h" />
     <ClCompile Include="eck\MediaTagMpeg.h" />
-    <ClCompile Include="eck\MemUtility.h" />
+    <ClCompile Include="eck\MemoryUtility.h" />
     <ClCompile Include="eck\CWicMultiFrameImage.h" />
     <ClCompile Include="eck\CInertialScrollView.h" />
     <ClCompile Include="eck\CIni.h" />
