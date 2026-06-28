@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CString.h"
-#include "WndHelper.h"
+#include "WindowHelper.h"
 
 ECK_NAMESPACE_BEGIN
 struct CWindowPlacementStore

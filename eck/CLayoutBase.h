@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "ILayout.h"
 #include "Utility.h"
-#include "WndHelper.h"
+#include "WindowHelper.h"
 
 ECK_NAMESPACE_BEGIN
 // 通用布局选项，低16位

@@ -626,7 +626,7 @@
     <ClCompile Include="eck\WinUiBuilder.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\WndHelper.h">
+    <ClCompile Include="eck\WindowHelper.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\UiTheme.h">
