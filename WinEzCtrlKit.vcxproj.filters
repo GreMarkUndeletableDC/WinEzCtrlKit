@@ -512,7 +512,7 @@
     <ClCompile Include="eck\LocaleStringUtility.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\LunarDateLib.h">
+    <ClCompile Include="eck\LunarDateTable.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\LunarDateTimeHelper.h">
