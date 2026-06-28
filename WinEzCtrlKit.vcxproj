@@ -333,7 +333,7 @@
     <ClCompile Include="eck\CStreamView.h" />
     <ClCompile Include="eck\CToolTip.h" />
     <ClCompile Include="eck\CTreeList.h" />
-    <ClCompile Include="eck\CtrlGraphics.h" />
+    <ClCompile Include="eck\ControlGraphics.h" />
     <ClCompile Include="eck\GraphicsHelper.h" />
     <ClCompile Include="eck\ILayout.h" />
     <ClCompile Include="eck\ITimeLine.h" />

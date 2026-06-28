@@ -389,7 +389,7 @@
     <ClCompile Include="eck\CTrivialBuffer.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\CtrlGraphics.h">
+    <ClCompile Include="eck\ControlGraphics.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\CUiAccess.h">

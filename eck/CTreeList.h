@@ -2,7 +2,7 @@
 #include "CHeaderExt.h"
 #include "CEditExt.h"
 #include "CToolTip.h"
-#include "CtrlGraphics.h"
+#include "ControlGraphics.h"
 #include "CScrollBar.h"
 #ifdef _DEBUG
 #include "Color.h"

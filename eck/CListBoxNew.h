@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CWindow.h"
-#include "CtrlGraphics.h"
+#include "ControlGraphics.h"
 #include "CSelectionRange.h"
 #ifdef _DEBUG
 #include "Color.h"
