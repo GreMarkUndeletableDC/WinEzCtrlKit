@@ -674,6 +674,7 @@ public:
         m_idxHot = -1;
         m_idxPressed = -1;
         m_idxDrag = -1;
+        m_ioDrag = -1;
         m_ioInsertMark = -1;
         m_bHitDivider = FALSE;
         m_bDragging = FALSE;

@@ -1102,7 +1102,7 @@ public:
     {
         if (m_eView == View::List && m_bEnableHeader)
             return m_cyTopExtra + m_cyHeader;
-        return m_cyBottomExtra;
+        return m_cyTopExtra;
     }
 
     EckInlineCe void MtSetTopExtra(TCoord v) noexcept { m_cyTopExtra = v; }

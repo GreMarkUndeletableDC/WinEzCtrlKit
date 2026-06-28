@@ -182,7 +182,7 @@ protected:
         {
             if (m_bIndicator)
             {
-
+                // TODO
             }
 
             if (m_pHeader && m_pHeader->IsValid())
