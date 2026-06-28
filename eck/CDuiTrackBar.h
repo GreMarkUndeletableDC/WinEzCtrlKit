@@ -215,7 +215,7 @@ public:
                 &m_Style[SsTrack],
                 m_bVertical ? IdPtTrackV : IdPtTrackH,
                 MakeD2DRectF(rcTrack),
-                &ps.rcfClip);
+                &ps.rcClip);
 
             TrackRectToFilledTrackRect(rcTrack);
             GetTheme()->Draw(
@@ -223,7 +223,7 @@ public:
                 &m_Style[bDisabled ? SsTrackDisabled : SsTrackActive],
                 m_bVertical ? IdPtActiveTrackV : IdPtActiveTrackH,
                 MakeD2DRectF(rcTrack),
-                &ps.rcfClip);
+                &ps.rcClip);
 
             if (!m_bThinTrack || ((TmGetState() & SaHot) || m_bAnActive))
             {
@@ -238,7 +238,7 @@ public:
                     &m_Style[bDisabled ? SsThumbDisabled : SsThumb],
                     IdPtThumb,
                     MakeD2DRectF(rcTrack),
-                    &ps.rcfClip);
+                    &ps.rcClip);
             }
 
             DbgDrawFrame();

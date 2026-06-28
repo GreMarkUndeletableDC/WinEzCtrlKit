@@ -416,15 +416,16 @@ private:
     void BlurpDrawStyle(CElement* pEle,
         const D2D1_RECT_F& rcClipInClient, float ox, float oy) noexcept
     {
-        EckAssert(pEle->GetStyle() & DES_BLURBKG);
+        EckAssert(pEle->GetStyle() & DES_BLUR_BACK);
         GetDeviceContext()->Flush();
-        auto rcfClipInElem{ rcClipInClient };
-        auto rcfClipInClient{ rcfClipInElem };
-        pEle->ClientToElement(rcfClipInElem);
-        CcReserveBitmapLogical(rcfClipInClient.right - rcfClipInClient.left,
-            rcfClipInClient.bottom - rcfClipInClient.top);
-        OffsetRect(rcfClipInClient, ox, oy);
-        BlurDrawDC(rcfClipInClient, { rcfClipInElem.left, rcfClipInElem.top },
+        auto rcClipInEle{ rcClipInClient };
+        auto rcClip{ rcClipInClient };
+        pEle->ClientToElement(rcClipInEle);
+        CcReserveBitmapLogical(
+            rcClip.right - rcClip.left,
+            rcClip.bottom - rcClip.top);
+        OffsetRect(rcClip, ox, oy);
+        BlurDrawDC(rcClip, { rcClipInEle.left, rcClipInEle.top },
             BlurGetDeviation(), BlurGetUseLayer());
     }
 
@@ -582,7 +583,7 @@ private:
 
                 pDC->SetTransform(D2D1::Matrix3x2F::Translation(
                     rcElem.left, rcElem.top));
-                if (uStyle & DES_BLURBKG)
+                if (uStyle & DES_BLUR_BACK)
                 {
                     auto rc0{ Kw::MakeD2DRectF(rc) };
                     IntersectRect(rc0, rc0, pEle->CompGetCompositedRect());
@@ -1560,9 +1561,9 @@ inline void CElement::InvalidateInternal(const Kw::Rect* prcInEle, BOOL bUpdateN
 inline void CElement::BeginPaint(_Out_ PAINTINFO& ps, WPARAM, LPARAM lParam) noexcept
 {
     const auto pExtra = (Detail::PAINT_EXTRA*)lParam;
-    ps.rcfClip = *pExtra->prcClipInClient;
-    ps.rcfClipInElem = ps.rcfClip;
-    ClientToElement(ps.rcfClipInElem);
+    ps.rcClip = *pExtra->prcClipInClient;
+    ps.rcClipInEle = ps.rcClip;
+    ClientToElement(ps.rcClipInEle);
     ps.ox = pExtra->ox;
     ps.oy = pExtra->oy;
     if (!(GetStyle() & DES_NO_CLIP))
@@ -1572,8 +1573,8 @@ inline void CElement::BeginPaint(_Out_ PAINTINFO& ps, WPARAM, LPARAM lParam) noe
     }
     else
         ps.bClip = FALSE;
-    if ((GetStyle() & DES_BLURBKG) && !GetCompositor())
-        GetWindow().BlurpDrawStyle(this, ps.rcfClip, ps.ox, ps.oy);
+    if ((GetStyle() & DES_BLUR_BACK) && !GetCompositor())
+        GetWindow().BlurpDrawStyle(this, ps.rcClip, ps.ox, ps.oy);
 }
 
 inline void CElement::PostMoveSize(BOOL bSize, BOOL bMove, const Kw::Rect& rcOld) noexcept
@@ -1599,7 +1600,7 @@ inline void CElement::PostMoveSize(BOOL bSize, BOOL bMove, const Kw::Rect& rcOld
 
 inline void CElement::SetStyleWorker(DWORD uStyle) noexcept
 {
-    if (uStyle & DES_BLURBKG)
+    if (uStyle & DES_BLUR_BACK)
         uStyle |= DES_CONTENT_EXPAND;
     const auto dwOld = GetStyle();
     __super::SetStyle(uStyle);

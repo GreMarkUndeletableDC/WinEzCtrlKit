@@ -368,10 +368,10 @@ public:
                 if (m_bDragging && i == m_idxDrag)
                     continue;
                 auto& e = m_vItem[i];
-                if (e.x > ps.rcfClipInElem.right ||
-                    e.x + e.cx < ps.rcfClipInElem.left)
+                if (e.x > ps.rcClipInEle.right ||
+                    e.x + e.cx < ps.rcClipInEle.left)
                     continue;
-                PaintItem(i, e, ps.rcfClip);
+                PaintItem(i, e, ps.rcClip);
             }
 
             if (m_bDragging && m_bDraggable && m_ioInsertMark >= 0)
@@ -385,7 +385,7 @@ public:
             }
 
             if (m_bDragging && m_idxDrag >= 0 && m_idxDrag < GetItemCount())
-                PaintItem(m_idxDrag, m_vItem[m_idxDrag], ps.rcfClip);
+                PaintItem(m_idxDrag, m_vItem[m_idxDrag], ps.rcClip);
 
             DbgDrawFrame();
             EndPaint(ps);
