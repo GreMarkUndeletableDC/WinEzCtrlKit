@@ -142,7 +142,7 @@ public:
     EckInlineNdCe D2D1_SIZE_F GetTileSizeLogical() const noexcept
     {
         const auto Size = GetTileSizePixel();
-        return { Size.width * 96.f / m_fDpi, Size.width * 96.f / m_fDpi };
+        return { Size.width * 96.f / m_fDpi, Size.height * 96.f / m_fDpi };
     }
 
     EckInlineNdCe UINT GetPageCount() const noexcept { return m_Packer.GetPageCount(); }

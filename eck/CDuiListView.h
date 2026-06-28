@@ -192,9 +192,8 @@ protected:
                     const auto idxCol = m_pHeader->OrderToIndex(io);
                     Kw::Rect rcText;
                     m_pHeader->GetItemRect(idxCol, rcText);
+                    OffsetRect(rcText, m_pHeader->GetRect().left, 0.f);
                     ElementToClient(rcText);
-                    const auto dx = m_pSccH ? m_pSccH->SccGetPosition() : 0.f;
-                    OffsetRect(rcText, -dx, 0.f);
 
                     if (rcText.right <= rcClip.left)
                         continue;

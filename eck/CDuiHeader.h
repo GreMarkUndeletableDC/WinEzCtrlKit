@@ -47,10 +47,10 @@ private:
         float xTarget{};// 拖动重排动画目标位置
         float cx{};
         float fSavedXOrCx{};
-        int idxActual{ -1 };
     };
 
     std::vector<ITEM> m_vItem{};
+    std::vector<int> m_vOrder{};// io -> idx
     EasingCurve<Easing::FOutCubic> m_ec{};
 
     int m_idxHot{ -1 };
@@ -58,6 +58,9 @@ private:
     int m_idxDrag{ -1 };
     int m_ioDrag{ -1 };
     int m_ioInsertMark{ -1 };
+
+    float m_cxContent{};
+
     float m_xDragOffset{};
     USHORT m_msLastDuration{};
 
@@ -136,8 +139,8 @@ private:
         }
     }
 
-    EckInlineNdCe auto& AtOrder(int io) noexcept { return m_vItem[m_vItem[io].idxActual]; }
-    EckInlineNdCe auto& AtOrder(int io) const noexcept { return m_vItem[m_vItem[io].idxActual]; }
+    EckInlineNdCe auto& AtOrder(int io) noexcept { return m_vItem[m_vOrder[io]]; }
+    EckInlineNdCe auto& AtOrder(int io) const noexcept { return m_vItem[m_vOrder[io]]; }
 
     // 为了方便起见，允许传入超出有效范围的序号，函数自动夹紧到[0, ItemCount)
     void ReCalculateItemPosition(int ioBegin = 0) noexcept
@@ -197,14 +200,14 @@ private:
 
     void DragMoveItem(int io, int ioNew) noexcept
     {
-        const auto idx = m_vItem[io].idxActual;
+        const auto idx = m_vOrder[io];
         if (io < ioNew)
             for (int i = io; i < ioNew; ++i)
-                m_vItem[i].idxActual = m_vItem[i + 1].idxActual;
+                m_vOrder[i] = m_vOrder[i + 1];
         else
             for (int i = io; i > ioNew; --i)
-                m_vItem[i].idxActual = m_vItem[i - 1].idxActual;
-        m_vItem[ioNew].idxActual = idx;
+                m_vOrder[i] = m_vOrder[i - 1];
+        m_vOrder[ioNew] = idx;
         ReCalculateItemPosition(std::min(io, ioNew));
     }
 
@@ -407,6 +410,7 @@ public:
                 const auto cxNew = ht.pt.x - e.x - m_xDragOffset;
                 if (cxNew != e.cx)
                 {
+                    m_cxContent += (cxNew - e.cx);
                     e.cx = cxNew;
                     UpdateTextLayout(m_idxDrag);
                     ReCalculateItemPosition(m_ioDrag + 1);
@@ -622,13 +626,24 @@ public:
 
     int InsertItem(int idx, std::wstring_view sv, float cx = 100.f) noexcept
     {
+        DragEnd(FALSE);
+        m_bAnimating = FALSE;
+
         if (idx < 0 || idx > GetItemCount())
             idx = GetItemCount();
+
+        for (auto& e : m_vOrder)
+        {
+            if (e >= idx)
+                ++e;
+        }
+        m_vOrder.emplace(m_vOrder.begin() + idx, idx);
 
         auto& e = *m_vItem.emplace(m_vItem.begin() + idx);
         e.rsText = sv;
         e.cx = cx;
-        e.idxActual = idx;
+
+        m_cxContent += cx;
 
         if (m_idxHot >= idx)
             ++m_idxHot;
@@ -641,6 +656,9 @@ public:
 
     void DeleteItem(int idx) noexcept
     {
+        DragEnd(FALSE);
+        m_bAnimating = FALSE;
+
         if (m_idxHot == idx)
             m_idxHot = -1;
         else if (m_idxHot > idx)
@@ -651,19 +669,31 @@ public:
         else if (m_idxPressed > idx)
             --m_idxPressed;
 
-        if (m_idxDrag == idx)
+        m_cxContent -= m_vItem[idx].cx;
+        int ioChangedBegin{ -1 };
+        for (auto it = m_vOrder.begin(); it != m_vOrder.end(); )
         {
-            m_idxDrag = -1;
-            m_bDragging = FALSE;
-            m_bDraggingDivider = FALSE;
-            m_bAnimating = FALSE;
+            if ((*it) == idx)
+            {
+                if (ioChangedBegin < 0)
+                    ioChangedBegin = int(it - m_vOrder.begin());
+                it = m_vOrder.erase(it);
+            }
+            else
+            {
+                if ((*it) > idx)
+                {
+                    --(*it);
+                    if (ioChangedBegin < 0)
+                        ioChangedBegin = int(it - m_vOrder.begin());
+                }
+                ++it;
+            }
         }
-        else if (m_idxDrag > idx)
-            --m_idxDrag;
 
         EvtDeleteItem(idx);
         m_vItem.erase(m_vItem.begin() + idx);
-        ReCalculateItemPosition(idx);
+        ReCalculateItemPosition(ioChangedBegin);
     }
 
     void DeleteAllItems() noexcept
@@ -671,6 +701,7 @@ public:
         EckCounter(GetItemCount(), i)
             EvtDeleteItem(i);
         m_vItem.clear();
+        m_cxContent = 0.f;
         m_idxHot = -1;
         m_idxPressed = -1;
         m_idxDrag = -1;
@@ -691,6 +722,7 @@ public:
 
     void SetItemWidth(int idx, float cx) noexcept
     {
+        m_cxContent += (cx - m_vItem[idx].cx);
         m_vItem[idx].cx = cx;
         UpdateTextLayout(idx);
     }
@@ -771,19 +803,16 @@ public:
 
     float GetContentWidth() const noexcept
     {
-        float cx{};
-        for (const auto& e : m_vItem)
-            cx += e.cx;
-        return cx;
+        return m_cxContent;
     }
 
-    EckInlineNdCe int OrderToIndex(int io) const noexcept { return m_vItem[io].idxActual; }
+    EckInlineNdCe int OrderToIndex(int io) const noexcept { return m_vOrder[io]; }
 
     EckInlineNdCe int IndexToOrder(int idx) const noexcept
     {
         EckCounter(GetItemCount(), io)
         {
-            if (AtOrder(io).idxActual == idx)
+            if (m_vOrder[io] == idx)
                 return io;
         }
         return -1;
