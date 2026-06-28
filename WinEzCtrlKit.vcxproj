@@ -388,7 +388,7 @@
     <ClCompile Include="eck\Utility2.h" />
     <ClCompile Include="eck\WinRtD2DInteropFx.h" />
     <ClCompile Include="eck\WinRtDCompInterop.h" />
-    <ClCompile Include="eck\WndHelper.h" />
+    <ClCompile Include="eck\WindowHelper.h" />
     <ClCompile Include="eck\CEasyD2D.h" />
     <ClCompile Include="eck\CEuiButton.h" />
     <ClCompile Include="eck\CIcoFileReader.h" />

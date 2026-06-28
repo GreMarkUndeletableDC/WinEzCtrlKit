@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "WndHelper.h"
+#include "WindowHelper.h"
 #include "MemoryWalker.h"
 #include "ILayout.h"
 #include "CEventChain.h"
