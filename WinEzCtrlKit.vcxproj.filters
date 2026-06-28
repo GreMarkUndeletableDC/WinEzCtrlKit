@@ -110,7 +110,7 @@
     <ClCompile Include="eck\BaseN.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\CalcExp.h">
+    <ClCompile Include="eck\Calculator.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\CUxDwmWindowTheme.h">
