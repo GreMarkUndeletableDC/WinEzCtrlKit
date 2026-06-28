@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "KwDef.h"
+#include "KwDefine.h"
 
 ECK_NAMESPACE_BEGIN
 KW2D_NAMESPACE_BEGIN

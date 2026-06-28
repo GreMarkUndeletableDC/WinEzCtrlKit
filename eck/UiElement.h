@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CWindow.h"
-#include "KwDef.h"
+#include "KwDefine.h"
 #include "CUnknown.h"
 #include "ComPtr.h"
 

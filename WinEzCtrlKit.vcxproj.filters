@@ -488,7 +488,7 @@
     <ClCompile Include="eck\KwConvexPolygon.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\KwDef.h">
+    <ClCompile Include="eck\KwDefine.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\KwDwTextRenderer.h">

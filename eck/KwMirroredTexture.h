@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "KwDef.h"
+#include "KwDefine.h"
 #include "ComPtr.h"
 #include "CTrivialBuffer.h"
 
