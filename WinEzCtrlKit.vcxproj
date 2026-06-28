@@ -175,7 +175,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CWindowTest.h" />
-    <ClCompile Include="eck\AutoPtrDef.h" />
+    <ClCompile Include="eck\AutoPointer.h" />
     <ClCompile Include="eck\BaseN.h" />
     <ClCompile Include="eck\Alpc.h" />
     <ClCompile Include="eck\CD3DImageList.h" />

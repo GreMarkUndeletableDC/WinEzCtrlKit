@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CByteBuffer.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 
 #include "../ThirdPartyLib/ZLib/zlib.h"
 

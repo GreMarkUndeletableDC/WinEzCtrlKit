@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "NativeWrapper.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 #include "CNtObject.h"
 #include "Utility.h"
 

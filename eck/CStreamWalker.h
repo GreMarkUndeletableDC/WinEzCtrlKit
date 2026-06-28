@@ -2,7 +2,7 @@
 #include "CString.h"
 #include "CByteBuffer.h"
 #include "IMemoryView.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 #include "NativeWrapper.h"
 #include "ComPtr.h"
 

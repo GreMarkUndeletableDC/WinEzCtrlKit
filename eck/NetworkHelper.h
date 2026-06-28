@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 #include "CoroutineHelper.h"
 #include "ComPtr.h"
 #include "CString.h"

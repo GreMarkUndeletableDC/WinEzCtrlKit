@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Utility.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 #include "Check.h"
 
 ECK_NAMESPACE_BEGIN

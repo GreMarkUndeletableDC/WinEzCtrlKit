@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "NativeWrapper.h"
 #include "ComPtr.h"
-#include "AutoPtrDef.h"
+#include "AutoPointer.h"
 #include "CString.h"
 #include "Check.h"
 
