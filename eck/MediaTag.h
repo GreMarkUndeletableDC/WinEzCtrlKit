@@ -10,9 +10,12 @@
 
 ECK_NAMESPACE_BEGIN
 ECK_MEDIATAG_NAMESPACE_BEGIN
-// 标签类型
 enum : UINT
 {
+    // --
+    // -- 标签类型 --
+    // --
+
     TAG_INVALID = 0u,
     TAG_NONE = 1u << 0,
     TAG_ID3V1 = 1u << 1,
@@ -21,22 +24,22 @@ enum : UINT
     TAG_ID3V2_4 = 1u << 4,
     TAG_FLAC = 1u << 5,
     TAG_APE = 1u << 6,
-};
 
-// 元数据类型
-enum MIMASKS :UINT
-{
+    // --
+    // -- 元数据类型 --
+    // --
+
     MIM_NONE = 0u,
     MIM_TITLE = 1u << 0,	// 标题
     MIM_ARTIST = 1u << 1,	// 艺术家
     MIM_ALBUM = 1u << 2,	// 专辑
     MIM_COMMENT = 1u << 3,	// 备注
-    MIM_LRC = 1u << 4,		// 歌词
+    MIM_LYRICS = 1u << 4,		// 歌词
     MIM_COVER = 1u << 5,	// 封面
     MIM_GENRE = 1u << 6,	// 流派
     MIM_TRACK = 1u << 7,	// 音轨号
 
-    MIM_ALL = 0xFFFFFFFF
+    MIM_ALL = 0xFFFFFFFF,
 
     /*
     NOTE 251223
@@ -46,12 +49,11 @@ enum MIMASKS :UINT
     ID3v2   TPOS，也有使用TXXX{MEDIA}的情况
     Vorbis  DISC/DISCNUMBER/DICSTOTAL/TOTALDISCS
     */
-};
-ECK_ENUM_BIT_FLAGS(MIMASKS);
 
-// 标签读写标志
-enum MIFLAGS : UINT
-{
+    // --
+    // -- 标签读写标志 --
+    // --
+
     //												| ID3v1	| ID3v2 | Flac	|  APE	|
     // 在Vorbis注释的TRACK或TRACKNUMBER中写入斜杠"/"加总音轨数
     MIF_WRITE_TRACK_TOTAL = 1u << 0,			// 	|	 	|	 	|	T	|	 	|
@@ -84,44 +86,47 @@ enum MIFLAGS : UINT
     MIF_PREPEND_TAG = 1u << 14,					// 	|		|	T	|		|	T	|
     MIM_DEFPOS_TAG = 1u << 15,					// 	|		|	T	|		|	T	|
 };
-ECK_ENUM_BIT_FLAGS(MIFLAGS);
 
-// 标签单元写入选项
-enum MIITEMFLAGS : BYTE
+enum : BYTE
 {
-    MIIF_ID3V2_4_APPEND = 1u << 0,		// 将该帧置于文件尾部的标签
-    // 将该图片写入为Vorbis注释中的METADATA_BLOCK_PICTURE
-    MIIF_METADATA_BLOCK_PICTURE = 1u << 1,
-};
-ECK_ENUM_BIT_FLAGS(MIITEMFLAGS);
+    // --
+    // -- 标签单元写入选项 --
+    // --
 
-// 错误码
+    MIIF_ID3V2_4_APPEND = 1 << 0,		// 将该帧置于文件尾部的标签
+    // 将该图片写入为Vorbis注释中的METADATA_BLOCK_PICTURE
+    MIIF_METADATA_BLOCK_PICTURE = 1 << 1,
+};
+
+using BFMASK = UINT;// MIM_
+using BFRW = UINT;  // MIF_
+using BFITEM = BYTE;// MIIF_
+
+// 通用错误码
 enum class Result
 {
     Ok,
-    Tag,				// 标签识别出错，如标签头错误等
-    Enum,		        // 枚举值无效
-    Enum_TextEncoding,	// 非法文本编码值
-    TooLargeData,		// 某数据长度超出限制
-    Length,				// 长度字段无效（过长或过短）
-    Value,			    // 值无效
-    IllegalRepeat,		// 非法重复
-    EmptyData,			// 某数据为空
-    ReservedData,	    // 保留部分或未定义部分填入错误信息
-    NoTag,				// 文件中无标签或标签还未被读入
-    MpegSyncFailed,		// MPEG同步失败
-    NotSupport,			// 不支持请求的操作
-    OutOfMemory,		// 内存不足
-    FileAccessDenied,	// 无法访问文件
+    Tag,                // 标签识别出错，如标签头错误等
+    Enumeration,        // 枚举值无效
+    TextEncoding,       // 非法文本编码值
+    TooLargeData,       // 某数据长度超出限制
+    Length,             // 长度字段无效（过长或过短）
+    Value,              // 值无效
+    IllegalRepeat,      // 非法重复
+    EmptyData,          // 某数据为空
+    ReservedData,       // 保留部分或未定义部分填入错误信息
+    NoTag,              // 文件中无标签或标签还未被读入
+    MpegSynchronizeFailed,// MPEG同步失败
+    NotSupport,         // 不支持请求的操作
+    OutOfMemory,        // 内存不足
+    FileAccessDenied,   // 无法访问文件
     Stream,             // 流错误，调用方检查流的错误码和当前位置来确定具体错误
     Broken,             // 文件已损坏
 };
-// 图片类型
-enum class PicType :BYTE
+
+enum class PictureType : BYTE
 {
-    Invalid = 0xFF,     // 任何无效的值
-    PrivBegin = 0,      // ！起始占位
-    Other = PrivBegin,  // 其他
+    Other,              // 其他
     FileIcon32x32,      // 32×32大小文件图标（仅PNG）
     OtherFileIcon,      // 其他图标
     CoverFront,         // 封面
@@ -142,10 +147,23 @@ enum class PicType :BYTE
     Illustration,       // 插画
     BandLogotype,       // 艺术家/艺术团队Logo
     PublisherLogotype,  // 发行商/工作室Logo
-    PrivEnd             // ！终止占位
+
+    Private_End,        // 终止占位
+    Invalid = 0xFF,     // 任何无效的值
 };
 
-constexpr inline std::string_view ApePicType[]
+EckInlineNdCe BOOL PkIsTypeValid(CcpIntOrEnum auto e) noexcept
+{
+    return (BYTE)e < (BYTE)PictureType::Private_End;
+}
+EckInlineNdCe PictureType PkNormalizeType(CcpIntOrEnum auto e) noexcept
+{
+    if (PkIsTypeValid(e))
+        return (PictureType)(BYTE)e;
+    return PictureType::Invalid;
+}
+
+constexpr inline std::string_view PictureTypeStringApe[]
 {
     "Other"sv,
     "Icon"sv,
@@ -171,7 +189,7 @@ constexpr inline std::string_view ApePicType[]
     "Invalid"sv,
 };
 
-constexpr inline  std::wstring_view ZhPicType[]
+constexpr inline std::wstring_view PictureTypeStringChinese[]
 {
     L"其他"sv,
     L"32×32文件图标"sv,
@@ -197,24 +215,20 @@ constexpr inline  std::wstring_view ZhPicType[]
     L"无效"sv,
 };
 
-static_assert(ARRAYSIZE(ApePicType) == ARRAYSIZE(ZhPicType));
-static_assert(ARRAYSIZE(ApePicType) == (size_t)PicType::PrivEnd + 1);
+static_assert(ARRAYSIZE(PictureTypeStringApe) == ARRAYSIZE(PictureTypeStringChinese));
+static_assert(ARRAYSIZE(PictureTypeStringApe) == (size_t)PictureType::Private_End + 1);
 
-EckInlineNdCe auto TagPictureTypeToString(PicType e) noexcept
+EckInlineNdCe auto PkTypeToString(PictureType e) noexcept
 {
-    if (e >= PicType::PrivEnd)
-        return ZhPicType[ARRAYSIZE(ZhPicType) - 1];
-    return ZhPicType[(size_t)e];
+    return PictureTypeStringChinese[size_t(PkIsTypeValid(e) ? e : PictureType::Private_End)];
 }
-EckInlineNdCe auto TagPictureTypeToApeString(PicType e) noexcept
+EckInlineNdCe auto PkTypeToApeString(PictureType e) noexcept
 {
-    if (e >= PicType::PrivEnd)
-        return ApePicType[ARRAYSIZE(ApePicType) - 1];
-    return ApePicType[(size_t)e];
+    return PictureTypeStringApe[size_t(PkIsTypeValid(e) ? e : PictureType::Private_End)];
 }
 
 // 长度1(2B) | 字符串1 | 长度2(2B) | 字符串2 | ... | 0(2B)
-struct StrList
+struct StringList
 {
     struct Iterator
     {
@@ -237,28 +251,29 @@ struct StrList
 
         EckInlineNdCe std::wstring_view operator*() const noexcept
         {
-            return { p + 1,(size_t)*p };
+            return { p + 1, (size_t)*p };
         }
 
         EckInlineNdCe bool operator==(const Iterator& x) const noexcept { return p == x.p; }
     };
 
-    CStringW Str{};
+    CStringW String{};
 
-    EckInlineCe void Clear() noexcept { Str.Clear(); }
+    EckInlineCe void Clear() noexcept { String.Clear(); }
 
     EckInlineNdCe PCWSTR FrontData() const noexcept
     {
-        if (Str.IsEmpty()) return nullptr;
-        return Str.Data() + 1;
+        if (String.IsEmpty()) return nullptr;
+        return String.Data() + 1;
     }
     EckInlineNdCe PWSTR FrontData() noexcept
     {
-        if (Str.IsEmpty()) return nullptr;
-        return Str.Data() + 1;
+        if (String.IsEmpty()) return nullptr;
+        return String.Data() + 1;
     }
 
-    void PushBackStringView(std::wstring_view svText,
+    void PushBackStringView(
+        std::wstring_view svText,
         std::wstring_view svDiv) noexcept
     {
         EckAssert(svText.size() <= 0xFFFF);
@@ -268,22 +283,22 @@ struct StrList
         cchText = (WCHAR)svText.size();
         if (svDiv.empty())
         {
-            Str.PushBackChar(cchText);
-            Str.PushBack(svText.data(), cchText);
-            Str.PushBackChar(L'\0');
+            String.PushBackChar(cchText);
+            String.PushBack(svText.data(), cchText);
+            String.PushBackChar(L'\0');
         }
         else// 如果提供了分隔符，则视为只有一个字符串
         {
-            if (Str.IsEmpty())
-                Str.PushBackChar(L'\0');// 长度
+            if (String.IsEmpty())
+                String.PushBackChar(L'\0');// 长度
             else
             {
-                Str.PopBack();
-                Str.PushBack(svDiv);
+                String.PopBack();
+                String.PushBack(svDiv);
             }
-            Str.PushBack(svText.data(), cchText);
-            Str[0] = WCHAR(Str.Size() - 1);
-            Str.PushBackChar(L'\0');
+            String.PushBack(svText.data(), cchText);
+            String[0] = WCHAR(String.Size() - 1);
+            String.PushBackChar(L'\0');
         }
     }
 
@@ -292,77 +307,91 @@ struct StrList
         PushBackStringView(rs.ToStringView(), svDiv);
     }
 
-    EckInlineNdCe Iterator begin() const noexcept { return { Str.Data() }; }
+    EckInlineNdCe Iterator begin() const noexcept { return { String.Data() }; }
     EckInlineNdCe Iterator end() const noexcept { return {}; }
 };
 
-struct MUSICPIC
+struct Picture
 {
-    PicType eType{ PicType::CoverFront };
-    BOOL bLink{};
+    PictureType eType{ PictureType::CoverFront };
     CStringW rsDesc{};
     CStringA rsMime{};
-    std::variant<CByteBuffer, CStringW> varPic{};
+    std::variant<CByteBuffer, CStringW> Data{};
 
-    EckInlineNdCe auto& GetPicturePath() noexcept { return std::get<CStringW>(varPic); }
-    EckInlineNdCe auto& GetPicturePath() const noexcept { return std::get<CStringW>(varPic); }
-    EckInlineNdCe auto& GetPictureData() noexcept { return std::get<CByteBuffer>(varPic); }
-    EckInlineNdCe auto& GetPictureData() const noexcept { return std::get<CByteBuffer>(varPic); }
+    EckInlineNdCe auto& GetPath() noexcept { return std::get<CStringW>(Data); }
+    EckInlineNdCe auto& GetPath() const noexcept { return std::get<CStringW>(Data); }
+    EckInlineNdCe auto& GetData() noexcept { return std::get<CByteBuffer>(Data); }
+    EckInlineNdCe auto& GetData() const noexcept { return std::get<CByteBuffer>(Data); }
+
+    EckInlineNd auto& WantPath() noexcept
+    {
+        if (!IsLink())
+            Data.emplace<CStringW>();
+        return GetPath();
+    }
+    EckInlineNd auto& WantData() noexcept
+    {
+        if (IsLink())
+            Data.emplace<CByteBuffer>();
+        return GetData();
+    }
+
+    EckInlineNdCe BOOL IsLink() const noexcept { return std::holds_alternative<CStringW>(Data); }
 
     // 从当前内容创建图片数据字节流
     // 若bLink为假，调用方必须保证在当前实例析构前销毁返回的流
     HRESULT CreateStream(_Out_ IStream*& pStream) const noexcept
     {
-        if (bLink)
+        if (IsLink())
         {
-            return SHCreateStreamOnFileEx(GetPicturePath().Data(),
+            return SHCreateStreamOnFileEx(GetPath().Data(),
                 STGM_READ, 0, FALSE, nullptr, &pStream);
         }
         else
         {
-            pStream = new CStreamView{ GetPictureData() };
+            pStream = new CStreamView{ GetData() };
             return S_OK;
         }
     }
 };
 
-struct MUSICINFO
+struct SimpleData
 {
-    MIMASKS uMask{ MIM_ALL };	// 欲操作字段的掩码
-    MIMASKS uMaskChecked{};		// 读操作返回后，设置已读取的信息；写操作时忽略
-    MIFLAGS uFlag{};
+    BFMASK uMask{ MIM_ALL };// 欲操作字段的掩码
+    BFMASK uMaskChecked{};  // 读操作返回后，设置已读取的信息；写操作时忽略
+    BFRW uFlag{};
 
     CStringW rsTitle{};
-    StrList slArtist{};
+    StringList slArtist{};
     CStringW rsAlbum{};
-    StrList slComment{};
+    StringList slComment{};
     CStringW rsLrc{};
     CStringW rsGenre{};
-    std::vector<MUSICPIC> vPic{};
+    std::vector<Picture> vPicture{};
     int nTrack{};
     int cTotalTrack{};
 
     // 取主封面。
     // 函数遍历图片列表，然后按照 封面 > 封底 > 第一幅图片
     // 的优先级顺序返回指定的图片，若失败则返回NULL
-    const MUSICPIC* GetMainCover() const
+    const Picture* GetMainCover() const noexcept
     {
-        if (vPic.empty())
+        if (vPicture.empty())
             return nullptr;
-        const MUSICPIC* pFront{}, * pBack{};
-        for (const auto& e : vPic)
+        const Picture* pFront{}, * pBack{};
+        for (const auto& e : vPicture)
         {
-            if (e.eType == PicType::CoverFront)
+            if (e.eType == PictureType::CoverFront)
                 pFront = &e;
-            else if (e.eType == PicType::CoverBack)
+            else if (e.eType == PictureType::CoverBack)
                 pBack = &e;
         }
         if (pFront) return pFront;
         if (pBack) return pBack;
-        return vPic.data();
+        return vPicture.data();
     }
 
-    void Clear()
+    void Clear() noexcept
     {
         uMaskChecked = MIM_NONE;
         rsTitle.Clear();
@@ -371,7 +400,7 @@ struct MUSICINFO
         slComment.Clear();
         rsLrc.Clear();
         rsGenre.Clear();
-        vPic.clear();
+        vPicture.clear();
     }
 };
 
@@ -457,20 +486,20 @@ enum : BYTE
 };
 
 // 从p处读取4字节并转换为32位小端整数
-EckInlineNdCe UINT TagSyncSafeIntToUInt(_In_reads_bytes_(4) PCBYTE p) noexcept
+EckInlineNdCe UINT TagSynchronizationSafeIntToUInt(_In_reads_bytes_(4) PCBYTE p) noexcept
 {
     return ((p[0] & 0x7F) << 21) | ((p[1] & 0x7F) << 14) |
         ((p[2] & 0x7F) << 7) | (p[3] & 0x7F);
 }
 // 将32位小端整数dw转为同步安全整数，并写入p处
-EckInlineNdCe void TagUIntToSyncSafeInt(_Out_writes_bytes_(4) BYTE* p, UINT dw) noexcept
+EckInlineNdCe void TagUIntToSynchronizationSafeInt(_Out_writes_bytes_(4) BYTE* p, UINT dw) noexcept
 {
     p[3] = (dw) & 0b0111'1111;
     p[2] = (dw >> 7) & 0b0111'1111;
     p[1] = (dw >> 14) & 0b0111'1111;
     p[0] = (dw >> 21) & 0b0111'1111;
 }
-EckNfInlineNdCe BOOL TagCheckID3v2Header(const ID3v2_HEADER& hdr,
+EckNfInlineNdCe BOOL TagCheckId3v2Header(const ID3v2_HEADER& hdr,
     BOOL bHeaderOrFooter = TRUE) noexcept
 {
     return (bHeaderOrFooter ?
@@ -480,7 +509,7 @@ EckNfInlineNdCe BOOL TagCheckID3v2Header(const ID3v2_HEADER& hdr,
         (hdr.Flags & 0b1111) == 0 &&
         hdr.Size[0] < 0x80 && hdr.Size[1] < 0x80 &&
         hdr.Size[2] < 0x80 && hdr.Size[3] < 0x80 &&
-        TagSyncSafeIntToUInt(hdr.Size) != 0;
+        TagSynchronizationSafeIntToUInt(hdr.Size) != 0;
 }
 
 struct FLAC_BLOCK_HEADER
@@ -612,7 +641,7 @@ private:
                 {
                     ID3v2_HEADER Id3Hdr{};
                     w.Seek(m_Loc.posV2Footer - m_Loc.cbID3v2 - 10u) >> Id3Hdr;
-                    if (TagCheckID3v2Header(Id3Hdr))
+                    if (TagCheckId3v2Header(Id3Hdr))
                     {
                         w.Seek(m_Loc.posV2Footer - m_Loc.cbID3v2 - 32u - 10u) >> Hdr;
                         if (TagCheckApeHeader(Hdr) && !(Hdr.dwFlags & APE_IS_HEADER))
@@ -713,10 +742,10 @@ private:
         {
             ID3v2_HEADER hdr;
             w.SeekToBegin() >> hdr;
-            if (TagCheckID3v2Header(hdr))
+            if (TagCheckId3v2Header(hdr))
             {
                 // 若已找到标签头，则使用其内部的SEEK帧来寻找尾部标签，因此此处不需要继续查找标签尾
-                m_Loc.cbID3v2 = TagSyncSafeIntToUInt(hdr.Size);
+                m_Loc.cbID3v2 = TagSynchronizationSafeIntToUInt(hdr.Size);
                 m_Loc.posV2 = 0u;
                 if (hdr.Ver == 3)
                     m_uTagType |= TAG_ID3V2_3;
@@ -734,9 +763,9 @@ private:
                         if (cbSize > 128u + 227u + 10u)
                         {
                             w.Seek(m_Loc.posV1Ext - 10) >> hdr;
-                            if (TagCheckID3v2Header(hdr, FALSE))
+                            if (TagCheckId3v2Header(hdr, FALSE))
                             {
-                                cbFrames = TagSyncSafeIntToUInt(hdr.Size);
+                                cbFrames = TagSynchronizationSafeIntToUInt(hdr.Size);
                                 if (cbSize >= 128u + 227u + 10u + cbFrames)
                                 {
                                     m_Loc.posV2FooterHdr = w.GetPosition() - 10u;
@@ -754,9 +783,9 @@ private:
                         if (cbSize > 128u + 10u)
                         {
                             w.Seek(m_Loc.posV1 - 10) >> hdr;
-                            if (TagCheckID3v2Header(hdr, FALSE))
+                            if (TagCheckId3v2Header(hdr, FALSE))
                             {
-                                cbFrames = TagSyncSafeIntToUInt(hdr.Size);
+                                cbFrames = TagSynchronizationSafeIntToUInt(hdr.Size);
                                 if (cbSize >= 128u + 10u + cbFrames)
                                 {
                                     m_Loc.posV2FooterHdr = (size_t)w.GetPosition() - 10u;
@@ -773,9 +802,9 @@ private:
                     {
                         w.Seek(-10, STREAM_SEEK_END);
                         w >> hdr;
-                        if (TagCheckID3v2Header(hdr, FALSE))
+                        if (TagCheckId3v2Header(hdr, FALSE))
                         {
-                            cbFrames = TagSyncSafeIntToUInt(hdr.Size);
+                            cbFrames = TagSynchronizationSafeIntToUInt(hdr.Size);
                             if (cbSize >= 10u + cbFrames)
                             {
                                 m_Loc.posV2FooterHdr = w.GetPosition() - 10u;
@@ -820,8 +849,11 @@ public:
     CMediaFile() = default;
     CMediaFile(IStream* pStream) noexcept : m_pStream{ pStream } { DetectTag(); }
 
-    CMediaFile(PCWSTR pszFile, UINT grfMode = STGM_READ,
-        UINT uAttr = FILE_ATTRIBUTE_NORMAL, BOOL bCreate = FALSE) noexcept
+    CMediaFile(
+        _In_z_ PCWSTR pszFile,
+        UINT grfMode = STGM_READ,
+        UINT uAttr = FILE_ATTRIBUTE_NORMAL,
+        BOOL bCreate = FALSE) noexcept
     {
         SHCreateStreamOnFileEx(pszFile, grfMode, uAttr,
             bCreate, nullptr, &m_pStream);
@@ -833,7 +865,7 @@ public:
         m_pStream = pStream;
         DetectTag();
     }
-    EckInlineNdCe IStream* GetStream() const noexcept { return m_pStream.Get(); }
+    EckInlineNdCe const ComPtr<IStream>& GetStream() const noexcept { return m_pStream; }
 
     EckInlineNdCe UINT GetTagType() const noexcept { return m_uTagType; }
     EckInlineNdCe auto& GetTagLocation() const noexcept { return m_Loc; }
@@ -863,12 +895,12 @@ protected:
     HRESULT m_hrLast{};
 public:
     ECK_DISABLE_COPY_MOVE(CTag);
-    CTag(CMediaFile& mf) noexcept : m_File{ mf }, m_Stream{ mf.GetStream() } {}
+    CTag(CMediaFile& mf) noexcept : m_File{ mf }, m_Stream{ mf.GetStream().Get() } {}
 
     virtual ~CTag() = default;
 
-    virtual Result SimpleGet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept = 0;
-    virtual Result SimpleSet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept = 0;
+    virtual Result SimpleGet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept = 0;
+    virtual Result SimpleSet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept = 0;
 
     virtual Result ReadTag(UINT uFlags) noexcept = 0;
     virtual Result WriteTag(UINT uFlags) noexcept = 0;

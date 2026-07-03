@@ -13,11 +13,11 @@ EckInlineNd BOOL TagCheckId3FrameId(_In_reads_(4) PCCH Id) noexcept
 }
 
 EckInlineNdCe UINT TagGetFrameLength(
-    const ID3v2_HEADER* pTagHdr,
-    const ID3v2_FRAME_HEADER* pFrameHdr) noexcept
+    _In_ const ID3v2_HEADER* pTagHdr,
+    _In_ const ID3v2_FRAME_HEADER* pFrameHdr) noexcept
 {
     if (pTagHdr->Ver == 4)
-        return TagSyncSafeIntToUInt(pFrameHdr->Size);
+        return TagSynchronizationSafeIntToUInt(pFrameHdr->Size);
     else
         return ReverseInteger(*(UINT*)pFrameHdr->Size);
 }
@@ -82,7 +82,8 @@ private:
     size_t m_SeekVal{ CMediaFile::NPos };// 根据SEEK帧查找到的后置标签位置
 
 
-    Result TagpParseFrameBody(size_t posEnd,
+    Result TagpParseFrameBody(
+        size_t posEnd,
         _Out_opt_ size_t* pposActualEnd = nullptr) noexcept
     {
         if (pposActualEnd)
@@ -198,7 +199,7 @@ private:
             return Result::NoTag;
         }
         m_Stream >> m_Header;
-        m_cbPrependTag = m_cbTag = TagSyncSafeIntToUInt(m_Header.Size);
+        m_cbPrependTag = m_cbTag = TagSynchronizationSafeIntToUInt(m_Header.Size);
         m_ExtHdrInfo = {};
         if (m_Header.Ver == 3)
         {
@@ -229,7 +230,7 @@ private:
                 UINT cb;
                 BYTE by;
                 m_Stream >> bySize;
-                cb = TagSyncSafeIntToUInt(bySize);
+                cb = TagSynchronizationSafeIntToUInt(bySize);
                 if (cb < 6)
                     return Result::Length;
                 m_Stream >> by;
@@ -272,7 +273,9 @@ private:
 
     // ID3规定，每种语言只能有一个注释帧
     // 若无连接符，默认使用"\n"
-    void TagpSetComment(ID3v2::COMM* pFrame, const StrList& slComment,
+    void TagpSetComment(
+        _In_ ID3v2::COMM* pFrame,
+        const StringList& slComment,
         const SIMPLE_OPT& Opt) noexcept
     {
         const auto svDiv = Opt.svCommDiv.empty() ? L"\n"sv : Opt.svCommDiv;
@@ -285,8 +288,11 @@ private:
         }
     }
 
-    void TagpSetTrack(ID3v2::TEXTFRAME* pFrame, int nTrack,
-        int cTotalTrack, const SIMPLE_OPT& Opt) noexcept
+    void TagpSetTrack(
+        _In_ ID3v2::TEXTFRAME* pFrame,
+        int nTrack,
+        int cTotalTrack,
+        const SIMPLE_OPT& Opt) noexcept
     {
         pFrame->vText.resize(1);
         if (cTotalTrack > 0)
@@ -296,8 +302,11 @@ private:
     }
 
     // 注意此函数不修改文本编码
-    void TagpSetPicture(ID3v2::APIC* pFrame, MUSICPIC& Pic,
-        const SIMPLE_OPT& Opt, BOOL bMove) noexcept
+    void TagpSetPicture(
+        _In_ ID3v2::APIC* pFrame,
+        Picture& Pic,
+        const SIMPLE_OPT& Opt,
+        BOOL bMove) noexcept
     {
         pFrame->eType = Pic.eType;
         if (bMove)
@@ -311,16 +320,16 @@ private:
             pFrame->rsDesc = Pic.rsDesc;
         }
 
-        if (Pic.bLink)
+        if (Pic.IsLink())
         {
             pFrame->rbData.Clear();
-            EcdWideToUtf8(pFrame->rbData, Pic.GetPicturePath().Data(), Pic.GetPicturePath().Size());
+            EcdWideToUtf8(pFrame->rbData, Pic.GetPath().Data(), Pic.GetPath().Size());
         }
         else
             if (bMove)
-                pFrame->rbData = std::move(Pic.GetPictureData());
+                pFrame->rbData = std::move(Pic.GetData());
             else
-                pFrame->rbData = Pic.GetPictureData();
+                pFrame->rbData = Pic.GetData();
     }
 
     struct EXTHDR_SERIAL_BUF
@@ -328,8 +337,10 @@ private:
         BYTE by[16];
     };
 
-    void TagpSerializeExtendedHeader(_Out_ EXTHDR_SERIAL_BUF& Buf,
-        _Out_ size_t& cb, _Out_ UINT*& pcbPadding) noexcept
+    void TagpSerializeExtendedHeader(
+        _Out_ EXTHDR_SERIAL_BUF& Buf,
+        _Out_ size_t& cb,
+        _Out_ UINT*& pcbPadding) const noexcept
     {
         EckAssert(m_ExtHdrInfo.bCrc == FALSE);// TODO: 支持CRC
         pcbPadding = nullptr;
@@ -360,7 +371,7 @@ private:
             }
 
             CMemoryWalker w{ Buf.by, cb };
-            TagUIntToSyncSafeInt((BYTE*)w.Data(), (UINT)cb);
+            TagUIntToSynchronizationSafeInt((BYTE*)w.Data(), (UINT)cb);
             w += 4;
             w << 1_by/*标志字节长度*/ << byFlags;
             if (m_ExtHdrInfo.bRestrictions)
@@ -368,19 +379,19 @@ private:
         }
     }
 
-    void TagpSkipExtendedHeader()
+    void TagpSkipExtendedHeader() /*NOT noexcept*/
     {
         BYTE bySize[4];
         m_Stream >> bySize;
         if (m_Header.Ver == 3)
             m_Stream += ReverseInteger(*(UINT*)bySize);
         else
-            m_Stream += (TagSyncSafeIntToUInt(bySize) - 4);
+            m_Stream += (TagSynchronizationSafeIntToUInt(bySize) - 4);
     }
 public:
     using CTag::CTag;
 
-    Result SimpleGet(Eck_Out_buffer_ MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept override
+    Result SimpleGet(Eck_Out_buffer_ SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
         mi.Clear();
         const auto bMove = (Opt.uFlags & SMOF_MOVE);
@@ -419,14 +430,14 @@ public:
                     mi.uMaskChecked |= MIM_ALBUM;
                 }
             }
-            else if ((mi.uMask & MIM_LRC) && e->EqualId("USLT"))
+            else if ((mi.uMask & MIM_LYRICS) && e->EqualId("USLT"))
             {
                 const auto p = DbgDynamicCast<ID3v2::USLT*>(e.get());
                 if (bMove)
                     mi.rsLrc = std::move(p->rsLrc);
                 else
                     mi.rsLrc = p->rsLrc;
-                mi.uMaskChecked |= MIM_LRC;
+                mi.uMaskChecked |= MIM_LYRICS;
             }
             else if ((mi.uMask & MIM_COMMENT) && e->EqualId("COMM"))
             {
@@ -437,7 +448,7 @@ public:
             else if ((mi.uMask & MIM_COVER) && e->EqualId("APIC"))
             {
                 const auto p = DbgDynamicCast<ID3v2::APIC*>(e.get());
-                auto& Pic = mi.vPic.emplace_back();
+                auto& Pic = mi.vPicture.emplace_back();
                 Pic.eType = p->eType;
                 if (bMove)
                 {
@@ -450,17 +461,24 @@ public:
                     Pic.rsMime = p->rsMime;
                 }
 
-                Pic.bLink = (p->rsMime == "-->");
-                if (Pic.bLink)
-                    Pic.varPic = EcdMultiByteToWide((PCSTR)p->rbData.Data(), (int)p->rbData.Size());
+                if (p->rsMime == "-->")
+                {
+                    EcdMultiByteToWide(
+                        Pic.WantPath(),
+                        (PCSTR)p->rbData.Data(),
+                        (int)p->rbData.Size());
+                }
                 else
-                    if (bMove)
-                        Pic.varPic = std::move(p->rbData);
+                {
+                    auto& rb = Pic.WantData();
+                    if (bMove && rb.Capacity() < p->rbData.Capacity())
+                        rb = std::move(p->rbData);
                     else
                     {
-                        Pic.varPic = CByteBuffer(p->rbData.Size());
-                        memcpy(Pic.GetPictureData().Data(), p->rbData.Data(), p->rbData.Size());
+                        rb.ReSize(p->rbData.Size());
+                        memcpy(rb.Data(), p->rbData.Data(), p->rbData.Size());
                     }
+                }
                 mi.uMaskChecked |= MIM_COVER;
             }
             else if ((mi.uMask & MIM_GENRE) && e->EqualId("TCON"))
@@ -489,22 +507,22 @@ public:
         return Result::Ok;
     }
 
-    Result SimpleSet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept override
+    Result SimpleSet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
         mi.uMaskChecked = MIM_NONE;
 
         const auto bMove = Opt.uFlags & SMOF_MOVE;
-        StrList::Iterator itArt{}, itArtEnd{};
+        StringList::Iterator itArt{}, itArtEnd{};
         if (mi.uMask & MIM_ARTIST)
         {
             itArt = mi.slArtist.begin();
             itArtEnd = mi.slArtist.end();
         }
-        decltype(mi.vPic.begin()) itPic{}, itPicEnd{};
+        decltype(mi.vPicture.begin()) itPic{}, itPicEnd{};
         if (mi.uMask & MIM_COVER)
         {
-            itPic = mi.vPic.begin();
-            itPicEnd = mi.vPic.end();
+            itPic = mi.vPicture.begin();
+            itPicEnd = mi.vPicture.end();
         }
 
 #undef ECKTEMP_SET_VAL
@@ -545,9 +563,9 @@ public:
             }
             else if ((mi.uMask & MIM_ALBUM) && e->EqualId("TALB"))
                 ECKTEMP_SET_VAL(mi.rsAlbum, MIM_ALBUM)
-            else if ((mi.uMask & MIM_LRC) && e->EqualId("USLT"))
+            else if ((mi.uMask & MIM_LYRICS) && e->EqualId("USLT"))
             {
-                if (mi.uMaskChecked & MIM_LRC)
+                if (mi.uMaskChecked & MIM_LYRICS)
                 {
                     it = m_vItem.erase(it);
                     continue;
@@ -558,7 +576,7 @@ public:
                 else
                     p->rsLrc = mi.rsLrc;
                 ++it;
-                mi.uMaskChecked |= MIM_LRC;
+                mi.uMaskChecked |= MIM_LYRICS;
             }
             else if ((mi.uMask & MIM_COMMENT) && e->EqualId("COMM"))
             {
@@ -626,7 +644,7 @@ public:
         }
         if (!(mi.uMaskChecked & MIM_ALBUM))
             ECKTEMP_NEW_VAL(mi.rsAlbum, "TALB");
-        if (!(mi.uMaskChecked & MIM_LRC))
+        if (!(mi.uMaskChecked & MIM_LYRICS))
         {
             auto e = std::make_unique<ID3v2::USLT>();
             e->eEncoding = ID3v2::TextEncoding::UTF8;
@@ -845,7 +863,7 @@ public:
             m_Stream << rbAppend;
             if (rbPrepend.IsEmpty())// 前置标签为空，立即写入标签尾
             {
-                TagUIntToSyncSafeInt(Hdr.Size, (UINT)rbPrepend.Size());
+                TagUIntToSynchronizationSafeInt(Hdr.Size, (UINT)rbPrepend.Size());
                 memcpy(Hdr.Header, "3DI", 3);
                 m_Stream << Hdr;
             }
@@ -925,7 +943,7 @@ public:
                 *pcbPaddingExtHdrV23 = ReverseInteger((UINT)cbPadding);
             // 准备头
             memcpy(Hdr.Header, "ID3", 3);
-            TagUIntToSyncSafeInt(Hdr.Size,
+            TagUIntToSynchronizationSafeInt(Hdr.Size,
                 UINT(cbPrependTotal + rbAppend.Size() + cbPadding));
             // 写入
             m_Stream << Hdr;

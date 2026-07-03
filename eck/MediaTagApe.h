@@ -42,9 +42,9 @@ private:
         EckInlineNdCe auto& GetByteBuffer() const noexcept { return std::get<1>(Value); }
     };
 
-    struct PIC
+    struct PICTURE
     {
-        PicType eType;
+        PictureType eType;
         CStringA rsKey;
         CStringW rsDesc;
         CByteBuffer rbData;
@@ -55,7 +55,7 @@ private:
     APE_HEADER m_Hdr{};
 
     std::vector<ITEM> m_vItem{};
-    std::vector<PIC> m_vPic{};
+    std::vector<PICTURE> m_vPicture{};
 
     EckInlineNdCe static ItemType GetItemType(UINT uFlags) noexcept
     {
@@ -79,7 +79,7 @@ private:
 public:
     CApe(CMediaFile& mf) noexcept : CTag{ mf } {}
 
-    Result SimpleGet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept override
+    Result SimpleGet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
 #undef ECKTEMP_GET_VAL
 #define ECKTEMP_GET_VAL(MiField)  \
@@ -115,14 +115,14 @@ public:
                 ECKTEMP_GET_VAL(mi.rsAlbum);
                 mi.uMaskChecked |= MIM_ALBUM;
             }
-            else if (!!(mi.uMask & MIM_LRC) && (
+            else if (!!(mi.uMask & MIM_LYRICS) && (
                 // 以下三个都有使用
                 e.rsKey.CompareI("LYRICS"sv) == 0 ||
                 e.rsKey.CompareI("UNSYNCED LYRICS"sv) == 0 ||
                 e.rsKey.CompareI("UNSYNCEDLYRICS"sv) == 0))
             {
                 ECKTEMP_GET_VAL(mi.rsLrc);
-                mi.uMaskChecked |= MIM_LRC;
+                mi.uMaskChecked |= MIM_LYRICS;
             }
             else if ((mi.uMask & MIM_COMMENT) &&
                 e.rsKey.CompareI("COMMENT"sv) == 0)
@@ -172,34 +172,35 @@ public:
 #undef ECKTEMP_GET_VAL
         if (mi.uMask & MIM_COVER)
         {
-            if (!m_vPic.empty())
+            if (!m_vPicture.empty())
                 mi.uMaskChecked |= MIM_COVER;
-            for (auto& e : m_vPic)
+            for (auto& e : m_vPicture)
             {
+                auto& New = mi.vPicture.emplace_back();
+                New.eType = e.eType;
                 if (bMove)
-                    mi.vPic.emplace_back(
-                        e.eType,
-                        FALSE,
-                        std::move(e.rsDesc),
-                        CStringA{},
-                        std::move(e.rbData));
+                    New.rsDesc = std::move(e.rsDesc);
                 else
-                {
-                    auto& f = mi.vPic.emplace_back(
-                        e.eType,
-                        FALSE,
-                        e.rsDesc,
-                        CStringA{},
-                        CByteBuffer(e.rbData.Size()));
-                    memcpy(f.GetPictureData().Data(),
-                        e.rbData.Data(), e.rbData.Size());
-                }
+                    New.rsDesc = e.rsDesc;
+
+                if (New.rsMime.Compare("-->"sv) == 0)
+                    EcdUtf8ToWide(New.WantPath(),
+                        (PCCH)e.rbData.Data(), (int)e.rbData.Size());
+                else
+                    if (bMove)
+                        New.WantData() = std::move(e.rbData);
+                    else
+                    {
+                        auto& rb = New.WantData();
+                        rb.ReSize(e.rbData.Size());
+                        memcpy(rb.Data(), e.rbData.Data(), e.rbData.Size());
+                    }
             }
         }
         return Result::Ok;
     }
 
-    Result SimpleSet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept override
+    Result SimpleSet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
         for (auto it = m_vItem.begin(); it != m_vItem.end(); )
         {
@@ -213,7 +214,7 @@ public:
             else if ((mi.uMask & MIM_ALBUM) &&
                 e.rsKey.CompareI("ALBUM"sv) == 0)
                 it = m_vItem.erase(it);
-            else if ((mi.uMask & MIM_LRC) && (
+            else if ((mi.uMask & MIM_LYRICS) && (
                 e.rsKey.CompareI("LYRICS"sv) == 0 ||
                 e.rsKey.CompareI("UNSYNCED LYRICS"sv) == 0 ||
                 e.rsKey.CompareI("UNSYNCEDLYRICS"sv) == 0))
@@ -265,7 +266,7 @@ public:
             ECKTEMP_SET_VAL(mi.rsAlbum, "ALBUM"sv);
         if (mi.uMask & MIM_COMMENT)
             ECKTEMP_SET_VAL_LIST(mi.slComment, "COMMENT"sv);
-        if (mi.uMask & MIM_LRC)
+        if (mi.uMask & MIM_LYRICS)
             ECKTEMP_SET_VAL(mi.rsLrc, "UNSYNCED LYRICS"sv);
         if (mi.uMask & MIM_GENRE)
             ECKTEMP_SET_VAL(mi.rsGenre, "GENRE"sv);
@@ -304,38 +305,38 @@ public:
 
         if (mi.uMask & MIM_COVER)
         {
-            m_vPic.clear();
-            for (auto& e : mi.vPic)
+            m_vPicture.clear();
+            for (auto& e : mi.vPicture)
             {
                 const auto eType = (
-                    e.eType == PicType::Invalid &&
+                    e.eType == PictureType::Invalid &&
                     (mi.uFlag & MIF_APE_INVALID_COVER_AS_FRONT) ?
-                    PicType::CoverFront : e.eType);
+                    PictureType::CoverFront : e.eType);
                 CByteBuffer rbData{};
-                if (e.bLink)
-                    rbData = ReadInFile(e.GetPicturePath().Data());
+                if (e.IsLink())
+                    rbData = ReadInFile(e.GetPath().Data());
                 else
                 {
                     if (bMove)
-                        rbData = std::move(e.GetPictureData());
+                        rbData = std::move(e.GetData());
                     else
                     {
-                        const auto& rb = e.GetPictureData();
+                        const auto& rb = e.GetData();
                         rbData.ReSize(rb.Size());
                         memcpy(rbData.Data(), rb.Data(), rb.Size());
                     }
                 }
-                auto& f = m_vPic.emplace_back(
+                auto& f = m_vPicture.emplace_back(
                     eType,
                     CStringA{},
                     e.rsDesc,
                     std::move(rbData));
-                if (eType == PicType::Invalid)
+                if (eType == PictureType::Invalid)
                     f.rsKey.Assign(EckArgString("Cover Art"));
                 else
                 {
                     f.rsKey.Assign(EckArgString("Cover Art ("));
-                    f.rsKey.PushBack(TagPictureTypeToApeString(eType));
+                    f.rsKey.PushBack(PkTypeToApeString(eType));
                     f.rsKey.PushBackChar(')');
                 }
             }
@@ -371,7 +372,7 @@ public:
             if (e.rsKey.IsStartWithI(EckArgString("Cover Art")))
             {
                 // 解析图片类型
-                PicType eType = PicType::Invalid;
+                PictureType eType = PictureType::Invalid;
                 const auto posBracket0 = e.rsKey.FindChar('(');
                 if (posBracket0 >= 0)
                 {
@@ -379,14 +380,14 @@ public:
                         e.rsKey.FindChar(')', posBracket0 + 1) - posBracket0 - 1;
                     if (cchType > 0)
                     {
-                        EckCounter(ARRAYSIZE(ApePicType), i)
+                        EckCounter(ARRAYSIZE(PictureTypeStringApe), i)
                         {
-                            const auto& sv = ApePicType[i];
+                            const auto& sv = PictureTypeStringApe[i];
                             if (TcsEqualLength2I(sv.data(), sv.size(),
                                 e.rsKey.Data() + posBracket0 + 1,
                                 cchType))
                             {
-                                eType = (PicType)i;
+                                eType = (PictureType)i;
                                 break;
                             }
                         }
@@ -399,7 +400,7 @@ public:
                     return Result::Length;
                 //
                 const auto cbData = size_t(cbVal - cchDesc - 1);
-                auto& f = m_vPic.emplace_back(
+                auto& f = m_vPicture.emplace_back(
                     eType,
                     std::move(e.rsKey),
                     EcdUtf8ToWide(pBaseU8, cchDesc),
@@ -457,7 +458,7 @@ public:
     Result WriteTag(UINT uFlags = 0u) noexcept override try
     {
         // 提前计算固定8字节+1字节键结束符大小
-        size_t cbBody = (m_vItem.size() + m_vPic.size()) * (4 + 4 + 1);
+        size_t cbBody = (m_vItem.size() + m_vPicture.size()) * (4 + 4 + 1);
         for (auto& e : m_vItem)
         {
             cbBody += e.rsKey.Size();
@@ -486,7 +487,7 @@ public:
                 ECK_UNREACHABLE;
             }
         }
-        for (auto& e : m_vPic)
+        for (auto& e : m_vPicture)
         {
             e.rsU8Cache.Clear();
             EcdWideToUtf8(e.rsU8Cache, e.rsDesc.Data(), e.rsDesc.Size());
@@ -497,7 +498,7 @@ public:
         memcpy(Hdr.byPreamble, "APETAGEX", 8);
         Hdr.dwVer = 2000;
         Hdr.cbBody = UINT(cbBody + 32);
-        Hdr.cItems = UINT(m_vItem.size() + m_vPic.size());
+        Hdr.cItems = UINT(m_vItem.size() + m_vPicture.size());
         Hdr.dwFlags = APE_HAS_HEADER | APE_HAS_FOOTER;
         ZeroMemory(Hdr.byReserved, sizeof(Hdr.byReserved));
 
@@ -581,7 +582,7 @@ public:
                 break;
             }
         }
-        for (const auto& e : m_vPic)
+        for (const auto& e : m_vPicture)
         {
             const auto dwFlag = (UINT)ItemType::Binary << 1;
             m_Stream << UINT(e.rbData.Size() + e.rsU8Cache.Size() + 1)
@@ -613,12 +614,12 @@ public:
     }
 
     void Reset() noexcept override { ItmClear(); }
-    BOOL IsEmpty() noexcept override { return m_vItem.empty() && m_vPic.empty(); }
+    BOOL IsEmpty() noexcept override { return m_vItem.empty() && m_vPicture.empty(); }
 
     EckInlineNdCe auto& GetItemList() noexcept { return m_vItem; }
     EckInlineNdCe auto& GetItemList() const noexcept { return m_vItem; }
-    EckInlineNdCe auto& GetPictureList() noexcept { return m_vPic; }
-    EckInlineNdCe auto& GetPictureList() const noexcept { return m_vPic; }
+    EckInlineNdCe auto& GetPictureList() noexcept { return m_vPicture; }
+    EckInlineNdCe auto& GetPictureList() const noexcept { return m_vPicture; }
 
     auto ItmAt(std::string_view svKey) noexcept
     {
@@ -646,7 +647,7 @@ public:
     void ItmClear() noexcept
     {
         m_vItem.clear();
-        m_vPic.clear();
+        m_vPicture.clear();
     }
 };
 ECK_MEDIATAG_NAMESPACE_END
