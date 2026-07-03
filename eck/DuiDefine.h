@@ -47,29 +47,17 @@ enum : UINT
 {
     ENC_DUI_DUMMY = ENC_SYSBEGIN,
 
-    // TrackBar
-    TBE_POSCHANGED,		// 位置改变
-    // List
-    LEE_GETDISPINFO,	// 【渲染线程】获取显示信息(NMLEDISPINFO*)
-    // ListTemplate
-    LTE_ITEMCHANED,		// 项改变(NMLTITEMCHEANGED*)，返回TRUE禁止修改
-    LTE_HOTITEMCHANED,	// 热点项改变(NMLTHOTITEMCHEANGED*)，返回TRUE禁止修改
-    LTE_SCROLLED,		// 滚动结束(NMLTSCROLLED*)
-    // TabList
-    TBLE_GETDISPINFO,	// 【渲染线程】获取显示信息(NMTBLDISPINFO*)
-    TBLE_SELCHANGED,	// 选项卡改变(NMTBLITEMINDEX*)
     // Header
     ENC_HD_BEGINDRAG,   // 开始拖拽(EVT_ITEM*)
     ENC_HD_ENDDRAG,     // 结束拖拽(EVT_ITEM*)
     ENC_HD_WIDTHCHANGED,// 宽度改变(EVT_ITEM*)
     ENC_HD_ORDERCHANGED,// 顺序改变(EVT_ORDER*)
     ENC_HD_DELETEITEM,  // 删除项(EVT_ITEM*)
-    // Edit
-    EDE_TXNOTIFY,		// 来自文本服务的通知(NMEDTXNOTIFY*)
-    // TabHeader
-    THE_GETDISPINFO,	// 【渲染线程】获取显示信息(NMTTHDISPINFO*)
 
-    EE_PRIVATE_BEGIN = 0x0400
+    // Edit
+    ENC_ED_TXNOTIFY,    // 来自文本服务的通知(NMEDTXNOTIFY*)
+
+    ENC_PRIVATE_BEGIN = 0x0400
 };
 
 enum class PresentMode : BYTE

@@ -722,6 +722,7 @@ public:
 public:
     EckInlineNdCe TElement* EtFirstChild() const noexcept { return m_pEleFirstChild; }
     EckInlineNdCe TElement* EtLastChild() const noexcept { return m_pEleLastChild; }
+    EckInlineNdCe TElement* EtCurrentNcHitTest() const noexcept { return m_pEleCurrentNcHitTest; }
 
     void EtBroadcastEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
     {
