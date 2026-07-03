@@ -448,30 +448,30 @@ public:
             else if ((mi.uMask & MIM_COVER) && e->EqualId("APIC"))
             {
                 const auto p = DbgDynamicCast<ID3v2::APIC*>(e.get());
-                auto& Pic = mi.vPicture.emplace_back();
-                Pic.eType = p->eType;
+                auto& New = mi.vPicture.emplace_back();
+                New.eType = p->eType;
                 if (bMove)
                 {
-                    Pic.rsDesc = std::move(p->rsDesc);
-                    Pic.rsMime = std::move(p->rsMime);
+                    New.rsDesc = std::move(p->rsDesc);
+                    New.rsMime = std::move(p->rsMime);
                 }
                 else
                 {
-                    Pic.rsDesc = p->rsDesc;
-                    Pic.rsMime = p->rsMime;
+                    New.rsDesc = p->rsDesc;
+                    New.rsMime = p->rsMime;
                 }
 
                 if (p->rsMime == "-->")
                 {
                     EcdMultiByteToWide(
-                        Pic.WantPath(),
+                        New.WantPath(),
                         (PCSTR)p->rbData.Data(),
                         (int)p->rbData.Size());
                 }
                 else
                 {
-                    auto& rb = Pic.WantData();
-                    if (bMove && rb.Capacity() < p->rbData.Capacity())
+                    auto& rb = New.WantData();
+                    if (bMove)
                         rb = std::move(p->rbData);
                     else
                     {

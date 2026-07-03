@@ -183,18 +183,14 @@ public:
                 else
                     New.rsDesc = e.rsDesc;
 
-                if (New.rsMime.Compare("-->"sv) == 0)
-                    EcdUtf8ToWide(New.WantPath(),
-                        (PCCH)e.rbData.Data(), (int)e.rbData.Size());
+                if (bMove)
+                    New.WantData() = std::move(e.rbData);
                 else
-                    if (bMove)
-                        New.WantData() = std::move(e.rbData);
-                    else
-                    {
-                        auto& rb = New.WantData();
-                        rb.ReSize(e.rbData.Size());
-                        memcpy(rb.Data(), e.rbData.Data(), e.rbData.Size());
-                    }
+                {
+                    auto& rb = New.WantData();
+                    rb.ReSize(e.rbData.Size());
+                    memcpy(rb.Data(), e.rbData.Data(), e.rbData.Size());
+                }
             }
         }
         return Result::Ok;
