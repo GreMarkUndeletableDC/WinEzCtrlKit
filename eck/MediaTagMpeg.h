@@ -111,7 +111,7 @@ public:
     size_t m_posBegin{};
     MPEG_INFO m_Info{};
 public:
-    CMpegInfo(CMediaFile& File) noexcept : m_File{ File }, m_Stream(File.GetStream())
+    CMpegInfo(CMediaFile& File) noexcept : m_File{ File }, m_Stream{ File.GetStream().Get() }
     {
         m_Stream.GetStream()->AddRef();
     }
@@ -129,7 +129,7 @@ public:
             m_Stream.Seek(Loc.posV2);
             ID3v2_HEADER Hdr;
             m_Stream >> Hdr;
-            m_posBegin = TagSyncSafeIntToUInt(Hdr.Size) + 10 + Loc.posV2;// 跳过ID3v2以避免错误同步
+            m_posBegin = TagSynchronizationSafeIntToUInt(Hdr.Size) + 10 + Loc.posV2;// 跳过ID3v2以避免错误同步
         }
         else
             m_posBegin = 0;
@@ -182,7 +182,7 @@ public:
                     m_posBegin += e.cbActual;
                 }
             }
-            return Result::MpegSyncFailed;
+            return Result::MpegSynchronizeFailed;
         }
     SyncSucceed:
         m_Info.eVersion = Version((byHdr[1] >> 3) & 0b11_by);

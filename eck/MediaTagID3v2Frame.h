@@ -156,7 +156,7 @@ struct FRAME
     BITBOOL bUnsynchronized : 1{};
     BITBOOL bHasDataLengthIndicator : 1{};
 
-    BYTE byFlags{};// MIIF_
+    BFITEM byFlags{};
 
     virtual ~FRAME() = default;
 
@@ -248,7 +248,7 @@ protected:
             if (bHasDataLengthIndicator)
                 pFrameHdr->Flags[1] |= ID3V24FF_HAS_DATA_LENGTH_INDICATOR;
 
-            TagUIntToSyncSafeInt(pFrameHdr->Size, (UINT)cbFrame);
+            TagUIntToSynchronizationSafeInt(pFrameHdr->Size, (UINT)cbFrame);
         }
         return w;
     }
@@ -353,7 +353,7 @@ protected:
         }
         else/* if (Ctx.pTagHdr->Ver == 4)*/
         {
-            cbBody = TagSyncSafeIntToUInt(Ctx.pFrameHdr->Size);
+            cbBody = TagSynchronizationSafeIntToUInt(Ctx.pFrameHdr->Size);
             if (cbBody != w.GetRemainingSize())
                 w.SeekToEnd() += 1;// throw
             if (Ctx.pFrameHdr->Flags[1] & ID3V24FF_HAS_GROUP_IDENTITY)
@@ -633,7 +633,7 @@ struct TEXTFRAME : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         vText.clear();
         Ctx.rbWork.Clear();
 
@@ -682,7 +682,7 @@ struct TXXX : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         ConvertTextEncoding(rsDesc, w, -1, eEncoding);
         ConvertTextEncoding(rsText, w, (int)w.GetRemainingSize(), eEncoding);
         return PostDeserialize(rb, Ctx);
@@ -738,7 +738,7 @@ struct WXXX : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         ConvertTextEncoding(rsDesc, w, -1, eEncoding);
         rsUrl.Assign((PCCH)w.Data(), (int)w.GetRemainingSize());
         return PostDeserialize(rb, Ctx);
@@ -800,14 +800,14 @@ struct ETCO final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eTimestampFmt;
         if (eTimestampFmt >= TimestampFmt::Max)
-            return Result::Enum;
+            return Result::Enumeration;
         vEvent.clear();
         while (!w.IsEnd())
         {
             auto& e = vEvent.emplace_back();
             w >> e.eType;
             if (e.eType >= EventType::InvalidEnd)
-                return Result::Enum;
+                return Result::Enumeration;
             w.ReadReversed(e.uTimestamp);
         }
         return PostDeserialize(rb, Ctx);
@@ -864,7 +864,7 @@ struct SYTC final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eTimestampFmt;
         if (eTimestampFmt >= TimestampFmt::Max)
-            return Result::Enum;
+            return Result::Enumeration;
         vTempo.clear();
         while (!w.IsEnd())
         {
@@ -915,7 +915,7 @@ struct USLT final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         w.Read(byLang, 3);
         ConvertTextEncoding(rsDesc, w, -1, eEncoding);
         ConvertTextEncoding(rsLrc, w, (int)w.GetRemainingSize(), eEncoding);
@@ -980,14 +980,14 @@ struct SYLT final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         w.Read(byLang, 3);
         w >> eTimestampFmt;
         if (eTimestampFmt >= TimestampFmt::Max)
-            return Result::Enum;
+            return Result::Enumeration;
         w >> eContent;
         if (eContent >= LrcContentType::Max)
-            return Result::Enum;
+            return Result::Enumeration;
         ConvertTextEncoding(rsDesc, w, -1, eEncoding);
         vSync.clear();
         while (!w.IsEnd())
@@ -1032,7 +1032,7 @@ struct COMM final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         w.Read(byLang, 3);
         ConvertTextEncoding(rsDesc, w, -1, eEncoding);
         ConvertTextEncoding(rsText, w, (int)w.GetRemainingSize(), eEncoding);
@@ -1089,7 +1089,7 @@ struct RVA2 final : public FRAME
             auto& e = vChannel.emplace_back();
             w >> e.eChannel;
             if (e.eChannel >= ChannelType::Max)
-                return Result::Enum;
+                return Result::Enumeration;
             w.ReadReversed(e.shVol);
             w >> e.cPeekVolBit;
             w.ReadReversed(e.bsPeekVol.Data(), CeilDivide<UINT>(e.cPeekVolBit, 8));
@@ -1133,7 +1133,7 @@ struct EQU2 final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eInterpolation;
         if (eInterpolation >= Interpolation::Max)
-            return Result::Enum;
+            return Result::Enumeration;
         w >> rsId;
         vPoint.clear();
         while (!w.IsEnd())
@@ -1190,7 +1190,7 @@ struct RVRB final : public FRAME
 struct APIC final : public FRAME
 {
     TextEncoding eEncoding{ TextEncoding::Default };
-    PicType eType{ PicType::CoverFront };
+    PictureType eType{ PictureType::CoverFront };
     CStringA rsMime{};
     CStringW rsDesc{};
     CByteBuffer rbData{};
@@ -1211,7 +1211,7 @@ struct APIC final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         w >> rsMime >> eType;
         ConvertTextEncoding(rsDesc, w, -1, eEncoding);
         rbData.Assign(w.Data(), w.GetRemainingSize());
@@ -1250,7 +1250,7 @@ struct GEOB final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         w >> rsMime;
         ConvertTextEncoding(rsFile, w, -1, eEncoding);
         ConvertTextEncoding(rsDesc, w, -1, eEncoding);
@@ -1458,7 +1458,7 @@ struct POSS final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eTimestamp;
         if (eTimestamp >= TimestampFmt::Max)
-            return Result::Enum;
+            return Result::Enumeration;
         w.ReadReversed(uTime);
         return PostDeserialize(rb, Ctx);
     }
@@ -1491,7 +1491,7 @@ struct USER final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         w.Read(byLang, 3);
         ConvertTextEncoding(rsText, w, (int)w.GetRemainingSize(), eEncoding);
         return PostDeserialize(rb, Ctx);
@@ -1526,7 +1526,7 @@ struct OWNE final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         w >> rsPrice >> szDate;
         ConvertTextEncoding(rsSeller, w, (int)w.GetRemainingSize(), eEncoding);
         return PostDeserialize(rb, Ctx);
@@ -1571,10 +1571,10 @@ struct COMR final : public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         w >> rsPrice >> szDate >> rsUrl >> eReceivedWay;
         if (eReceivedWay >= ReceivedWay::Max)
-            return Result::Enum;
+            return Result::Enumeration;
         ConvertTextEncoding(rsSeller, w, -1, eEncoding);
         ConvertTextEncoding(rsDesc, w, -1, eEncoding);
         w >> rsMime;
@@ -1838,7 +1838,7 @@ struct IPLS final :public FRAME
         auto w = PreDeserialize(rb, Ctx);
         w >> eEncoding;
         if (eEncoding >= TextEncoding::Max)
-            return Result::Enum_TextEncoding;
+            return Result::TextEncoding;
         vMap.clear();
         int cb;
         while (!w.IsEnd())

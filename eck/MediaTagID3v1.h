@@ -287,7 +287,7 @@ private:
 public:
     CID3v1(CMediaFile& File) noexcept : CTag{ File } {}
 
-    Result SimpleGet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept override
+    Result SimpleGet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
         mi.Clear();
         if (m_File.GetTagLocation().posV1 == CMediaFile::NPos)
@@ -347,7 +347,7 @@ public:
         return Result::Ok;
     }
 
-    Result SimpleSet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept override
+    Result SimpleSet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
         const auto bMove = Opt.uFlags & SMOF_MOVE;
 #undef ECKTEMP_SET_VAL

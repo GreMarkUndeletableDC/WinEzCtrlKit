@@ -45,9 +45,9 @@ public:
         BYTE Md5[16];
     };
 
-    struct PIC
+    struct PICTURE
     {
-        PicType eType{};
+        PictureType eType{};
         CStringA rsMime{};
         CStringW rsDesc{};
         CByteBuffer rbData{};
@@ -55,11 +55,11 @@ public:
         UINT cy{};
         UINT bpp{};
         UINT cColor{};
-        MIITEMFLAGS byAddtFlags{};
+        BFITEM byAddtFlags{};
     };
 private:
     std::vector<ITEM> m_vItem{};	// 所有Vorbis注释
-    std::vector<PIC> m_vPic{};	    // 所有图片
+    std::vector<PICTURE> m_vPicture{};	    // 所有图片
     STREAMINFO m_si{};				// 流信息
     std::vector<BLOCK> m_vBlock{};	// 其他块
 
@@ -69,16 +69,13 @@ private:
     size_t m_posFlacTagEnd{ CMediaFile::NPos };
 
     // WARNING 函数返回后rb已被移动
-    static Result ParseImageBlock(CByteBuffer& rb, PIC& Pic) noexcept
+    static Result ParseImageBlock(CByteBuffer& rb, PICTURE& Pic) noexcept
     {
         CMemoryWalker r(rb.Data(), rb.Size());
         UINT t;
         UINT uType;
         r.ReadReversed(uType);// 图片类型
-        if (uType < (BYTE)PicType::PrivBegin || uType >= (BYTE)PicType::PrivEnd)
-            Pic.eType = PicType::Invalid;
-        else
-            Pic.eType = (PicType)uType;
+        Pic.eType = PkNormalizeType(uType);
 
         r.ReadReversed(t);// 长度
         Pic.rsMime.ReSize(t);
@@ -88,7 +85,11 @@ private:
         Pic.rsDesc = EcdMultiByteToWide((PCCH)r.Data(), (int)t, CP_UTF8);
         r += t;
 
-        r.ReadReversed(Pic.cx).ReadReversed(Pic.cy).ReadReversed(Pic.bpp).ReadReversed(Pic.cColor);
+        r
+            .ReadReversed(Pic.cx)
+            .ReadReversed(Pic.cy)
+            .ReadReversed(Pic.bpp)
+            .ReadReversed(Pic.cColor);
 
         r.ReadReversed(t);// 图片数据长度
 
@@ -97,7 +98,7 @@ private:
         return Result::Ok;
     }
 
-    Result InitForWriteTag() noexcept
+    Result InitializeForWriteTag() noexcept
     {
         const auto& Loc = m_File.GetTagLocation();
         if (Loc.posFlac == CMediaFile::NPos)
@@ -125,7 +126,7 @@ private:
     }
 
     // 尾插到rbImage
-    void SerializePicture(const PIC& e, CByteBuffer& rbImage) noexcept
+    void SerializePicture(const PICTURE& e, CByteBuffer& rbImage) noexcept
     {
         const auto cbCurr = rbImage.Size();
         rbImage.PushBack(4u);// 悬而未决
@@ -162,7 +163,7 @@ public:
 public:
     CFlac(CMediaFile& File) :CTag(File) {}
 
-    Result SimpleGet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept override
+    Result SimpleGet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
 #undef ECKTEMP_GET_VAL
 #define ECKTEMP_GET_VAL(MiField) \
@@ -194,14 +195,14 @@ public:
                 ECKTEMP_GET_VAL(mi.rsAlbum);
                 mi.uMaskChecked |= MIM_ALBUM;
             }
-            else if (!!(mi.uMask & MIM_LRC) && (
+            else if (!!(mi.uMask & MIM_LYRICS) && (
                 // LYRICS在Vorbis注释中出现较少，应使用后两个
                 e.rsKey.CompareI("LYRICS"sv) == 0 ||
                 e.rsKey.CompareI("UNSYNCED LYRICS"sv) == 0 ||
                 e.rsKey.CompareI("UNSYNCEDLYRICS"sv) == 0))
             {
                 ECKTEMP_GET_VAL(mi.rsLrc);
-                mi.uMaskChecked |= MIM_LRC;
+                mi.uMaskChecked |= MIM_LYRICS;
             }
             // Vorbis注释建议使用DESCRIPTION
             else if ((mi.uMask & MIM_COMMENT) && (
@@ -251,44 +252,44 @@ public:
 
         if (mi.uMask & MIM_COVER)
         {
-            if (!m_vPic.empty())
+            if (!m_vPicture.empty())
                 mi.uMaskChecked |= MIM_COVER;
-            for (auto& e : m_vPic)
+            for (auto& e : m_vPicture)
             {
-                if (e.rsMime.Compare("-->"sv) == 0)
-                    mi.vPic.emplace_back(
-                        e.eType,
-                        TRUE,
-                        e.rsDesc,
-                        e.rsMime,
-                        EcdUtf8ToWide(e.rbData));
+                auto& New = mi.vPicture.emplace_back();
+                New.eType = e.eType;
+                if (bMove)
+                {
+                    New.rsDesc = std::move(e.rsDesc);
+                    New.rsMime = std::move(e.rsMime);
+                }
+                else
+                {
+                    New.rsDesc = e.rsDesc;
+                    New.rsMime = e.rsMime;
+                }
+
+                if (New.rsMime.Compare("-->"sv) == 0)
+                    EcdUtf8ToWide(New.WantPath(),
+                        (PCCH)e.rbData.Data(), (int)e.rbData.Size());
                 else
                     if (bMove)
-                        mi.vPic.emplace_back(
-                            e.eType,
-                            FALSE,
-                            e.rsDesc,
-                            e.rsMime,
-                            std::move(e.rbData));
+                        New.WantData() = std::move(e.rbData);
                     else
                     {
-                        auto& f = mi.vPic.emplace_back(
-                            e.eType,
-                            FALSE,
-                            e.rsDesc,
-                            e.rsMime,
-                            CByteBuffer(e.rbData.Size()));
-                        memcpy(f.GetPictureData().Data(), e.rbData.Data(), e.rbData.Size());
+                        auto& rb = New.WantData();
+                        rb.ReSize(e.rbData.Size());
+                        memcpy(rb.Data(), e.rbData.Data(), e.rbData.Size());
                     }
             }
         }
         return Result::Ok;
     }
 
-    Result SimpleSet(MUSICINFO& mi, const SIMPLE_OPT& Opt) noexcept override
+    Result SimpleSet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
         const auto bMove = Opt.uFlags & SMOF_MOVE;
-        StrList::Iterator itArt{}, itArtEnd{}, itComm{}, itCommEnd{};
+        StringList::Iterator itArt{}, itArtEnd{}, itComm{}, itCommEnd{};
         if (mi.uMask & MIM_ARTIST)
         {
             itArt = mi.slArtist.begin();
@@ -323,7 +324,7 @@ public:
             else if ((mi.uMask & MIM_ALBUM) &&
                 e.rsKey.CompareI("ALBUM"sv) == 0)
                 it = m_vItem.erase(it);
-            else if ((mi.uMask & MIM_LRC) && (
+            else if ((mi.uMask & MIM_LYRICS) && (
                 e.rsKey.CompareI("LYRICS"sv) == 0 ||
                 e.rsKey.CompareI("UNSYNCED LYRICS"sv) == 0 ||
                 e.rsKey.CompareI("UNSYNCEDLYRICS"sv) == 0))
@@ -382,7 +383,7 @@ public:
             while (itComm != itCommEnd)
                 m_vItem.emplace_back("DESCRIPTION"sv, *itComm++);
         }
-        if (mi.uMask & MIM_LRC)
+        if (mi.uMask & MIM_LYRICS)
             ECKTEMP_SET_VAL(mi.rsLrc, "UNSYNCED LYRICS"sv);
         if (mi.uMask & MIM_GENRE)
             ECKTEMP_SET_VAL(mi.rsGenre, "GENRE"sv);
@@ -405,10 +406,10 @@ public:
         }
 #undef ECKTEMP_SET_VAL
 
-        m_vPic.clear();
-        for (auto& e : mi.vPic)
+        m_vPicture.clear();
+        for (auto& e : mi.vPicture)
         {
-            auto& f = m_vPic.emplace_back();
+            auto& f = m_vPicture.emplace_back();
             f.eType = e.eType;
             if (bMove)
             {
@@ -421,16 +422,16 @@ public:
                 f.rsDesc = e.rsDesc;
             }
 
-            if (e.bLink)
+            if (e.IsLink())
             {
-                const auto& rs = e.GetPicturePath();
+                const auto& rs = e.GetPath();
                 EcdWideToUtf8(f.rbData, rs.Data(), rs.Size());
             }
             else
                 if (bMove)
-                    f.rbData = std::move(e.GetPictureData());
+                    f.rbData = std::move(e.GetData());
                 else
-                    f.rbData = e.GetPictureData();
+                    f.rbData = e.GetData();
         }
         return Result::Ok;
     }
@@ -495,7 +496,7 @@ public:
                     if (rsTemp.IsStartWithI("METADATA_BLOCK_PICTURE"sv))
                     {
                         auto rb = Base64Decode(rsTemp.Data() + pos, cchActual);
-                        ParseImageBlock(rb, m_vPic.emplace_back());
+                        ParseImageBlock(rb, m_vPicture.emplace_back());
                     }
                     else [[likely]]
                     {
@@ -510,7 +511,7 @@ public:
             {
                 CByteBuffer rb(cbBlock);
                 m_Stream.Read(rb.Data(), cbBlock);
-                ParseImageBlock(rb, m_vPic.emplace_back());
+                ParseImageBlock(rb, m_vPicture.emplace_back());
             }
             break;
             default:
@@ -546,7 +547,7 @@ public:
             return Result::NoTag;
         if (m_posFlacTagEnd == CMediaFile::NPos ||
             m_posStreamInfoEnd == CMediaFile::NPos)
-            InitForWriteTag();
+            InitializeForWriteTag();
         if (m_posFlacTagEnd == CMediaFile::NPos ||
             m_posStreamInfoEnd == CMediaFile::NPos)
             return Result::Tag;
@@ -592,13 +593,13 @@ public:
 
         // 预估大小
         size_t cbImageGuess{};
-        for (const auto& e : m_vPic)
+        for (const auto& e : m_vPicture)
             cbImageGuess += (e.rsMime.Size() + e.rsDesc.Size() * 2 + e.rbData.Size() + 40);
         rbPic.Reserve(cbImageGuess);
 
         CByteBuffer rbTemp{};
         constexpr CHAR Key_MetaDataBlockPicture[]{ "METADATA_BLOCK_PICTURE" };
-        for (const auto& e : m_vPic)
+        for (const auto& e : m_vPicture)
         {
             if ((e.byAddtFlags & MIIF_METADATA_BLOCK_PICTURE) ||
                 (uFlags & MIF_WRITE_METADATA_BLOCK_PICTURE))
@@ -702,15 +703,15 @@ public:
         m_posStreamInfoEnd = CMediaFile::NPos;
     }
 
-    BOOL IsEmpty() noexcept override { return m_vItem.empty() && m_vPic.empty(); }
+    BOOL IsEmpty() noexcept override { return m_vItem.empty() && m_vPicture.empty(); }
 
     EckInlineNdCe auto& GetItemList() noexcept { return m_vItem; }
     EckInlineNdCe auto& GetItemList() const noexcept { return m_vItem; }
-    EckInlineNdCe auto& GetPictureList() noexcept { return m_vPic; }
-    EckInlineNdCe auto& GetPictureList() const noexcept { return m_vPic; }
+    EckInlineNdCe auto& GetPictureList() noexcept { return m_vPicture; }
+    EckInlineNdCe auto& GetPictureList() const noexcept { return m_vPicture; }
     EckInlineNdCe auto& GetBlockList() noexcept { return m_vBlock; }
     EckInlineNdCe auto& GetBlockList() const noexcept { return m_vBlock; }
-    EckInlineNdCe auto& GetStreamInfo() const noexcept { return m_si; }
+    EckInlineNdCe auto& GetStreamInformation() const noexcept { return m_si; }
     EckInlineNdCe auto& GetVendor() noexcept { return m_rsVendor; }
     EckInlineNdCe auto& GetVendor() const noexcept { return m_rsVendor; }
 
@@ -740,7 +741,7 @@ public:
     void ItmClear() noexcept
     {
         m_vItem.clear();
-        m_vPic.clear();
+        m_vPicture.clear();
     }
 };
 ECK_MEDIATAG_NAMESPACE_END
