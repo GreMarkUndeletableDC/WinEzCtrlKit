@@ -1454,7 +1454,7 @@ inline HRESULT CEditTextHost::TxGetPropertyBits(DWORD dwMask, DWORD* pdwBits)
 
 inline HRESULT CEditTextHost::TxNotify(DWORD iNotify, void* pv)
 {
-    CEdit::EVT_TX nm{ EDE_TXNOTIFY };
+    CEdit::EVT_TX nm{ ENC_ED_TXNOTIFY };
     nm.iNotify = iNotify;
     nm.pData = pv;
     m_pEdit->SendNotify(&nm);
