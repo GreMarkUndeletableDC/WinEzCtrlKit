@@ -38,12 +38,11 @@ public:
     constexpr CRectPackTile(
         TCoord cxTile, TCoord cyTile,
         TCoord cxPage, TCoord cyPage,
-        TCoord cxPageMax, TCoord cyPageMax,
-        BOOLEAN bIncPageSize = TRUE) noexcept :
+        TCoord cxPageMax, TCoord cyPageMax) noexcept :
         m_cxTile{ cxTile }, m_cyTile{ cyTile },
         m_cxPage{ cxPage }, m_cyPage{ cyPage },
         m_cxPageMax{ cxPageMax }, m_cyPageMax{ cyPageMax },
-        m_bIncPageSize{ bIncPageSize }
+        m_bIncPageSize{ FALSE }
     {
         if (m_cxPage > m_cxPageMax)
             m_cxPage = m_cxPageMax;
