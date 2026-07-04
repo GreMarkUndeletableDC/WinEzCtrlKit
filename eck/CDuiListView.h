@@ -153,7 +153,7 @@ protected:
             GetDC()->DrawTextLayout(
                 { x, rc.top },
                 pTl.Get(),
-                GetWindow().CcSetBrushColor(ArgbToD2DColorF(GetTheme()->GetColor(IdCrFore))),
+                GetWindow().CcSetBrushColor(GetTheme()->GetColorD2D(IdCrFore)),
                 DrawTextLayoutFlags);
     }
     void PaintItem(UiBasic::Lc::Index idx, const D2D1_RECT_F& rcClip) noexcept

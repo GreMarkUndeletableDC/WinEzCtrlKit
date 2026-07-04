@@ -497,7 +497,7 @@ public:
             if (pStyle->CrFore != IdTmInvalid)
             {
                 const auto pBrush = pEle->GetWindow().CcSetBrushColor(
-                    ArgbToD2DColorF(GetColor(pStyle->CrFore)));
+                    GetColorD2D(pStyle->CrFore));
                 const auto r = cxRect / 2.f;
                 const D2D1_ELLIPSE Ell
                 {

@@ -391,7 +391,7 @@ public:
             if (m_bCaretShow)
             {
                 const auto pBrush = GetWindow().CcSetBrushColor(
-                    ArgbToD2DColorF(GetTheme()->GetColor(IdCrFore)));
+                    GetTheme()->GetColorD2D(IdCrFore));
                 auto rcCaret{ m_rcCaret };
                 ElementToClient(rcCaret);
                 GetDC()->FillRectangle(rcCaret, pBrush);

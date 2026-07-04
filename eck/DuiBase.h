@@ -1651,7 +1651,7 @@ inline TmResult CElement::TmGenericDrawBackground(
 {
     const auto pDC = GetDC();
     const auto pBrush = GetWindow().CcSetBrushColor(
-        ArgbToD2DColorF(GetTheme()->GetStyleColor(pStyle, SfBack)));
+        GetTheme()->GetStyleColorD2D(pStyle, SfBack));
     const auto cx = rc.right - rc.left;
     const auto cy = rc.bottom - rc.top;
     if (pStyle->HasRoundCorner())
@@ -1677,8 +1677,7 @@ inline TmResult CElement::TmGenericDrawBackground(
     if (pStyle->HasBorder())
     {
         const auto d = -pStyle->cxBorder / 2.f;
-        pBrush->SetColor(ArgbToD2DColorF(
-            GetTheme()->GetStyleColor(pStyle, SfBorder)));
+        pBrush->SetColor(GetTheme()->GetStyleColorD2D(pStyle, SfBorder));
         if (pStyle->HasRoundCorner())
         {
             if (pStyle->rRound > std::min(cx, cy) / 2.f)
