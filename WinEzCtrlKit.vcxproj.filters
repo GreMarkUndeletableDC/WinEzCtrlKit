@@ -254,9 +254,6 @@
     <ClCompile Include="eck\CObject.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\CommDlg.h">
-      <Filter>ECK Include</Filter>
-    </ClCompile>
     <ClCompile Include="eck\Compress.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
@@ -744,6 +741,15 @@
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\CListBoxExt.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\CColorDialog.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\CFontDialog.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\CTaskDialog.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
   </ItemGroup>
