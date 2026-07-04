@@ -25,9 +25,8 @@ public:
     CD3DImageList(
         TCoord cxTile, TCoord cyTile,
         TCoord cxPage = 512, TCoord cyPage = 256,
-        DXGI_FORMAT eFormat = DXGI_FORMAT_B8G8R8A8_UNORM,
-        BOOLEAN bIncPageSize = TRUE) noexcept :
-        m_Packer{ TCoord(cxTile + 1), TCoord(cyTile + 1), cxPage, cyPage, 8192, 8192, bIncPageSize },
+        DXGI_FORMAT eFormat = DXGI_FORMAT_B8G8R8A8_UNORM) noexcept :
+        m_Packer{ TCoord(cxTile + 1), TCoord(cyTile + 1), cxPage, cyPage, 8192, 8192 },
         m_eFormat{ eFormat }
     {}
 

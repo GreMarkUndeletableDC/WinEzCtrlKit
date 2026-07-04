@@ -29,14 +29,13 @@ public:
         float fDpi,
         float cxTile, float cyTile,
         float cxPage = 512, float cyPage = 256,
-        DXGI_FORMAT eFormat = DXGI_FORMAT_B8G8R8A8_UNORM,
-        BOOLEAN bIncPageSize = TRUE) noexcept :
+        DXGI_FORMAT eFormat = DXGI_FORMAT_B8G8R8A8_UNORM) noexcept :
         m_Packer{
             (TCoord)(ceilf(cxTile* fDpi / 96.f) + 1),
             (TCoord)(ceilf(cyTile* fDpi / 96.f) + 1),
             (TCoord)ceilf(cxPage),
             (TCoord)ceilf(cyPage),
-            8192, 8192, bIncPageSize
+            8192, 8192
         },
         m_eFormat{ eFormat },
         m_fDpi{ fDpi },
