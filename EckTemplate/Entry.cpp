@@ -13,7 +13,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     if (FAILED(hr))
     {
         EckDbgPrintFormatMessage(hr);
-        eck::MsgBox(eck::Format(L"CoInitialize failed: 0x%08X", hr), L"", MB_ICONERROR);
+        MessageBoxW(
+            nullptr,
+            eck::Format(L"CoInitialize failed: 0x%08X", hr).Data(),
+            L"",
+            MB_ICONERROR);
         return 0;
     }
 
@@ -24,7 +28,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     if (eInitRet != eck::InitStatus::Ok)
     {
         EckDbgPrintFormatMessage(uErr);
-        eck::MsgBox(eck::Format(L"Initialize failed: %d(0x%08X)", (int)eInitRet, uErr), L"", MB_ICONERROR);
+        MessageBoxW(
+            nullptr,
+            eck::Format(L"Initialize failed: %d(0x%08X)", (int)eInitRet, uErr).Data(),
+            L"",
+            MB_ICONERROR);
         return 0;
     }
 
@@ -38,7 +46,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     const auto pt = eck::CalculateCenterWindowPosition(nullptr, size.cx, size.cy, FALSE);
     pWnd->Create(L"示例Win32程序", WS_OVERLAPPEDWINDOW, 0,
         pt.x, pt.y, size.cx, size.cy, nullptr, 0);
-    pWnd->Show(SW_SHOW);
+    pWnd->Show(nCmdShow);
 
     MSG msg;
     while (GetMessageW(&msg, nullptr, 0, 0))

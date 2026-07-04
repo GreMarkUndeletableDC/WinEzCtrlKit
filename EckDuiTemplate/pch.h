@@ -3,7 +3,6 @@
 
 #include "eck\PchInclude.h"
 #include "eck\SystemHelper.h"
-#include "eck\CommDlg.h"
 #include "eck\CLinearLayout.h"
 #include "eck\DuiBase.h"
 #include "eck\CDuiButton.h"

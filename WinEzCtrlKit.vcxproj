@@ -354,7 +354,6 @@
     <ClCompile Include="eck\CButton.h" />
     <ClCompile Include="eck\CColorPicker.h" />
     <ClCompile Include="eck\CEdit.h" />
-    <ClCompile Include="eck\CommDlg.h" />
     <ClCompile Include="eck\CLabel.h" />
     <ClCompile Include="eck\CListBox.h" />
     <ClCompile Include="eck\CListBoxExt.h" />
@@ -409,6 +408,9 @@
     <ClCompile Include="eck\UiScroll.h" />
     <ClCompile Include="eck\HttpStatus.h" />
     <ClCompile Include="eck\ServerHelper.h" />
+    <ClCompile Include="eck\CColorDialog.h" />
+    <ClCompile Include="eck\CFontDialog.h" />
+    <ClCompile Include="eck\CTaskDialog.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

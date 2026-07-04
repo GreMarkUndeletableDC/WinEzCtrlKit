@@ -1082,11 +1082,22 @@ HRESULT UxfMenuInitialize(CWindow* pWnd) noexcept;
 HRESULT UxfMenuUninitialize(CWindow* pWnd) noexcept;
 #endif// ECK_OPT_NO_DARKMODE
 
-EckInlineNd HANDLE CrtCreateThread(_beginthreadex_proc_type pStartAddress,
-    void* pParameter = nullptr, UINT* pThreadId = nullptr, UINT dwCreationFlags = 0) noexcept
+EckInlineNd HANDLE CrtCreateThread(
+    _In_ _beginthreadex_proc_type pStartAddress,
+    _In_opt_ void* pParameter = nullptr,
+    _Out_opt_ UINT* pThreadId = nullptr,
+    UINT dwCreationFlags = 0) noexcept
 {
     return CreateThread(nullptr, 0, (PTHREAD_START_ROUTINE)pStartAddress,
         pParameter, dwCreationFlags, (DWORD*)pThreadId);
+}
+EckInline int MessageDialog(
+    _In_z_ PCWSTR pszText,
+    _In_opt_z_ PCWSTR pszCaption = L"",
+    UINT uType = 0,
+    HWND hParent = nullptr) noexcept
+{
+    return MessageBoxW(hParent, pszText, pszCaption, uType);
 }
 
 #ifdef _DEBUG
