@@ -135,7 +135,7 @@ private:
                 { rcItem.left + dOuter, rcItem.top + dOuter },
                 e.pLayout.Get(),
                 GetWindow().CcSetBrushColor(
-                    ArgbToD2DColorF(GetTheme()->GetStyleColor(&m_Style[iSs], SfFore))));
+                    GetTheme()->GetStyleColorD2D(&m_Style[iSs], SfFore)));
         }
     }
 
@@ -380,7 +380,7 @@ public:
                 DragCalculateInsertMarkRect(rcMark);
                 ElementToClient(rcMark);
                 const auto pBrush = GetWindow().CcSetBrushColor(
-                    ArgbToD2DColorF(GetTheme()->GetColor(IdCrAccent)));
+                    GetTheme()->GetColorD2D(IdCrAccent));
                 GetDC()->FillRectangle(rcMark, pBrush);
             }
 
@@ -838,7 +838,7 @@ public:
         D2D1_RECT_F rcDivider{ rc };
         rcDivider.left = rcDivider.right - 1.f;
         const auto pBrush = pEle->GetWindow().CcSetBrushColor(
-            ArgbToD2DColorF(pEle->GetTheme()->GetColor(IdCrBorder)));
+            pEle->GetTheme()->GetColorD2D(IdCrBorder));
         pEle->GetDC()->FillRectangle(rcDivider, pBrush);
         return TmResult::Ok;
     }

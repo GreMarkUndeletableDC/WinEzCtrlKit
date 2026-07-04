@@ -49,7 +49,7 @@ private:
     {
         const D2D1_GRADIENT_STOP Stop[]
         {
-            { 0.f, ArgbToD2DColorF(GetTheme()->GetColor(IdCrFore)) },
+            { 0.f, GetTheme()->GetColorD2D(IdCrFore) },
             { 1.f }
         };
         ComPtr<ID2D1GradientStopCollection> pStopCollection;
@@ -129,7 +129,7 @@ public:
                 }
                 else
                     pBrush = GetWindow().CcSetBrushColor(
-                        ArgbToD2DColorF(GetTheme()->GetColor(IdCrFore)));
+                        GetTheme()->GetColorD2D(IdCrFore));
                 GetDC()->DrawTextLayout(
                     pt,
                     m_pLayout.Get(),

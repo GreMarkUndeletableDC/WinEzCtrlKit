@@ -97,21 +97,45 @@ public:
             return std::nullopt;
         return m_pColor->Get(id);
     }
-    UINT GetColor(UINT id, UINT argbDef = 0) const noexcept
+    std::optional<D2D1_COLOR_F> GetColorOptionalD2D(UINT id) const noexcept
     {
-        if (id == IdTmInvalid)
-            return argbDef;
-        const auto v = GetColorOptional(id);
-        return v.value_or(argbDef);
+        if (!m_pColor || id == IdTmInvalid)
+            return std::nullopt;
+        const auto v = m_pColor->Get(id);
+        if (v.has_value())
+            return ArgbToD2DColorF(v.value());
+        return std::nullopt;
     }
-    UINT GetStyleColor(const SimpleStyle* pStyle, UINT sf, UINT argbDef = 0) const noexcept
+
+    UINT GetColor(UINT id, UINT argbDefault = 0) const noexcept
+    {
+        const auto v = GetColorOptional(id);
+        return v.value_or(argbDefault);
+    }
+    D2D1_COLOR_F GetColorD2D(UINT id, const D2D1_COLOR_F& Default = {}) const noexcept
+    {
+        const auto v = GetColorOptionalD2D(id);
+        return v.value_or(Default);
+    }
+
+    UINT GetStyleColor(const SimpleStyle* pStyle, UINT sf, UINT argbDefault = 0) const noexcept
     {
         const auto u = pStyle->Cr[sf];
         const auto bArgb = pStyle->bArgb[sf];
         if (bArgb)
             return u;
         else
-            return GetColor(u, argbDef);
+            return GetColor(u, argbDefault);
+    }
+    D2D1_COLOR_F GetStyleColorD2D(const SimpleStyle* pStyle, UINT sf,
+        const D2D1_COLOR_F& Default = {}) const noexcept
+    {
+        const auto u = pStyle->Cr[sf];
+        const auto bArgb = pStyle->bArgb[sf];
+        if (bArgb)
+            return ArgbToD2DColorF(u);
+        else
+            return GetColorD2D(u, Default);
     }
 
     std::optional<float> GetMetricOptional(UINT id) const noexcept
