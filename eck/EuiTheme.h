@@ -49,8 +49,8 @@ public:
         USHORT dRight{};
         USHORT dBottom{};
 
-        Align eAlignV{};
-        Align eAlignH{};
+        Alignment eAlignV{};
+        Alignment eAlignH{};
         ImageMode eImgModeFore{};
         ImageMode eImgModeBack{};
 

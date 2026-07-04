@@ -923,7 +923,7 @@ namespace Detail
         JsonProxy(unsigned int x) noexcept : JsonProxy((unsigned long long)x) {}
         JsonProxy(unsigned long x) noexcept : JsonProxy((unsigned long long)x) {}
         JsonProxy(std::integral auto x) noexcept : JsonProxy((int)x) {}
-        template<CcpEnum T>
+        template<CcpEnumeration T>
         JsonProxy(T x) noexcept : JsonProxy(std::underlying_type_t<T>(x)) {}
 
         template<size_t N>

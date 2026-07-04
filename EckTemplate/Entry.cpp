@@ -25,7 +25,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     ip.uFlags = eck::EIF_NOINITD2D | eck::EIF_NOINITDWRITE;
     UINT uErr;
     const auto eInitRet = eck::Initialize(hInstance, &ip, &uErr);
-    if (eInitRet != eck::InitStatus::Ok)
+    if (eInitRet != eck::StartupStatus::Ok)
     {
         EckDbgPrintFormatMessage(uErr);
         MessageBoxW(

@@ -19,8 +19,8 @@ private:
     CBitmap m_Bitmap{};
     BITBOOL m_bSpacePressed : 1{};
     BITBOOL m_bAutoScale : 1{ TRUE };
-    Align m_eAlignH{ Align::Center };
-    Align m_eAlignV{ Align::Center };
+    Alignment m_eAlignH{ Alignment::Center };
+    Alignment m_eAlignV{ Alignment::Center };
     BYTE m_eInter{ D2D1_INTERPOLATION_MODE_LINEAR };
     float m_fOpacity{ 1.f };
     SimpleStyle m_Style[SsMax]
@@ -137,9 +137,9 @@ public:
                 Kw::Vec2 pt{ rc.left };
                 switch (m_eAlignV)
                 {
-                case Align::Near:   pt.y = GetTheme()->GetMetric(IdMePaddingOuter); break;
-                case Align::Center: pt.y = (GetHeight() - tm.height) / 2.f; break;
-                case Align::Far:    pt.y = GetHeight() - GetTheme()->GetMetric(IdMePaddingOuter) - tm.height; break;
+                case Alignment::Near:   pt.y = GetTheme()->GetMetric(IdMePaddingOuter); break;
+                case Alignment::Center: pt.y = (GetHeight() - tm.height) / 2.f; break;
+                case Alignment::Far:    pt.y = GetHeight() - GetTheme()->GetMetric(IdMePaddingOuter) - tm.height; break;
                 }
 
                 pt += GetOffsetInClient();

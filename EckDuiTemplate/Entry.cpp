@@ -23,7 +23,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
     UINT uErr;
     const auto eInitRet = eck::Initialize(hInstance, nullptr, &uErr);
-    if (eInitRet != eck::InitStatus::Ok)
+    if (eInitRet != eck::StartupStatus::Ok)
     {
         EckDbgPrintFormatMessage(uErr);
         MessageBoxW(

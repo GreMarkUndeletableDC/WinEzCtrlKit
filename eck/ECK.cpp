@@ -1608,7 +1608,7 @@ static BOOL WINAPI NewShowScrollBar(HWND hWnd, int nBar, BOOL bShow)
 #pragma endregion ScrollBarHook
 
 #pragma region Initialize
-InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT* puErrCode) noexcept
+StartupStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT* puErrCode) noexcept
 {
     EckAssert(!g_hInstance && !g_dwTlsSlot);
     UINT uTemp;
@@ -1640,7 +1640,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
         if (gps != Gdiplus::Ok)
         {
             *puErrCode = gps;
-            return InitStatus::Gdiplus;
+            return StartupStatus::Gdiplus;
         }
     }
 #endif// !ECK_OPT_NO_GDIPLUS
@@ -1667,7 +1667,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
                 *puErrCode = GetLastError();
                 EckDbgPrintFormatMessage(*puErrCode);
                 EckDbgBreak();
-                return InitStatus::WindowClass;
+                return StartupStatus::WindowClass;
             }
             break;
         case RWCT_CUSTOM:
@@ -1676,7 +1676,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
                 *puErrCode = GetLastError();
                 EckDbgPrintFormatMessage(*puErrCode);
                 EckDbgBreak();
-                return InitStatus::WindowClass;
+                return StartupStatus::WindowClass;
             }
             break;
         default:
@@ -1707,7 +1707,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
         {
             *puErrCode = hr;
             EckDbgPrintFormatMessage(hr);
-            return InitStatus::D2DFactory;
+            return StartupStatus::D2DFactory;
         }
 #if ECK_OPT_D2D_V1_2
         g_pD2DFactory->QueryInterface(&g_pD2DFactory2);
@@ -1722,7 +1722,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
         {
             *puErrCode = hr;
             EckDbgPrintFormatMessage(hr);
-            return InitStatus::D3DDevice;
+            return StartupStatus::D3DDevice;
         }
         // DXGI设备
         g_pD3D11Device->QueryInterface(&g_pDxgiDevice);
@@ -1730,7 +1730,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
         {
             *puErrCode = hr;
             EckDbgPrintFormatMessage(hr);
-            return InitStatus::DxgiDevice;
+            return StartupStatus::DxgiDevice;
         }
         // DXGI工厂
         ComPtr<IDXGIAdapter> pDxgiAdapter;
@@ -1744,7 +1744,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
         {
             *puErrCode = hr;
             EckDbgPrintFormatMessage(hr);
-            return InitStatus::D2DDevice;
+            return StartupStatus::D2DDevice;
         }
 #endif // !ECK_OPT_NO_D2D
 
@@ -1774,7 +1774,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
         {
             *puErrCode = hr;
             EckDbgPrintFormatMessage(hr);
-            return InitStatus::DWriteFactory;
+            return StartupStatus::DWriteFactory;
         }
 #if ECK_OPT_DWRITE_V1
         g_pDwFactory->QueryInterface(&g_pDwFactory1);
@@ -1794,7 +1794,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
         {
             *puErrCode = hr;
             EckDbgPrintFormatMessage(hr);
-            return InitStatus::WicFactory;
+            return StartupStatus::WicFactory;
         }
     }
 
@@ -1839,7 +1839,7 @@ InitStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UINT*
     DetourAttach(&s_pfnShowScrollBar, NewShowScrollBar);
     DetourTransactionCommit();
 #endif // ECK_SBHOOK_INCLUDED
-    return InitStatus::Ok;
+    return StartupStatus::Ok;
 }
 
 void Uninitialize() noexcept

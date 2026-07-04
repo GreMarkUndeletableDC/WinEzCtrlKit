@@ -708,28 +708,28 @@ public:
     /// </summary>
     /// <param name="iAlign"></param>
     /// <returns></returns>
-    EckInline void SetAlignment(Align iAlign) const noexcept
+    EckInline void SetAlignment(Alignment iAlign) const noexcept
     {
         DWORD dwStyle;
         switch (iAlign)
         {
-        case Align::Near: dwStyle = ES_LEFT; break;
-        case Align::Center: dwStyle = ES_CENTER; break;
-        case Align::Far: dwStyle = ES_RIGHT; break;
+        case Alignment::Near: dwStyle = ES_LEFT; break;
+        case Alignment::Center: dwStyle = ES_CENTER; break;
+        case Alignment::Far: dwStyle = ES_RIGHT; break;
         default: ECK_UNREACHABLE;
         }
         ModifyStyle(dwStyle, ES_LEFT | ES_CENTER | ES_RIGHT);
     }
 
-    EckInline Align GetAlignment() const noexcept
+    EckInline Alignment GetAlignment() const noexcept
     {
         DWORD dwStyle = GetStyle();
         if (IsBitSet(dwStyle, ES_RIGHT))
-            return Align::Far;
+            return Alignment::Far;
         else if (IsBitSet(dwStyle, ES_CENTER))
-            return Align::Center;
+            return Alignment::Center;
         else
-            return Align::Near;
+            return Alignment::Near;
     }
 };
 

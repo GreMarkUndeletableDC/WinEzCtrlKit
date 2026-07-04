@@ -93,7 +93,7 @@ public:
     }
 
     EckInline HRESULT NewFont(_Out_ IDWriteTextFormat*& pTf,
-        Align eAlignText = Align::Near, Align eAlignPara = Align::Near,
+        Alignment eAlignText = Alignment::Near, Alignment eAlignPara = Alignment::Near,
         float fSize = -1.f, int iWeight = 400, BOOL bEllipsis = FALSE) const noexcept
     {
         const auto hr = NewFont(pTf, m_Template.rsFace.Data(),
@@ -105,16 +105,16 @@ public:
             switch (eAlignPara)
             {
             default:			e1 = DWRITE_PARAGRAPH_ALIGNMENT_NEAR; break;
-            case Align::Far:	e1 = DWRITE_PARAGRAPH_ALIGNMENT_FAR; break;
-            case Align::Center: e1 = DWRITE_PARAGRAPH_ALIGNMENT_CENTER; break;
+            case Alignment::Far:	e1 = DWRITE_PARAGRAPH_ALIGNMENT_FAR; break;
+            case Alignment::Center: e1 = DWRITE_PARAGRAPH_ALIGNMENT_CENTER; break;
             }
             pTf->SetParagraphAlignment(e1);
             DWRITE_TEXT_ALIGNMENT e2;
             switch (eAlignText)
             {
             default:			e2 = DWRITE_TEXT_ALIGNMENT_LEADING; break;
-            case Align::Far:	e2 = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
-            case Align::Center: e2 = DWRITE_TEXT_ALIGNMENT_CENTER; break;
+            case Alignment::Far:	e2 = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
+            case Alignment::Center: e2 = DWRITE_TEXT_ALIGNMENT_CENTER; break;
             }
             pTf->SetTextAlignment(e2);
             if (bEllipsis)

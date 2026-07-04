@@ -1106,7 +1106,7 @@ public:
         return CompareI(sv.data(), (int)sv.size());
     }
 
-    template<CcpIntOrEnum T>
+    template<CcpIntegerOrEnumeration T>
     TcvResult PushBackNumber(
         T x,
         int iRadix = 10,

@@ -40,7 +40,7 @@ private:
     BITBOOL m_bRepairDbClick : 1{ TRUE };		// 连击修正
     BITBOOL m_bShowEmptyMainExtText : 1{ TRUE };// 即使主文本为空也不忽略其高度
     BYTE m_byColorAlpha{ 100 };					// 背景色透明度
-    Align m_eExtAlignV{ Align::Center };		// 扩展文本垂直对齐
+    Alignment m_eExtAlignV{ Alignment::Center };		// 扩展文本垂直对齐
     COLORREF m_crText{ CLR_DEFAULT };			// 文本颜色
     COLORREF m_crBk{ CLR_DEFAULT };				// 背景色
     COLORREF m_crTextBk{ CLR_DEFAULT };			// 文本背景色
@@ -325,14 +325,14 @@ private:
                     int y;
                     switch (m_eExtAlignV)
                     {
-                    case Align::Near:
+                    case Alignment::Near:
                         y = rc.top + m_cyMainText + m_cxEdge;
                         break;
-                    case Align::Center:
+                    case Alignment::Center:
                         y = rc.top + (rc.bottom - rc.top - (m_cyMainText + m_cxEdge + m_cySubText)) / 2;
                         y += (m_cyMainText + m_cxEdge);
                         break;
-                    case Align::Far:
+                    case Alignment::Far:
                         y = rc.bottom - m_cxEdge - m_cySubText;
                         break;
                     default: ECK_UNREACHABLE;
@@ -559,7 +559,7 @@ private:
         m_idxHotItem = m_idxFilterEditing = -1;
         m_bAutoDarkMode = m_bRepairDbClick = m_bShowEmptyMainExtText = TRUE;
         m_bUseExtText = FALSE;
-        m_eExtAlignV = Align::Center;
+        m_eExtAlignV = Alignment::Center;
         m_crText = m_crBk = m_crTextBk = m_crTextSubText = m_crTextBkSubText =
             m_crTextFilter = m_crTextBkFilter = CLR_DEFAULT;
         m_hFontMainText = nullptr;
@@ -573,7 +573,7 @@ public:
     ECKPROP(HeGetFilterTextColor, HeSetFilterTextColor)		COLORREF FilterTextColor;
     ECKPROP(HeGetFilterTextBkColor, HeSetFilterTextBkColor) COLORREF FilterTextBkColor;
     ECKPROP(HeGetMainTextFont, HeSetMainTextFont)			HFONT MainTextFont;
-    ECKPROP(HeGetExtTextAlignV, HeSetExtTextAlignV)			Align ExtTextAlignV;
+    ECKPROP(HeGetExtTextAlignV, HeSetExtTextAlignV)			Alignment ExtTextAlignV;
     ECKPROP(HeGetAutoDarkMode, HeSetAutoDarkMode)			BOOL AutoDarkMode;
     ECKPROP(HeGetUseExtText, HeSetUseExtText)				BOOL UseExtText;
     ECKPROP(HeGetRepairDoubleClick, HeSetRepairDoubleClick) BOOL RepairDbClick;
@@ -928,8 +928,8 @@ public:
     EckInlineCe void HeSetBkColorAlpha(BYTE by) noexcept { m_byColorAlpha = by; }
     EckInlineNdCe BYTE HeGetBkColorAlpha() const noexcept { return m_byColorAlpha; }
 
-    EckInlineCe void HeSetExtTextAlignV(Align e) noexcept { m_eExtAlignV = e; }
-    EckInlineNdCe Align HeGetExtTextAlignV() const noexcept { return m_eExtAlignV; }
+    EckInlineCe void HeSetExtTextAlignV(Alignment e) noexcept { m_eExtAlignV = e; }
+    EckInlineNdCe Alignment HeGetExtTextAlignV() const noexcept { return m_eExtAlignV; }
 
     // 取过滤器当前编辑项
     EckInlineNdCe int HeGetCurrEditingItem() const noexcept { return m_idxFilterEditing; }

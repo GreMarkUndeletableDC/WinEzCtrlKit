@@ -20,7 +20,7 @@ int wmain(int argc, WCHAR** argv)
     ip.uFlags = eck::EIF_CONSOLE_APP;
     UINT uErr;
     const auto eInitRet = eck::Initialize(NtCurrentImageBaseHInst(), &ip, &uErr);
-    if (eInitRet != eck::InitStatus::Ok)
+    if (eInitRet != eck::StartupStatus::Ok)
     {
         EckDbgPrintFormatMessage(uErr);
         ConOut.PrintLine(L"Initialize failed: ",

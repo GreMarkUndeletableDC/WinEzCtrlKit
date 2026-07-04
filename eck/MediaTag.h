@@ -152,11 +152,11 @@ enum class PictureType : BYTE
     Invalid = 0xFF,     // 任何无效的值
 };
 
-EckInlineNdCe BOOL PkIsTypeValid(CcpIntOrEnum auto e) noexcept
+EckInlineNdCe BOOL PkIsTypeValid(CcpIntegerOrEnumeration auto e) noexcept
 {
     return (BYTE)e < (BYTE)PictureType::Private_End;
 }
-EckInlineNdCe PictureType PkNormalizeType(CcpIntOrEnum auto e) noexcept
+EckInlineNdCe PictureType PkNormalizeType(CcpIntegerOrEnumeration auto e) noexcept
 {
     if (PkIsTypeValid(e))
         return (PictureType)(BYTE)e;

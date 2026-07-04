@@ -5,13 +5,13 @@
 ECK_NAMESPACE_BEGIN
 namespace Detail
 {
-    struct XptMemWalker {};
-    struct XptMemWalkerRange : XptMemWalker
+    struct XptMemoryWalker {};
+    struct XptMemoryWalkerRange : XptMemoryWalker
     {
         PCBYTE pBase{};
         size_t cbMax{};
         PCBYTE pCurr{};
-        constexpr XptMemWalkerRange(PCBYTE b, size_t m, PCBYTE c) noexcept
+        constexpr XptMemoryWalkerRange(PCBYTE b, size_t m, PCBYTE c) noexcept
             : pBase{ b }, cbMax{ m }, pCurr{ c }
         {}
     };
@@ -26,7 +26,7 @@ namespace Detail
         EckInline void CheckRange(PCBYTE p) const
         {
             if (m_pBase + m_cbMax < p)
-                throw XptMemWalkerRange{ m_pBase, m_cbMax, p };
+                throw XptMemoryWalkerRange{ m_pBase, m_cbMax, p };
         }
     public:
         CMemoryReaderBase() = default;
@@ -52,7 +52,7 @@ namespace Detail
         EckInline void CheckRange(BYTE* p) const
         {
             if (m_pBase + m_cbMax < p)
-                throw XptMemWalkerRange{ m_pBase, m_cbMax, p };
+                throw XptMemoryWalkerRange{ m_pBase, m_cbMax, p };
         }
     public:
         CMemoryWalkerBase() = default;
@@ -127,8 +127,8 @@ namespace Detail
     public:
         using T::T;
 
-        using Xpt = XptMemWalker;
-        using XptRange = XptMemWalkerRange;
+        using Xpt = XptMemoryWalker;
+        using XptRange = XptMemoryWalkerRange;
 
         EckInline auto& Read(_Out_writes_bytes_all_(cb) void* pDst, size_t cb)
         {
@@ -174,7 +174,7 @@ namespace Detail
                     break;
                 }
             if (!bFoundNull)
-                throw XptMemWalkerRange{ this->m_pBase, this->m_cbMax, (PCBYTE)p };
+                throw XptMemoryWalkerRange{ this->m_pBase, this->m_cbMax, (PCBYTE)p };
             return int(p - (const T*)Data());
         }
 

@@ -132,13 +132,13 @@ ECK_NAMESPACE_BEGIN
 using namespace std::literals;
 
 template<class T>
-concept CcpIntOrEnum = std::is_integral_v<T> || std::is_enum_v<T>;
+concept CcpIntegerOrEnumeration = std::is_integral_v<T> || std::is_enum_v<T>;
 template<class T>
-concept CcpEnum = std::is_enum_v<T>;
+concept CcpEnumeration = std::is_enum_v<T>;
 template<class T>
 concept CcpNumber = std::integral<T> || std::floating_point<T>;
 template<class T>
-concept CcpNumberOrEnum = CcpNumber<T> || std::is_enum_v<T>;
+concept CcpNumberOrEnumeration = CcpNumber<T> || std::is_enum_v<T>;
 template<class T>
 concept CcpComInterface = std::is_base_of_v<IUnknown, std::remove_cvref_t<T>>;
 template<class TChar>
@@ -171,17 +171,17 @@ using ConstCharPointer_T = const CharFromPointer_T<TPtr>*;
 template<CcpCharPointer TPtr1, CcpCharPointer TPtr2>
 constexpr inline bool IsSameChar_V = std::is_same_v<CharFromPointer_T<TPtr1>, CharFromPointer_T<TPtr2>>;
 
-template<CcpIntOrEnum T, bool = std::is_enum_v<T>>
+template<CcpIntegerOrEnumeration T, bool = std::is_enum_v<T>>
 struct UnderlyingType
 {
     using Type = std::underlying_type_t<T>;
 };
-template<CcpIntOrEnum T>
+template<CcpIntegerOrEnumeration T>
 struct UnderlyingType<T, false>
 {
     using Type = T;
 };
-template<CcpIntOrEnum T>
+template<CcpIntegerOrEnumeration T>
 using UnderlyingType_T = UnderlyingType<T>::Type;
 
 template <template <class...> class TTemplate, class TTarget>
@@ -547,7 +547,7 @@ struct OWNED_RAW_BUFFER
 };
 #pragma endregion Type
 
-#pragma region Const
+#pragma region Constant
 // 控件序列化数据对齐
 #ifdef _WIN64
 #define ECK_CTRLDATA_ALIGN	8
@@ -653,10 +653,10 @@ constexpr inline PCWSTR MSGREG_BUBBLE = L"Eck.Message.Bubble";
 
 // BOOL(0, BBMSG*)  返回是否拦截
 const inline UINT MessageBubble = RegisterWindowMessageW(MSGREG_BUBBLE);
-#pragma endregion Const
+#pragma endregion Constant
 
-#pragma region Enum
-enum class InitStatus
+#pragma region Enumeration
+enum class StartupStatus
 {
     Ok,
     WindowClass,
@@ -669,7 +669,7 @@ enum class InitStatus
     D2DDevice,
 };
 
-enum class Align : BYTE
+enum class Alignment : BYTE
 {
     Near,
     Center,
@@ -822,7 +822,7 @@ enum class ImageMode : BYTE
     Tile,
     Stretch,
 };
-#pragma endregion Enum
+#pragma endregion Enumeration
 
 #pragma region Global
 extern NTVER g_NtVersion;
@@ -918,7 +918,7 @@ struct INITPARAM
 };
 
 /// <summary>
-/// 初始化ECK Lib。
+/// 初始化ECK。
 /// 使用任何ECK功能之前需调用该函数。仅允许调用一次。
 /// 函数将在内部调用eck::ThreadInitialize，除非设置了EIF_NOINITTHREAD
 /// </summary>
@@ -926,11 +926,10 @@ struct INITPARAM
 /// <param name="pip">指向初始化参数的可选指针</param>
 /// <param name="puErrCode">指向接收错误码变量的可选指针</param>
 /// <returns>错误代码</returns>
-InitStatus Initialize(
+StartupStatus Initialize(
     HINSTANCE hInstance,
     const INITPARAM* pip = nullptr,
-    _Out_opt_ UINT* puErrCode = nullptr
-) noexcept;
+    _Out_opt_ UINT* puErrCode = nullptr) noexcept;
 
 void Uninitialize() noexcept;
 #pragma endregion Initialize
@@ -1102,7 +1101,7 @@ EckInline int MessageDialog(
 
 #ifdef _DEBUG
 void Assert(PCWSTR pszMsg, PCWSTR pszFile, PCWSTR pszLine) noexcept;
-inline void DbgPrint(CcpNumberOrEnum auto x, BOOL bNewLine = TRUE) noexcept
+inline void DbgPrint(CcpNumberOrEnumeration auto x, BOOL bNewLine = TRUE) noexcept
 {
     auto s = std::to_string((eck::UnderlyingType_T<decltype(x)>)x);
     if (bNewLine)
