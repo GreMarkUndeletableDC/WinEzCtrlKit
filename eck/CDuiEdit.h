@@ -145,7 +145,7 @@ private:
     D2D1_RECT_F m_rcCaret{};
     DWORD m_dwTxProp{ DefaultTxProperty };
     WCHAR m_chPassword{ L'*' };
-    Align m_eSingleLineAlignV{ Align::Center };
+    Alignment m_eSingleLineAlignV{ Alignment::Center };
 
     BITBOOL m_bCaretShow : 1{};
 
@@ -194,7 +194,7 @@ private:
     {
         if (m_bSlAutoAlignV && !(m_dwTxProp & TXTBIT_MULTILINE))
         {
-            if (m_eSingleLineAlignV == Align::Near)
+            if (m_eSingleLineAlignV == Alignment::Near)
                 goto Normal;
             const auto cy = m_DefCharFormat.yHeight * 96.f / 1440.f +
                 LogicalToPixel(2.f);
@@ -203,7 +203,7 @@ private:
                 GetHeight() - m_mgTextAera.top - m_mgTextAera.bottom);
             cyTop = LogicalToPixel(m_mgTextAera.top);
             cyBtm = LogicalToPixel(m_mgTextAera.bottom);
-            if (m_eSingleLineAlignV == Align::Center)
+            if (m_eSingleLineAlignV == Alignment::Center)
             {
                 const auto t = (cyExtra - cy) / 2;
                 cyTop += t;

@@ -960,7 +960,7 @@ EckInline BOOL FloatEqual(T f1, T f2, T fEpsilon = std::numeric_limits<T>::epsil
 template<CcpNumber T>
 EckInlineNdCe T Distance(T x1, T x2) noexcept { return (x1 > x2) ? (x1 - x2) : (x2 - x1); }
 
-template<CcpNumberOrEnum T>
+template<CcpNumberOrEnumeration T>
 EckInlineNdCe T DpiScale(T i, int iDpiNew, int iDpiOld = 96) noexcept { return T(i * iDpiNew / iDpiOld); }
 EckInlineCe void DpiScale(_Inout_ CcpRectStruct auto& rc, int iDpiNew, int iDpiOld = 96) noexcept
 {

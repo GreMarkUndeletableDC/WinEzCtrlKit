@@ -54,8 +54,8 @@ private:
 
     ImageMode m_eBkImgMode{ ImageMode::TopLeft };		// 底图模式
     GradientMode m_eGradientMode{ GradientMode::None };	// 渐变模式
-    Align m_eAlignH{};	// 横向对齐
-    Align m_eAlignV{};	// 纵向对齐
+    Alignment m_eAlignH{};	// 横向对齐
+    Alignment m_eAlignV{};	// 纵向对齐
 
     Ellipsis m_eEllipsisMode{};		// 省略号模式
     Prefix m_ePrefixMode{};			// 前缀模式
@@ -104,8 +104,8 @@ private:
     {
         switch (m_eAlignH)
         {
-        case Align::Center:	return DT_CENTER; break;
-        case Align::Far:	return DT_RIGHT; break;
+        case Alignment::Center:	return DT_CENTER; break;
+        case Alignment::Far:	return DT_RIGHT; break;
         }
         return DT_LEFT;
     }
@@ -186,17 +186,17 @@ private:
             int cyText = rc.bottom - rc.top;
             switch (m_eAlignV)
             {
-            case Align::Near:// 上边
+            case Alignment::Near:// 上边
                 rc.top = 0;
                 rc.bottom = rc.top + cyText;
                 yPic = rc.top;
                 break;
-            case Align::Center:// 中间
+            case Alignment::Center:// 中间
                 rc.top = (m_cyClient - cyText) / 2;
                 rc.bottom = rc.top + cyText;
                 yPic = (m_cyClient - cyImg) / 2;
                 break;
-            case Align::Far:// 下边
+            case Alignment::Far:// 下边
                 rc.bottom = m_cyClient;
                 rc.top = rc.bottom - cyText;
                 yPic = m_cyClient - cyImg;
@@ -212,17 +212,17 @@ private:
             int cyText = rc.bottom - rc.top;
             switch (m_eAlignV)
             {
-            case Align::Near:// 上边
+            case Alignment::Near:// 上边
                 rc.top = 0;
                 rc.bottom = rc.top + cyText;
                 yPic = rc.top;
                 break;
-            case Align::Center:// 中间
+            case Alignment::Center:// 中间
                 rc.top = (m_cyClient - cyText) / 2;
                 rc.bottom = rc.top + cyText;
                 yPic = (m_cyClient - cyImg) / 2;
                 break;
-            case Align::Far:// 下边
+            case Alignment::Far:// 下边
                 rc.bottom = m_cyClient;
                 rc.top = rc.bottom - cyText;
                 yPic = m_cyClient - cyImg;
@@ -235,18 +235,18 @@ private:
         const int cxText = rc.right - rc.left;
         switch (m_eAlignH)
         {
-        case Align::Near:// 左边
+        case Alignment::Near:// 左边
             uDtFlags |= DT_LEFT;
             rc.left = cxImg;
             rc.right = rc.left + cxText;
             xPic = 0;
             break;
-        case Align::Center:// 中间
+        case Alignment::Center:// 中间
             rc.left = (m_cxClient - (cxText + cxImg)) / 2 + cxImg;
             rc.right = rc.left + cxText;
             xPic = rc.left - cxImg;
             break;
-        case Align::Far:// 右边
+        case Alignment::Far:// 右边
             uDtFlags |= DT_RIGHT;
             rc.right = m_cxClient - cxImg;
             rc.left = rc.right - cxText;
@@ -406,8 +406,8 @@ public:
             m_hFont = nullptr;
             m_eBkImgMode = ImageMode::TopLeft;
             m_eGradientMode = GradientMode::None;
-            m_eAlignH = Align::Near;
-            m_eAlignV = Align::Near;
+            m_eAlignH = Alignment::Near;
+            m_eAlignV = Alignment::Near;
             m_eEllipsisMode = Ellipsis::None;
             m_ePrefixMode = Prefix::Normal;
             m_eMouseOption = MouseOption::None;
@@ -468,12 +468,12 @@ public:
     }
     EckInlineNdCe HBITMAP GetImage() const noexcept { return m_hbmImg; }
 
-    EckInlineCe void SetAlignment(BOOL bHAlign, Align eAlign) noexcept
+    EckInlineCe void SetAlignment(BOOL bHAlign, Alignment eAlign) noexcept
     {
         (bHAlign ? m_eAlignH : m_eAlignV) = eAlign;
         m_bPartMetricsDirty = TRUE;
     }
-    EckInlineNdCe Align GetAlignment(BOOL bHAlign) const noexcept
+    EckInlineNdCe Alignment GetAlignment(BOOL bHAlign) const noexcept
     {
         return (bHAlign ? m_eAlignH : m_eAlignV);
     }

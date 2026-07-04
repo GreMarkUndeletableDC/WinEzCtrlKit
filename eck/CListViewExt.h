@@ -112,7 +112,7 @@ struct LVE_EDIT_INFO
     SIZE sizeExtra;	// 为了美观而添加到sizeIdeal的额外大小
     PCWSTR pszText;	// 当前文本
     int cchText;	// 当前文本长度
-    Align eAlign;	// 横向对齐方式
+    Alignment eAlign;	// 横向对齐方式
 };
 
 /*
@@ -1006,20 +1006,20 @@ private:
                 m_Header.GetItem(m_idxEditSubItem, &hdi);
                 if (hdi.fmt & HDF_RIGHT)
                 {
-                    edi.eAlign = Align::Far;
+                    edi.eAlign = Alignment::Far;
                     edi.rcIdeal.x = rc.right - edi.rcIdeal.cx;
                 }
                 else if (hdi.fmt & HDF_CENTER)
                 {
-                    edi.eAlign = Align::Center;
+                    edi.eAlign = Alignment::Center;
                     edi.rcIdeal.x = rc.left + (rc.right - rc.left - edi.rcIdeal.cx) / 2;
                 }
                 else
-                    edi.eAlign = Align::Near;
+                    edi.eAlign = Alignment::Near;
             }
             else
             {
-                edi.eAlign = Align::Near;
+                edi.eAlign = Alignment::Near;
                 edi.rcIdeal.x = rc.left + (rc.right - rc.left - edi.rcIdeal.cx) / 2;
             }
             if (IsRectInclude(edi.rcIdeal, rcClient))
@@ -1040,9 +1040,9 @@ private:
                 m_pEdit = std::make_unique<CEditExt>();
 
             DWORD dwStyle = WS_VISIBLE | WS_CHILD;
-            if (edi.eAlign == Align::Far)
+            if (edi.eAlign == Alignment::Far)
                 dwStyle |= ES_RIGHT;
-            else if (edi.eAlign == Align::Center)
+            else if (edi.eAlign == Alignment::Center)
                 dwStyle |= ES_CENTER;
             m_pEdit->Create(edi.pszText, dwStyle, 0,
                 edi.rcIdeal.x, edi.rcIdeal.y, edi.rcIdeal.cx, edi.rcIdeal.cy,

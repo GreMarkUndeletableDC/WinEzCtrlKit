@@ -278,7 +278,7 @@ public:
         SetStyle(dwStyle);
     }
 
-    void SetAlignment(BOOL bHAlign, Align iAlign) const noexcept
+    void SetAlignment(BOOL bHAlign, Alignment iAlign) const noexcept
     {
         auto dwStyle = GetStyle();
         if (bHAlign)
@@ -286,9 +286,9 @@ public:
             dwStyle &= (~(BS_LEFT | BS_CENTER | BS_RIGHT));
             switch (iAlign)
             {
-            case Align::Near: dwStyle |= BS_LEFT; break;
-            case Align::Center: dwStyle |= BS_CENTER; break;
-            case Align::Far: dwStyle |= BS_RIGHT; break;
+            case Alignment::Near: dwStyle |= BS_LEFT; break;
+            case Alignment::Center: dwStyle |= BS_CENTER; break;
+            case Alignment::Far: dwStyle |= BS_RIGHT; break;
             }
         }
         else
@@ -296,34 +296,34 @@ public:
             dwStyle &= (~(BS_TOP | BS_VCENTER | BS_BOTTOM));
             switch (iAlign)
             {
-            case Align::Near: dwStyle |= BS_TOP; break;
-            case Align::Center: dwStyle |= BS_VCENTER; break;
-            case Align::Far: dwStyle |= BS_BOTTOM; break;
+            case Alignment::Near: dwStyle |= BS_TOP; break;
+            case Alignment::Center: dwStyle |= BS_VCENTER; break;
+            case Alignment::Far: dwStyle |= BS_BOTTOM; break;
             }
         }
         SetStyle(dwStyle);
     }
 
-    Align GetAlignment(BOOL bHAlign) const noexcept
+    Alignment GetAlignment(BOOL bHAlign) const noexcept
     {
         auto dwStyle = GetStyle();
         if (bHAlign)
         {
             if (IsBitSet(dwStyle, BS_CENTER))
-                return Align::Center;
+                return Alignment::Center;
             else if (IsBitSet(dwStyle, BS_RIGHT))
-                return Align::Far;
+                return Alignment::Far;
             else
-                return Align::Near;
+                return Alignment::Near;
         }
         else
         {
             if (IsBitSet(dwStyle, BS_VCENTER))
-                return Align::Center;
+                return Alignment::Center;
             else if (IsBitSet(dwStyle, BS_BOTTOM))
-                return Align::Far;
+                return Alignment::Far;
             else
-                return Align::Near;
+                return Alignment::Near;
         }
     }
 };
