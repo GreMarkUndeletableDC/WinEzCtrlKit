@@ -163,9 +163,9 @@ inline std::optional<ARGB> TmSsLerpColor(
     if (!oc1 && !oc2)
         return std::nullopt;
     if (!oc1)
-        oc1 = 0;
+        oc1 = *oc2 & 0x00'FFFFFF;
     if (!oc2)
-        oc2 = 0;
+        oc2 = *oc1 & 0x00'FFFFFF;
     return LerpArgb(*oc1, *oc2, kLerp);
 }
 
