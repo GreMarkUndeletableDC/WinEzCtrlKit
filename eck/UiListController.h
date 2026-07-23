@@ -97,6 +97,8 @@ struct IHostT
 {
     virtual TCoord LchSccGetPosition(BOOL bVert) const noexcept = 0;
     virtual void LchSccSetRange(BOOL bVert, TCoord Min, TCoord Max) noexcept = 0;
+    virtual void LchSccScrollDelta(BOOL bVert, TCoord d, BOOL bSmooth) noexcept = 0;
+
     virtual TCoord LchGetHeight() const noexcept = 0;
     virtual TCoord LchGetWidth() const noexcept = 0;
     virtual TCoord LchGetListContentWidth() const noexcept = 0;
@@ -342,7 +344,7 @@ private:
     View m_eView{ View::List };
     Selection m_eSelection{ Selection::Single };
 
-    BITBOOL m_bGroup : 1{1};
+    BITBOOL m_bGroup : 1{};
     BITBOOL m_bGroupImage : 1{};
     BITBOOL m_bEnableDragSel : 1{ TRUE };
     BITBOOL m_bVarItemHeight : 1{};
@@ -1096,6 +1098,31 @@ public:
             for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
                 ItmpSelect(idx, Data, FALSE, TRUE);
         }
+    }
+
+    BOOL ItmEnsureVisible(Index idx, BOOL bSmooth) noexcept
+    {
+        TRect rc;
+        if (m_bGroup && idx.Item < 0)
+            GetGroupRect(idx.Group, Part::GroupHeader, rc);
+        else
+            GetItemRect(idx, rc);
+
+        const auto cyTopExtra = MtRealTopExtra();
+        const auto cy = m_pHost->LchGetHeight();
+
+        float d;
+        if (rc.top < cyTopExtra)
+            d = rc.top - cyTopExtra;
+        else if (rc.bottom > cy - MtGetBottomExtra())
+            d = rc.bottom - cy + MtGetBottomExtra();
+        else
+            return FALSE;
+
+        m_pHost->LchSccScrollDelta(TRUE, d, bSmooth);
+        if (!bSmooth)
+            ReCalculateTopItem();
+        return TRUE;
     }
 
     EckInlineNdCe TCoord MtRealTopExtra() const noexcept
