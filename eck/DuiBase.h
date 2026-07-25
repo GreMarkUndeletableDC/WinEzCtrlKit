@@ -64,7 +64,6 @@ public:
 
     EckInlineNdCe CDuiWindow& GetWindow() const noexcept { return *(CDuiWindow*)GetContainer(); }
     EckInlineNdCe ID2D1DeviceContext* GetDC() const noexcept;
-    EckInlineNdCe ID2D1Bitmap1* CcGetBitmap() const noexcept;
 
     void SetRect(const Kw::Rect& rc) noexcept
     {
@@ -195,8 +194,6 @@ public:
     EckInlineNdCe CElement* GetFocus() noexcept;
     EckInline BOOL SetTimer(UINT_PTR uId, UINT uElapse) noexcept;
     EckInline BOOL KillTimer(UINT_PTR uId) noexcept;
-
-    EckInline void KctWake() const noexcept;
 
     EckInlineNdCe BOOL IsValid() const noexcept { return !!__super::GetContainer(); }
 
@@ -512,9 +509,6 @@ private:
         GetDeviceContext()->CreateSolidColorBrush({}, m_Stock.pBrush.AtClear());
     }
 
-    static EckInlineNdCe D2D1_ALPHA_MODE RdcD2DAlphaMode() noexcept { return D2D1_ALPHA_MODE_PREMULTIPLIED; }
-    static EckInlineNdCe DXGI_ALPHA_MODE RdcDxgiAlphaMode() noexcept { return DXGI_ALPHA_MODE_PREMULTIPLIED; }
-
     void RdpRenderTree(CElement* pEle, const Kw::Rect& rc, Detail::PAINT_EXTRA* pExtra) noexcept
     {
         const auto pDC = GetDeviceContext();
@@ -660,7 +654,7 @@ private:
 
         const D2D1_BITMAP_PROPERTIES1 BitmapProperty
         {
-            { DXGI_FORMAT_B8G8R8A8_UNORM, RdcD2DAlphaMode() },
+            { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
             (float)GetUserDpi(),
             (float)GetUserDpi(),
             D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
@@ -860,11 +854,11 @@ private:
         {
         case PresentMode::BitBltSwapChain:
             m_D2D.ReSize(1, cx, cy, 0,
-                RdcD2DAlphaMode(), BitmapOptions, fDpi);
+                D2D1_ALPHA_MODE_PREMULTIPLIED, BitmapOptions, fDpi);
             break;
         case PresentMode::FlipSwapChain:
             m_D2D.ReSize(2, cx, cy, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT,
-                RdcD2DAlphaMode(), BitmapOptions, fDpi);
+                D2D1_ALPHA_MODE_PREMULTIPLIED, BitmapOptions, fDpi);
             break;
         case PresentMode::DCompositionSurface:
         case PresentMode::DCompositionVisual:
@@ -888,7 +882,7 @@ private:
             SafeRelease(m_D2D.m_pBitmap);
             const D2D1_BITMAP_PROPERTIES1 BmpProp
             {
-                { DXGI_FORMAT_B8G8R8A8_UNORM, RdcD2DAlphaMode() },
+                { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
                 fDpi, fDpi,
                 D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW |
                 D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
@@ -921,7 +915,7 @@ private:
         {
             auto Param = EZD2D_PARAM::MakeBitblt(Handle, g_pDxgiFactory, g_pDxgiDevice,
                 g_pD2DDevice, cx, cy, fDpi);
-            Param.uBmpAlphaMode = RdcD2DAlphaMode();
+            Param.uBmpAlphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
             m_D2D.Create(Param);
         }
         break;
@@ -929,7 +923,7 @@ private:
         {
             auto Param = EZD2D_PARAM::MakeFlip(Handle, g_pDxgiFactory, g_pDxgiDevice,
                 g_pD2DDevice, cx, cy, fDpi);
-            Param.uBmpAlphaMode = RdcD2DAlphaMode();
+            Param.uBmpAlphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
             Param.uFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
             m_D2D.Create(Param);
             ComPtr<IDXGISwapChain2> pSwapChain2;
@@ -952,7 +946,7 @@ private:
             m_pDcDevice->CreateVisual(&m_pDcVisual);
             m_pDcDevice->CreateSurface(cx, cy,
                 DXGI_FORMAT_B8G8R8A8_UNORM,
-                RdcDxgiAlphaMode(),
+                DXGI_ALPHA_MODE_PREMULTIPLIED,
                 &m_pDcSurface);
             m_pDcVisual->SetContent(m_pDcSurface);
             m_pDcTarget->SetRoot(m_pDcVisual);
@@ -965,7 +959,7 @@ private:
         {
             D2D1_RENDER_TARGET_PROPERTIES RtProp;
             RtProp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
-            RtProp.pixelFormat = { DXGI_FORMAT_B8G8R8A8_UNORM, RdcD2DAlphaMode() };
+            RtProp.pixelFormat = { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED };
             RtProp.dpiX = RtProp.dpiY = fDpi;
             RtProp.usage = D2D1_RENDER_TARGET_USAGE_NONE;
             RtProp.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
@@ -986,7 +980,7 @@ private:
 
             m_pDcDevice->CreateSurface(cx, cy,
                 DXGI_FORMAT_B8G8R8A8_UNORM,
-                RdcDxgiAlphaMode(),
+                DXGI_ALPHA_MODE_PREMULTIPLIED,
                 &m_pDcSurface);
             m_pDcVisual->SetContent(m_pDcSurface);
             m_pDcVisual->SetOffsetX(0.f);
@@ -1002,7 +996,7 @@ private:
                 &m_D2D.m_pDC);
             const D2D1_BITMAP_PROPERTIES1 BmpProp
             {
-                { DXGI_FORMAT_B8G8R8A8_UNORM, RdcD2DAlphaMode() },
+                { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
                 fDpi, fDpi,
                 D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW |
                 D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
@@ -1406,8 +1400,10 @@ public:
     /// 使用DCompositionVisual呈现时，初始化渲染到的目标视觉对象
     /// </summary>
     /// <param name="pVisual">目标视觉对象，窗口内容渲染到此对象</param>
-    /// <param name="pDevice">DComp设备</param>
-    void InitializeDCompositionVisual(IDCompositionVisual* pVisual, IDCompositionDevice* pDevice) noexcept
+    /// <param name="pDevice">DComposition设备</param>
+    void RdInitializeDCompositionVisual(
+        _In_ IDCompositionVisual* pVisual,
+        _In_ IDCompositionDevice* pDevice) noexcept
     {
         EckAssert(m_ePresentMode == PresentMode::DCompositionVisual);
         EckAssert(!m_pDcVisual && !m_pDcSurface && !m_pDcDevice);
@@ -1751,8 +1747,6 @@ EckInline     void      CElement::SetFocus()       noexcept { GetWindow().EleSet
 EckInlineNdCe CElement* CElement::GetFocus()       noexcept { return GetWindow().EleGetFocus(); }
 EckInline     BOOL      CElement::SetTimer(UINT_PTR uId, UINT uElapse) noexcept { return GetWindow().EleSetTimer(this, uId, uElapse); }
 EckInline     BOOL      CElement::KillTimer(UINT_PTR uId) noexcept { return GetWindow().EleKillTimer(this, uId); }
-EckInline     void      CElement::KctWake() const noexcept { GetWindow().KctWake(); }
-EckInlineNdCe ID2D1Bitmap1* CElement::CcGetBitmap() const noexcept { return GetWindow().CcGetBitmap(); }
 
 class CUiaBase : public CElement::CUiaElement
 {
