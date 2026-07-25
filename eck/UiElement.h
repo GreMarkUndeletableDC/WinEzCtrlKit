@@ -78,6 +78,18 @@ namespace Declaration
         UINT uNotify;
         BOOL bProcessed;
     };
+
+    // UiHook事件
+    enum : UINT
+    {
+        UIHE_CREATE,
+        UIHE_DESTROY,
+    };
+
+    struct UIHOOK_EVENT
+    {
+        UINT uEvent;
+    };
 }
 using namespace Declaration;
 
@@ -323,6 +335,8 @@ private:
 
     std::vector<TIMER> m_vTimer{};
 
+    CEventChain<Intercept_T, LRESULT, TElement*, const UIHOOK_EVENT*> m_ecUiHook{};
+
     int m_iUserDpi{ 96 };
     int m_iDpi{ 96 };
 
@@ -337,6 +351,8 @@ private:
     BITBOOL m_bDbgDrawFrame : 1{};
     BITBOOL m_bDbgDrawDirtyRect : 1{};
     BITBOOL m_bEnableOleDragDrop : 1{};
+public:
+    using HUiHookSlot = decltype(m_ecUiHook)::HSlot;
 private:
     void ElementDestroying(TElement* pEle) noexcept
     {
@@ -932,6 +948,8 @@ public:
     EckInlineNdCe BOOL DbgGetDrawFrame() const noexcept { return m_bDbgDrawFrame; }
     EckInlineCe void DbgSetDrawDirtyRect(BOOL b) noexcept { m_bDbgDrawDirtyRect = b; }
     EckInlineNdCe BOOL DbgGetDrawDirtyRect() const noexcept { return m_bDbgDrawDirtyRect; }
+
+    EckInlineNdCe auto& GetUiHookEventChain() noexcept { return m_ecUiHook; }
 };
 
 /*
@@ -1311,6 +1329,9 @@ protected:
     // 函数调用时对象完全初始化完毕
     void PostCreate() noexcept
     {
+        const UIHOOK_EVENT Evt{ .uEvent = UIHE_CREATE };
+        GetContainer()->GetUiHookEventChain().Emit((THost*)this, &Evt);
+
         if (GetContainer()->UiaIsInitialized() &&
             UiaClientsAreListening())
         {
@@ -1325,6 +1346,9 @@ protected:
     // 函数返回后当前对象仍然有效，派生类产生销毁事件，然后调用PostDestroy
     void PreDestroy() noexcept
     {
+        const UIHOOK_EVENT Evt{ .uEvent = UIHE_DESTROY };
+        GetContainer()->GetUiHookEventChain().Emit((THost*)this, &Evt);
+
         auto pChild = EtFirstChild();
         while (pChild)
         {
