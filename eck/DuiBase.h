@@ -676,7 +676,7 @@ private:
         Evt.PreRender.pDstSurface = pDxgiSurface.Get();
         Evt.PreRender.prcDirty = &rcDirtyPixel;
         rer = OnRenderEvent(RE_PRERENDER, Evt);
-        const auto bPostRender = !!(rer & RER_REDIRECTION);
+        const auto bPostRender = !!(rer & RER_POST_RENDER);
 
         Evt.PreRender.ptOffset.x -= rcDirtyPixel.left;
         Evt.PreRender.ptOffset.y -= rcDirtyPixel.top;
@@ -779,6 +779,7 @@ private:
             Evt.PreRender.ptOffset = {};
             Evt.PreRender.prcDirty = &rcPixel;
             rer = OnRenderEvent(RE_PRERENDER, Evt);
+            const auto bPostRender = !!(rer & RER_POST_RENDER);
             if (!(rer & RER_NO_FILLBACK))
             {
                 if (m_bFullUpdate)
@@ -832,6 +833,8 @@ private:
                 }
 #endif
             }
+            if (bPostRender)
+                OnRenderEvent(RE_POSTRENDER, Evt);
             pDC->EndDraw();
         }
         return;
