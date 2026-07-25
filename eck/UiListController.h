@@ -1121,7 +1121,10 @@ public:
 
         m_pHost->LchSccScrollDelta(TRUE, d, bSmooth);
         if (!bSmooth)
+        {
             ReCalculateTopItem();
+            m_pHost->LchInvalidateRect(nullptr);
+        }
         return TRUE;
     }
 

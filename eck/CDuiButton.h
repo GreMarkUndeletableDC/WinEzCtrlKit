@@ -178,7 +178,8 @@ public:
             if (TmState() & SapLButtonDown)
                 GetContainer()->EleReleaseCapture();
             GetWindow().RdLockUpdate();
-            EvtClick();
+            if (PointInRect(GetViewRect(), EagPoint(lParam)))
+                EvtClick();
             Invalidate();
             GetWindow().RdUnlockUpdate();
             break;
