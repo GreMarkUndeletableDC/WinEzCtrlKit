@@ -176,12 +176,14 @@ public:
             break;
         case WM_LBUTTONUP:
             if (TmState() & SapLButtonDown)
+            {
                 GetContainer()->EleReleaseCapture();
-            GetWindow().RdLockUpdate();
-            if (PointInRect(GetViewRect(), EagPoint(lParam)))
-                EvtClick();
-            Invalidate();
-            GetWindow().RdUnlockUpdate();
+                GetWindow().RdLockUpdate();
+                if (PointInRect(GetViewRect(), EagPoint(lParam)))
+                    EvtClick();
+                Invalidate();
+                GetWindow().RdUnlockUpdate();
+            }
             break;
         case WM_CAPTURECHANGED:
             if (TmState() & SapLButtonDown)
