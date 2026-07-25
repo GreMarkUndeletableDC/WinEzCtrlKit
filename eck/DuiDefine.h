@@ -136,8 +136,8 @@ union RENDER_EVENT
         // In: 本次更新的脏矩形
         // Out: 如果应用程序需要，将新的脏矩形写入该结构，仅在pDstSurface不为0时有效
         RECT* prcDirty;
-    } QueryTarget;
-    struct// 均为物理坐标
+    } QueryTarget;// 均为物理坐标
+    struct
     {
         // 本次更新的DXGI图面。在非DComposition模式下此字段为nullptr
         IDXGISurface1* pDstSurface;

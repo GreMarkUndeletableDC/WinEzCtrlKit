@@ -409,6 +409,7 @@ private:
     float m_fBlurDeviation{ 15.f };
 
     ARGB m_argbAccent{ 0xFF'66CCFF };
+    ARGB m_argbBack{ 0xFF'000000 };
 
     USHORT m_cLockUpdate{};
 
@@ -1179,7 +1180,7 @@ public:
         {
             const auto pDC = GetDeviceContext();
             pDC->PushAxisAlignedClip(e.FillBack.rc, D2D1_ANTIALIAS_MODE_ALIASED);
-            pDC->Clear({});
+            pDC->Clear(ArgbToD2DColorF(m_argbBack));
             pDC->PopAxisAlignedClip();
         }
         return RER_NONE;
@@ -1480,6 +1481,11 @@ public:
         if (!--m_cLockUpdate && bUpdateNow)
             RdRenderAndPresent();
     }
+
+    EckInlineNdCe BOOL RdIsFullUpdate() const noexcept { return m_bFullUpdate; }
+
+    EckInlineNdCe ARGB RdGetBackColor() const noexcept { return m_argbBack; }
+    EckInlineCe void RdSetBackColor(ARGB argb) noexcept { m_argbBack = argb; }
 
     EckInlineNdCe ARGB TmAccentColor() const noexcept { return m_argbAccent; }
 };
