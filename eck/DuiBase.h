@@ -638,9 +638,11 @@ private:
         // --
 
         Evt.QueryTarget.pDstSurface = nullptr;
+        Evt.QueryTarget.ptOffset = {};
         Evt.QueryTarget.prcDirty = &rcDirtyPixel;
         rer = OnRenderEvent(RE_QUERY_TARGET, Evt);
-        if (rer & RER_REDIRECTION)
+        const auto bRedirection = !!(rer & RER_REDIRECTION);
+        if (bRedirection)
         {
             pDxgiSurface.Attach(Evt.QueryTarget.pDstSurface);
             Evt.PreRender.ptOffset = Evt.QueryTarget.ptOffset;
@@ -673,6 +675,7 @@ private:
         Evt.PreRender.pDstSurface = pDxgiSurface.Get();
         Evt.PreRender.prcDirty = &rcDirtyPixel;
         rer = OnRenderEvent(RE_PRERENDER, Evt);
+        const auto bPostRender = !!(rer & RER_REDIRECTION);
 
         Evt.PreRender.ptOffset.x -= rcDirtyPixel.left;
         Evt.PreRender.ptOffset.y -= rcDirtyPixel.top;
@@ -731,10 +734,11 @@ private:
             pDC->DrawRectangle(MakeD2DRectF(rcDirtyLogical), pBr.Get(), 2.f);
         }
 #endif // _DEBUG
-        if (rer & RER_REDIRECTION)
+        if (bPostRender)
             OnRenderEvent(RE_POSTRENDER, Evt);
         pDC->EndDraw();
-        m_pDcSurface->EndDraw();
+        if (!bRedirection)
+            m_pDcSurface->EndDraw();
         pDC->SetTarget(nullptr);
 
         if (m_ePresentMode == PresentMode::DCompositionVisual)
@@ -833,9 +837,10 @@ private:
         case PresentMode::DCompositionSurface:
         case PresentMode::DCompositionVisual:
             RdpRender_DComposition(rc);
-            return;
+            break;
         }
-        ECK_UNREACHABLE;
+        if (prcPixel)
+            *prcPixel = {};
     }
 
     void RdReSize() noexcept

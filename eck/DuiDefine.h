@@ -80,7 +80,7 @@ enum
     //   QueryTarget
     // Return:
     //   RER_NONE           执行默认操作
-    //   RER_REDIRECTION    应用程序重定向渲染，DUI系统应使用pNewDstSurface和prcNewDirty
+    //   RER_REDIRECTION    应用程序重定向渲染，DUI系统应使用pDstSurface和prcDirty
     RE_QUERY_TARGET,
 
     // 即将开始渲染
@@ -89,10 +89,11 @@ enum
     // Return:
     //   RER_NONE           执行默认操作
     //   RER_NO_FILLBACK    执行默认操作，且不产生RE_FILLBACK事件
+    //   RER_POST_RENDER    触发RE_POSTRENDER
     RE_PRERENDER,
 
     // 渲染完毕。
-    // 如果应用程序为RE_PRERENDER返回了RER_REDIRECTION，则渲染完毕后产生该事件；
+    // 如果应用程序为RE_PRERENDER返回了RER_POST_RENDER，则渲染完毕后产生该事件；
     // 此事件产生时关联图面仍然有效，且DC未调用EndDraw
     // Return:
     //   RER_NONE
@@ -119,6 +120,7 @@ enum : LRESULT
     RER_NONE = 0,
     RER_REDIRECTION = 1 << 0,
     RER_NO_FILLBACK = 1 << 1,
+    RER_POST_RENDER = 1 << 2,
 };
 
 union RENDER_EVENT
@@ -137,7 +139,7 @@ union RENDER_EVENT
     } QueryTarget;
     struct// 均为物理坐标
     {
-        // 本次更新的DXGI图面
+        // 本次更新的DXGI图面。在非DComposition模式下此字段为nullptr
         IDXGISurface1* pDstSurface;
         // 本次更新的DComposition图面重画偏移
         POINT ptOffset;
