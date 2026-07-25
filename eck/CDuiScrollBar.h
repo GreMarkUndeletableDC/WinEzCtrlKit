@@ -187,7 +187,7 @@ public:
                 TmState() |= SaHot;
                 m_ec.Start(0.f, 1.f, m_bAnActive);
                 m_bAnActive = TRUE;
-                KctWake();
+                GetWindow().KctWake();
             }
             if (m_bDragThumb)
             {
@@ -215,7 +215,7 @@ public:
                 TmState() &= ~SaHot;
                 m_ec.Start(1.f, 0.f, m_bAnActive);
                 m_bAnActive = TRUE;
-                KctWake();
+                GetWindow().KctWake();
             }
         }
         return 0;

@@ -544,7 +544,7 @@ public:
             if (wParam & MK_SHIFT)
                 goto ScrollH;// 横向滚动
             m_pSccV->SccMouseWheel(float(-GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA));
-            KctWake();
+            GetWindow().KctWake();
         }
         else if (uMsg == WM_MOUSEHWHEEL)
         {
@@ -552,7 +552,7 @@ public:
                 goto TxSend;
         ScrollH:
             m_pSccH->SccMouseWheel(float(-GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA));
-            KctWake();
+            GetWindow().KctWake();
         }
         else if (uMsg >= WM_MOUSEFIRST && uMsg <= WM_MOUSELAST)
         {
