@@ -71,7 +71,6 @@ public:
     EckInlineNdCe auto GetInterpolationMode() const noexcept { return m_eInterMode; }
 };
 
-// 2D仿射变换
 struct CCompositor2DAffineTransform : public CCompositor
 {
 private:
