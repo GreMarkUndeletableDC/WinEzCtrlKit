@@ -1187,7 +1187,11 @@ public:
     {
         const auto iOld = GetUserDpi();
         __super::SetUserDpi(iDpi);
-        EtBroadcastEvent(WM_DPICHANGED, iOld, 0);
+        if (IsValid())
+        {
+            RdSetUserDpi();
+            EtBroadcastEvent(WM_DPICHANGED, iOld, 0);
+        }
     }
 
     void KctStartTimer() noexcept { m_MsgTimer.Start(); }
