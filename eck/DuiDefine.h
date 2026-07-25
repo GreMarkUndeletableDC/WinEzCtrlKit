@@ -128,16 +128,14 @@ union RENDER_EVENT
         // 如果应用程序需要，此字段设为渲染到的新图面
         // 应用程序必须将引用计数**+1**
         IDXGISurface1* pDstSurface;
-        // In: 本次更新的脏矩形
-        // Out: 如果应用程序需要，将新的脏矩形写入该结构，仅在pDstSurface不为0时有效
-        RECT* prcDirty;
         // 如果应用程序需要，此字段设置为绘图偏移。
         // 仅在pDstSurface不为0时有效
         POINT ptOffset;
-        // 是否更新整个窗口
-        BOOL bFullUpdate;
+        // In: 本次更新的脏矩形
+        // Out: 如果应用程序需要，将新的脏矩形写入该结构，仅在pDstSurface不为0时有效
+        RECT* prcDirty;
     } QueryTarget;
-    struct
+    struct// 均为物理坐标
     {
         // 本次更新的DXGI图面
         IDXGISurface1* pDstSurface;
@@ -145,8 +143,6 @@ union RENDER_EVENT
         POINT ptOffset;
         // 本次更新的脏矩形
         const RECT* prcDirty;
-        // 是否更新整个窗口
-        BOOL bFullUpdate;
     } PreRender;// 均为物理坐标
     struct
     {

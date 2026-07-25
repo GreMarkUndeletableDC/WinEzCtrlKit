@@ -617,7 +617,7 @@ private:
         }
     }
 
-    void RdpRender_DComposition(const Kw::Rect& rc, BOOL bFullUpdate = FALSE) noexcept
+    void RdpRender_DComposition(const Kw::Rect& rc) noexcept
     {
         EckAssert(GetPresentMode() == PresentMode::DCompositionSurface ||
             GetPresentMode() == PresentMode::DCompositionVisual);
@@ -639,7 +639,6 @@ private:
 
         Evt.QueryTarget.pDstSurface = nullptr;
         Evt.QueryTarget.prcDirty = &rcDirtyPixel;
-        Evt.QueryTarget.bFullUpdate = bFullUpdate;
         rer = OnRenderEvent(RE_QUERY_TARGET, Evt);
         if (rer & RER_REDIRECTION)
         {
@@ -649,7 +648,7 @@ private:
         else
         {
             m_pDcSurface->BeginDraw(
-                bFullUpdate ? nullptr : &rcDirtyPixel,
+                m_bFullUpdate ? nullptr : &rcDirtyPixel,
                 IID_PPV_ARGS(&pDxgiSurface),
                 &Evt.PreRender.ptOffset);
         }
@@ -673,7 +672,6 @@ private:
 
         Evt.PreRender.pDstSurface = pDxgiSurface.Get();
         Evt.PreRender.prcDirty = &rcDirtyPixel;
-        Evt.PreRender.bFullUpdate = bFullUpdate;
         rer = OnRenderEvent(RE_PRERENDER, Evt);
 
         Evt.PreRender.ptOffset.x -= rcDirtyPixel.left;
@@ -692,14 +690,14 @@ private:
         // 画背景
         if (!(rer & RER_NO_FILLBACK))
         {
-            if (bFullUpdate)
+            if (m_bFullUpdate)
                 ++rcDirtyInSurface.right, ++rcDirtyInSurface.bottom;
 
             RENDER_EVENT Evt;
             Evt.FillBack.rc = MakeD2DRectF(rcDirtyInSurface);
             OnRenderEvent(RE_FILLBACK, Evt);
 
-            if (bFullUpdate)
+            if (m_bFullUpdate)
                 --rcDirtyInSurface.right, --rcDirtyInSurface.bottom;
         }
 
@@ -745,10 +743,7 @@ private:
             m_pDcDevice->Commit();
     }
 
-    void RdpRender(
-        const Kw::Rect& rc,
-        BOOL bFullUpdate = FALSE,
-        RECT* prcPixel = nullptr) noexcept
+    void RdpRender(const Kw::Rect& rc, _Out_opt_ RECT* prcPixel = nullptr) noexcept
     {
         const auto pDC = GetDeviceContext();
         switch (m_ePresentMode)
@@ -778,18 +773,17 @@ private:
             Evt.PreRender.pDstSurface = nullptr;
             Evt.PreRender.ptOffset = {};
             Evt.PreRender.prcDirty = &rcPixel;
-            Evt.PreRender.bFullUpdate = m_bFullUpdate;
             rer = OnRenderEvent(RE_PRERENDER, Evt);
             if (!(rer & RER_NO_FILLBACK))
             {
-                if (bFullUpdate)
+                if (m_bFullUpdate)
                     ++rcDirty.right, ++rcDirty.bottom;
 
                 RENDER_EVENT Evt;
                 Evt.FillBack.rc = MakeD2DRectF(rcDirty);
                 OnRenderEvent(RE_FILLBACK, Evt);
 
-                if (bFullUpdate)
+                if (m_bFullUpdate)
                     --rcDirty.right, --rcDirty.bottom;
             }
 
@@ -820,7 +814,7 @@ private:
                     .pptSrc = &ptSrc,
                     .pblend = &BlendFunctionAlpha,
                     .dwFlags = ULW_ALPHA,
-                    .prcDirty = bFullUpdate ? nullptr : &rcPixel,
+                    .prcDirty = m_bFullUpdate ? nullptr : &rcPixel,
                 };
                 UpdateLayeredWindowIndirect(Handle, &ulwi);
                 constexpr RECT rcEmpty{};
@@ -838,7 +832,7 @@ private:
         return;
         case PresentMode::DCompositionSurface:
         case PresentMode::DCompositionVisual:
-            RdpRender_DComposition(rc, bFullUpdate);
+            RdpRender_DComposition(rc);
             return;
         }
         ECK_UNREACHABLE;
@@ -1450,7 +1444,7 @@ public:
             m_ePresentMode == PresentMode::FlipSwapChain ||
             m_ePresentMode == PresentMode::BitBltSwapChain);
         RECT rcDirtyPixel;
-        RdpRender(rc, m_bFullUpdate, bWantDirtyRect ? &rcDirtyPixel : nullptr);
+        RdpRender(rc, bWantDirtyRect ? &rcDirtyPixel : nullptr);
 
         DXGI_PRESENT_PARAMETERS pp{};
         if (bWantDirtyRect)
