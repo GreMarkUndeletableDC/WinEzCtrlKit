@@ -1180,6 +1180,12 @@ public:
         OffsetRect(rc, 0, -dy);
         return rc;
     }
+
+    EckInlineNdCe BOOL GetGroup() const noexcept { return m_bGroup; }
+    void SetGroup(BOOL bGroup) noexcept
+    {
+        m_bGroup = bGroup;
+    }
 };
 ECK_LC_NAMESPACE_END
 ECK_UIBASIC_NAMESPACE_END
