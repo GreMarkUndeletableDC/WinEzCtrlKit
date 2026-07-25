@@ -176,8 +176,14 @@ public:
             break;
         case WM_LBUTTONUP:
             if (TmState() & SapLButtonDown)
+            {
                 GetContainer()->EleReleaseCapture();
-            Invalidate();
+                GetWindow().RdLockUpdate();
+                if (PointInRect(GetViewRect(), EagPoint(lParam)))
+                    EvtClick();
+                Invalidate();
+                GetWindow().RdUnlockUpdate();
+            }
             break;
         case WM_CAPTURECHANGED:
             if (TmState() & SapLButtonDown)
@@ -206,9 +212,11 @@ public:
             m_bSpacePressed = FALSE;
             if (TmState() & SaPressed)
             {
-                EvtClick();
                 TmState() &= ~SaPressed;
+                GetWindow().RdLockUpdate();
+                EvtClick();
                 Invalidate();
+                GetWindow().RdUnlockUpdate();
             }
         }
         break;

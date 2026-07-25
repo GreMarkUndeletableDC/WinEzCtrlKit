@@ -548,24 +548,28 @@ public:
 
     float LchSccGetPosition(BOOL bVert) const noexcept override
     {
-        if (bVert)
-            return m_pSccV ? m_pSccV->SccGetPosition() : 0;
-        else
-            return m_pSccH ? m_pSccH->SccGetPosition() : 0;
+        const auto pScc = (bVert ? m_pSccV : m_pSccH);
+        if (pScc)
+            return pScc->SccGetPosition();
+        return 0.f;
     }
     void LchSccSetRange(BOOL bVert, TCoord Min, TCoord Max) noexcept override
     {
-        if (bVert)
+        const auto pScc = (bVert ? m_pSccV : m_pSccH);
+        if (pScc)
+            pScc->SccSetRange(Min, Max);
+    }
+    void LchSccScrollDelta(BOOL bVert, TCoord d, BOOL bSmooth) noexcept override
+    {
+        const auto pScc = (bVert ? m_pSccV : m_pSccH);
+        if (pScc)
         {
-            if (m_pSccV)
-                m_pSccV->SccSetRange(Min, Max);
-        }
-        else
-        {
-            if (m_pSccH)
-                m_pSccH->SccSetRange(Min, Max);
+            pScc->SccScrollDelta(d, bSmooth);
+            if (bSmooth)
+                GetWindow().KctWake();
         }
     }
+
     TCoord LchGetHeight() const noexcept override { return GetHeight(); }
     TCoord LchGetWidth() const noexcept override
     {

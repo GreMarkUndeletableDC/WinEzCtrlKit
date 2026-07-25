@@ -151,8 +151,11 @@ public:
     }
 };
 
-inline std::optional<ARGB> TmSsLerpColor(CThemeBase* pTheme,
-    BOOL bArgbOrId, UINT cr1, UINT cr2, float fLerp) noexcept
+inline std::optional<ARGB> TmSsLerpColor(
+    CThemeBase* pTheme,
+    BOOL bArgbOrId,
+    UINT cr1, UINT cr2,
+    float kLerp) noexcept
 {
     std::optional<ARGB> oc1, oc2;
     oc1 = bArgbOrId ? cr1 : pTheme->GetColorOptional(cr1);
@@ -160,23 +163,23 @@ inline std::optional<ARGB> TmSsLerpColor(CThemeBase* pTheme,
     if (!oc1 && !oc2)
         return std::nullopt;
     if (!oc1)
-        oc1 = 0;
+        oc1 = *oc2 & 0x00'FFFFFF;
     if (!oc2)
-        oc2 = 0;
-    return LerpArgb(*oc1, *oc2, fLerp);
+        oc2 = *oc1 & 0x00'FFFFFF;
+    return LerpArgb(*oc1, *oc2, kLerp);
 }
 
 inline SimpleStyle TmSsLerp(
     CThemeBase* pTheme,
     const SimpleStyle& s1,
     const SimpleStyle& s2,
-    float fLerp) noexcept
+    float kLerp) noexcept
 {
     SimpleStyle s;
-    s.rRound = s1.rRound + (s2.rRound - s1.rRound) * fLerp;
-    s.cxBorder = s1.cxBorder + (s2.cxBorder - s1.cxBorder) * fLerp;
+    s.rRound = s1.rRound + (s2.rRound - s1.rRound) * kLerp;
+    s.cxBorder = s1.cxBorder + (s2.cxBorder - s1.cxBorder) * kLerp;
 
-    const auto crFore = TmSsLerpColor(pTheme, s1.bForeArgb, s1.CrFore, s2.CrFore, fLerp);
+    const auto crFore = TmSsLerpColor(pTheme, s1.bForeArgb, s1.CrFore, s2.CrFore, kLerp);
     if (crFore)
     {
         s.CrFore = *crFore;
@@ -184,7 +187,7 @@ inline SimpleStyle TmSsLerp(
     }
     else
         s.CrFore = IdTmInvalid;
-    const auto crBack = TmSsLerpColor(pTheme, s1.bBackArgb, s1.CrBack, s2.CrBack, fLerp);
+    const auto crBack = TmSsLerpColor(pTheme, s1.bBackArgb, s1.CrBack, s2.CrBack, kLerp);
     if (crBack)
     {
         s.CrBack = *crBack;
@@ -192,7 +195,7 @@ inline SimpleStyle TmSsLerp(
     }
     else
         s.CrBack = IdTmInvalid;
-    const auto crBorder = TmSsLerpColor(pTheme, s1.bBorderArgb, s1.CrBorder, s2.CrBorder, fLerp);
+    const auto crBorder = TmSsLerpColor(pTheme, s1.bBorderArgb, s1.CrBorder, s2.CrBorder, kLerp);
     if (crBorder)
     {
         s.CrBorder = *crBorder;
