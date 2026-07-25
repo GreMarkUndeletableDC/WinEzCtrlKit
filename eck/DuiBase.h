@@ -279,6 +279,8 @@ public:
         for (; pp >= pTrans; --pp)
         {
             pEle = *pp;
+            if (!pEle)// IntelliSense
+                break;
             const auto pCompositor = pEle->m_pCompositor;
             if (pCompositor)
             {
@@ -1444,17 +1446,17 @@ public:
                 return;
         }
 
-        const auto bWantPhyRect = !m_bFullUpdate && (
+        const auto bWantDirtyRect = !m_bFullUpdate && (
             m_ePresentMode == PresentMode::FlipSwapChain ||
             m_ePresentMode == PresentMode::BitBltSwapChain);
-        RECT rcPhy;
-        RdpRender(rc, m_bFullUpdate, bWantPhyRect ? &rcPhy : nullptr);
+        RECT rcDirtyPixel;
+        RdpRender(rc, m_bFullUpdate, bWantDirtyRect ? &rcDirtyPixel : nullptr);
 
         DXGI_PRESENT_PARAMETERS pp{};
-        if (bWantPhyRect)
+        if (bWantDirtyRect)
         {
             pp.DirtyRectsCount = 1;
-            pp.pDirtyRects = &rcPhy;
+            pp.pDirtyRects = &rcDirtyPixel;
         }
 
         switch (m_ePresentMode)
