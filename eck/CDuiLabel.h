@@ -58,8 +58,8 @@ private:
         GetDC()->CreateLinearGradientBrush(Prop, pStopCollection.Get(), m_pBrushFade.AtClear());
     }
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -154,6 +154,14 @@ public:
                 Invalidate();
             break;
 
+        case EWM_COLORSCHEMECHANGED:
+            TmAutoSwitchTheme(this, wParam);
+            break;
+        case WM_THEMECHANGED:
+            if (m_bFade)
+                UpdateFadeBrush();
+            break;
+
         case WM_CREATE:
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
             UpdateTextLayout();
@@ -211,7 +219,7 @@ public:
 };
 
 
-class CTmLabel : public CThemeBase
+class CTmLabel : public CTheme
 {
 public:
     TmResult Draw(
@@ -224,7 +232,7 @@ public:
         return TmResult::NotSupport;
     }
 };
-inline RcPtr<CThemeBase> CLabel::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CLabel::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmLabel>(bDark);
 }

@@ -1,4 +1,5 @@
 ﻿#include "CReferenceCounted.h"
+#include "Color.h"
 
 ECK_NAMESPACE_BEGIN
 ECK_UIBASIC_NAMESPACE_BEGIN
@@ -49,11 +50,65 @@ namespace Declaration
 
         IdTmSystemBegin,
     };
+
+    struct ACCENT_COLOR
+    {
+        ARGB argbAccent;
+
+        ARGB argbAccentHot;     // 输出
+        ARGB argbAccentPressed; // 输出
+
+        ARGB argbAccentDisabled;
+        ARGB argbAccentFore;
+        ARGB argbAccentForeDisabled;
+    };
+
+    struct CAC_PARAM : ACCENT_COLOR
+    {
+        UINT uFlags;// CACF_*
+    };
+
+    enum : UINT
+    {
+        CACF_DARK_MODE = 1u << 0,
+        CACF_NO_HOT = 1u << 1,
+        CACF_NO_PRESSED = 1u << 2,
+    };
+
+    // 计算强调颜色组
+    // argbAccent用作输入
+    // 忽略argbAccentDisabled、argbAccentFore、argbAccentForeDisabled
+    inline constexpr void TmCalculateAccentColor(_Inout_ CAC_PARAM& ac) noexcept
+    {
+        const auto
+            a = GetArgbA(ac.argbAccent),
+            r = GetArgbR(ac.argbAccent),
+            g = GetArgbG(ac.argbAccent),
+            b = GetArgbB(ac.argbAccent);
+
+        const auto bDark = !!(ac.uFlags & CACF_DARK_MODE);
+
+        ACCENT_COLOR_SET acs;
+        CalculateAccentColorSet(ac.argbAccent, acs);
+        if (bDark)
+            ac.argbAccent = acs.argbLight2;
+
+        if (!(ac.uFlags & CACF_NO_HOT))
+            if (bDark)
+                ac.argbAccentHot = LerpArgb(ac.argbAccent, 0xFF'000000, 0.1f);
+            else
+                ac.argbAccentHot = LerpArgb(ac.argbAccent, 0xFF'FFFFFF, 0.1f);
+        if (!(ac.uFlags & CACF_NO_PRESSED))
+            if (bDark)
+                ac.argbAccentPressed = LerpArgb(ac.argbAccent, 0xFF'000000, 0.2f);
+            else
+                ac.argbAccentPressed = LerpArgb(ac.argbAccent, 0xFF'FFFFFF, 0.2f);
+    }
 }
 
-class CColorCollection final : public CReferenceCountedT<CColorCollection>
+class CColorCollection : public CReferenceCounted
 {
-private:
+protected:
     struct ITEM
     {
         UINT id;
@@ -91,9 +146,9 @@ public:
 };
 
 template<class T>
-class CMetricCollection final : public CReferenceCountedT<CMetricCollection<T>>
+class CMetricCollection : public CReferenceCounted
 {
-private:
+protected:
     struct ITEM
     {
         UINT id;

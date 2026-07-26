@@ -26,6 +26,8 @@ namespace Declaration
         DES_NOTIFY_PARENT = 1u << 9,// 元素产生的通知发送到父元素
         DES_DBG_FRAME = 1u << 10,
         DES_NO_CLIP = 1u << 11,     // 重画时不剪辑到元素矩形
+        DES_DARK_MODE = 1u << 12,
+        DES_NO_AUTO_DARK = 1u << 13,// 当元素接收EWM_COLORSCHEMECHANGED时不自动更新主题
     };
 
     enum : UINT
@@ -42,6 +44,9 @@ namespace Declaration
         EWM_DROP,       // HRESULT(DRAGDROPINFO*, 0)
 
         EWM_DROP_WIN31, // void(HDROP, 0)  转发Win3.1风格拖放WM_DROPFILES
+
+        // 颜色主题改变 (BOOL 是否为深色, 0)
+        EWM_COLORSCHEMECHANGED,
 
         WM_TICK,        // 定时器线程发送到窗口
 
@@ -70,7 +75,6 @@ namespace Declaration
         SaMixed = 1u << 5,
 
         SapLButtonDown = 1u << 6,
-        SapDarkMode = 1u << 7,
     };
 
     struct ELENMHDR
@@ -1693,14 +1697,9 @@ protected:
     EckInlineNdCe UINT& TmState() noexcept { return m_uTmState; }
 public:
     EckInlineNdCe UINT TmGetState() const noexcept { return m_uTmState; }
-    EckInlineNdCe BOOL TmIsDarkMode() const noexcept { return !!(m_uTmState & SapDarkMode); }
-    EckInlineNdCe void TmSetDarkMode(BOOL bDark) noexcept
-    {
-        if (bDark)
-            m_uTmState |= SapDarkMode;
-        else
-            m_uTmState &= ~SapDarkMode;
-    }
+
+    EckInlineNdCe BOOL TmIsDarkMode() const noexcept { return !!(GetStyle() & DES_DARK_MODE); }
+    EckInlineNdCe UINT TmDarkStyle() const noexcept { return GetStyle() & DES_DARK_MODE; }
 };
 ECK_UIBASIC_NAMESPACE_END
 ECK_NAMESPACE_END

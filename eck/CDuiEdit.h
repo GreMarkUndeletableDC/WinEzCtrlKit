@@ -120,8 +120,8 @@ public:
         SsMax
     };
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -255,8 +255,10 @@ private:
             m_pSccV = m_pSBVert.get();
             if (!m_pSBVert->IsValid())
             {
-                m_pSBVert->TmSetDarkMode(TmIsDarkMode());
-                m_pSBVert->Create({}, DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP, 0,
+                m_pSBVert->Create(
+                    {},
+                    DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
+                    0,
                     0, 0, 0, 0, this);
                 m_pSBVert->SetVertical(TRUE);
             }
@@ -268,8 +270,9 @@ private:
             m_pSccH = m_pSBHorz.get();
             if (!m_pSBHorz->IsValid())
             {
-                m_pSBHorz->TmSetDarkMode(TmIsDarkMode());
-                m_pSBHorz->Create({}, DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP,
+                m_pSBHorz->Create(
+                    {},
+                    DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
                     0, 0, 0, 0, 0, this);
             }
         }
@@ -499,6 +502,10 @@ public:
             TxPropertyChanged(uBits, uBits);
         }
         break;
+
+        case EWM_COLORSCHEMECHANGED:
+            TmAutoSwitchTheme(this, wParam);
+            break;
 
         case WM_CREATE:
         {
@@ -1183,7 +1190,7 @@ public:
     }
 };
 
-class CTmEdit : public CThemeBase
+class CTmEdit : public CTheme
 {
 public:
     TmResult Draw(
@@ -1198,7 +1205,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CThemeBase> CEdit::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CEdit::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmEdit>(bDark);
 }

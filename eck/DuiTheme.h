@@ -2,15 +2,126 @@
 #include "UiTheme.h"
 #include "UiColor.h"
 #include "Color.h"
+#include "CSrwLock.h"
+#include "CTrivialBuffer.h"
 
 #include <any>
 
 ECK_NAMESPACE_BEGIN
 ECK_DUI_NAMESPACE_BEGIN
-using UiBasic::CColorCollection;
-using CMetricCollection = UiBasic::CMetricCollection<float>;
-
 using namespace UiBasic::Declaration;
+
+class CMetricCollection final : public UiBasic::CMetricCollection<float>
+{};
+
+class CColorCollection final : public UiBasic::CColorCollection
+{
+private:
+    BOOL m_bAutoAccent{};
+
+    // pacUpdate不为空
+    //   执行更新
+    // pacUpdate为空
+    //   根据bRegister决定注册或注销
+    static void AutoAccentOperation(
+        CColorCollection* pThis,
+        BOOL bRegister,
+        const ACCENT_COLOR* pacUpdate) noexcept
+    {
+        static CTrivialBuffer<CColorCollection*> s_vCollection{};
+        static CSrwLock s_Lock{};
+
+        CSrwWriteGuard _{ s_Lock };
+        if (pacUpdate)
+        {
+            for (auto p : s_vCollection)
+                p->UpdateAccentColor(*pacUpdate);
+            return;
+        }
+
+        if (bRegister)
+            s_vCollection.PushBack(pThis);
+        else
+        {
+            EckCounter(s_vCollection.Size(), i)
+            {
+                if (s_vCollection[i] == pThis)
+                {
+                    s_vCollection.Erase(i);
+                    break;
+                }
+            }
+        }
+    }
+public:
+    CColorCollection() = default;
+
+    CColorCollection(const CColorCollection& x) noexcept { m_vItem = x.m_vItem; }
+    CColorCollection& operator=(const CColorCollection& x) noexcept
+    {
+        if (this == &x)
+            return *this;
+        m_vItem = x.m_vItem;
+        return *this;
+    }
+
+    CColorCollection(CColorCollection&& x) = delete;
+    CColorCollection& operator=(CColorCollection&& x) = delete;
+
+    ~CColorCollection()
+    {
+        if (m_bAutoAccent)
+            AutoAccentOperation(this, FALSE, nullptr);
+    }
+
+    EckInlineNdCe BOOL GetAutoAccent() const noexcept { return m_bAutoAccent; }
+    // 复制构造不会继承AutoAccent状态
+    void SetAutoAccent(BOOL b) noexcept
+    {
+        m_bAutoAccent = b;
+        AutoAccentOperation(this, b, nullptr);
+    }
+
+    void UpdateAccentColor(const ACCENT_COLOR& ac) noexcept
+    {
+        for (auto& e : m_vItem)
+        {
+            switch (e.id)
+            {
+            case IdCrAccent:
+                e.argb = ac.argbAccent;
+                break;
+            case IdCrAccentHot:
+                e.argb = ac.argbAccentHot;
+                break;
+            case IdCrAccentPressed:
+                e.argb = ac.argbAccentPressed;
+                break;
+            case IdCrAccentDisabled:
+                e.argb = ac.argbAccentDisabled;
+                break;
+            case IdCrAccentFore:
+                e.argb = ac.argbAccentFore;
+                break;
+            case IdCrAccentForeDisabled:
+                e.argb = ac.argbAccentForeDisabled;
+                break;
+            }
+        }
+    }
+
+    static void UpdateAllAccentColor(const ACCENT_COLOR& ac, BOOL bDark) noexcept
+    {
+        CAC_PARAM Param{ ac };
+        Param.uFlags = bDark ? CACF_DARK_MODE : 0;
+        TmCalculateAccentColor(Param);
+
+        Param.argbAccentFore = IsColorLightArgb(Param.argbAccent) ? CrlFore : CrdFore;
+        Param.argbAccentForeDisabled = bDark ? CrdForeDisabled : CrlForeDisabled;
+        Param.argbAccentDisabled = bDark ? CrdAccentDisabled : CrlAccentDisabled;
+        AutoAccentOperation(nullptr, 0, &Param);
+    }
+};
 
 enum class TmResult
 {
@@ -63,7 +174,7 @@ struct SimpleStyle
     }
 };
 
-class CThemeBase : public CReferenceCounted
+class CTheme : public CReferenceCounted
 {
 protected:
     RcPtr<CColorCollection> m_pColor{};
@@ -74,7 +185,10 @@ public:
         const SimpleStyle* pStyle,
         UINT idPart,
         const D2D1_RECT_F& rc,
-        _In_opt_ const D2D1_RECT_F* prcClip = nullptr) noexcept = 0;
+        _In_opt_ const D2D1_RECT_F* prcClip = nullptr) noexcept
+    {
+        return TmResult::NotSupport;
+    }
 
     virtual TmResult SetExtra(UINT idExtra, const std::any& Val) noexcept
     {
@@ -152,7 +266,7 @@ public:
 };
 
 inline std::optional<ARGB> TmSsLerpColor(
-    CThemeBase* pTheme,
+    CTheme* pTheme,
     BOOL bArgbOrId,
     UINT cr1, UINT cr2,
     float kLerp) noexcept
@@ -170,7 +284,7 @@ inline std::optional<ARGB> TmSsLerpColor(
 }
 
 inline SimpleStyle TmSsLerp(
-    CThemeBase* pTheme,
+    CTheme* pTheme,
     const SimpleStyle& s1,
     const SimpleStyle& s2,
     float kLerp) noexcept
@@ -266,7 +380,12 @@ inline RcPtr<CColorCollection> TmsMakeColorCollectionLight() noexcept
 }
 inline RcPtr<CColorCollection> TmsColorCollectionLight() noexcept
 {
-    static auto p{ TmsMakeColorCollectionLight() };
+    static auto p = []
+        {
+            auto p = TmsMakeColorCollectionLight();
+            p->SetAutoAccent(TRUE);
+            return p;
+        }();
     return p;
 }
 inline RcPtr<CColorCollection> TmsMakeColorCollectionDark() noexcept
@@ -299,7 +418,12 @@ inline RcPtr<CColorCollection> TmsMakeColorCollectionDark() noexcept
 }
 inline RcPtr<CColorCollection> TmsColorCollectionDark() noexcept
 {
-    static auto p{ TmsMakeColorCollectionDark() };
+    static auto p = []
+        {
+            auto p = TmsMakeColorCollectionDark();
+            p->SetAutoAccent(TRUE);
+            return p;
+        }();
     return p;
 }
 
@@ -320,7 +444,7 @@ EckInlineNdCe SimpleStyle TmsSsMakeDisabled(float cxBorder = 0.f, float r = 0.f)
     return { IdCrFore, IdCrBackDisabled, IdCrBorderDisabled, r, cxBorder };
 }
 
-template<std::derived_from<CThemeBase> TTheme>
+template<std::derived_from<CTheme> TTheme>
 EckInline auto TmMakeTheme(BOOL bDark) noexcept
 {
     const auto p = RcPtr<TTheme>::Make();
@@ -329,6 +453,14 @@ EckInline auto TmMakeTheme(BOOL bDark) noexcept
         TmsColorCollectionDark().Get() :
         TmsColorCollectionLight().Get());
     return p;
+}
+
+// EWM_COLORSCHEMECHANGED的默认处理
+template<class TElement>
+EckInline void TmAutoSwitchTheme(TElement* pEle, WPARAM bDark) noexcept
+{
+    if (!(pEle->GetStyle() & DES_NO_AUTO_DARK))
+        pEle->SetTheme(TElement::TmDefaultTheme((BOOL)bDark).Get());
 }
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END

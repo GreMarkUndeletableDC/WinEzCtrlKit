@@ -82,8 +82,8 @@ private:
         return SsNormal;
     }
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -147,7 +147,8 @@ public:
                     Kw::MakeD2DPointF(pt),
                     m_pLayout.Get(),
                     GetWindow().CcSetBrushColor(
-                        GetTheme()->GetStyleColorD2D(&Ss, SfFore)));
+                        GetTheme()->GetStyleColorD2D(&Ss, SfFore)),
+                    DrawTextLayoutFlags);
             }
 
             DbgDrawFrame();
@@ -255,6 +256,10 @@ public:
             UpdateTextLayout();
             return 0;
 
+        case EWM_COLORSCHEMECHANGED:
+            TmAutoSwitchTheme(this, wParam);
+            break;
+
         case WM_CREATE:
             if (GetStyle() & DES_DISABLE)
             {
@@ -282,9 +287,12 @@ public:
 
     EckInline void SetIcon(const CBitmap& p) noexcept { m_Bitmap = p; }
     EckInlineNdCe auto& GetIcon() const noexcept { return m_Bitmap; }
+
+    EckInlineNdCe auto& TmSimpleStyle(UINT ss) noexcept { return m_Style[ss]; }
+    EckInlineNdCe auto TmSimpleStyle() noexcept { return m_Style; }
 };
 
-class CTmButton : public CThemeBase
+class CTmButton : public CTheme
 {
 public:
     TmResult Draw(
@@ -299,7 +307,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CThemeBase> CButton::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CButton::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmButton>(bDark);
 }
