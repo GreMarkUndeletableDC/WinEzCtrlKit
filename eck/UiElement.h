@@ -26,6 +26,10 @@ namespace Declaration
         DES_NOTIFY_PARENT = 1u << 9,// 元素产生的通知发送到父元素
         DES_DBG_FRAME = 1u << 10,
         DES_NO_CLIP = 1u << 11,     // 重画时不剪辑到元素矩形
+        DES_DARK_MODE = 1u << 12,
+        // 不自动更新主题的深浅色，这只影响窗口级别的自动切换
+        // 元素处理DES_DARK_MODE位的修改时应忽略此样式
+        DES_NO_AUTO_DARK = 1u << 13,
     };
 
     enum : UINT
@@ -70,7 +74,6 @@ namespace Declaration
         SaMixed = 1u << 5,
 
         SapLButtonDown = 1u << 6,
-        SapDarkMode = 1u << 7,
     };
 
     struct ELENMHDR
@@ -750,6 +753,18 @@ public:
             pEle = pEle->EtNext();
         }
     }
+
+    void EtForEachElement(std::invocable<TElement*> auto&& Fn) noexcept
+    {
+        auto pEle = EtFirstChild();
+        while (pEle)
+        {
+            EckCanCallbackContinue(Fn(pEle))
+                return;
+            pEle->EtForEachElement(Fn);
+            pEle = pEle->EtNext();
+        }
+    }
 public:
     TElement* EleSetFocus(TElement* pEle) noexcept
     {
@@ -784,7 +799,7 @@ public:
     EckInline void EleReleaseCapture() noexcept
     {
         ReleaseCapture();
-        // WM_CAPTURECHANGED will process it:
+        // WM_CAPTURECHANGED后:
         // m_pEleMouseCapture->CallEvent(WM_CAPTURECHANGED, 0, nullptr);
         // m_pEleMouseCapture = nullptr;
     }
@@ -1586,15 +1601,15 @@ public:
         }
     }
 
-    void EtForEachElement(std::invocable<THost*> auto&& Fn, THost* pElemBegin) noexcept
+    void EtForEachElement(std::invocable<THost*> auto&& Fn) noexcept
     {
-        auto p{ pElemBegin };
-        while (p)
+        auto pEle = EtFirstChild();
+        while (pEle)
         {
-            EckCanCallbackContinue(Fn(p))
+            EckCanCallbackContinue(Fn(pEle))
                 return;
-            EtForEachElement(Fn, p->EtFirstChild());
-            p = p->EtNext();
+            pEle->EtForEachElement(Fn);
+            pEle = pEle->EtNext();
         }
     }
 protected:
@@ -1693,14 +1708,9 @@ protected:
     EckInlineNdCe UINT& TmState() noexcept { return m_uTmState; }
 public:
     EckInlineNdCe UINT TmGetState() const noexcept { return m_uTmState; }
-    EckInlineNdCe BOOL TmIsDarkMode() const noexcept { return !!(m_uTmState & SapDarkMode); }
-    EckInlineNdCe void TmSetDarkMode(BOOL bDark) noexcept
-    {
-        if (bDark)
-            m_uTmState |= SapDarkMode;
-        else
-            m_uTmState &= ~SapDarkMode;
-    }
+
+    EckInlineNdCe BOOL TmIsDarkMode() const noexcept { return !!(GetStyle() & DES_DARK_MODE); }
+    EckInlineNdCe UINT TmDarkStyle() const noexcept { return GetStyle() & DES_DARK_MODE; }
 };
 ECK_UIBASIC_NAMESPACE_END
 ECK_NAMESPACE_END

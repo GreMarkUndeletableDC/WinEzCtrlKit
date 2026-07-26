@@ -157,8 +157,8 @@ private:
 
     EckInlineNd BOOL IsWindowThemeReady() const noexcept { return m_pUdwTheme && m_pAtlas; }
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -325,6 +325,10 @@ public:
             }
         }
         return 0;
+
+        case WM_STYLECHANGED:
+            TmAutoSwitchTheme(this, wParam);
+            break;
 
         case WM_CREATE:
         {
@@ -583,7 +587,7 @@ public:
 };
 
 
-class CTmTitleBar : public CThemeBase
+class CTmTitleBar : public CTheme
 {
 public:
     TmResult Draw(
@@ -596,7 +600,7 @@ public:
         return TmResult::NotSupport;
     }
 };
-inline RcPtr<CThemeBase> CTitleBar::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CTitleBar::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmTitleBar>(bDark);
 }

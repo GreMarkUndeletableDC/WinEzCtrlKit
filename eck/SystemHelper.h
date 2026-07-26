@@ -4,6 +4,7 @@
 #include "AutoPointer.h"
 #include "CString.h"
 #include "Check.h"
+#include "CRegistryKey.h"
 
 #include <intrin.h>
 #include <wbemcli.h>
@@ -549,5 +550,12 @@ inline NTSTATUS ExpandEnvironmentString(CStringW& rsDst,
     }
     else
         return nts;
+}
+
+inline ARGB GetDwmColorizationColor() noexcept
+{
+    CRegistryKey Key{};
+    Key.Open(HKEY_CURRENT_USER, LR"(Software\Microsoft\Windows\DWM)", KEY_READ);
+    return (ARGB)Key.QueryValueDword(L"ColorizationColor");
 }
 ECK_NAMESPACE_END

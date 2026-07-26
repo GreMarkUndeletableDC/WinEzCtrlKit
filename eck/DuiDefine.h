@@ -157,8 +157,6 @@ enum
 {
     ECKPRIV_EWM_PLACEHOLDER = EWM_SYSBEGIN,
 
-    // 颜色主题改变 (BOOL 是否为深色, 0)
-    EWM_COLORSCHEMECHANGED,
     // 查询扩展矩形 (_Inout_ D2D1_RECT_F*, 0)
     EWM_QUERY_EXPAND_RECT,
     // 创建缓存位图 (_Inout_ CREATE_CACHE_BITMAP_INFO*, 0)

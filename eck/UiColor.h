@@ -15,7 +15,7 @@ namespace Declaration
         CrlBorderDisabled = CrlBorder,
 
         CrlBack = 0x66'FFFFFF,
-        CrlBackHot = 0xB2'FFFFFF,
+        CrlBackHot = 0xB2'EDEDED,
         CrlBackPressed = 0xCC'DCDCDC,
         CrlBackDisabled = 0x4C'E0E0E0,
 
