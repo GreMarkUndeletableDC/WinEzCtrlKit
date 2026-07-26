@@ -17,7 +17,8 @@ class CMetricCollection final : public UiBasic::CMetricCollection<float>
 class CColorCollection final : public UiBasic::CColorCollection
 {
 private:
-    BOOL m_bAutoAccent{};
+    BOOLEAN m_bAutoAccent{};
+    BOOLEAN m_bDark{};
 
     // pacUpdate不为空
     //   执行更新
@@ -43,13 +44,12 @@ private:
             s_vCollection.PushBack(pThis);
         else
         {
-            EckCounter(s_vCollection.Size(), i)
+            for (size_t i = 0; i < s_vCollection.Size(); )
             {
                 if (s_vCollection[i] == pThis)
-                {
                     s_vCollection.Erase(i);
-                    break;
-                }
+                else
+                    ++i;
             }
         }
     }
@@ -121,6 +121,9 @@ public:
         Param.argbAccentDisabled = bDark ? CrdAccentDisabled : CrlAccentDisabled;
         AutoAccentOperation(nullptr, 0, &Param);
     }
+
+    EckInlineNdCe BOOL GetDarkMode() const noexcept { return m_bDark; }
+    EckInlineCe void SetDarkMode(BOOL b) noexcept { m_bDark = b; }
 };
 
 enum class TmResult

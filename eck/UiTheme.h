@@ -80,12 +80,6 @@ namespace Declaration
     // 忽略argbAccentDisabled、argbAccentFore、argbAccentForeDisabled
     inline constexpr void TmCalculateAccentColor(_Inout_ CAC_PARAM& ac) noexcept
     {
-        const auto
-            a = GetArgbA(ac.argbAccent),
-            r = GetArgbR(ac.argbAccent),
-            g = GetArgbG(ac.argbAccent),
-            b = GetArgbB(ac.argbAccent);
-
         const auto bDark = !!(ac.uFlags & CACF_DARK_MODE);
 
         ACCENT_COLOR_SET acs;
