@@ -236,11 +236,12 @@ public:
             break;
         case WM_STYLECHANGED:
             TmAutoSwitchTheme(this, wParam);
-            if (!(((UINT)wParam ^ GetStyle()) & DES_DISABLE))
-                break;
-            if (GetStyle() & DES_DISABLE)
+            if (((UINT)wParam ^ GetStyle()) & DES_DISABLE)
             {
-                TmState() |= SaDisable;
+                if (GetStyle() & DES_DISABLE)
+                    TmState() |= SaDisable;
+                else
+                    TmState() &= ~SaDisable;
                 Invalidate();
             }
             break;

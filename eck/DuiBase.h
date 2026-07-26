@@ -1161,7 +1161,7 @@ public:
             if (m_bAutoTheme && IsColorSchemeChangeMessage(lParam))
             {
                 RdLockUpdate();
-                TmSwitchTheme(PtcCurrent()->bAppDarkMode);
+                TmSwitchTheme(ShouldAppsUseDarkMode());
                 Redraw();
                 RdUnlockUpdate();
             }
@@ -1534,10 +1534,10 @@ public:
 
     void TmUpdateAccentColor(ARGB argb) noexcept
     {
-        EtBroadcastEvent(WM_DWMCOLORIZATIONCOLORCHANGED, argb, 0);
         m_argbAccent = argb;
         if (m_bAutoThemeAccent)
             CColorCollection::UpdateAllAccentColor(argb);
+        EtBroadcastEvent(WM_DWMCOLORIZATIONCOLORCHANGED, argb, 0);
     }
 
     void TmUpdateDwmColorizationColor() noexcept
