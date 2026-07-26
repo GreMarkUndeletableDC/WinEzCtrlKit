@@ -17,40 +17,53 @@ class CMetricCollection final : public UiBasic::CMetricCollection<float>
 class CColorCollection final : public UiBasic::CColorCollection
 {
 private:
+    struct STATIC
+    {
+        CTrivialBuffer<CColorCollection*> vCollection{};
+        CSrwLock Lock{};
+    };
+
     BOOLEAN m_bAutoAccent{};
     BOOLEAN m_bDark{};
 
-    // pacUpdate不为空
-    //   执行更新
-    // pacUpdate为空
-    //   根据bRegister决定注册或注销
-    static void AutoAccentOperation(
-        CColorCollection* pThis,
-        BOOL bRegister,
-        const ACCENT_COLOR* pacUpdate) noexcept
+    static STATIC& GetStatic() noexcept
     {
-        static CTrivialBuffer<CColorCollection*> s_vCollection{};
-        static CSrwLock s_Lock{};
+        static STATIC s{};
+        return s;
+    }
 
-        CSrwWriteGuard _{ s_Lock };
-        if (pacUpdate)
-        {
-            for (auto p : s_vCollection)
-                p->UpdateAccentColor(*pacUpdate);
-            return;
-        }
+    void AccentRegister(BOOL bRegister) noexcept
+    {
+        auto& s = GetStatic();
+        CSrwWriteGuard _{ s.Lock };
 
         if (bRegister)
-            s_vCollection.PushBack(pThis);
+            s.vCollection.PushBack(this);
         else
         {
-            for (size_t i = 0; i < s_vCollection.Size(); )
+            for (size_t i = 0; i < s.vCollection.Size(); )
             {
-                if (s_vCollection[i] == pThis)
-                    s_vCollection.Erase(i);
+                if (s.vCollection[i] == this)
+                    s.vCollection.Erase(i);
                 else
                     ++i;
             }
+        }
+    }
+
+    static void AccentUpdate(
+        const ACCENT_COLOR& acLight,
+        const ACCENT_COLOR& acDark) noexcept
+    {
+        auto& s = GetStatic();
+        CSrwWriteGuard _{ s.Lock };
+
+        for (auto p : s.vCollection)
+        {
+            if (p->GetDarkMode())
+                p->UpdateAccentColor(acDark);
+            else
+                p->UpdateAccentColor(acLight);
         }
     }
 public:
@@ -71,15 +84,18 @@ public:
     ~CColorCollection()
     {
         if (m_bAutoAccent)
-            AutoAccentOperation(this, FALSE, nullptr);
+            AccentRegister(FALSE);
     }
 
     EckInlineNdCe BOOL GetAutoAccent() const noexcept { return m_bAutoAccent; }
     // 复制构造不会继承AutoAccent状态
     void SetAutoAccent(BOOL b) noexcept
     {
-        m_bAutoAccent = b;
-        AutoAccentOperation(this, b, nullptr);
+        if (m_bAutoAccent != !!b)
+        {
+            m_bAutoAccent = b;
+            AccentRegister(m_bAutoAccent);
+        }
     }
 
     void UpdateAccentColor(const ACCENT_COLOR& ac) noexcept
@@ -97,29 +113,28 @@ public:
             case IdCrAccentPressed:
                 e.argb = ac.argbAccentPressed;
                 break;
-            case IdCrAccentDisabled:
-                e.argb = ac.argbAccentDisabled;
-                break;
             case IdCrAccentFore:
                 e.argb = ac.argbAccentFore;
-                break;
-            case IdCrAccentForeDisabled:
-                e.argb = ac.argbAccentForeDisabled;
                 break;
             }
         }
     }
 
-    static void UpdateAllAccentColor(const ACCENT_COLOR& ac, BOOL bDark) noexcept
+    static void UpdateAllAccentColor(ARGB argbBase) noexcept
     {
-        CAC_PARAM Param{ ac };
-        Param.uFlags = bDark ? CACF_DARK_MODE : 0;
-        TmCalculateAccentColor(Param);
+        CAC_PARAM ParamLight{}, ParamDark{};
+        ParamLight.argbAccent = argbBase;
+        TmCalculateAccentColor(ParamLight);
+        ParamDark.argbAccent = argbBase;
+        ParamDark.uFlags = CACF_DARK_MODE;
+        TmCalculateAccentColor(ParamDark);
 
-        Param.argbAccentFore = IsColorLightArgb(Param.argbAccent) ? CrlFore : CrdFore;
-        Param.argbAccentForeDisabled = bDark ? CrdForeDisabled : CrlForeDisabled;
-        Param.argbAccentDisabled = bDark ? CrdAccentDisabled : CrlAccentDisabled;
-        AutoAccentOperation(nullptr, 0, &Param);
+        ParamLight.argbAccentFore =
+            IsColorLightArgb(ParamLight.argbAccent) ? CrlFore : CrdFore;
+        ParamDark.argbAccentFore =
+            IsColorLightArgb(ParamDark.argbAccent) ? CrlFore : CrdFore;
+
+        AccentUpdate(ParamLight, ParamDark);
     }
 
     EckInlineNdCe BOOL GetDarkMode() const noexcept { return m_bDark; }
@@ -387,6 +402,7 @@ inline RcPtr<CColorCollection> TmsColorCollectionLight() noexcept
         {
             auto p = TmsMakeColorCollectionLight();
             p->SetAutoAccent(TRUE);
+            p->SetDarkMode(FALSE);
             return p;
         }();
     return p;
@@ -425,6 +441,7 @@ inline RcPtr<CColorCollection> TmsColorCollectionDark() noexcept
         {
             auto p = TmsMakeColorCollectionDark();
             p->SetAutoAccent(TRUE);
+            p->SetDarkMode(TRUE);
             return p;
         }();
     return p;
@@ -458,12 +475,15 @@ EckInline auto TmMakeTheme(BOOL bDark) noexcept
     return p;
 }
 
-// EWM_COLORSCHEMECHANGED的默认处理
+// WM_STYLECHANGED DES_DARK_MODE被改变时的默认处理
 template<class TElement>
-EckInline void TmAutoSwitchTheme(TElement* pEle, WPARAM bDark) noexcept
+EckInline void TmAutoSwitchTheme(TElement* pEle, WPARAM wParam) noexcept
 {
-    if (!(pEle->GetStyle() & DES_NO_AUTO_DARK))
-        pEle->SetTheme(TElement::TmDefaultTheme((BOOL)bDark).Get());
+    if ((pEle->GetStyle() ^ wParam) & DES_DARK_MODE)
+    {
+        const auto bDark = !!(pEle->GetStyle() & DES_DARK_MODE);
+        pEle->SetTheme(TElement::TmDefaultTheme(bDark).Get());
+    }
 }
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END

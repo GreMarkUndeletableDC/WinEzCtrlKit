@@ -235,6 +235,7 @@ public:
             Invalidate();
             break;
         case WM_STYLECHANGED:
+            TmAutoSwitchTheme(this, wParam);
             if (!(((UINT)wParam ^ GetStyle()) & DES_DISABLE))
                 break;
             if (GetStyle() & DES_DISABLE)
@@ -255,10 +256,6 @@ public:
         case WM_SETFONT:
             UpdateTextLayout();
             return 0;
-
-        case EWM_COLORSCHEMECHANGED:
-            TmAutoSwitchTheme(this, wParam);
-            break;
 
         case WM_CREATE:
             if (GetStyle() & DES_DISABLE)

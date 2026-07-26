@@ -154,7 +154,7 @@ public:
                 Invalidate();
             break;
 
-        case EWM_COLORSCHEMECHANGED:
+        case WM_STYLECHANGED:
             TmAutoSwitchTheme(this, wParam);
             break;
         case WM_THEMECHANGED:

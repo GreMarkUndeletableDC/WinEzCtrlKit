@@ -27,7 +27,9 @@ namespace Declaration
         DES_DBG_FRAME = 1u << 10,
         DES_NO_CLIP = 1u << 11,     // 重画时不剪辑到元素矩形
         DES_DARK_MODE = 1u << 12,
-        DES_NO_AUTO_DARK = 1u << 13,// 当元素接收EWM_COLORSCHEMECHANGED时不自动更新主题
+        // 不自动更新主题的深浅色，这只影响窗口级别的自动切换
+        // 元素处理DES_DARK_MODE位的修改时应忽略此样式
+        DES_NO_AUTO_DARK = 1u << 13,
     };
 
     enum : UINT
@@ -44,9 +46,6 @@ namespace Declaration
         EWM_DROP,       // HRESULT(DRAGDROPINFO*, 0)
 
         EWM_DROP_WIN31, // void(HDROP, 0)  转发Win3.1风格拖放WM_DROPFILES
-
-        // 颜色主题改变 (BOOL 是否为深色, 0)
-        EWM_COLORSCHEMECHANGED,
 
         WM_TICK,        // 定时器线程发送到窗口
 
@@ -754,6 +753,18 @@ public:
             pEle = pEle->EtNext();
         }
     }
+
+    void EtForEachElement(std::invocable<TElement*> auto&& Fn) noexcept
+    {
+        auto pEle = EtFirstChild();
+        while (pEle)
+        {
+            EckCanCallbackContinue(Fn(pEle))
+                return;
+            pEle->EtForEachElement(Fn);
+            pEle = pEle->EtNext();
+        }
+    }
 public:
     TElement* EleSetFocus(TElement* pEle) noexcept
     {
@@ -788,7 +799,7 @@ public:
     EckInline void EleReleaseCapture() noexcept
     {
         ReleaseCapture();
-        // WM_CAPTURECHANGED will process it:
+        // WM_CAPTURECHANGED后:
         // m_pEleMouseCapture->CallEvent(WM_CAPTURECHANGED, 0, nullptr);
         // m_pEleMouseCapture = nullptr;
     }
@@ -1590,15 +1601,15 @@ public:
         }
     }
 
-    void EtForEachElement(std::invocable<THost*> auto&& Fn, THost* pElemBegin) noexcept
+    void EtForEachElement(std::invocable<THost*> auto&& Fn) noexcept
     {
-        auto p{ pElemBegin };
-        while (p)
+        auto pEle = EtFirstChild();
+        while (pEle)
         {
-            EckCanCallbackContinue(Fn(p))
+            EckCanCallbackContinue(Fn(pEle))
                 return;
-            EtForEachElement(Fn, p->EtFirstChild());
-            p = p->EtNext();
+            pEle->EtForEachElement(Fn);
+            pEle = pEle->EtNext();
         }
     }
 protected:

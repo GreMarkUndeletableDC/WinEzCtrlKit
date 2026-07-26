@@ -14,6 +14,13 @@
 
 ECK_NAMESPACE_BEGIN
 ECK_DUI_NAMESPACE_BEGIN
+/*
+* 实现了以下事件
+* 
+* WM_STYLECHANGED   (DWORD 旧样式, 0)
+* WM_THEMECHANGED   (0          , 0)
+* WM_DWMCOLORIZATIONCOLORCHANGED (0, 0)
+*/
 class CElement : public UiBasic::CElement<CElement, true>
 {
     friend class CDuiWindow;
@@ -419,7 +426,7 @@ private:
 
     BITBOOL m_bBlurUseLayer : 1{};      // 模糊是否使用图层
     BITBOOL m_bAutoTheme : 1{ TRUE };
-    BITBOOL m_bAutoThemeAccent : 1{ TRUE };
+    BITBOOL m_bAutoThemeAccent : 1{};
 
     BITBOOL m_bFullUpdate : 1{ TRUE };  // 当前是否需要完全重绘
     BITBOOL m_bWaitSwapChain : 1{};
@@ -1510,29 +1517,36 @@ public:
     EckInlineNdCe ARGB RdGetBackColor() const noexcept { return m_argbBack; }
     EckInlineCe void RdSetBackColor(ARGB argb) noexcept { m_argbBack = argb; }
 
-    // 广播EWM_COLORSCHEMECHANGED
     void TmSwitchTheme(BOOL bDark) noexcept
     {
         RdLockUpdate();
-        EtBroadcastEvent(EWM_COLORSCHEMECHANGED, bDark, 0);
+        EtForEachElement(
+            [&](CElement* pEle)
+            {
+                if (!(pEle->GetStyle() & DES_NO_AUTO_DARK))
+                    if (bDark)
+                        pEle->SetStyle(pEle->GetStyle() | DES_DARK_MODE);
+                    else
+                        pEle->SetStyle(pEle->GetStyle() & ~DES_DARK_MODE);
+            });
         RdUnlockUpdate();
     }
 
-    void TmUpdateAccentColor(ARGB argb, BOOL bDark) noexcept
+    void TmUpdateAccentColor(ARGB argb) noexcept
     {
+        EtBroadcastEvent(WM_DWMCOLORIZATIONCOLORCHANGED, argb, 0);
         m_argbAccent = argb;
         if (m_bAutoThemeAccent)
-        {
-            CColorCollection::UpdateAllAccentColor(
-                ACCENT_COLOR{ .argbAccent = argb }, bDark);
-        }
+            CColorCollection::UpdateAllAccentColor(argb);
     }
 
     void TmUpdateDwmColorizationColor() noexcept
     {
-        m_argbAccent = GetDwmColorizationColor();
-        TmUpdateAccentColor(m_argbAccent, PtcCurrent()->bAppDarkMode);
+        TmUpdateAccentColor(GetDwmColorizationColor());
     }
+
+    EckInlineCe void TmSetAutoTheme(BOOL b) noexcept { m_bAutoTheme = b; }
+    EckInlineCe void TmSetAutoThemeAccent(BOOL b) noexcept { m_bAutoThemeAccent = b; }
 };
 
 inline BOOL CElement::Create(std::wstring_view svText, DWORD uStyle, DWORD dwExStyle,

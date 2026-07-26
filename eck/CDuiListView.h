@@ -535,7 +535,7 @@ public:
             HdrSetTextFormat();
             break;
 
-        case EWM_COLORSCHEMECHANGED:
+        case WM_STYLECHANGED:
             TmAutoSwitchTheme(this, wParam);
             break;
 

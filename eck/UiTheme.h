@@ -58,9 +58,7 @@ namespace Declaration
         ARGB argbAccentHot;     // 输出
         ARGB argbAccentPressed; // 输出
 
-        ARGB argbAccentDisabled;
         ARGB argbAccentFore;
-        ARGB argbAccentForeDisabled;
     };
 
     struct CAC_PARAM : ACCENT_COLOR
@@ -73,6 +71,7 @@ namespace Declaration
         CACF_DARK_MODE = 1u << 0,
         CACF_NO_HOT = 1u << 1,
         CACF_NO_PRESSED = 1u << 2,
+        CACF_DWM_COLORIZATION = 1u << 3,
     };
 
     // 计算强调颜色组

@@ -170,7 +170,7 @@ private:
         { IdTmInvalid, IdCrBackDisabled, IdTmInvalid },
     };
 
-    void OnDpiChanged()
+    void OnDpiChanged() noexcept
     {
         // RE启动时使用系统DPI，随后整个生命周期内只有下列两种情况下
         // msftedit!CTxtEdit::UpdateDPI被调用并更新DPI
@@ -190,7 +190,7 @@ private:
         }
     }
 
-    void UpdateInsetRect()
+    void UpdateInsetRect() noexcept
     {
         if (m_bSlAutoAlignV && !(m_dwTxProp & TXTBIT_MULTILINE))
         {
@@ -503,7 +503,7 @@ public:
         }
         break;
 
-        case EWM_COLORSCHEMECHANGED:
+        case WM_STYLECHANGED:
             TmAutoSwitchTheme(this, wParam);
             break;
 

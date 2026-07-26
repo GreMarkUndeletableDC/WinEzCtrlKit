@@ -398,7 +398,10 @@ namespace Detail
         v = std::min(vPrev + vBase / 4.f, 1.f);
         s = (v >= 0.7f) ? (sPrev * 0.75f) : sPrev;
     }
-    EckInlineNdCe void AccentColorDarker(float vBase, float vPrev, _Out_ float& v) noexcept
+    EckInlineNdCe void AccentColorDarker(
+        float vBase,
+        float vPrev,
+        _Out_ float& v) noexcept
     {
         v = std::max(vPrev - vBase / 4.f, 0.f);
     }
