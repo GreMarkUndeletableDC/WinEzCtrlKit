@@ -427,6 +427,7 @@ private:
     BITBOOL m_bBlurUseLayer : 1{};      // 模糊是否使用图层
     BITBOOL m_bAutoTheme : 1{ TRUE };
     BITBOOL m_bAutoThemeAccent : 1{};
+    BITBOOL m_bDbgDrawCompRect : 1{};
 
     BITBOOL m_bFullUpdate : 1{ TRUE };  // 当前是否需要完全重绘
     BITBOOL m_bWaitSwapChain : 1{};
@@ -527,23 +528,21 @@ private:
     {
         const auto pDC = RdGetDC();
         Kw::Rect rcClip;// 相对客户区
-        ID2D1Image* pOldTarget{};
+        ComPtr<ID2D1Image> pOldTarget{};
         COMP_RENDER_INFO cri;
-        IDXGISurface1* pDxgiSurface{};
-        ID2D1Bitmap1* pBitmap{};
         D2D1_MATRIX_3X2_F Mat;
         while (pEle)
         {
-            const auto rcElem = pEle->GetRectInClient();
+            const auto rcEle = pEle->GetRectInClient();
             const auto uStyle = pEle->GetStyle();
             if (!(uStyle & DES_VISIBLE) || (uStyle & DES_NO_REDRAW) ||
-                IsRectEmpty(rcElem))
+                IsRectEmpty(rcEle))
                 goto NextElem;
             if ((pEle->GetCompositor() &&
                 !(uStyle & DES_COMP_NO_REDIRECTION) &&
                 IsRectsIntersect(pEle->GetWholeRectInClient(), rc)))
-                rcClip = rcElem;
-            else if (!IntersectRect(rcClip, rcElem, rc))
+                rcClip = rcEle;
+            else if (!IntersectRect(rcClip, rcEle, rc))
                 goto NextElem;
 
             if (pEle->GetCompositor())
@@ -559,19 +558,20 @@ private:
                         pEle->CompGetCacheBitmap().Get())
                         goto SkipCompReRender;
                     pDC->Flush();
-                    pDC->GetTarget(&pOldTarget);
+                    pDC->GetTarget(pOldTarget.AtClear());
                     pEle->CompUpdateCacheBitmap(
-                        rcElem.right - rcElem.left,
-                        rcElem.bottom - rcElem.top);
+                        rcEle.right - rcEle.left,
+                        rcEle.bottom - rcEle.top);
                     pDC->GetTransform(&Mat);
 
                     pDC->SetTarget(pEle->CompGetCacheBitmap().Get());
                     const auto rcValid = pEle->CompGetCacheBitmap().GetActualSourceRect();
                     pDC->SetTransform(D2D1::Matrix3x2F::Translation(
-                        rcValid.left - rcElem.left,
-                        rcValid.top - rcElem.top));
+                        rcValid.left - rcEle.left,
+                        rcValid.top - rcEle.top));
 
-                    pDC->PushAxisAlignedClip(Kw::MakeD2DRectF(rcElem), D2D1_ANTIALIAS_MODE_ALIASED);
+                    pDC->PushAxisAlignedClip(
+                        Kw::MakeD2DRectF(rcEle), D2D1_ANTIALIAS_MODE_ALIASED);
                     pDC->Clear({});
                     pDC->PopAxisAlignedClip();
                 }
@@ -586,8 +586,7 @@ private:
                 {
                     RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
                     pDC->Flush();
-                    pDC->SetTarget(pOldTarget);
-                    pOldTarget->Release();
+                    pDC->SetTarget(pOldTarget.Get());
                 }
             SkipCompReRender:
                 cri.pBitmap = pEle->CompGetCacheBitmap().Get();
@@ -596,8 +595,9 @@ private:
                 else
                     cri.rcSrc = Kw::MakeD2DRectF(pEle->GetViewRect());
 
-                pDC->SetTransform(D2D1::Matrix3x2F::Translation(
-                    rcElem.left, rcElem.top));
+                pDC->SetTransform(
+                    Mat *
+                    D2D1::Matrix3x2F::Translation(rcEle.left, rcEle.top));
                 if (uStyle & DES_BLUR_BACK)
                 {
                     auto rc0{ Kw::MakeD2DRectF(rc) };
@@ -608,15 +608,18 @@ private:
                 pEle->GetCompositor()->PostRender(cri);
                 pDC->SetTransform(Mat);
 #ifdef _DEBUG
-                const auto pBr = CcGetBrush();
-                pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Aqua));
-                pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBr);
+                if (m_bDbgDrawCompRect)
+                {
+                    const auto pBr = CcGetBrush();
+                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Aqua));
+                    pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBr);
 
-                pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
-                pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBr);
+                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+                    pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBr);
 
-                pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Orange));
-                pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBr);
+                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Orange));
+                    pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBr);
+                }
 #endif
             }
             else
@@ -1547,6 +1550,8 @@ public:
 
     EckInlineCe void TmSetAutoTheme(BOOL b) noexcept { m_bAutoTheme = b; }
     EckInlineCe void TmSetAutoThemeAccent(BOOL b) noexcept { m_bAutoThemeAccent = b; }
+
+    EckInlineCe void DbgSetDrawCompositorRect(BOOL b) noexcept { m_bDbgDrawCompRect = b; }
 };
 
 inline BOOL CElement::Create(std::wstring_view svText, DWORD uStyle, DWORD dwExStyle,
