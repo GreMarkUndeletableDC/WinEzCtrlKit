@@ -86,6 +86,7 @@ namespace Declaration
     enum : UINT
     {
         UIHE_CREATE,
+        UIHE_PRECREATE,
         UIHE_DESTROY,
     };
 
@@ -1340,6 +1341,8 @@ protected:
             pParentFirstChild = (THost*)this;
             pParentLastChild = (THost*)this;
         }
+        const UIHOOK_EVENT Evt{ .uEvent = UIHE_PRECREATE };
+        GetContainer()->GetUiHookEventChain().Emit((THost*)this, &Evt);
     }
     // 函数调用时对象完全初始化完毕
     void PostCreate() noexcept

@@ -669,8 +669,9 @@ public:
             {
                 auto idx = LvItemFromY(rc.top);
                 const auto idx1 = LvItemFromY(rc.bottom);
-                for (; idx.Item <= idx1.Item; ++idx.Item)
-                    FnItem({ idx });
+                if (idx.IsValid() && idx1.IsValid())
+                    for (; idx.Item <= idx1.Item; ++idx.Item)
+                        FnItem({ idx });
             }
             break;
             }
