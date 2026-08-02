@@ -53,6 +53,11 @@ struct Index
     int Group{ -1 };
 
     EckInlineNdCe BOOL IsValid() const noexcept { return Item >= 0 || Group >= 0; }
+
+    EckInlineNdCe bool operator==(const Index& x) const noexcept
+    {
+        return Item == x.Item && Group == x.Group;
+    }
 };
 struct IndexRange
 {
@@ -1086,10 +1091,10 @@ public:
             for (idx.Group = 0; idx.Group < cGroup; ++idx.Group)
             {
                 idx.Item = -1;
-                ItmpSelect(idx, Data, FALSE, TRUE);
+                ItmpSelect(idx, Data, FALSE, bRedraw);
                 const auto cItem = m_pAdapter->LcaGetCount(idx.Group);
                 for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
-                    ItmpSelect(idx, Data, FALSE, TRUE);
+                    ItmpSelect(idx, Data, FALSE, bRedraw);
             }
         }
         else
@@ -1097,7 +1102,30 @@ public:
             const auto cItem = m_pAdapter->LcaGetCount().Item;
             Index idx{};
             for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
-                ItmpSelect(idx, Data, FALSE, TRUE);
+                ItmpSelect(idx, Data, FALSE, bRedraw);
+        }
+    }
+
+    void ItmSelect(Index idx, BOOL bSelect = TRUE, BOOL bRedraw = TRUE) noexcept
+    {
+        if (m_eSelection == Selection::Single)
+        {
+            Index idxOld{ m_idxSel, m_idxSelItemGroup };
+            if (bSelect)
+            {
+                m_idxSel = idx.Item, m_idxSelItemGroup = idx.Group;
+                if (bRedraw && idx.IsValid())
+                    InvalidateItem(idx);
+            }
+            else
+                m_idxSel = m_idxSelItemGroup = -1;
+            if (bRedraw && idxOld.IsValid() && idxOld != idx)
+                InvalidateItem(idxOld);
+        }
+        else
+        {
+            std::any Data{};
+            ItmpSelect(idx, Data, bSelect, bRedraw);
         }
     }
 

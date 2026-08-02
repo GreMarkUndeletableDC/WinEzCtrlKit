@@ -1551,7 +1551,7 @@ public:
     EckInlineCe void TmSetAutoTheme(BOOL b) noexcept { m_bAutoTheme = b; }
     EckInlineCe void TmSetAutoThemeAccent(BOOL b) noexcept { m_bAutoThemeAccent = b; }
 
-    EckInlineCe void DbgSetDrawCompositorRect(BOOL b) noexcept { m_bDbgDrawCompRect = b; }
+    EckInlineCe void DbgSetDrawCompositedRect(BOOL b) noexcept { m_bDbgDrawCompRect = b; }
 };
 
 inline BOOL CElement::Create(std::wstring_view svText, DWORD uStyle, DWORD dwExStyle,
