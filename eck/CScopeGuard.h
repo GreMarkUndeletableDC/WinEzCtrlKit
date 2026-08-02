@@ -9,8 +9,8 @@ private:
     F m_Fn;
     BOOLEAN m_bActive;
 public:
-    explicit CScopeGuard(F&& f) noexcept
-        : m_Fn{ std::move<F>(f) }, m_bActive{ TRUE } {}
+    explicit CScopeGuard(auto&& f) noexcept
+        : m_Fn{ std::forward(f) }, m_bActive{ TRUE } {}
 
     CScopeGuard(CScopeGuard&& x) noexcept
         : m_Fn{ std::move(x.m_Fn) }, m_bActive{ x.m_bActive }
@@ -36,4 +36,7 @@ public:
 
     EckInlineCe void Cancel() noexcept { m_bActive = false; }
 };
+
+template <typename F>
+CScopeGuard(F) -> CScopeGuard<std::decay_t<F>>;
 ECK_NAMESPACE_END
