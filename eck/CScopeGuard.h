@@ -9,8 +9,9 @@ private:
     F m_Fn;
     BOOLEAN m_bActive;
 public:
-    explicit CScopeGuard(auto&& f) noexcept
-        : m_Fn{ std::forward(f) }, m_bActive{ TRUE } {}
+    template<class I>
+    explicit CScopeGuard(I&& f) noexcept
+        : m_Fn{ std::forward<I>(f) }, m_bActive{ TRUE } {}
 
     CScopeGuard(CScopeGuard&& x) noexcept
         : m_Fn{ std::move(x.m_Fn) }, m_bActive{ x.m_bActive }
