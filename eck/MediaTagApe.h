@@ -4,7 +4,7 @@
 
 ECK_NAMESPACE_BEGIN
 ECK_MEDIATAG_NAMESPACE_BEGIN
-class CApe : public CTag
+class CApe final : public CTag
 {
 private:
     enum class ItemType

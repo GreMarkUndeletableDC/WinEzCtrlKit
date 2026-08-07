@@ -32,7 +32,7 @@ constexpr inline USHORT MpegSampleCountTable[][3]
     { 384, 1152,  576 }   // MPEG-2.5
 };
 
-class CMpeg
+class CMpeg final
 {
 public:
     enum class Version : BYTE

@@ -5,7 +5,7 @@
 
 ECK_NAMESPACE_BEGIN
 ECK_MEDIATAG_NAMESPACE_BEGIN
-class CFlac : public CTag
+class CFlac final : public CTag
 {
 public:
     struct ITEM
