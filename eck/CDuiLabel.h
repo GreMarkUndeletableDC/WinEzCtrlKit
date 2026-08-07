@@ -10,19 +10,39 @@ private:
     ComPtr<IDWriteTextLayout> m_pLayout{};
     ComPtr<ID2D1LinearGradientBrush> m_pBrushFade{};
     CBitmap m_BitmapIcon{};
-    CBitmap m_BitmapBk{};
+    CBitmap m_BitmapBack{};
 
     float m_cxFade{ 40.f };
 
     BITBOOL m_bOnlyBitmap : 1{};
     BITBOOL m_bFade : 1{};
+    BITBOOL m_bAutoScale : 1{ TRUE };
 
-    BYTE m_eInterMode : 6{ D2D1_INTERPOLATION_MODE_LINEAR };
+    BYTE m_eInterMode{ D2D1_INTERPOLATION_MODE_LINEAR };
 
     ImageMode m_eBkImgMode{ ImageMode::TopLeft };
 
-    BYTE m_byIconAlpha{ 0xFF };
-    BYTE m_byBkAlpha{ 0xFF };
+    float m_kIconOpacity{ 1.f };
+    float m_kBackOpacity{ 1.f };
+
+    Kw::Vec2 CalculateIconSize(float cxText) const noexcept
+    {
+        EckAssert(m_BitmapIcon.Get());
+        const auto rc = m_BitmapIcon.GetActualSourceRect();
+        const auto cx = rc.right - rc.left;
+        const auto cy = rc.bottom - rc.top;
+        if (m_bAutoScale)
+        {
+            const auto dOuter = GetTheme()->GetMetric(IdMePaddingOuter);
+            const auto cyNew = GetHeight() - dOuter * 2;
+            const auto cxNew = GetWidth() - dOuter - cxText;
+            if (cxNew > cyNew)
+                return { cyNew * cx / cy, cyNew };
+            else
+                return { cxNew, cxNew * cy / cx };
+        }
+        return { cx, cy };
+    }
 
     void UpdateTextLayout() noexcept
     {
@@ -77,13 +97,13 @@ public:
             PAINTINFO ps;
             BeginPaint(ps, wParam, lParam);
 
-            if (m_BitmapBk.Get())
+            if (m_BitmapBack.Get())
             {
                 DrawBackgroundImage(
-                    GetDC(), m_BitmapBk.Get(), m_eBkImgMode,
+                    GetDC(), m_BitmapBack.Get(), m_eBkImgMode,
                     GetRectInClientD2D(),
-                    m_BitmapBk.GetSourceRect(),
-                    m_byBkAlpha / 255.f,
+                    m_BitmapBack.GetSourceRect(),
+                    m_kBackOpacity,
                     (D2D1_INTERPOLATION_MODE)m_eInterMode);
             }
 
@@ -91,10 +111,15 @@ public:
             {
                 if (m_BitmapIcon.Get())
                 {
-                    auto rc{ m_BitmapIcon.GetActualSourceRect() };
+                    const auto Size = CalculateIconSize(0.f);
+                    D2D1_RECT_F rc{ 0.f, 0.f, Size.x, Size.y };
                     CenterRect(rc, GetRectInClientD2D());
-                    GetDC()->DrawBitmap(m_BitmapIcon.Get(), rc, m_byIconAlpha / 255.f,
-                        (D2D1_INTERPOLATION_MODE)m_eInterMode, m_BitmapIcon.GetSourceRect());
+                    GetDC()->DrawBitmap(
+                        m_BitmapIcon.Get(),
+                        rc,
+                        m_kIconOpacity,
+                        (D2D1_INTERPOLATION_MODE)m_eInterMode,
+                        m_BitmapIcon.GetSourceRect());
                 }
             }
             else
@@ -107,17 +132,22 @@ public:
                 {
                     const auto dInner = GetTheme()->GetMetric(IdMePaddingInner);
 
-                    auto rc{ m_BitmapIcon.GetActualSourceRect() };
-                    const auto cxIcon = rc.right - rc.left;
-                    const auto cyIcon = rc.bottom - rc.top;
-                    rc.left = (GetWidth() - cxIcon - dInner - tm.width) / 2.f;
-                    rc.top = (GetHeight() - cyIcon) / 2.f;
-                    rc.right = rc.left + cxIcon;
-                    rc.bottom = rc.top + cyIcon;
-                    GetDC()->DrawBitmap(m_BitmapIcon.Get(), rc, m_byIconAlpha / 255.f,
-                        (D2D1_INTERPOLATION_MODE)m_eInterMode, m_BitmapIcon.GetSourceRect());
+                    const auto Size = CalculateIconSize(tm.width);
+                    D2D1_RECT_F rc;
+                    rc.left = (GetWidth() - Size.x - dInner - tm.width) / 2.f;
+                    rc.top = (GetHeight() - Size.y) / 2.f;
+                    rc.right = rc.left + Size.x;
+                    rc.bottom = rc.top + Size.y;
+                    ElementToClient(rc);
 
-                    pt.x += (cxIcon + dInner);
+                    GetDC()->DrawBitmap(
+                        m_BitmapIcon.Get(),
+                        rc,
+                        m_kIconOpacity,
+                        (D2D1_INTERPOLATION_MODE)m_eInterMode,
+                        m_BitmapIcon.GetSourceRect());
+
+                    pt.x += (Size.x + dInner);
                 }
 
                 ID2D1Brush* pBrush;
@@ -180,8 +210,8 @@ public:
         UpdateTextLayout();
     }
     EckInlineNdCe auto& GetBitmap() const noexcept { return m_BitmapIcon; }
-    void SetBackgroundBitmap(const CBitmap& Bmp) noexcept { m_BitmapBk = Bmp; }
-    EckInlineNdCe auto& GetBackgroundBitmap() const noexcept { return m_BitmapBk; }
+    void SetBackgroundBitmap(const CBitmap& Bmp) noexcept { m_BitmapBack = Bmp; }
+    EckInlineNdCe auto& GetBackgroundBitmap() const noexcept { return m_BitmapBack; }
 
     void SetFade(BOOL b) noexcept
     {
@@ -204,10 +234,10 @@ public:
     EckInlineCe void SetInterpolationMode(D2D1_INTERPOLATION_MODE e) noexcept { m_eInterMode = (BYTE)e; }
     EckInlineNdCe D2D1_INTERPOLATION_MODE GetInterpolationMode() const noexcept { return (D2D1_INTERPOLATION_MODE)m_eInterMode; }
 
-    EckInlineCe void SetBitmapAlpha(BYTE by) noexcept { m_byIconAlpha = by; }
-    EckInlineNdCe BYTE GetBitmapAlpha() const noexcept { return m_byIconAlpha; }
-    EckInlineCe void SetBackgroundBitmapAlpha(BYTE by) noexcept { m_byBkAlpha = by; }
-    EckInlineNdCe BYTE GetBackgroundBitmapAlpha() const noexcept { return m_byBkAlpha; }
+    EckInlineCe void SetIconOpacity(float f) noexcept { m_kIconOpacity = f; }
+    EckInlineNdCe float GetIconOpacity() const noexcept { return m_kIconOpacity; }
+    EckInlineCe void SetBackgroundOpacity(float f) noexcept { m_kBackOpacity = f; }
+    EckInlineNdCe float GetBackgroundOpacity() const noexcept { return m_kBackOpacity; }
 
     EckInlineCe void SetFadeWidth(float f) noexcept
     {
@@ -216,6 +246,9 @@ public:
             UpdateFadeBrush();
     }
     EckInlineNdCe float GetFadeWidth() const noexcept { return m_cxFade; }
+
+    EckInlineCe void SetAutoScale(BOOL b) noexcept { m_bAutoScale = b; }
+    EckInlineNdCe BOOL GetAutoScale() const noexcept { return m_bAutoScale; }
 };
 
 
