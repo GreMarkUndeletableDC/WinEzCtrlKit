@@ -253,15 +253,15 @@ public:
     public:
         using Detail::IniEntry::IniEntry;
 
-        EckInline void ForEachKeyValue(auto&& Fn) noexcept
+        EckInline void ForEachKeyValue(std::invocable<const KeyValue&> auto&& Fn) noexcept
         {
             for (auto& e : Val)
-                Fn(e.second);
+                Fn(e);
         }
-        EckInline void ForEachChild(auto&& Fn) noexcept
+        EckInline void ForEachChild(std::invocable<const Section&> auto&& Fn) noexcept
         {
             for (auto& e : Child)
-                Fn(e.second);
+                Fn(e);
         }
     };
 
@@ -536,8 +536,8 @@ private:
     {
         for (auto& Section : m_Root)
         {
-            Fn(Section.second);
-            ForEachEntry(Section.second, Fn);
+            Fn(Section);
+            ForEachEntry(Section, Fn);
         }
         for (auto& Comment : m_vComment)
             Fn(Comment);
@@ -750,10 +750,10 @@ public:
     }
 private:
     void InternalForEachSectionInOrder(
-        std::vector<TSectionIterator>& vSec,
+        std::vector<TSectionConstIterator>& vSec,
         TSectionSet& Set) noexcept
     {
-        for (auto it = m_Root.begin(); it != m_Root.end(); ++it)
+        for (auto it = Set.begin(); it != Set.end(); ++it)
         {
             vSec[it->uId] = it;
             InternalForEachSectionInOrder(vSec, it->Child);
@@ -764,9 +764,9 @@ public:
         std::invocable<const Section&> auto&& Fn,
         const SectionContext& Section = {}) noexcept
     {
-        std::vector<TSectionIterator> vSec{ m_uId };
+        std::vector<TSectionConstIterator> vSec{ m_uId };
         InternalForEachSectionInOrder(vSec, Section ? Section->Child : m_Root);
-        const auto itEnd = std::remove(vSec.begin(), vSec.end(), TSectionIterator{});
+        const auto itEnd = std::remove(vSec.begin(), vSec.end(), TSectionConstIterator{});
         for (auto it = vSec.begin(); it != itEnd; ++it)
             Fn(*it);
     }
@@ -775,14 +775,16 @@ public:
         std::invocable<const KeyValue&> auto&& Fn,
         const SectionContext& Section) noexcept
     {
+        using TIterator = TKeyValueConstIterator;
         auto& Val = Section->Val;
-        std::vector<TKeyValueIterator> vVal{};
+        std::vector<> vVal{};
         vVal.reserve(Val.size());
         for (auto it = Val.begin(); it != Val.end(); ++it)
             vVal.emplace_back(it);
-        std::sort(vVal.begin(), vVal.end(), [](const TKeyValueIterator& x1, const TKeyValueIterator& x2)
+        std::sort(vVal.begin(), vVal.end(),
+            [](const TIterator& x1, const TIterator& x2) noexcept
             {
-                return x1->second.uId < x2->second.uId;
+                return x1->uId < x2->uId;
             });
         for (auto e : vVal)
             Fn(e);
