@@ -130,14 +130,14 @@ public:
     {
         CDocument doc(k_JsonArray);
         Assert::IsTrue(doc.GetRoot().IsArray());
-        Assert::AreEqual((size_t)3, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)3, doc.GetRoot().ArraySize());
     }
 
     TEST_METHOD(GetRoot_Object)
     {
         CDocument doc(k_JsonObject);
         Assert::IsTrue(doc.GetRoot().IsObject());
-        Assert::AreEqual((size_t)3, doc.GetRoot().ObjSize());
+        Assert::AreEqual((size_t)3, doc.GetRoot().ObjectSize());
     }
 
     // ── GetReadSize / GetValueCount ───────────────────
@@ -328,27 +328,27 @@ public:
     TEST_METHOD(ArrSize_3Elements)
     {
         CDocument doc(k_JsonArray);
-        Assert::AreEqual((size_t)3, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)3, doc.GetRoot().ArraySize());
     }
     TEST_METHOD(ArrAt_InBounds)
     {
         CDocument doc(k_JsonArray);
         CValue root = doc.GetRoot();
-        Assert::AreEqual(1, root.ArrAt(0).GetInt());
-        Assert::AreEqual(2, root.ArrAt(1).GetInt());
-        Assert::AreEqual(3, root.ArrAt(2).GetInt());
+        Assert::AreEqual(1, root.ArrayAt(0).GetInt());
+        Assert::AreEqual(2, root.ArrayAt(1).GetInt());
+        Assert::AreEqual(3, root.ArrayAt(2).GetInt());
     }
     TEST_METHOD(ArrFront_And_ArrBack)
     {
         CDocument doc(k_JsonArray);
         CValue root = doc.GetRoot();
-        Assert::AreEqual(1, root.ArrFront().GetInt());
-        Assert::AreEqual(3, root.ArrBack().GetInt());
+        Assert::AreEqual(1, root.ArrayFront().GetInt());
+        Assert::AreEqual(3, root.ArrayBack().GetInt());
     }
     TEST_METHOD(ArrAt_EmptyArray)
     {
         CDocument doc(k_JsonEmptyArray);
-        CValue v = doc.GetRoot().ArrAt(0);
+        CValue v = doc.GetRoot().ArrayAt(0);
         Assert::IsFalse(v.IsValid());
     }
 
@@ -356,12 +356,12 @@ public:
     TEST_METHOD(ObjSize_3Pairs)
     {
         CDocument doc(k_JsonObject);
-        Assert::AreEqual((size_t)3, doc.GetRoot().ObjSize());
+        Assert::AreEqual((size_t)3, doc.GetRoot().ObjectSize());
     }
     TEST_METHOD(ObjAt_ExistingKey)
     {
         CDocument doc(k_JsonObject);
-        CValue v = doc.GetRoot().ObjAt("b");
+        CValue v = doc.GetRoot().ObjectAt("b");
         Assert::IsTrue(v.IsValid());
         Assert::IsTrue(v.IsString());
         Assert::AreEqual("str", v.GetString());
@@ -369,14 +369,14 @@ public:
     TEST_METHOD(ObjAt_WithLength)
     {
         CDocument doc(k_JsonObject);
-        CValue v = doc.GetRoot().ObjAt("a", 1);
+        CValue v = doc.GetRoot().ObjectAt("a", 1);
         Assert::IsTrue(v.IsValid());
         Assert::AreEqual(1, v.GetInt());
     }
     TEST_METHOD(ObjAt_MissingKey)
     {
         CDocument doc(k_JsonObject);
-        CValue v = doc.GetRoot().ObjAt("zzz");
+        CValue v = doc.GetRoot().ObjectAt("zzz");
         Assert::IsFalse(v.IsValid());
     }
 
@@ -443,7 +443,7 @@ public:
     TEST_METHOD(AtValue_OnValue_Found)
     {
         CDocument doc(k_JsonNestedObject);
-        CValue sub = doc.GetRoot().ObjAt("x");
+        CValue sub = doc.GetRoot().ObjectAt("x");
         CValue v = sub.AtValue("/y");
         Assert::AreEqual(99, v.GetInt());
     }
@@ -737,21 +737,21 @@ public:
         int32_t vals[] = { 10, 20, 30 };
         doc.SetRoot(doc.NewArray(vals, 3));
         Assert::IsTrue(doc.GetRoot().IsArray());
-        Assert::AreEqual((size_t)3, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)3, doc.GetRoot().ArraySize());
     }
     TEST_METHOD(NewArray_FromDoubleSpan)
     {
         CMutableDocument doc;
         double vals[] = { 1.1, 2.2 };
         doc.SetRoot(doc.NewArray(vals, 2));
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
     TEST_METHOD(NewArray_FromBoolSpan)
     {
         CMutableDocument doc;
         bool vals[] = { true, false, true };
         doc.SetRoot(doc.NewArray(vals, 3));
-        Assert::AreEqual((size_t)3, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)3, doc.GetRoot().ArraySize());
     }
     // 更多整型重载
     TEST_METHOD(NewArray_Int8_Int16_Int64)
@@ -760,9 +760,9 @@ public:
         int8_t  v8[] = { 1, -1 };
         int16_t v16[] = { 100, -100 };
         int64_t v64[] = { INT64_MAX, INT64_MIN };
-        doc.SetRoot(doc.NewArray(v8, 2));   Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
-        doc.SetRoot(doc.NewArray(v16, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
-        doc.SetRoot(doc.NewArray(v64, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        doc.SetRoot(doc.NewArray(v8, 2));   Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
+        doc.SetRoot(doc.NewArray(v16, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
+        doc.SetRoot(doc.NewArray(v64, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
     TEST_METHOD(NewArray_UInt8_UInt16_UInt32_UInt64)
     {
@@ -771,24 +771,24 @@ public:
         uint16_t u16[] = { 0, 65535 };
         uint32_t u32[] = { 0, UINT32_MAX };
         uint64_t u64[] = { 0, UINT64_MAX };
-        doc.SetRoot(doc.NewArray(u8, 2));   Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
-        doc.SetRoot(doc.NewArray(u16, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
-        doc.SetRoot(doc.NewArray(u32, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
-        doc.SetRoot(doc.NewArray(u64, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        doc.SetRoot(doc.NewArray(u8, 2));   Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
+        doc.SetRoot(doc.NewArray(u16, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
+        doc.SetRoot(doc.NewArray(u32, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
+        doc.SetRoot(doc.NewArray(u64, 2));  Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
     TEST_METHOD(NewArray_FloatSpan)
     {
         CMutableDocument doc;
         float vals[] = { 1.f, 2.f };
         doc.SetRoot(doc.NewArray(vals, 2));
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
     TEST_METHOD(NewArray_CstrPtrArray)
     {
         CMutableDocument doc;
         const char* strs[] = { "foo", "bar" };
         doc.SetRoot(doc.NewArray(strs, 2));
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
     TEST_METHOD(NewArray_CstrWithLengths)
     {
@@ -796,14 +796,14 @@ public:
         const char* strs[] = { "foo", "bar" };
         size_t lens[] = { 3, 3 };
         doc.SetRoot(doc.NewArray(strs, lens, 2));
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
     TEST_METHOD(NewArrayCopy_Cstr)
     {
         CMutableDocument doc;
         const char* strs[] = { "hello", "world" };
         doc.SetRoot(doc.NewArrayCopy(strs, 2));
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
 
     // ── NewObject 工厂 ───────────────────────────────
@@ -812,14 +812,14 @@ public:
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
         Assert::IsTrue(doc.GetRoot().IsObject());
-        Assert::AreEqual((size_t)0, doc.GetRoot().ObjSize());
+        Assert::AreEqual((size_t)0, doc.GetRoot().ObjectSize());
     }
     TEST_METHOD(NewObject_FromKVPairs)
     {
         CMutableDocument doc;
         const char* kv[] = { "key1", "val1", "key2", "val2" };
         doc.SetRoot(doc.NewObject(kv, 2));
-        Assert::AreEqual((size_t)2, doc.GetRoot().ObjSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ObjectSize());
     }
 
     // ── SetStringPoolSize / SetValuePoolSize ─────────
@@ -961,9 +961,9 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewNull());
-        doc.GetRoot().SetArray(2);
+        doc.GetRoot().SetArray();
         Assert::IsTrue(doc.GetRoot().IsArray());
-        doc.GetRoot().SetObject(2);
+        doc.GetRoot().SetObject();
         Assert::IsTrue(doc.GetRoot().IsObject());
     }
     TEST_METHOD(SetRaw)
@@ -981,10 +981,10 @@ public:
         doc.SetRoot(doc.NewArray());
         doc.GetRoot().ArrPushBack(doc.NewInt(1));
         doc.GetRoot().ArrPushBack(doc.NewInt(2));
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
         CMutableValue popped = doc.GetRoot().ArrPopBack();
         Assert::AreEqual(2, popped.GetInt());
-        Assert::AreEqual((size_t)1, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)1, doc.GetRoot().ArraySize());
     }
 
     TEST_METHOD(ArrPushFront_ArrPopFront)
@@ -993,7 +993,7 @@ public:
         doc.SetRoot(doc.NewArray());
         doc.GetRoot().ArrPushBack(doc.NewInt(10));
         doc.GetRoot().ArrPushFront(doc.NewInt(5));
-        Assert::AreEqual(5, doc.GetRoot().ArrFront().GetInt());
+        Assert::AreEqual(5, doc.GetRoot().ArrayFront().GetInt());
         CMutableValue p = doc.GetRoot().ArrPopFront();
         Assert::AreEqual(5, p.GetInt());
     }
@@ -1005,8 +1005,8 @@ public:
         doc.GetRoot().ArrPushBack(doc.NewInt(1));
         doc.GetRoot().ArrPushBack(doc.NewInt(3));
         doc.GetRoot().ArrInsert(1, doc.NewInt(2));
-        Assert::AreEqual(3u, (unsigned)doc.GetRoot().ArrSize());
-        Assert::AreEqual(2, doc.GetRoot().ArrAt(1).GetInt());
+        Assert::AreEqual(3u, (unsigned)doc.GetRoot().ArraySize());
+        Assert::AreEqual(2, doc.GetRoot().ArrayAt(1).GetInt());
     }
 
     TEST_METHOD(ArrReplace)
@@ -1015,7 +1015,7 @@ public:
         doc.SetRoot(doc.NewArray());
         doc.GetRoot().ArrPushBack(doc.NewInt(1));
         doc.GetRoot().ArrReplace(0, doc.NewInt(99));
-        Assert::AreEqual(99, doc.GetRoot().ArrAt(0).GetInt());
+        Assert::AreEqual(99, doc.GetRoot().ArrayAt(0).GetInt());
     }
 
     TEST_METHOD(ArrRemove_Single)
@@ -1025,8 +1025,8 @@ public:
         doc.GetRoot().ArrPushBack(doc.NewInt(1));
         doc.GetRoot().ArrPushBack(doc.NewInt(2));
         doc.GetRoot().ArrRemove(size_t(0));
-        Assert::AreEqual((size_t)1, doc.GetRoot().ArrSize());
-        Assert::AreEqual(2, doc.GetRoot().ArrAt(0).GetInt());
+        Assert::AreEqual((size_t)1, doc.GetRoot().ArraySize());
+        Assert::AreEqual(2, doc.GetRoot().ArrayAt(0).GetInt());
     }
 
     TEST_METHOD(ArrRemove_Range)
@@ -1036,7 +1036,7 @@ public:
         for (int i = 0; i < 5; ++i)
             doc.GetRoot().ArrPushBack(doc.NewInt(i));
         doc.GetRoot().ArrRemove(size_t(1), size_t(3)); // 删除索引 1-3
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
 
     TEST_METHOD(ArrClear)
@@ -1045,7 +1045,7 @@ public:
         doc.SetRoot(doc.NewArray());
         doc.GetRoot().ArrPushBack(doc.NewInt(1));
         doc.GetRoot().ArrClear();
-        Assert::AreEqual((size_t)0, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)0, doc.GetRoot().ArraySize());
     }
 
     TEST_METHOD(ArrRotate)
@@ -1055,8 +1055,8 @@ public:
         for (int i = 0; i < 3; ++i)
             doc.GetRoot().ArrPushBack(doc.NewInt(i));
         doc.GetRoot().ArrRotate(1); // [0,1,2] -> [1,2,0]
-        Assert::AreEqual(1, doc.GetRoot().ArrAt(0).GetInt());
-        Assert::AreEqual(0, doc.GetRoot().ArrAt(2).GetInt());
+        Assert::AreEqual(1, doc.GetRoot().ArrayAt(0).GetInt());
+        Assert::AreEqual(0, doc.GetRoot().ArrayAt(2).GetInt());
     }
 
     // ── Object 变异操作 ──────────────────────────────
@@ -1065,7 +1065,7 @@ public:
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
         doc.GetRoot().ObjInsert(0, doc.NewString("k"), doc.NewInt(1));
-        Assert::AreEqual((size_t)1, doc.GetRoot().ObjSize());
+        Assert::AreEqual((size_t)1, doc.GetRoot().ObjectSize());
     }
 
     TEST_METHOD(ObjRemove_ByKey)
@@ -1074,7 +1074,7 @@ public:
         doc.SetRoot(doc.NewObject());
         doc.GetRoot().ObjInsert(0, doc.NewString("x"), doc.NewInt(7));
         doc.GetRoot().ObjRemove(doc.NewString("x"));
-        Assert::AreEqual((size_t)0, doc.GetRoot().ObjSize());
+        Assert::AreEqual((size_t)0, doc.GetRoot().ObjectSize());
     }
 
     TEST_METHOD(ObjRemove_ByCStr)
@@ -1083,7 +1083,7 @@ public:
         doc.SetRoot(doc.NewObject());
         doc.GetRoot().ObjInsert(0, doc.NewString("y"), doc.NewInt(8));
         doc.GetRoot().ObjRemove("y");
-        Assert::AreEqual((size_t)0, doc.GetRoot().ObjSize());
+        Assert::AreEqual((size_t)0, doc.GetRoot().ObjectSize());
     }
 
     TEST_METHOD(ObjReplace_ExistingKey)
@@ -1092,7 +1092,7 @@ public:
         doc.SetRoot(doc.NewObject());
         doc.GetRoot().ObjInsert(0, doc.NewString("n"), doc.NewInt(1));
         doc.GetRoot().ObjReplace(doc.NewString("n"), doc.NewInt(42));
-        Assert::AreEqual(42, doc.GetRoot().ObjAt("n").GetInt());
+        Assert::AreEqual(42, doc.GetRoot().ObjectAt("n").GetInt());
     }
 
     TEST_METHOD(ObjClear)
@@ -1101,7 +1101,7 @@ public:
         doc.SetRoot(doc.NewObject());
         doc.GetRoot().ObjInsert(0, doc.NewString("a"), doc.NewInt(1));
         doc.GetRoot().ObjClear();
-        Assert::AreEqual((size_t)0, doc.GetRoot().ObjSize());
+        Assert::AreEqual((size_t)0, doc.GetRoot().ObjectSize());
     }
 
     TEST_METHOD(ObjRotate)
@@ -1112,7 +1112,7 @@ public:
         doc.GetRoot().ObjInsert(1, doc.NewString("b"), doc.NewInt(2));
         doc.GetRoot().ObjInsert(2, doc.NewString("c"), doc.NewInt(3));
         doc.GetRoot().ObjRotate(1); // {"a":1,"b":2,"c":3} -> {"b":2,"c":3,"a":1}
-        Assert::IsTrue(doc.GetRoot().ObjAt("a").IsValid());
+        Assert::IsTrue(doc.GetRoot().ObjectAt("a").IsValid());
     }
 
     // ── AsArray / AsObject proxy ─────────────────────
@@ -1237,7 +1237,7 @@ public:
                 it.Remove();
         }
         // 仅剩奇数 1,3
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
 
     TEST_METHOD(MutableArrayIterator_PrefixIncrement_Star)
@@ -1345,8 +1345,8 @@ public:
                 it.Remove();
             it.Next();
         }
-        Assert::AreEqual((size_t)1, doc.GetRoot().ObjSize());
-        Assert::IsTrue(doc.GetRoot().ObjAt("keep").IsValid());
+        Assert::AreEqual((size_t)1, doc.GetRoot().ObjectSize());
+        Assert::IsTrue(doc.GetRoot().ObjectAt("keep").IsValid());
     }
 
     TEST_METHOD(MutableObjectIterator_PrefixIncrement)
@@ -1468,8 +1468,8 @@ public:
         CMutableDocument doc;
         doc = { "name", "Alice", "age", 30 };
         Assert::IsTrue(doc.GetRoot().IsObject());
-        Assert::AreEqual("Alice", doc.GetRoot().ObjAt("name").GetString());
-        Assert::AreEqual(30, doc.GetRoot().ObjAt("age").GetInt());
+        Assert::AreEqual("Alice", doc.GetRoot().ObjectAt("name").GetString());
+        Assert::AreEqual(30, doc.GetRoot().ObjectAt("age").GetInt());
     }
 
     TEST_METHOD(Proxy_InlineObject_SinglePair)
@@ -1477,7 +1477,7 @@ public:
         CMutableDocument doc;
         doc = { "x", 1 };
         Assert::IsTrue(doc.GetRoot().IsObject());
-        Assert::AreEqual(1, doc.GetRoot().ObjAt("x").GetInt());
+        Assert::AreEqual(1, doc.GetRoot().ObjectAt("x").GetInt());
     }
 
     // ── 内联数组语法 {Array_T{}, e1, e2, ...} ────────
@@ -1486,9 +1486,9 @@ public:
         CMutableDocument doc;
         doc = { Array_T{}, 1, 2, 3 };
         Assert::IsTrue(doc.GetRoot().IsArray());
-        Assert::AreEqual((size_t)3, doc.GetRoot().ArrSize());
-        Assert::AreEqual(1, doc.GetRoot().ArrAt(0).GetInt());
-        Assert::AreEqual(3, doc.GetRoot().ArrAt(2).GetInt());
+        Assert::AreEqual((size_t)3, doc.GetRoot().ArraySize());
+        Assert::AreEqual(1, doc.GetRoot().ArrayAt(0).GetInt());
+        Assert::AreEqual(3, doc.GetRoot().ArrayAt(2).GetInt());
     }
 
     TEST_METHOD(Proxy_InlineArray_Empty)
@@ -1496,17 +1496,17 @@ public:
         CMutableDocument doc;
         doc = { Array_T{} };
         Assert::IsTrue(doc.GetRoot().IsArray());
-        Assert::AreEqual((size_t)0, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)0, doc.GetRoot().ArraySize());
     }
 
     TEST_METHOD(Proxy_InlineArray_MixedTypes)
     {
         CMutableDocument doc;
         doc = { Array_T{}, 1, "two", 3.0, true, nullptr };
-        Assert::AreEqual((size_t)5, doc.GetRoot().ArrSize());
-        Assert::IsTrue(doc.GetRoot().ArrAt(1).IsString());
-        Assert::IsTrue(doc.GetRoot().ArrAt(3).IsBool());
-        Assert::IsTrue(doc.GetRoot().ArrAt(4).IsNull());
+        Assert::AreEqual((size_t)5, doc.GetRoot().ArraySize());
+        Assert::IsTrue(doc.GetRoot().ArrayAt(1).IsString());
+        Assert::IsTrue(doc.GetRoot().ArrayAt(3).IsBool());
+        Assert::IsTrue(doc.GetRoot().ArrayAt(4).IsNull());
     }
 
     // ── 嵌套结构 ────────────────────────────────────
@@ -1517,9 +1517,9 @@ public:
                {Array_T{}, 1, 2},
                {"k", "v"}
         };
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
-        Assert::IsTrue(doc.GetRoot().ArrAt(0).IsArray());
-        Assert::IsTrue(doc.GetRoot().ArrAt(1).IsObject());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
+        Assert::IsTrue(doc.GetRoot().ArrayAt(0).IsArray());
+        Assert::IsTrue(doc.GetRoot().ArrayAt(1).IsObject());
     }
 
     // ── CMutableValue::operator= (ReplaceMutValue) ──
@@ -1545,7 +1545,7 @@ public:
         doc = 0;
         doc.GetRoot().ProxyReplace({ Array_T{}, 10, 20 }, doc);
         Assert::IsTrue(doc.GetRoot().IsArray());
-        Assert::AreEqual((size_t)2, doc.GetRoot().ArrSize());
+        Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
 
     TEST_METHOD(Proxy_ReplaceExistingValue_ToObject)
@@ -1675,7 +1675,7 @@ public:
         size_t lens[] = { 2, 4 };
         CMutableValue arr = doc.NewArrayCopy(strs, lens, 2);
         Assert::IsTrue(arr.IsArray());
-        Assert::AreEqual((size_t)2, arr.ArrSize());
+        Assert::AreEqual((size_t)2, arr.ArraySize());
     }
 
     // NewObject with kv flat array
@@ -1685,24 +1685,24 @@ public:
         const char* kv[] = { "a","1","b","2" };
         CMutableValue obj = doc.NewObject(kv, 2);
         Assert::IsTrue(obj.IsObject());
-        Assert::AreEqual((size_t)2, obj.ObjSize());
+        Assert::AreEqual((size_t)2, obj.ObjectSize());
     }
 
     // ── 空数组/对象 ──────────────────────────────────
     TEST_METHOD(EmptyArray_ArrFront_Invalid)
     {
         CDocument doc(k_JsonEmptyArray);
-        Assert::IsFalse(doc.GetRoot().ArrFront().IsValid());
+        Assert::IsFalse(doc.GetRoot().ArrayFront().IsValid());
     }
     TEST_METHOD(EmptyArray_ArrBack_Invalid)
     {
         CDocument doc(k_JsonEmptyArray);
-        Assert::IsFalse(doc.GetRoot().ArrBack().IsValid());
+        Assert::IsFalse(doc.GetRoot().ArrayBack().IsValid());
     }
     TEST_METHOD(EmptyObject_ObjAt_Invalid)
     {
         CDocument doc(k_JsonEmptyObject);
-        Assert::IsFalse(doc.GetRoot().ObjAt("any").IsValid());
+        Assert::IsFalse(doc.GetRoot().ObjectAt("any").IsValid());
     }
 
     // ── CValue::IsValid 对 nullptr ───────────────────
@@ -1733,10 +1733,10 @@ public:
     {
         CDocument doc(k_JsonNestedArray);  // [[1,2],[3,4]]
         CValue outer = doc.GetRoot();
-        Assert::AreEqual((size_t)2, outer.ArrSize());
-        CValue inner = outer.ArrAt(1);    // [3,4]
-        Assert::AreEqual((size_t)2, inner.ArrSize());
-        Assert::AreEqual(4, inner.ArrAt(1).GetInt());
+        Assert::AreEqual((size_t)2, outer.ArraySize());
+        CValue inner = outer.ArrayAt(1);    // [3,4]
+        Assert::AreEqual((size_t)2, inner.ArraySize());
+        Assert::AreEqual(4, inner.ArrayAt(1).GetInt());
     }
 
     // ── 复杂文档的多路径访问 ─────────────────────────
@@ -1744,16 +1744,16 @@ public:
     {
         CDocument doc(k_JsonComplex);
         // {"nums":[1,2,3],"flag":false,"sub":{"k":"v"}}
-        CValue nums = doc.GetRoot().ObjAt("nums");
+        CValue nums = doc.GetRoot().ObjectAt("nums");
         Assert::IsTrue(nums.IsArray());
-        Assert::AreEqual((size_t)3, nums.ArrSize());
+        Assert::AreEqual((size_t)3, nums.ArraySize());
 
-        CValue flag = doc.GetRoot().ObjAt("flag");
+        CValue flag = doc.GetRoot().ObjectAt("flag");
         Assert::IsTrue(flag.IsFalse());
 
-        CValue sub = doc.GetRoot().ObjAt("sub");
+        CValue sub = doc.GetRoot().ObjectAt("sub");
         Assert::IsTrue(sub.IsObject());
-        CValue kv = sub.ObjAt("k");
+        CValue kv = sub.ObjectAt("k");
         Assert::AreEqual("v", kv.GetString());
     }
 
