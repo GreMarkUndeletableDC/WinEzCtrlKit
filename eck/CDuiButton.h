@@ -22,7 +22,7 @@ private:
     Alignment m_eAlignH{ Alignment::Center };
     Alignment m_eAlignV{ Alignment::Center };
     BYTE m_eInter{ D2D1_INTERPOLATION_MODE_LINEAR };
-    float m_fOpacity{ 1.f };
+    float m_kIconOpacity{ 1.f };
     SimpleStyle m_Style[SsMax]
     {
         TmsSsMakeNormal(1.f),
@@ -31,7 +31,7 @@ private:
         TmsSsMakeDisabled(1.f),
     };
 
-    Kw::Vec2 CalculateBitmapSize() const noexcept
+    Kw::Vec2 CalculateIconSize(float cxText) const noexcept
     {
         EckAssert(m_Bitmap.Get());
         const auto rc = m_Bitmap.GetActualSourceRect();
@@ -39,9 +39,13 @@ private:
         const auto cy = rc.bottom - rc.top;
         if (m_bAutoScale)
         {
-            const float dOuter = GetTheme()->GetMetric(IdMePaddingOuter);
+            const auto dOuter = GetTheme()->GetMetric(IdMePaddingOuter);
             const auto cyNew = GetHeight() - dOuter * 2;
-            return { cyNew * cx / cy, cyNew };
+            const auto cxNew = GetWidth() - dOuter - cxText;
+            if (cxNew > cyNew)
+                return { cyNew * cx / cy, cyNew };
+            else
+                return { cxNew, cxNew * cy / cx };
         }
         return { cx, cy };
     }
@@ -53,7 +57,7 @@ private:
 
         float cxMax = GetWidth() - dOuter * 2.f;
         if (m_Bitmap.Get())
-            cxMax -= (CalculateBitmapSize().x + dInner);
+            cxMax -= (CalculateIconSize(0.f).x + dInner);
 
         g_pDwFactory->CreateTextLayout(
             pszText, cchText, GetTextFormat().Get(),
@@ -82,8 +86,8 @@ private:
         return SsNormal;
     }
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -119,18 +123,23 @@ public:
             D2D1_RECT_F rc;
             if (m_Bitmap.Get())
             {
-                const auto sizeBitmap = CalculateBitmapSize();
+                const auto sizeBitmap = CalculateIconSize(tm.width);
                 rc.left = (GetWidth() - sizeBitmap.x -
-                    (tm.width ? (dInner - tm.width) : 0.f)) / 2.f;
+                    (tm.width > 0.f ? (dInner + tm.width) : 0.f)) / 2.f;
                 rc.top = (GetHeight() - sizeBitmap.y) / 2.f;
                 rc.right = rc.left + sizeBitmap.x;
                 rc.bottom = rc.top + sizeBitmap.y;
-                GetDC()->DrawBitmap(m_Bitmap.Get(), &rc, m_fOpacity,
+                ElementToClient(rc);
+
+                GetDC()->DrawBitmap(m_Bitmap.Get(), &rc, m_kIconOpacity,
                     (D2D1_INTERPOLATION_MODE)m_eInter, m_Bitmap.GetSourceRect());
                 rc.left = rc.right + dInner;
             }
             else
+            {
                 rc.left = (GetWidth() - tm.width) / 2.f;
+                rc.left += GetOffsetInClient().x;
+            }
 
             if (m_pLayout)
             {
@@ -142,12 +151,14 @@ public:
                 case Alignment::Far:    pt.y = GetHeight() - GetTheme()->GetMetric(IdMePaddingOuter) - tm.height; break;
                 }
 
-                pt += GetOffsetInClient();
+                pt.y += GetOffsetInClient().y;
+
                 GetDC()->DrawTextLayout(
                     Kw::MakeD2DPointF(pt),
                     m_pLayout.Get(),
                     GetWindow().CcSetBrushColor(
-                        GetTheme()->GetStyleColorD2D(&Ss, SfFore)));
+                        GetTheme()->GetStyleColorD2D(&Ss, SfFore)),
+                    DrawTextLayoutFlags);
             }
 
             DbgDrawFrame();
@@ -176,8 +187,14 @@ public:
             break;
         case WM_LBUTTONUP:
             if (TmState() & SapLButtonDown)
+            {
                 GetContainer()->EleReleaseCapture();
-            Invalidate();
+                GetWindow().RdLockUpdate();
+                if (PointInRect(GetViewRect(), EagPoint(lParam)))
+                    EvtClick();
+                Invalidate();
+                GetWindow().RdUnlockUpdate();
+            }
             break;
         case WM_CAPTURECHANGED:
             if (TmState() & SapLButtonDown)
@@ -206,9 +223,11 @@ public:
             m_bSpacePressed = FALSE;
             if (TmState() & SaPressed)
             {
-                EvtClick();
                 TmState() &= ~SaPressed;
+                GetWindow().RdLockUpdate();
+                EvtClick();
                 Invalidate();
+                GetWindow().RdUnlockUpdate();
             }
         }
         break;
@@ -226,11 +245,13 @@ public:
             Invalidate();
             break;
         case WM_STYLECHANGED:
-            if (!(((UINT)wParam ^ GetStyle()) & DES_DISABLE))
-                break;
-            if (GetStyle() & DES_DISABLE)
+            TmAutoSwitchTheme(this, wParam);
+            if (((UINT)wParam ^ GetStyle()) & DES_DISABLE)
             {
-                TmState() |= SaDisable;
+                if (GetStyle() & DES_DISABLE)
+                    TmState() |= SaDisable;
+                else
+                    TmState() &= ~SaDisable;
                 Invalidate();
             }
             break;
@@ -274,9 +295,26 @@ public:
 
     EckInline void SetIcon(const CBitmap& p) noexcept { m_Bitmap = p; }
     EckInlineNdCe auto& GetIcon() const noexcept { return m_Bitmap; }
+
+    EckInlineNdCe auto& TmSimpleStyle(UINT ss) noexcept { return m_Style[ss]; }
+    EckInlineNdCe auto& TmSimpleStyle() noexcept { return m_Style; }
+
+    EckInlineCe void SetAutoScale(BOOL b) noexcept { m_bAutoScale = b; }
+    EckInlineNdCe BOOL GetAutoScale() const noexcept { return m_bAutoScale; }
+
+    EckInlineCe void SetHorizontalAlignment(Alignment e) noexcept { m_eAlignH = e; }
+    EckInlineNdCe Alignment GetHorizontalAlignment() const noexcept { return m_eAlignH; }
+    EckInlineCe void SetVerticalAlignment(Alignment e) noexcept { m_eAlignV = e; }
+    EckInlineNdCe Alignment GetVerticalAlignment() const noexcept { return m_eAlignV; }
+
+    EckInlineCe void SetInterpolationMode(D2D1_INTERPOLATION_MODE e) noexcept { m_eInter = (BYTE)e; }
+    EckInlineNdCe D2D1_INTERPOLATION_MODE GetInterpolationMode() const noexcept { return (D2D1_INTERPOLATION_MODE)m_eInter; }
+
+    EckInlineCe void SetIconOpacity(float f) noexcept { m_kIconOpacity = f; }
+    EckInlineNdCe float GetIconOpacity() const noexcept { return m_kIconOpacity; }
 };
 
-class CTmButton : public CThemeBase
+class CTmButton : public CTheme
 {
 public:
     TmResult Draw(
@@ -291,7 +329,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CThemeBase> CButton::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CButton::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmButton>(bDark);
 }

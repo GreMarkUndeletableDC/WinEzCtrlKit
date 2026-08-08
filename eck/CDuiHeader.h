@@ -135,7 +135,8 @@ private:
                 { rcItem.left + dOuter, rcItem.top + dOuter },
                 e.pLayout.Get(),
                 GetWindow().CcSetBrushColor(
-                    GetTheme()->GetStyleColorD2D(&m_Style[iSs], SfFore)));
+                    GetTheme()->GetStyleColorD2D(&m_Style[iSs], SfFore)),
+                DrawTextLayoutFlags);
         }
     }
 
@@ -345,8 +346,8 @@ private:
         rcItem.bottom = GetHeight();
     }
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -536,6 +537,10 @@ public:
 
         case WM_SIZE:
             UpdateAllTextLayout();
+            break;
+
+        case WM_STYLECHANGED:
+            TmAutoSwitchTheme(this, wParam);
             break;
 
         case WM_CREATE:
@@ -820,7 +825,7 @@ public:
 };
 
 
-class CTmHeader : public CThemeBase
+class CTmHeader : public CTheme
 {
 public:
     TmResult Draw(
@@ -843,7 +848,7 @@ public:
         return TmResult::Ok;
     }
 };
-inline RcPtr<CThemeBase> CHeader::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CHeader::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     const auto pTheme = TmMakeTheme<CTmHeader>(bDark);
     const auto pmc = TmsMakeMetricCollection();

@@ -22,7 +22,8 @@ enum
     DES_CONTENT_EXPAND_RECT = (1u << 29),
     // DUI系统应当检查当前元素的祖元素，因为它们可能设置了混合器
     DES_PARENT_COMP = (1u << 28),
-    DES_NO_REDRAW = (1u << 27),	// 不允许重绘，一般不使用此样式
+    // 不允许重绘，一般不使用此样式
+    DES_NO_REDRAW = (1u << 27),
     // 对于手动混合元素，DUI不应自行分配后台缓存，
     // 而应调用CCompositor::CreateCacheBitmap
     DES_OWNER_COMP_CACHE = (1u << 26),
@@ -73,65 +74,96 @@ enum class PresentMode : BYTE
 // 渲染事件代码
 enum
 {
+    // 查询渲染目标。
+    // 重画开始前产生此事件，应用程序可选重定向渲染的目标图面
+    // Field:
+    //   QueryTarget
+    // Return:
+    //   RER_NONE           执行默认操作
+    //   RER_REDIRECTION    应用程序重定向渲染，DUI系统应使用pDstSurface和prcDirty
+    RE_QUERY_TARGET,
+
     // 即将开始渲染
-    // 下列字段有效：PreRender
-    // 下列返回值有效：
-    // RER_NONE = 执行默认操作
-    // RER_REDIRECTION = 应用程序重定向渲染，DUI系统应使用pSfcNewDst和prcNewDirtyPhy
+    // Field:
+    //   PreRender
+    // Return:
+    //   RER_NONE           执行默认操作
+    //   RER_NO_FILLBACK    执行默认操作，且不产生RE_FILLBACK事件
+    //   RER_POST_RENDER    触发RE_POSTRENDER
     RE_PRERENDER,
-    // 渲染完毕，仅当RE_PRERENDER返回RER_REDIRECTION时产生
+
+    // 渲染完毕。
+    // 如果应用程序为RE_PRERENDER返回了RER_POST_RENDER，则渲染完毕后产生该事件；
+    // 此事件产生时关联图面仍然有效，且DC未调用EndDraw
+    // Return:
+    //   RER_NONE
     RE_POSTRENDER,
-    // DUI系统认为有必要冲洗一切挂起的工作
+
+    // 提交显示。
+    // 仅呈现模式为DCompositionVisual时产生，应用程序应提交DComposition设备
+    // Return:
+    //   RER_NONE
     RE_COMMIT,
+
     // 正在填充背景
-    // 下列字段有效：FillBkg
-    // 下列返回值有效：
-    // RER_NONE = 执行默认操作
-    // RER_NO_ERASE = 跳过背景填充
-    RE_FILLBACKGROUND,
+    // Field:
+    //   FillBack
+    // Return:
+    //   RER_NONE           执行默认操作
+    //   RER_NO_FILLBACK    跳过背景填充
+    RE_FILLBACK,
 };
+
 // 渲染事件返回值
 enum : LRESULT
 {
     RER_NONE = 0,
     RER_REDIRECTION = 1 << 0,
-    RER_NO_ERASE = 1 << 1,
+    RER_NO_FILLBACK = 1 << 1,
+    RER_POST_RENDER = 1 << 2,
 };
-struct RENDER_EVENT
+
+union RENDER_EVENT
 {
-    union
+    struct
     {
-        struct
-        {
-            IDXGISurface* pSfcFinalDst;
-            POINT ptOffsetPhy;
-            const RECT* prcDirtyPhy;
-            IDXGISurface* pSfcNewDst;
-            RECT* prcNewDirtyPhy;
-        } PreRender;
-        struct
-        {
-            D2D1_RECT_F rc;
-        } FillBkg;
-    };
+        // 如果应用程序需要，此字段设为渲染到的新图面
+        // 应用程序必须将引用计数**+1**
+        IDXGISurface1* pDstSurface;
+        // 如果应用程序需要，此字段设置为绘图偏移。
+        // 仅在pDstSurface不为0时有效
+        POINT ptOffset;
+        // In: 本次更新的脏矩形
+        // Out: 如果应用程序需要，将新的脏矩形写入该结构，仅在pDstSurface不为0时有效
+        RECT* prcDirty;
+    } QueryTarget;// 均为物理坐标
+    struct
+    {
+        // 本次更新的DXGI图面。在非DComposition模式下此字段为nullptr
+        IDXGISurface1* pDstSurface;
+        // 本次更新的DComposition图面重画偏移
+        POINT ptOffset;
+        // 本次更新的脏矩形
+        const RECT* prcDirty;
+    } PreRender;// 均为物理坐标
+    struct
+    {
+        D2D1_RECT_F rc;
+    } FillBack;
 };
 
 // 元素事件
 enum
 {
-    ECKPRIV_EWM_PLACEHOLDER = WM_USER_SAFE,
-    WM_DRAGENTER,
-    WM_DRAGOVER,
-    WM_DRAGLEAVE,
-    WM_DROP,
+    ECKPRIV_EWM_PLACEHOLDER = EWM_SYSBEGIN,
 
-    EWM_COLORSCHEMECHANGED,	// 颜色主题改变 (BOOL 是否为暗色, 0)
-    EWM_QUERY_EXPAND_RECT,	// 查询扩展矩形 (_Inout_ D2D1_RECT_F*, 0)
+    // 查询扩展矩形 (_Inout_ D2D1_RECT_F*, 0)
+    EWM_QUERY_EXPAND_RECT,
     // 创建缓存位图 (_Inout_ CREATE_CACHE_BITMAP_INFO*, 0)
     // 若成功则应返回TRUE
     EWM_CREATE_CACHE_BITMAP,
 
-    EWM_PRIVBEGIN,
+    EWM_USERBEGIN,
 };
 
 namespace Detail

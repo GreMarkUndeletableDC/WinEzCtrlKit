@@ -4,11 +4,11 @@
 ECK_NAMESPACE_BEGIN
 ECK_MEDIATAG_NAMESPACE_BEGIN
 // 采样率 单位Hz
-constexpr inline USHORT MpegSampleRateTable[][3]
+constexpr inline USHORT MpegSampleRateTable[][4]
 {
-    { 44100,48000,32000 },	// MPEG-1
-    { 22050,24000,16000 },	// MPEG-2
-    { 11025,12000, 8000 }	// MPEG-2.5
+    { 44100, 48000, 32000, 0 },// MPEG-1
+    { 22050, 24000, 16000, 0 },// MPEG-2
+    { 11025, 12000,  8000, 0 } // MPEG-2.5
 };
 
 constexpr inline USHORT MpegBitrateFree = std::numeric_limits<USHORT>::max();
@@ -16,26 +16,26 @@ constexpr inline USHORT MpegBitrateFree = std::numeric_limits<USHORT>::max();
 // 比特率 单位kbps
 constexpr inline USHORT MpegBitrateTable[][16]
 {
-    { MpegBitrateFree,32,64,96,128,160,192,224,256,288,320,352,384,416,448,0 },	// MPEG-1 Layer 1
-    { MpegBitrateFree,32,48,56, 64, 80, 96,112,128,160,192,224,256,320,384,0 },	// MPEG-1 Layer 2
-    { MpegBitrateFree,32,40,48, 56, 64, 80, 96,112,128,160,192,224,256,320,0 },	// MPEG-1 Layer 3
-    { MpegBitrateFree,32,48,56, 64, 80, 96,112,128,144,160,176,192,224,256,0 },	// MPEG-2/2.5 Layer 1
-    { MpegBitrateFree, 8,16,24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,0 },	// MPEG-2/2.5 Layer 2
-    { MpegBitrateFree, 8,16,24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,0 }	// MPEG-2/2.5 Layer 3
+    { MpegBitrateFree, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 0 },// MPEG-1 Layer 1
+    { MpegBitrateFree, 32, 48, 56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 384, 0 },// MPEG-1 Layer 2
+    { MpegBitrateFree, 32, 40, 48,  56,  64,  80,  96, 112, 128, 160, 192, 224, 256, 320, 0 },// MPEG-1 Layer 3
+    { MpegBitrateFree, 32, 48, 56,  64,  80,  96, 112, 128, 144, 160, 176, 192, 224, 256, 0 },// MPEG-2/2.5 Layer 1
+    { MpegBitrateFree,  8, 16, 24,  32,  40,  48,  56,  64,  80,  96, 112, 128, 144, 160, 0 },// MPEG-2/2.5 Layer 2
+    { MpegBitrateFree,  8, 16, 24,  32,  40,  48,  56,  64,  80,  96, 112, 128, 144, 160, 0 } // MPEG-2/2.5 Layer 3
 };
 
 // 采样数
 constexpr inline USHORT MpegSampleCountTable[][3]
 {
-    { 384,1152,1152 },	// MPEG-1
-    { 384,1152, 576 },	// MPEG-2
-    { 384,1152, 576 }	// MPEG-2.5
+    { 384, 1152, 1152 },  // MPEG-1
+    { 384, 1152,  576 },  // MPEG-2
+    { 384, 1152,  576 }   // MPEG-2.5
 };
 
-class CMpegInfo
+class CMpeg
 {
 public:
-    enum class Version :BYTE
+    enum class Version : BYTE
     {
         Mpeg2_5,
         Reserved,
@@ -43,7 +43,7 @@ public:
         Mpeg1,
     };
 
-    enum class Layer :BYTE
+    enum class Layer : BYTE
     {
         Reserved,
         Layer3,
@@ -51,15 +51,15 @@ public:
         Layer1,
     };
 
-    enum class Channel :BYTE
+    enum class Channel : BYTE
     {
-        Stereo,			// 立体声
-        JointStereo,	// 联合立体声
-        DualChannel,	// 双声道
-        Mono,			// 单声道
+        Stereo,     // 立体声
+        JointStereo,// 联合立体声
+        DualChannel,// 双声道
+        Mono,       // 单声道
     };
 
-    enum class Emphasis :BYTE
+    enum class Emphasis : BYTE
     {
         None,
         Ms50_15,
@@ -77,7 +77,7 @@ public:
         Emphasis eEmphasis;
         BYTE eExtMode;
 
-        BITBOOL bCrc : 1;
+        BITBOOL bNoCrc : 1;
         BITBOOL bPadding : 1;
         BITBOOL bPrivate : 1;
         BITBOOL bCopyright : 1;
@@ -98,7 +98,7 @@ public:
         UINT SampleRateIndex : 2;
         UINT BitrateIndex : 4;
 
-        UINT bCrc : 1;
+        UINT bNoCrc : 1;
         UINT Layer : 2;
         UINT Version : 2;
         UINT Sync : 11;
@@ -111,15 +111,7 @@ public:
     size_t m_posBegin{};
     MPEG_INFO m_Info{};
 public:
-    CMpegInfo(CMediaFile& File) noexcept : m_File{ File }, m_Stream{ File.GetStream().Get() }
-    {
-        m_Stream.GetStream()->AddRef();
-    }
-
-    ~CMpegInfo()
-    {
-        m_Stream.GetStream()->Release();
-    }
+    CMpeg(CMediaFile& File) noexcept : m_File{ File }, m_Stream{ File.GetStream().Get() } {}
 
     Result Read() noexcept try
     {
@@ -137,7 +129,7 @@ public:
         // 同步到MPEG头
         BYTE byHdr[4]{};
         m_Stream >> byHdr;
-        if (byHdr[0] != 0xFF && (byHdr[1] & 0b1110'0000_by) != 0b1110'0000_by)
+        if (byHdr[0] != 0xFF || (byHdr[1] & 0b1110'0000_by) != 0b1110'0000_by)
         {
             // 没有同步字节，重新同步
             m_Stream.Seek(m_posBegin);
@@ -182,12 +174,12 @@ public:
                     m_posBegin += e.cbActual;
                 }
             }
-            return Result::MpegSynchronizeFailed;
+            return Result::MpegSynchronization;
         }
     SyncSucceed:
         m_Info.eVersion = Version((byHdr[1] >> 3) & 0b11_by);
         m_Info.eLayer = Layer((byHdr[1] >> 1) & 0b11_by);
-        m_Info.bCrc = byHdr[1] & 1_by;
+        m_Info.bNoCrc = byHdr[1] & 1_by;
 
         m_Info.BitrateIndex = (byHdr[2] >> 4) & 0b1111_by;
         m_Info.SampleRateIndex = (byHdr[2] >> 2) & 0b11_by;
@@ -206,10 +198,12 @@ public:
         return Result::Stream;
     }
 
-    EckInlineNdCe const auto& GetInfomation() const { return m_Info; }
+    EckInlineNdCe const auto& GetInformation() const noexcept { return m_Info; }
 
-    constexpr USHORT GetBitrate() const
+    constexpr USHORT GetBitrate() const noexcept
     {
+        if (m_Info.eVersion == Version::Reserved)
+            return 0;
         const size_t idxVer = ((m_Info.eVersion == Version::Mpeg1) ? 0u : 1u);
         size_t idxLayer;
         switch (m_Info.eLayer)
@@ -223,7 +217,7 @@ public:
         return MpegBitrateTable[idxVer * 3 + idxLayer][m_Info.BitrateIndex];
     }
 
-    constexpr USHORT GetSampleRate() const
+    constexpr USHORT GetSampleRate() const noexcept
     {
         size_t idxVer;
         switch (m_Info.eVersion)
@@ -239,7 +233,7 @@ public:
 
     // 计算以毫秒计的每帧持续时间。
     // 因ID3v2中某些字段可以用MPEG帧作时长单位，故提供此方法
-    constexpr double CalcDurationPerFrame() const
+    constexpr double CalculateDurationPerFrame() const noexcept
     {
         size_t idxVer;
         switch (m_Info.eVersion)
@@ -260,6 +254,13 @@ public:
         }
 
         return (double)MpegSampleCountTable[idxVer][idxLayer] / (double)GetSampleRate() * 1000.;
+    }
+
+    EckInlineNdCe size_t GetBeginPosition() const noexcept { return m_posBegin; }
+
+    EckInlineNdCe BYTE GetChannelCount() const noexcept
+    {
+        return m_Info.eChannel == Channel::Mono ? 1 : 2;
     }
 };
 ECK_MEDIATAG_NAMESPACE_END

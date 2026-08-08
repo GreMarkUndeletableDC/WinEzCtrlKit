@@ -11,8 +11,8 @@ struct COMP_RENDER_INFO
     CElement* pEle;         // 当前正渲染的元素
     ID2D1DeviceContext* pDC;// 已设置适当变换使其坐标相对pEle
     ID2D1Bitmap1* pBitmap;  // 渲染完毕的位图。通常，混合器需要将此位图内容做恰当处理后呈现
-    D2D1_RECT_F rcSrc;  // 相对pBitmap
-    D2D1_RECT_F rcDst;  // 相对pEle
+    D2D1_RECT_F rcSrc;      // 相对pBitmap
+    D2D1_RECT_F rcDst;      // 相对pEle
 };
 
 // 表示一个特定的混合操作，默认的实现不执行任何操作
@@ -67,7 +67,7 @@ public:
     /// <summary>
     /// 计算混合后矩形。
     /// 若IsInPlace返回TRUE，则此方法不会被调用。
-    /// DUI系统自动缓存结算结果，并在尺寸改变时重新调用计算，实现无需缓存
+    /// DUI系统自动缓存计算结果，并在尺寸改变时重新调用计算，实现无需缓存
     /// </summary>
     /// <param name="rc">计算结果</param>
     /// <param name="bInClientOrParent">结果相对于客户区还是相对于父元素</param>
@@ -100,7 +100,7 @@ public:
 /*
     void TransformPoint(_Inout_ Kw::Vec2& pt, BOOL bNormalToComposited) noexcept override
     {}
-    void CalculateCompositedRect(_Out_ RECT& rc, BOOL bInClientOrParent) noexcept override
+    void CalculateCompositedRect(_Out_ D2D1_RECT_F& rc, BOOL bInClientOrParent) noexcept override
     {}
     BOOL IsInPlace() const noexcept override { return TRUE; }
     void PostRender(COMP_RENDER_INFO& cri) noexcept override

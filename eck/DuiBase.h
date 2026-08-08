@@ -8,11 +8,19 @@
 #ifdef _DEBUG
 #include "Random.h"
 #endif
+#include "SystemHelper.h"
 
 #include <dcomp.h>
 
 ECK_NAMESPACE_BEGIN
 ECK_DUI_NAMESPACE_BEGIN
+/*
+* 实现了以下事件
+* 
+* WM_STYLECHANGED   (DWORD 旧样式, 0)
+* WM_THEMECHANGED   (0          , 0)
+* WM_DWMCOLORIZATIONCOLORCHANGED (0, 0)
+*/
 class CElement : public UiBasic::CElement<CElement, true>
 {
     friend class CDuiWindow;
@@ -21,7 +29,7 @@ private:
     CCompositor* m_pCompositor{};
 
     CStringW m_rsText{};
-    RcPtr<CThemeBase> m_pTheme{};
+    RcPtr<CTheme> m_pTheme{};
     ComPtr<IDWriteTextFormat> m_pTextFormat{};
 
     void InvalidateInternal(const Kw::Rect* prcInEle, BOOL bUpdateNow) noexcept;
@@ -64,7 +72,6 @@ public:
 
     EckInlineNdCe CDuiWindow& GetWindow() const noexcept { return *(CDuiWindow*)GetContainer(); }
     EckInlineNdCe ID2D1DeviceContext* GetDC() const noexcept;
-    EckInlineNdCe ID2D1Bitmap1* CcGetBitmap() const noexcept;
 
     void SetRect(const Kw::Rect& rc) noexcept
     {
@@ -95,6 +102,11 @@ public:
     {
         SetRect({ (float)rc.x, (float)rc.y, float(rc.x + rc.cx), float(rc.y + rc.cy) });
     }
+
+    using TBase::PixelToLogical;
+    using TBase::LogicalToPixel;
+    EckInlineCe void PixelToLogical(_Inout_ D2D1_POINT_2F& pt) const noexcept { PixelToLogical((Kw::Vec2&)pt); }
+    EckInlineCe void LogicalToPixel(_Inout_ D2D1_POINT_2F& pt) const noexcept { LogicalToPixel((Kw::Vec2&)pt); }
 
     EckInlineNdCe D2D1_RECT_F GetRectInClientD2D() const noexcept { return Kw::MakeD2DRectF(GetRectInClient()); }
     EckInlineNdCe D2D1_RECT_F GetViewRectD2D() const noexcept { return Kw::MakeD2DRectF(GetViewRect()); }
@@ -134,7 +146,11 @@ public:
         SetStyle(u);
     }
 
-    EckInline void SetTheme(CThemeBase* p) noexcept { m_pTheme = p; }
+    EckInline void SetTheme(CTheme* p) noexcept
+    {
+        m_pTheme = p;
+        CallEvent(WM_THEMECHANGED, 0, 0);
+    }
     EckInlineNdCe auto& GetTheme() const noexcept { return m_pTheme; }
 
     void SetCompositor(CCompositor* pCompositor, BOOL bAutoMarkParentComp = TRUE) noexcept
@@ -190,8 +206,6 @@ public:
     EckInlineNdCe CElement* GetFocus() noexcept;
     EckInline BOOL SetTimer(UINT_PTR uId, UINT uElapse) noexcept;
     EckInline BOOL KillTimer(UINT_PTR uId) noexcept;
-
-    EckInline void KctWake() const noexcept;
 
     EckInlineNdCe BOOL IsValid() const noexcept { return !!__super::GetContainer(); }
 
@@ -274,6 +288,8 @@ public:
         for (; pp >= pTrans; --pp)
         {
             pEle = *pp;
+            if (!pEle)// IntelliSense
+                break;
             const auto pCompositor = pEle->m_pCompositor;
             if (pCompositor)
             {
@@ -402,13 +418,16 @@ private:
     float m_fBlurDeviation{ 15.f };
 
     ARGB m_argbAccent{ 0xFF'66CCFF };
+    ARGB m_argbBack{ 0xFF'000000 };
 
     USHORT m_cLockUpdate{};
 
     PresentMode m_ePresentMode{ PresentMode::FlipSwapChain };
 
     BITBOOL m_bBlurUseLayer : 1{};      // 模糊是否使用图层
-    BITBOOL m_bTransparent : 1{ TRUE }; // 窗口是透明的
+    BITBOOL m_bAutoTheme : 1{ TRUE };
+    BITBOOL m_bAutoThemeAccent : 1{};
+    BITBOOL m_bDbgDrawCompRect : 1{};
 
     BITBOOL m_bFullUpdate : 1{ TRUE };  // 当前是否需要完全重绘
     BITBOOL m_bWaitSwapChain : 1{};
@@ -417,7 +436,7 @@ private:
         const D2D1_RECT_F& rcClipInClient, float ox, float oy) noexcept
     {
         EckAssert(pEle->GetStyle() & DES_BLUR_BACK);
-        GetDeviceContext()->Flush();
+        RdGetDC()->Flush();
         auto rcClipInEle{ rcClipInClient };
         auto rcClip{ rcClipInClient };
         pEle->ClientToElement(rcClipInEle);
@@ -502,39 +521,34 @@ private:
 
     void CcCreateBrush() noexcept
     {
-        GetDeviceContext()->CreateSolidColorBrush({}, m_Stock.pBrush.AtClear());
+        RdGetDC()->CreateSolidColorBrush({}, m_Stock.pBrush.AtClear());
     }
-
-    static EckInlineNdCe D2D1_ALPHA_MODE RdcD2DAlphaMode() noexcept { return D2D1_ALPHA_MODE_PREMULTIPLIED; }
-    static EckInlineNdCe DXGI_ALPHA_MODE RdcDxgiAlphaMode() noexcept { return DXGI_ALPHA_MODE_PREMULTIPLIED; }
 
     void RdpRenderTree(CElement* pEle, const Kw::Rect& rc, Detail::PAINT_EXTRA* pExtra) noexcept
     {
-        const auto pDC = GetDeviceContext();
+        const auto pDC = RdGetDC();
         Kw::Rect rcClip;// 相对客户区
-        ID2D1Image* pOldTarget{};
+        ComPtr<ID2D1Image> pOldTarget{};
         COMP_RENDER_INFO cri;
-        IDXGISurface1* pDxgiSurface{};
-        ID2D1Bitmap1* pBitmap{};
         D2D1_MATRIX_3X2_F Mat;
         while (pEle)
         {
-            const auto rcElem = pEle->GetRectInClient();
+            const auto rcEle = pEle->GetRectInClient();
             const auto uStyle = pEle->GetStyle();
             if (!(uStyle & DES_VISIBLE) || (uStyle & DES_NO_REDRAW) ||
-                IsRectEmpty(rcElem))
+                IsRectEmpty(rcEle))
                 goto NextElem;
             if ((pEle->GetCompositor() &&
                 !(uStyle & DES_COMP_NO_REDIRECTION) &&
                 IsRectsIntersect(pEle->GetWholeRectInClient(), rc)))
-                rcClip = rcElem;
-            else if (!IntersectRect(rcClip, rcElem, rc))
+                rcClip = rcEle;
+            else if (!IntersectRect(rcClip, rcEle, rc))
                 goto NextElem;
 
             if (pEle->GetCompositor())
             {
                 cri.pEle = pEle;
-                cri.pDC = GetDeviceContext();
+                cri.pDC = RdGetDC();
                 cri.rcDst = Kw::MakeD2DRectF(pEle->GetViewRect());
                 if (uStyle & DES_COMP_NO_REDIRECTION)
                     pEle->GetCompositor()->PreRender(cri);
@@ -544,19 +558,20 @@ private:
                         pEle->CompGetCacheBitmap().Get())
                         goto SkipCompReRender;
                     pDC->Flush();
-                    pDC->GetTarget(&pOldTarget);
+                    pDC->GetTarget(pOldTarget.AtClear());
                     pEle->CompUpdateCacheBitmap(
-                        rcElem.right - rcElem.left,
-                        rcElem.bottom - rcElem.top);
+                        rcEle.right - rcEle.left,
+                        rcEle.bottom - rcEle.top);
                     pDC->GetTransform(&Mat);
 
                     pDC->SetTarget(pEle->CompGetCacheBitmap().Get());
                     const auto rcValid = pEle->CompGetCacheBitmap().GetActualSourceRect();
                     pDC->SetTransform(D2D1::Matrix3x2F::Translation(
-                        rcValid.left - rcElem.left,
-                        rcValid.top - rcElem.top));
+                        rcValid.left - rcEle.left,
+                        rcValid.top - rcEle.top));
 
-                    pDC->PushAxisAlignedClip(Kw::MakeD2DRectF(rcElem), D2D1_ANTIALIAS_MODE_ALIASED);
+                    pDC->PushAxisAlignedClip(
+                        Kw::MakeD2DRectF(rcEle), D2D1_ANTIALIAS_MODE_ALIASED);
                     pDC->Clear({});
                     pDC->PopAxisAlignedClip();
                 }
@@ -571,8 +586,7 @@ private:
                 {
                     RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
                     pDC->Flush();
-                    pDC->SetTarget(pOldTarget);
-                    pOldTarget->Release();
+                    pDC->SetTarget(pOldTarget.Get());
                 }
             SkipCompReRender:
                 cri.pBitmap = pEle->CompGetCacheBitmap().Get();
@@ -581,8 +595,9 @@ private:
                 else
                     cri.rcSrc = Kw::MakeD2DRectF(pEle->GetViewRect());
 
-                pDC->SetTransform(D2D1::Matrix3x2F::Translation(
-                    rcElem.left, rcElem.top));
+                pDC->SetTransform(
+                    Mat *
+                    D2D1::Matrix3x2F::Translation(rcEle.left, rcEle.top));
                 if (uStyle & DES_BLUR_BACK)
                 {
                     auto rc0{ Kw::MakeD2DRectF(rc) };
@@ -593,15 +608,18 @@ private:
                 pEle->GetCompositor()->PostRender(cri);
                 pDC->SetTransform(Mat);
 #ifdef _DEBUG
-                const auto pBr = CcGetBrush();
-                pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Aqua));
-                pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBr);
+                if (m_bDbgDrawCompRect)
+                {
+                    const auto pBr = CcGetBrush();
+                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Aqua));
+                    pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBr);
 
-                pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
-                pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBr);
+                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+                    pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBr);
 
-                pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Orange));
-                pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBr);
+                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Orange));
+                    pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBr);
+                }
 #endif
             }
             else
@@ -611,137 +629,139 @@ private:
         }
     }
 
-    void RdpRender_DComposition(const Kw::Rect& rc, BOOL bFullUpdate = FALSE) noexcept
+    void RdpRender_DComposition(const Kw::Rect& rc) noexcept
     {
         EckAssert(GetPresentMode() == PresentMode::DCompositionSurface ||
             GetPresentMode() == PresentMode::DCompositionVisual);
-        const auto pDC = GetDeviceContext();
-        RENDER_EVENT e;
+
+        const auto pDC = RdGetDC();
+
+        RENDER_EVENT Evt;
+        LRESULT rer;
         ComPtr<IDXGISurface1> pDxgiSurface;
-        auto rcPhyF{ rc };
-        LogicalToPixel(rcPhyF);
-        RECT rcPhy, rcNewPhy;
-        CeilRect(rcPhyF, rcPhy);
-        // 准备
-        e.PreRender.prcDirtyPhy = bFullUpdate ? nullptr : &rcPhy;
-        m_pDcSurface->BeginDraw(e.PreRender.prcDirtyPhy,
-            IID_PPV_ARGS(&pDxgiSurface), &e.PreRender.ptOffsetPhy);
-        e.PreRender.pSfcFinalDst = pDxgiSurface.Get();
-        e.PreRender.prcNewDirtyPhy = &rcNewPhy;
-        e.PreRender.pSfcNewDst = nullptr;
-        const auto rer = OnRenderEvent(RE_PRERENDER, e);
-        if (!(rer & RER_REDIRECTION))
+
+        RECT rcDirtyPixel;
         {
-            e.PreRender.ptOffsetPhy.x -= rcPhy.left;
-            e.PreRender.ptOffsetPhy.y -= rcPhy.top;
+            auto rcDirtyF{ rc };
+            LogicalToPixel(rcDirtyF);
+            CeilRect(rcDirtyF, rcDirtyPixel);
         }
-        // 准备D2D渲染目标
-        const D2D1_BITMAP_PROPERTIES1 D2dBmpProp
+
+        // --
+
+        Evt.QueryTarget.pDstSurface = nullptr;
+        Evt.QueryTarget.ptOffset = {};
+        Evt.QueryTarget.prcDirty = &rcDirtyPixel;
+        rer = OnRenderEvent(RE_QUERY_TARGET, Evt);
+        const auto bRedirection = !!(rer & RER_REDIRECTION);
+        if (bRedirection)
         {
-            { DXGI_FORMAT_B8G8R8A8_UNORM, RdcD2DAlphaMode() },
+            pDxgiSurface.Attach(Evt.QueryTarget.pDstSurface);
+            Evt.PreRender.ptOffset = Evt.QueryTarget.ptOffset;
+        }
+        else
+        {
+            m_pDcSurface->BeginDraw(
+                m_bFullUpdate ? nullptr : &rcDirtyPixel,
+                IID_PPV_ARGS(&pDxgiSurface),
+                &Evt.PreRender.ptOffset);
+        }
+
+        // --
+
+        const D2D1_BITMAP_PROPERTIES1 BitmapProperty
+        {
+            { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
             (float)GetUserDpi(),
             (float)GetUserDpi(),
             D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
             nullptr
         };
+
         ComPtr<ID2D1Bitmap1> pBitmap;
-        pDC->CreateBitmapFromDxgiSurface(
-            (rer & RER_REDIRECTION) ? e.PreRender.pSfcNewDst : pDxgiSurface.Get(),
-            &D2dBmpProp, &pBitmap);
+        pDC->CreateBitmapFromDxgiSurface(pDxgiSurface.Get(), &BitmapProperty, &pBitmap);
         pDC->SetTarget(pBitmap.Get());
         pDC->BeginDraw();
         pDC->SetTransform(D2D1::Matrix3x2F::Identity());
 
-        Kw::Rect rcF, rcFinalF;
-        rcFinalF = Kw::MakeRect(rcPhy);
-        OffsetRect(rcFinalF, (float)e.PreRender.ptOffsetPhy.x,
-            (float)e.PreRender.ptOffsetPhy.y);
-        PixelToLogical(rcFinalF);
-        if (rer & RER_REDIRECTION)
-        {
-            rcF = Kw::MakeRect(rcNewPhy);
-            PixelToLogical(rcF);
-        }
-        else
-            rcF = rcFinalF;
+        Evt.PreRender.pDstSurface = pDxgiSurface.Get();
+        Evt.PreRender.prcDirty = &rcDirtyPixel;
+        rer = OnRenderEvent(RE_PRERENDER, Evt);
+        const auto bPostRender = !!(rer & RER_POST_RENDER);
+
+        Evt.PreRender.ptOffset.x -= rcDirtyPixel.left;
+        Evt.PreRender.ptOffset.y -= rcDirtyPixel.top;
+
+        // --
+
+        Kw::Rect rcDirtyInSurface;
+        rcDirtyInSurface = Kw::MakeRect(rcDirtyPixel);
+        OffsetRect(
+            rcDirtyInSurface,
+            (float)Evt.PreRender.ptOffset.x,
+            (float)Evt.PreRender.ptOffset.y);
+        PixelToLogical(rcDirtyInSurface);
+
         // 画背景
-        if (!(rer & RER_NO_ERASE))
+        if (!(rer & RER_NO_FILLBACK))
         {
-            if (bFullUpdate)
-            {
-                ++rcF.right;
-                ++rcF.bottom;
-            }
-            if (m_bTransparent)
-            {
-                pDC->PushAxisAlignedClip(Kw::MakeD2DRectF(rcF), D2D1_ANTIALIAS_MODE_ALIASED);
-                pDC->Clear({ .a = 1.f });
-                pDC->PopAxisAlignedClip();
-            }
-            OnRenderEvent(RE_FILLBACKGROUND, *(RENDER_EVENT*)&rcF);
-            if (bFullUpdate)
-            {
-                --rcF.right;
-                --rcF.bottom;
-            }
+            if (m_bFullUpdate)
+                ++rcDirtyInSurface.right, ++rcDirtyInSurface.bottom;
+
+            RENDER_EVENT Evt;
+            Evt.FillBack.rc = MakeD2DRectF(rcDirtyInSurface);
+            OnRenderEvent(RE_FILLBACK, Evt);
+
+            if (m_bFullUpdate)
+                --rcDirtyInSurface.right, --rcDirtyInSurface.bottom;
         }
-        // 画元素树
-        const D2D1_POINT_2F ptLogOffsetFinalF
+
+        auto rcDirtyLogical{ rcDirtyInSurface };
+        const D2D1_POINT_2F ptOffsetLogical
         {
-            PixelToLogical((float)e.PreRender.ptOffsetPhy.x),
-            PixelToLogical((float)e.PreRender.ptOffsetPhy.y)
+            PixelToLogical((float)Evt.PreRender.ptOffset.x),
+            PixelToLogical((float)Evt.PreRender.ptOffset.y)
         };
-        OffsetRect(rcFinalF, -ptLogOffsetFinalF.x, -ptLogOffsetFinalF.y);
-        CeilRect(rcFinalF);
+        OffsetRect(rcDirtyLogical, -ptOffsetLogical.x, -ptOffsetLogical.y);
+        CeilRect(rcDirtyLogical);
+
         Detail::PAINT_EXTRA Extra;
-        if (rer & RER_REDIRECTION)
-        {
-            const D2D1_POINT_2F ptOrgLogF
-            {
-                PixelToLogical((float)rcNewPhy.left),
-                PixelToLogical((float)rcNewPhy.top)
-            };
-            Extra.ox = ptOrgLogF.x - rc.left;
-            Extra.oy = ptOrgLogF.y - rc.top;
-        }
-        else
-        {
-            Extra.ox = ptLogOffsetFinalF.x;
-            Extra.oy = ptLogOffsetFinalF.y;
-        }
+        Extra.ox = ptOffsetLogical.x;
+        Extra.oy = ptOffsetLogical.y;
+
         pDC->PushAxisAlignedClip(
-            Kw::MakeD2DRectF(rcF), D2D1_ANTIALIAS_MODE_ALIASED);
+            Kw::MakeD2DRectF(rcDirtyInSurface), D2D1_ANTIALIAS_MODE_ALIASED);
         pDC->SetTransform(D2D1::Matrix3x2F::Translation(Extra.ox, Extra.oy));
-        RdpRenderTree(EtFirstChild(), rcFinalF, &Extra);
+        RdpRenderTree(EtFirstChild(), rcDirtyLogical, &Extra);
         pDC->PopAxisAlignedClip();
 
 #ifdef _DEBUG
         if (DbgGetDrawDirtyRect())
         {
             ComPtr<ID2D1SolidColorBrush> pBr;
-            InflateRect(rcF, -1.f, -1.f);
+            InflateRect(rcDirtyLogical, -1.f, -1.f);
             pDC->SetTransform(D2D1::Matrix3x2F::Identity());
             ARGB Cr = m_Pcg.Next() | 0xFF000000;
             pDC->CreateSolidColorBrush(D2D1::ColorF(Cr), &pBr);
-            pDC->DrawRectangle((D2D1_RECT_F*)&rcF, pBr.Get(), 2.f);
+            pDC->DrawRectangle(MakeD2DRectF(rcDirtyLogical), pBr.Get(), 2.f);
         }
 #endif // _DEBUG
+        if (bPostRender)
+            OnRenderEvent(RE_POSTRENDER, Evt);
         pDC->EndDraw();
-        if (rer & RER_REDIRECTION)
-            OnRenderEvent(RE_POSTRENDER, e);
-        m_pDcSurface->EndDraw();
+        if (!bRedirection)
+            m_pDcSurface->EndDraw();
         pDC->SetTarget(nullptr);
 
         if (m_ePresentMode == PresentMode::DCompositionVisual)
-            OnRenderEvent(RE_COMMIT, e);
+            OnRenderEvent(RE_COMMIT, Evt);
         else
             m_pDcDevice->Commit();
     }
-    // TODO 重构渲染事件钩出和擦除逻辑
-    void RdpRender(const Kw::Rect& rc, BOOL bFullUpdate = FALSE,
-        RECT* prcPhy = nullptr) noexcept
+
+    void RdpRender(const Kw::Rect& rc, _Out_opt_ RECT* prcPixel = nullptr) noexcept
     {
-        const auto pDC = GetDeviceContext();
+        const auto pDC = RdGetDC();
         switch (m_ePresentMode)
         {
         case PresentMode::BitBltSwapChain:
@@ -751,41 +771,45 @@ private:
         {
             pDC->BeginDraw();
             pDC->SetTransform(D2D1::Matrix3x2F::Identity());
-            auto rcF{ rc };
-            LogicalToPixel(rcF);
-            CeilRect(rcF);
-            const RECT rcPhy{ MakeRect(rcF) };
-            if (prcPhy) *prcPhy = rcPhy;
-            PixelToLogical(rcF);
-            CeilRect(rcF);
-            RENDER_EVENT e;
-            const auto rer = OnRenderEvent(RE_PRERENDER, e);
-            if (!(rer & RER_NO_ERASE))
+
+            auto rcDirty{ rc };
+            LogicalToPixel(rcDirty);
+            CeilRect(rcDirty);
+
+            const RECT rcPixel{ MakeRect(rcDirty) };
+            if (prcPixel)
+                *prcPixel = rcPixel;
+
+            PixelToLogical(rcDirty);
+            CeilRect(rcDirty);
+
+            RENDER_EVENT Evt;
+            LRESULT rer;
+
+            Evt.PreRender.pDstSurface = nullptr;
+            Evt.PreRender.ptOffset = {};
+            Evt.PreRender.prcDirty = &rcPixel;
+            rer = OnRenderEvent(RE_PRERENDER, Evt);
+            const auto bPostRender = !!(rer & RER_POST_RENDER);
+            if (!(rer & RER_NO_FILLBACK))
             {
-                if (bFullUpdate) [[unlikely]]
-                {
-                    ++rcF.right;
-                    ++rcF.bottom;
-                }
-                if (m_bTransparent)
-                {
-                    pDC->PushAxisAlignedClip(
-                        Kw::MakeD2DRectF(rcF), D2D1_ANTIALIAS_MODE_ALIASED);
-                    pDC->Clear({ .a = 1.f });
-                    pDC->PopAxisAlignedClip();
-                }
-                OnRenderEvent(RE_FILLBACKGROUND, *(RENDER_EVENT*)&rcF);
-                if (bFullUpdate) [[unlikely]]
-                {
-                    --rcF.right;
-                    --rcF.bottom;
-                }
+                if (m_bFullUpdate)
+                    ++rcDirty.right, ++rcDirty.bottom;
+
+                RENDER_EVENT Evt;
+                Evt.FillBack.rc = MakeD2DRectF(rcDirty);
+                OnRenderEvent(RE_FILLBACK, Evt);
+
+                if (m_bFullUpdate)
+                    --rcDirty.right, --rcDirty.bottom;
             }
+
             Detail::PAINT_EXTRA Extra{};
             pDC->PushAxisAlignedClip(
-                Kw::MakeD2DRectF(rcF), D2D1_ANTIALIAS_MODE_ALIASED);
-            RdpRenderTree(EtFirstChild(), rcF, &Extra);
+                Kw::MakeD2DRectF(rcDirty), D2D1_ANTIALIAS_MODE_ALIASED);
+            RdpRenderTree(EtFirstChild(), rcDirty, &Extra);
             pDC->PopAxisAlignedClip();
+
             if (m_ePresentMode == PresentMode::UpdateLayeredWindow)
             {
                 HDC hDC;
@@ -807,7 +831,7 @@ private:
                     .pptSrc = &ptSrc,
                     .pblend = &BlendFunctionAlpha,
                     .dwFlags = ULW_ALPHA,
-                    .prcDirty = bFullUpdate ? nullptr : &rcPhy,
+                    .prcDirty = m_bFullUpdate ? nullptr : &rcPixel,
                 };
                 UpdateLayeredWindowIndirect(Handle, &ulwi);
                 constexpr RECT rcEmpty{};
@@ -820,15 +844,18 @@ private:
                 }
 #endif
             }
+            if (bPostRender)
+                OnRenderEvent(RE_POSTRENDER, Evt);
             pDC->EndDraw();
         }
         return;
         case PresentMode::DCompositionSurface:
         case PresentMode::DCompositionVisual:
-            RdpRender_DComposition(rc, bFullUpdate);
-            return;
+            RdpRender_DComposition(rc);
+            break;
         }
-        ECK_UNREACHABLE;
+        if (prcPixel)
+            *prcPixel = {};
     }
 
     void RdReSize() noexcept
@@ -844,11 +871,11 @@ private:
         {
         case PresentMode::BitBltSwapChain:
             m_D2D.ReSize(1, cx, cy, 0,
-                RdcD2DAlphaMode(), BitmapOptions, fDpi);
+                D2D1_ALPHA_MODE_PREMULTIPLIED, BitmapOptions, fDpi);
             break;
         case PresentMode::FlipSwapChain:
             m_D2D.ReSize(2, cx, cy, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT,
-                RdcD2DAlphaMode(), BitmapOptions, fDpi);
+                D2D1_ALPHA_MODE_PREMULTIPLIED, BitmapOptions, fDpi);
             break;
         case PresentMode::DCompositionSurface:
         case PresentMode::DCompositionVisual:
@@ -872,14 +899,14 @@ private:
             SafeRelease(m_D2D.m_pBitmap);
             const D2D1_BITMAP_PROPERTIES1 BmpProp
             {
-                { DXGI_FORMAT_B8G8R8A8_UNORM, RdcD2DAlphaMode() },
+                { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
                 fDpi, fDpi,
                 D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW |
                 D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
             };
-            GetDeviceContext()->CreateBitmap({ cx, cy },
+            RdGetDC()->CreateBitmap({ cx, cy },
                 nullptr, 0, BmpProp, &m_D2D.m_pBitmap);
-            GetDeviceContext()->SetTarget(m_D2D.m_pBitmap);
+            RdGetDC()->SetTarget(m_D2D.m_pBitmap);
         }
         break;
         default:
@@ -891,7 +918,7 @@ private:
     {
         CcDeleteBitmap();
         m_bFullUpdate = TRUE;
-        GetDeviceContext()->SetDpi((float)GetUserDpi(), (float)GetUserDpi());
+        RdGetDC()->SetDpi((float)GetUserDpi(), (float)GetUserDpi());
     }
 
     void RdInitialize() noexcept
@@ -905,7 +932,7 @@ private:
         {
             auto Param = EZD2D_PARAM::MakeBitblt(Handle, g_pDxgiFactory, g_pDxgiDevice,
                 g_pD2DDevice, cx, cy, fDpi);
-            Param.uBmpAlphaMode = RdcD2DAlphaMode();
+            Param.uBmpAlphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
             m_D2D.Create(Param);
         }
         break;
@@ -913,7 +940,7 @@ private:
         {
             auto Param = EZD2D_PARAM::MakeFlip(Handle, g_pDxgiFactory, g_pDxgiDevice,
                 g_pD2DDevice, cx, cy, fDpi);
-            Param.uBmpAlphaMode = RdcD2DAlphaMode();
+            Param.uBmpAlphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
             Param.uFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
             m_D2D.Create(Param);
             ComPtr<IDXGISwapChain2> pSwapChain2;
@@ -936,7 +963,7 @@ private:
             m_pDcDevice->CreateVisual(&m_pDcVisual);
             m_pDcDevice->CreateSurface(cx, cy,
                 DXGI_FORMAT_B8G8R8A8_UNORM,
-                RdcDxgiAlphaMode(),
+                DXGI_ALPHA_MODE_PREMULTIPLIED,
                 &m_pDcSurface);
             m_pDcVisual->SetContent(m_pDcSurface);
             m_pDcTarget->SetRoot(m_pDcVisual);
@@ -949,7 +976,7 @@ private:
         {
             D2D1_RENDER_TARGET_PROPERTIES RtProp;
             RtProp.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
-            RtProp.pixelFormat = { DXGI_FORMAT_B8G8R8A8_UNORM, RdcD2DAlphaMode() };
+            RtProp.pixelFormat = { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED };
             RtProp.dpiX = RtProp.dpiY = fDpi;
             RtProp.usage = D2D1_RENDER_TARGET_USAGE_NONE;
             RtProp.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
@@ -970,7 +997,7 @@ private:
 
             m_pDcDevice->CreateSurface(cx, cy,
                 DXGI_FORMAT_B8G8R8A8_UNORM,
-                RdcDxgiAlphaMode(),
+                DXGI_ALPHA_MODE_PREMULTIPLIED,
                 &m_pDcSurface);
             m_pDcVisual->SetContent(m_pDcSurface);
             m_pDcVisual->SetOffsetX(0.f);
@@ -986,21 +1013,21 @@ private:
                 &m_D2D.m_pDC);
             const D2D1_BITMAP_PROPERTIES1 BmpProp
             {
-                { DXGI_FORMAT_B8G8R8A8_UNORM, RdcD2DAlphaMode() },
+                { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
                 fDpi, fDpi,
                 D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW |
                 D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
             };
-            GetDeviceContext()->CreateBitmap({ cx, cy },
+            RdGetDC()->CreateBitmap({ cx, cy },
                 nullptr, 0, BmpProp, &m_D2D.m_pBitmap);
-            GetDeviceContext()->SetTarget(m_D2D.m_pBitmap);
-            GetDeviceContext()->QueryInterface(&m_pGdiInterop);
+            RdGetDC()->SetTarget(m_D2D.m_pBitmap);
+            RdGetDC()->QueryInterface(&m_pGdiInterop);
         }
         break;
         default:
             ECK_UNREACHABLE;
         }
-        const auto pDC = GetDeviceContext();
+        const auto pDC = RdGetDC();
         pDC->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
         if (m_ePresentMode != PresentMode::WindowRenderTarget)
             pDC->SetDpi((float)GetUserDpi(), (float)GetUserDpi());
@@ -1134,11 +1161,24 @@ public:
             return 0;
 
         case WM_SETTINGCHANGE:
-        {
-            if (IsColorSchemeChangeMessage(lParam))
-                EtBroadcastEvent(EWM_COLORSCHEMECHANGED, ShouldAppsUseDarkMode(), 0);
-        }
-        break;
+            if (m_bAutoTheme && IsColorSchemeChangeMessage(lParam))
+            {
+                RdLockUpdate();
+                TmSwitchTheme(ShouldAppsUseDarkMode());
+                Redraw();
+                RdUnlockUpdate();
+            }
+            break;
+
+        case WM_DWMCOLORIZATIONCOLORCHANGED:
+            if (m_bAutoThemeAccent)
+            {
+                RdLockUpdate();
+                TmUpdateDwmColorizationColor();
+                Redraw();
+                RdUnlockUpdate();
+            }
+            break;
 
         case WM_CREATE:
         {
@@ -1163,10 +1203,12 @@ public:
 
     virtual LRESULT OnRenderEvent(UINT uMsg, RENDER_EVENT& e) noexcept
     {
-        if (uMsg == RE_FILLBACKGROUND)
+        if (uMsg == RE_FILLBACK)
         {
-            //if (m_pBrBkg)
-            //    GetDeviceContext()->FillRectangle(e.FillBkg.rc, m_pBrBkg);
+            const auto pDC = RdGetDC();
+            pDC->PushAxisAlignedClip(e.FillBack.rc, D2D1_ANTIALIAS_MODE_ALIASED);
+            pDC->Clear(ArgbToD2DColorF(m_argbBack));
+            pDC->PopAxisAlignedClip();
         }
         return RER_NONE;
     }
@@ -1175,7 +1217,11 @@ public:
     {
         const auto iOld = GetUserDpi();
         __super::SetUserDpi(iDpi);
-        EtBroadcastEvent(WM_DPICHANGED, iOld, 0);
+        if (IsValid())
+        {
+            RdSetUserDpi();
+            EtBroadcastEvent(WM_DPICHANGED, iOld, 0);
+        }
     }
 
     void KctStartTimer() noexcept { m_MsgTimer.Start(); }
@@ -1207,9 +1253,6 @@ public:
     }
     EckInlineNdCe PresentMode GetPresentMode() const noexcept { return m_ePresentMode; }
 
-    EckInlineCe void SetTransparent(BOOL bTransparent) noexcept { m_bTransparent = bTransparent; }
-    EckInlineNdCe BOOL GetTransparent() const noexcept { return m_bTransparent; }
-
     EckInlineNdCe ID2D1Bitmap1* CcGetBitmap() const noexcept { return m_Stock.pCacheBitmap.Get(); }
 
     void CcReserveBitmap(UINT cxPhy, UINT cyPhy) noexcept
@@ -1218,7 +1261,7 @@ public:
         {
             m_Stock.cxCache = cxPhy;
             m_Stock.cyCache = cyPhy;
-            BmCreate(cxPhy, cyPhy, m_Stock.pCacheBitmap.AtSelfClear());
+            RdCreateBitmap(cxPhy, cyPhy, m_Stock.pCacheBitmap.AtSelfClear());
         }
     }
     void CcReserveBitmapLogical(float cx, float cy) noexcept
@@ -1242,19 +1285,19 @@ public:
     {
         if (!m_Stock.pFxBlur.Get())
         {
-            GetDeviceContext()->CreateEffect(
+            RdGetDC()->CreateEffect(
                 CLSID_D2D1GaussianBlur, m_Stock.pFxBlur.AtClear());
             m_Stock.pFxBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_BORDER_MODE,
                 D2D1_BORDER_MODE_HARD);
         }
         if (!m_Stock.pFxCrop.Get())
-            GetDeviceContext()->CreateEffect(CLSID_D2D1Crop, m_Stock.pFxCrop.AtClear());
+            RdGetDC()->CreateEffect(CLSID_D2D1Crop, m_Stock.pFxCrop.AtClear());
     }
 private:
     HRESULT BlurpDrawEffect(ID2D1Effect* pFx,
         D2D1_POINT_2F ptDrawing, BOOL bUseLayer) noexcept
     {
-        const auto pDC = GetDeviceContext();
+        const auto pDC = RdGetDC();
 #ifdef _DEBUG
         D2D1_LAYER_PARAMETERS1 LyParam
         {
@@ -1302,7 +1345,7 @@ public:
     {
         ComPtr<ID2D1Bitmap1> pBmp;
         ComPtr<ID2D1Image> pTarget;
-        GetDeviceContext()->GetTarget(&pTarget);
+        RdGetDC()->GetTarget(&pTarget);
         pTarget->QueryInterface(&pBmp);
         HRESULT hr;
         float xDpi, yDpi;
@@ -1369,7 +1412,7 @@ public:
     EckInlineCe void BlurSetDeviation(float fDeviation) noexcept { m_fBlurDeviation = fDeviation; }
     EckInlineNdCe float BlurGetDeviation() const noexcept { return m_fBlurDeviation; }
 
-    HRESULT BmCreate(int cxPhy, int cyPhy, _Out_ ID2D1Bitmap1*& pBmp) noexcept
+    HRESULT RdCreateBitmap(int cxPixel, int cyPixel, _Out_ ID2D1Bitmap1*& pBmp) noexcept
     {
         const D2D1_BITMAP_PROPERTIES1 Prop
         {
@@ -1378,12 +1421,12 @@ public:
             (float)GetUserDpi(),
             D2D1_BITMAP_OPTIONS_TARGET
         };
-        return GetDeviceContext()->CreateBitmap(D2D1::SizeU(cxPhy, cyPhy),
+        return RdGetDC()->CreateBitmap(D2D1::SizeU(cxPixel, cyPixel),
             nullptr, 0, Prop, &pBmp);
     }
-    HRESULT BmCreateLogical(float cx, float cy, _Out_ ID2D1Bitmap1*& pBmp) noexcept
+    HRESULT RdCreateBitmapLogical(float cx, float cy, _Out_ ID2D1Bitmap1*& pBmp) noexcept
     {
-        return BmCreate((int)ceilf(LogicalToPixel(cx)), (int)ceilf(LogicalToPixel(cy)), pBmp);
+        return RdCreateBitmap((int)ceilf(LogicalToPixel(cx)), (int)ceilf(LogicalToPixel(cy)), pBmp);
     }
 
     /// <summary>
@@ -1391,8 +1434,10 @@ public:
     /// 使用DCompositionVisual呈现时，初始化渲染到的目标视觉对象
     /// </summary>
     /// <param name="pVisual">目标视觉对象，窗口内容渲染到此对象</param>
-    /// <param name="pDevice">DComp设备</param>
-    void InitializeDCompositionVisual(IDCompositionVisual* pVisual, IDCompositionDevice* pDevice) noexcept
+    /// <param name="pDevice">DComposition设备</param>
+    void RdInitializeDCompositionVisual(
+        _In_ IDCompositionVisual* pVisual,
+        _In_ IDCompositionDevice* pDevice) noexcept
     {
         EckAssert(m_ePresentMode == PresentMode::DCompositionVisual);
         EckAssert(!m_pDcVisual && !m_pDcSurface && !m_pDcDevice);
@@ -1402,7 +1447,7 @@ public:
         m_pDcDevice->AddRef();
     }
 
-    EckInlineNdCe ID2D1DeviceContext* GetDeviceContext() const noexcept { return m_D2D.GetDC(); }
+    EckInlineNdCe ID2D1DeviceContext* RdGetDC() const noexcept { return m_D2D.GetDC(); }
 
     void RdInvalidate(const Kw::Rect& rc, BOOL bUpdateNow = TRUE)
     {
@@ -1434,17 +1479,17 @@ public:
                 return;
         }
 
-        const auto bWantPhyRect = !m_bFullUpdate && (
+        const auto bWantDirtyRect = !m_bFullUpdate && (
             m_ePresentMode == PresentMode::FlipSwapChain ||
             m_ePresentMode == PresentMode::BitBltSwapChain);
-        RECT rcPhy;
-        RdpRender(rc, m_bFullUpdate, bWantPhyRect ? &rcPhy : nullptr);
+        RECT rcDirtyPixel;
+        RdpRender(rc, bWantDirtyRect ? &rcDirtyPixel : nullptr);
 
         DXGI_PRESENT_PARAMETERS pp{};
-        if (bWantPhyRect)
+        if (bWantDirtyRect)
         {
             pp.DirtyRectsCount = 1;
-            pp.pDirtyRects = &rcPhy;
+            pp.pDirtyRects = &rcDirtyPixel;
         }
 
         switch (m_ePresentMode)
@@ -1470,7 +1515,43 @@ public:
             RdRenderAndPresent();
     }
 
-    EckInlineNdCe ARGB TmAccentColor() const noexcept { return m_argbAccent; }
+    EckInlineNdCe BOOL RdIsFullUpdate() const noexcept { return m_bFullUpdate; }
+
+    EckInlineNdCe ARGB RdGetBackColor() const noexcept { return m_argbBack; }
+    EckInlineCe void RdSetBackColor(ARGB argb) noexcept { m_argbBack = argb; }
+
+    void TmSwitchTheme(BOOL bDark) noexcept
+    {
+        RdLockUpdate();
+        EtForEachElement(
+            [&](CElement* pEle)
+            {
+                if (!(pEle->GetStyle() & DES_NO_AUTO_DARK))
+                    if (bDark)
+                        pEle->SetStyle(pEle->GetStyle() | DES_DARK_MODE);
+                    else
+                        pEle->SetStyle(pEle->GetStyle() & ~DES_DARK_MODE);
+            });
+        RdUnlockUpdate();
+    }
+
+    void TmUpdateAccentColor(ARGB argb) noexcept
+    {
+        m_argbAccent = argb;
+        if (m_bAutoThemeAccent)
+            CColorCollection::UpdateAllAccentColor(argb);
+        EtBroadcastEvent(WM_DWMCOLORIZATIONCOLORCHANGED, argb, 0);
+    }
+
+    void TmUpdateDwmColorizationColor() noexcept
+    {
+        TmUpdateAccentColor(GetDwmColorizationColor());
+    }
+
+    EckInlineCe void TmSetAutoTheme(BOOL b) noexcept { m_bAutoTheme = b; }
+    EckInlineCe void TmSetAutoThemeAccent(BOOL b) noexcept { m_bAutoThemeAccent = b; }
+
+    EckInlineCe void DbgSetDrawCompositedRect(BOOL b) noexcept { m_bDbgDrawCompRect = b; }
 };
 
 inline BOOL CElement::Create(std::wstring_view svText, DWORD uStyle, DWORD dwExStyle,
@@ -1638,7 +1719,7 @@ inline HRESULT CElement::CompUpdateCacheBitmap(float cx, float cy) noexcept
     else
     {
         ComPtr<ID2D1Bitmap1> pBitmap;
-        hr = GetWindow().BmCreate(cxPhy, cyPhy, pBitmap.AtSelf());
+        hr = GetWindow().RdCreateBitmap(cxPhy, cyPhy, pBitmap.AtSelf());
         Bitmap.Set(pBitmap.Get());
     }
     m_pCompositor->EleUpdateCacheBitmap(Bitmap);
@@ -1721,7 +1802,7 @@ inline void CElement::DbgDrawFrame() const noexcept
 
 EckInlineNdCe ID2D1DeviceContext* CElement::GetDC() const noexcept
 {
-    return GetWindow().GetDeviceContext();
+    return GetWindow().RdGetDC();
 }
 
 EckInline     CElement* CElement::SetCapture()     noexcept { return GetWindow().EleSetCapture(this); }
@@ -1731,8 +1812,6 @@ EckInline     void      CElement::SetFocus()       noexcept { GetWindow().EleSet
 EckInlineNdCe CElement* CElement::GetFocus()       noexcept { return GetWindow().EleGetFocus(); }
 EckInline     BOOL      CElement::SetTimer(UINT_PTR uId, UINT uElapse) noexcept { return GetWindow().EleSetTimer(this, uId, uElapse); }
 EckInline     BOOL      CElement::KillTimer(UINT_PTR uId) noexcept { return GetWindow().EleKillTimer(this, uId); }
-EckInline     void      CElement::KctWake() const noexcept { GetWindow().KctWake(); }
-EckInlineNdCe ID2D1Bitmap1* CElement::CcGetBitmap() const noexcept { return GetWindow().CcGetBitmap(); }
 
 class CUiaBase : public CElement::CUiaElement
 {

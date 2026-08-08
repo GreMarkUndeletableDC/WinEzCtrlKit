@@ -146,8 +146,8 @@ private:
         EndPaint(ps);
     }
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -187,7 +187,7 @@ public:
                 TmState() |= SaHot;
                 m_ec.Start(0.f, 1.f, m_bAnActive);
                 m_bAnActive = TRUE;
-                KctWake();
+                GetWindow().KctWake();
             }
             if (m_bDragThumb)
             {
@@ -215,7 +215,7 @@ public:
                 TmState() &= ~SaHot;
                 m_ec.Start(1.f, 0.f, m_bAnActive);
                 m_bAnActive = TRUE;
-                KctWake();
+                GetWindow().KctWake();
             }
         }
         return 0;
@@ -298,6 +298,10 @@ public:
                 return p->CallEvent(uMsg, wParam, lParam);
         }
         break;
+
+        case WM_STYLECHANGED:
+            TmAutoSwitchTheme(this, wParam);
+            break;
 
         case WM_CREATE:
             GetWindow().KctRegisterTimeLine(this);
@@ -453,7 +457,7 @@ public:
     }
 };
 
-class CTmScrollBar : public CThemeBase
+class CTmScrollBar : public CTheme
 {
 public:
     TmResult Draw(
@@ -471,7 +475,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CThemeBase> CScrollBar::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CScrollBar::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmScrollBar>(bDark);
 }

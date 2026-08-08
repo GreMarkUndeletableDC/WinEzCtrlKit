@@ -57,7 +57,7 @@ private:
     SimpleStyle m_Style[SsMax]
     {
         // Track
-        { IdTmInvalid,        IdCrBack,           IdTmInvalid },
+        { IdTmInvalid,        IdCrBackHot,        IdTmInvalid },
         // Track Active
         { IdTmInvalid,        IdCrAccent,         IdTmInvalid },
         // Track Disabled
@@ -186,8 +186,8 @@ private:
         Invalidate(rcThumb, bUpdateNow);
     }
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -353,6 +353,10 @@ public:
         }
         return 0;
 
+        case WM_STYLECHANGED:
+            TmAutoSwitchTheme(this, wParam);
+            break;
+
         case WM_CREATE:
             GetWindow().KctRegisterTimeLine(this);
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
@@ -459,7 +463,7 @@ public:
 };
 
 
-class CTmTrackBar : public CThemeBase
+class CTmTrackBar : public CTheme
 {
 private:
     float m_kThumbCircleScale{ CTrackBar::ThumbCircleScaleNormal };
@@ -530,7 +534,7 @@ public:
     }
 
 };
-inline RcPtr<CThemeBase> CTrackBar::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CTrackBar::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmTrackBar>(bDark);
 }

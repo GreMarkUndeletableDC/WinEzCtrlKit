@@ -46,8 +46,8 @@ public:
     using Selection = TController::Selection;
     using View = TController::View;
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -232,7 +232,7 @@ protected:
 
     void ScbCreateElement(BOOL bVert, BOOL bHorz) noexcept
     {
-        constexpr DWORD Style =
+        const DWORD Style = TmDarkStyle() |
             DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | DES_NOTIFY_PARENT;
         if (!m_bUseBuiltInScrollBar)
             return;
@@ -244,7 +244,6 @@ protected:
             m_pSccV = m_pSBVert.get();
             if (!m_pSBVert->IsValid())
             {
-                m_pSBVert->TmSetDarkMode(TmIsDarkMode());
                 m_pSBVert->Create({}, Style, 0, 0, 0, 0, 0, this);
                 m_pSBVert->SetVertical(TRUE);
             }
@@ -256,7 +255,6 @@ protected:
             m_pSccH = m_pSBHorz.get();
             if (!m_pSBHorz->IsValid())
             {
-                m_pSBHorz->TmSetDarkMode(TmIsDarkMode());
                 m_pSBHorz->Create({}, Style, 0, 0, 0, 0, 0, this);
                 m_pSBHorz->SetVertical(FALSE);
             }
@@ -349,8 +347,10 @@ protected:
             m_pHeader = std::make_unique<CHeader>();
         if (!m_pHeader->IsValid())
         {
-            m_pHeader->TmSetDarkMode(TmIsDarkMode());
-            m_pHeader->Create({}, DES_VISIBLE | DES_DBG_FRAME | DES_NOTIFY_PARENT, 0,
+            m_pHeader->Create(
+                {},
+                DES_VISIBLE | DES_DBG_FRAME | DES_NOTIFY_PARENT | TmDarkStyle(),
+                0,
                 0, 0, 0, 0, this);
             HdrSetTextFormat();
         }
@@ -535,6 +535,10 @@ public:
             HdrSetTextFormat();
             break;
 
+        case WM_STYLECHANGED:
+            TmAutoSwitchTheme(this, wParam);
+            break;
+
         case WM_CREATE:
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
             ScbCreateElement(TRUE, TRUE);
@@ -548,24 +552,28 @@ public:
 
     float LchSccGetPosition(BOOL bVert) const noexcept override
     {
-        if (bVert)
-            return m_pSccV ? m_pSccV->SccGetPosition() : 0;
-        else
-            return m_pSccH ? m_pSccH->SccGetPosition() : 0;
+        const auto pScc = (bVert ? m_pSccV : m_pSccH);
+        if (pScc)
+            return pScc->SccGetPosition();
+        return 0.f;
     }
     void LchSccSetRange(BOOL bVert, TCoord Min, TCoord Max) noexcept override
     {
-        if (bVert)
+        const auto pScc = (bVert ? m_pSccV : m_pSccH);
+        if (pScc)
+            pScc->SccSetRange(Min, Max);
+    }
+    void LchSccScrollDelta(BOOL bVert, TCoord d, BOOL bSmooth) noexcept override
+    {
+        const auto pScc = (bVert ? m_pSccV : m_pSccH);
+        if (pScc)
         {
-            if (m_pSccV)
-                m_pSccV->SccSetRange(Min, Max);
-        }
-        else
-        {
-            if (m_pSccH)
-                m_pSccH->SccSetRange(Min, Max);
+            pScc->SccScrollDelta(d, bSmooth);
+            if (bSmooth)
+                GetWindow().KctWake();
         }
     }
+
     TCoord LchGetHeight() const noexcept override { return GetHeight(); }
     TCoord LchGetWidth() const noexcept override
     {
@@ -631,7 +639,7 @@ public:
 };
 
 
-class CTmListView : public CThemeBase
+class CTmListView : public CTheme
 {
 public:
     TmResult Draw(
@@ -649,7 +657,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CThemeBase> CListView::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CListView::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmListView>(bDark);
 }

@@ -120,8 +120,8 @@ public:
         SsMax
     };
 public:
-    static RcPtr<CThemeBase> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CThemeBase> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
     {
         static auto p1{ TmMakeDefaultTheme(TRUE) };
         static auto p2{ TmMakeDefaultTheme(FALSE) };
@@ -170,7 +170,7 @@ private:
         { IdTmInvalid, IdCrBackDisabled, IdTmInvalid },
     };
 
-    void OnDpiChanged()
+    void OnDpiChanged() noexcept
     {
         // RE启动时使用系统DPI，随后整个生命周期内只有下列两种情况下
         // msftedit!CTxtEdit::UpdateDPI被调用并更新DPI
@@ -190,7 +190,7 @@ private:
         }
     }
 
-    void UpdateInsetRect()
+    void UpdateInsetRect() noexcept
     {
         if (m_bSlAutoAlignV && !(m_dwTxProp & TXTBIT_MULTILINE))
         {
@@ -255,8 +255,10 @@ private:
             m_pSccV = m_pSBVert.get();
             if (!m_pSBVert->IsValid())
             {
-                m_pSBVert->TmSetDarkMode(TmIsDarkMode());
-                m_pSBVert->Create({}, DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP, 0,
+                m_pSBVert->Create(
+                    {},
+                    DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
+                    0,
                     0, 0, 0, 0, this);
                 m_pSBVert->SetVertical(TRUE);
             }
@@ -268,8 +270,9 @@ private:
             m_pSccH = m_pSBHorz.get();
             if (!m_pSBHorz->IsValid())
             {
-                m_pSBHorz->TmSetDarkMode(TmIsDarkMode());
-                m_pSBHorz->Create({}, DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP,
+                m_pSBHorz->Create(
+                    {},
+                    DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
                     0, 0, 0, 0, 0, this);
             }
         }
@@ -500,6 +503,10 @@ public:
         }
         break;
 
+        case WM_STYLECHANGED:
+            TmAutoSwitchTheme(this, wParam);
+            break;
+
         case WM_CREATE:
         {
             GetWindow().RdLockUpdate();
@@ -544,7 +551,7 @@ public:
             if (wParam & MK_SHIFT)
                 goto ScrollH;// 横向滚动
             m_pSccV->SccMouseWheel(float(-GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA));
-            KctWake();
+            GetWindow().KctWake();
         }
         else if (uMsg == WM_MOUSEHWHEEL)
         {
@@ -552,7 +559,7 @@ public:
                 goto TxSend;
         ScrollH:
             m_pSccH->SccMouseWheel(float(-GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA));
-            KctWake();
+            GetWindow().KctWake();
         }
         else if (uMsg >= WM_MOUSEFIRST && uMsg <= WM_MOUSELAST)
         {
@@ -1183,7 +1190,7 @@ public:
     }
 };
 
-class CTmEdit : public CThemeBase
+class CTmEdit : public CTheme
 {
 public:
     TmResult Draw(
@@ -1198,7 +1205,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CThemeBase> CEdit::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CEdit::TmMakeDefaultTheme(BOOL bDark) noexcept
 {
     return TmMakeTheme<CTmEdit>(bDark);
 }
