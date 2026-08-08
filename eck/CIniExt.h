@@ -188,7 +188,7 @@ class CIniExt
 {
 public:
     using Entry = Detail::IniEntry;
-    using Value = Detail::IniValue;
+    using KeyValue = Detail::IniValue;
 
     struct FCompare
     {
@@ -234,9 +234,9 @@ public:
         std::unordered_multiset<T, FHash, FEqual>,
         std::unordered_set<T, FHash, FEqual>>;
 
-    using TValueSet = std::conditional_t<IsOrderedMap || !IsCaseSensitive,
-        TSet<Detail::IniValue>,
-        TUnorderedSet<Detail::IniValue>>;
+    using TKeyValueSet = std::conditional_t<IsOrderedMap || !IsCaseSensitive,
+        TSet<KeyValue>,
+        TUnorderedSet<KeyValue>>;
 
     struct Section;
 
@@ -248,7 +248,7 @@ public:
     {
         friend class CIniExt;
     private:
-        mutable TValueSet Val{};    // 【禁止外部修改】所有值
+        mutable TKeyValueSet Val{};    // 【禁止外部修改】所有值
         mutable TSectionSet Child{};// 【禁止外部修改】子节
     public:
         using Detail::IniEntry::IniEntry;
@@ -265,22 +265,20 @@ public:
         }
     };
 
-    struct Comment : Detail::IniEntry
+    struct Comment
     {
     public:
-        using Detail::IniEntry::IniEntry;
+        CStringW rsName{};
+        UINT uId{};
     };
 
     using TSectionIterator = typename TSectionSet::iterator;
     using TSectionConstIterator = typename TSectionSet::const_iterator;
+    using TKeyValueIterator = typename TKeyValueSet::iterator;
+    using TKeyValueConstIterator = typename TKeyValueSet::const_iterator;
 
-    using TKeyValueIterator = typename TValueSet::iterator;
-    using TKeyValueConstIterator = typename TValueSet::const_iterator;
-
-    using SectionContext = Detail::IniContext<TSectionIterator>;
-    using SectionConstContext = Detail::IniContext<TSectionConstIterator>;
-    using KeyValueContext = Detail::IniContextKeyValue<TKeyValueIterator>;
-    using CtxKvCst = Detail::IniContextKeyValue<TKeyValueConstIterator>;
+    using SectionContext = Detail::IniContext<TSectionConstIterator>;
+    using KeyValueContext = Detail::IniContextKeyValue<TKeyValueConstIterator>;
 private:
     TSectionSet m_Root{};
     std::vector<Comment> m_vComment{};// uFlags和rsComment无效
@@ -291,16 +289,16 @@ private:
     {
         switch (ch)
         {
-        case 'n':	ch = '\n';	break;
-        case 'r':	ch = '\r';	break;
-        case 't':	ch = '\t';	break;
-        case '0':	ch = '\0';	break;
-        case '\\':	break;
-        case ';':	break;
-        case '[':	break;
-        case ']':	break;
-        case '=':	break;
-        default:	return FALSE;
+        case 'n':   ch = '\n';	break;
+        case 'r':   ch = '\r';	break;
+        case 't':   ch = '\t';	break;
+        case '0':   ch = '\0';	break;
+        case '\\':  break;
+        case ';':   break;
+        case '[':   break;
+        case ']':   break;
+        case '=':   break;
+        default:    return FALSE;
         }
         return TRUE;
     }
@@ -545,83 +543,6 @@ private:
             Fn(Comment);
     }
 
-    void OnCreateEntry(UINT uId, std::wstring_view svName) noexcept
-    {
-        ForEachEntry([this, uId](Entry& e)
-            {
-                if (e.uId >= uId)
-                    e.uId += 1;
-            });
-    }
-
-    void OnDeleteEntry(UINT uId) noexcept
-    {
-        ForEachEntry([this, uId](Entry& e)
-            {
-                if (e.uId > uId)
-                    e.uId -= 1;
-            });
-        --m_uId;
-    }
-
-    SectionContext InternalSetSection(
-        TSectionSet& Set,
-        const SectionContext& Section,
-        std::wstring_view svName) noexcept
-    {
-        auto New{ std::move(*Section) };
-        Set.erase(Section.it);
-        New.rsName.Assign(svName);
-        return { Iterator(Set.emplace(std::move(New))) };
-    }
-    SectionContext InternalCreateSection(
-        TSectionSet& Set,
-        UINT uId,
-        std::wstring_view svName,
-        UINT uFlags) noexcept
-    {
-        if (uId == UINT_MAX)
-            uId = m_uId++;
-        OnCreateEntry(uId, svName);
-        return { Iterator(Set.emplace(Section{ svName, uId, uFlags, {} })) };
-    }
-    void InternalDeleteSection(
-        TSectionSet& Set,
-        const SectionContext& Section) noexcept
-    {
-        OnDeleteEntry(Section.it->uId);
-        Set.erase(Section.it);
-    }
-
-
-    KeyValueContext InternalSetKeyName(
-        TValueSet& Set,
-        const KeyValueContext& Kv,
-        std::wstring_view svName) noexcept
-    {
-        auto New{ std::move(*Kv) };
-        Set.erase(Kv.it);
-        New.rsName.Assign(svName);
-        return { Iterator(Set.emplace(std::move(New))) };
-    }
-    KeyValueContext InternalCreateKeyValue(
-        TValueSet& Set,
-        UINT uId,
-        std::wstring_view svName,
-        std::wstring_view svValue,
-        UINT uFlags) noexcept
-    {
-        if (uId != UINT_MAX)
-            uId = m_uId++;
-        OnCreateEntry(uId, svName);
-        return { Iterator(Set.emplace(Value{ svName, uId, uFlags, {}, svValue })) };
-    }
-    void InternalDeleteKeyValue(TValueSet& Set, TKeyValueIterator it) noexcept
-    {
-        OnDeleteEntry(it->uId);
-        Set.erase(it);
-    }
-
     void PushBackEol(Eck_Append_buffer_ CStringW& rs) const noexcept
     {
         switch (m_eEolType)
@@ -664,7 +585,7 @@ public:
         std::vector<ITEM> stSec{};// 栈顶为当前节
         stSec.reserve(16);
         stSec.emplace_back();// Dummy
-        Entry* pLastEntry{};
+        const Entry* pLastEntry{};
         while (pszIni < pszEnd)
         {
             const auto ch = *pszIni++;
@@ -749,7 +670,7 @@ public:
                     if (bContainer && !Ret.second)
                         return IniResult::SecDuplicate;
                     stSec.emplace_back(Ret.first, bContainer);
-                    pLastEntry = &Ret.first->second;
+                    pLastEntry = &(*Ret.first);
                     eState = State::Key;
                 }
                 else if (!IsSpaceCharHeader(ch))
@@ -778,7 +699,7 @@ public:
                 EckAssert(!rsKey.IsLocal());
                 auto& Set = stSec.back().it->Val;
                 const auto sv = rsKey.ToStringView();
-                const auto it = Iterator(Set.emplace(Value{
+                const auto it = Iterator(Set.emplace(KeyValue{
                     std::move(rsKey),
                     m_uId++,
                     (rsComment.IsEmpty() ? INIE_EF_NONE : INIE_EF_HAS_COMMENTS),
@@ -797,123 +718,7 @@ public:
         return IniResult::Ok;
     }
 
-    IniResult Save(CStringW& rsOut, UINT uFlags = INIE_IF_NONE) const noexcept
-    {
-        const auto bEscape = (uFlags & INIE_IF_ESCAPE);
-        struct STACK
-        {
-            TSectionConstIterator it{};
-            BOOL bExtended{};
-        };
-        std::vector<STACK> sSec{};
-        sSec.reserve(m_uId);
-        std::vector<TKeyValueConstIterator> vKv{};
-        vKv.reserve(m_uId);
-        struct STACK2
-        {
-            std::wstring_view svName{};
-            size_t cChild{};
-        };
-        std::vector<STACK2> sContainer{};
-        CStringW rsSpace{};
-
-        auto Fn_PushBackSection = [&](const TSectionSet& Set)
-            {
-                if (Set.empty())
-                    return;
-                const BOOL bInsertingChild = sSec.empty() ? FALSE : sSec.back().bExtended;
-                size_t i{ bInsertingChild ? sSec.size() - 1 : sSec.size() };
-                sSec.resize(sSec.size() + Set.size());
-                if (bInsertingChild)
-                {
-                    sSec.back() = sSec[i];
-                    sSec[i].bExtended = FALSE;
-                }
-                const auto itSecBegin = sSec.begin() + i;
-                for (auto it = Set.begin(); it != Set.end(); ++it, ++i)
-                    sSec[i].it = it;
-                const auto itSecEnd = sSec.end();
-                std::sort(itSecBegin, itSecEnd, [](const STACK& x1, const STACK& x2)
-                    {
-                        return x1.it->uId > x2.it->uId;// 倒排序，便于后续弹出
-                    });
-            };
-
-        Fn_PushBackSection(m_Root);
-        while (!sSec.empty())
-        {
-            auto& e = *sSec.back().it;
-            if ((e.uFlags & INIE_EF_IS_CONTAINER) && !sSec.back().bExtended)
-            {
-                sContainer.emplace_back(sSec.back().it->rsName.ToStringView(), e.Child.size() + 1);
-                rsSpace.PushBackChar(' ').PushBackChar(' ');
-                sSec.back().bExtended = TRUE;
-                Fn_PushBackSection(e.Child);
-            }
-            else
-            {
-                rsOut.PushBack(rsSpace.Data(), rsSpace.Size() - 2);
-                rsOut.PushBackChar('[');
-                if (e.uFlags & INIE_EF_IS_CONTAINER)
-                    rsOut.PushBackChar('>');
-                if (bEscape)
-                    EscapeString(e.rsName.ToStringView(), rsOut);
-                else
-                    rsOut.PushBack(e.rsName);
-                rsOut.PushBackChar(']');
-                PushBackEol(rsOut);
-                for (auto it = e.Val.begin(); it != e.Val.end(); ++it)
-                    vKv.emplace_back(it);
-                std::sort(vKv.begin(), vKv.end(), [](const TKeyValueConstIterator& x1, const TKeyValueConstIterator& x2)
-                    {
-                        return x1->uId < x2->uId;
-                    });
-                for (const auto& f : vKv)
-                {
-                    rsOut.PushBack(rsSpace.Data(), rsSpace.Size() - 2);
-                    if (bEscape)
-                    {
-                        EscapeString(f->rsName.ToStringView(), rsOut);
-                        rsOut.PushBackChar('=');
-                        EscapeString(f->rsValue.ToStringView(), rsOut);
-                    }
-                    else
-                        rsOut
-                        .PushBack(f->rsName)
-                        .PushBackChar('=')
-                        .PushBack(f->rsValue);
-                    PushBackEol(rsOut);
-                }
-                vKv.clear();
-                if (uFlags & INIE_IF_EOL_BEFORE_SECTION)
-                    PushBackEol(rsOut);
-                sSec.pop_back();
-
-                while (!sContainer.empty() && --sContainer.back().cChild == 0)
-                {
-                    rsOut.PushBack(rsSpace.Data(), rsSpace.Size() - 2);
-                    rsOut.PushBackChar('[').PushBackChar('<');
-                    if (uFlags & INIE_IF_END_CONTAINER_WITH_NAME)
-                        if (bEscape)
-                            EscapeString(sContainer.back().svName, rsOut);
-                        else
-                            rsOut.PushBack(sContainer.back().svName);
-                    rsOut.PushBackChar(']');
-                    PushBackEol(rsOut);
-                    sContainer.pop_back();
-                    rsSpace.PopBack().PopBack();
-                }
-            }
-        }
-        return IniResult::Ok;
-    }
-
-    EckInlineNd SectionContext GetSection(std::wstring_view svName) noexcept
-    {
-        const auto it = m_Root.find(svName);
-        return { it == m_Root.end() ? TSectionIterator{} : it };
-    }
-    EckInlineNd SectionConstContext GetSection(std::wstring_view svName) const noexcept
+    EckInlineNd SectionContext GetSection(std::wstring_view svName) const noexcept
     {
         const auto it = m_Root.find(svName);
         return { it == m_Root.end() ? TSectionConstIterator{} : it };
@@ -924,65 +729,11 @@ public:
         std::wstring_view svName) const noexcept
     {
         const auto it = Section->Child.find(svName);
-        return { it == Section->Child.end() ? TSectionIterator{} : it };
-    }
-    EckInlineNd SectionConstContext GetSection(
-        const SectionConstContext& Section,
-        std::wstring_view svName) const noexcept
-    {
-        const auto it = Section->Child.find(svName);
         return { it == Section->Child.end() ? TSectionConstIterator{} : it };
-    }
-
-    EckInline SectionContext SetSection(
-        const SectionContext& Section,
-        std::wstring_view svName) noexcept
-    {
-        return InternalSetSection(m_Root, Section, svName);
-    }
-    EckInline SectionContext SetSection(
-        const SectionContext& Section,
-        const SectionContext& SecParent,
-        std::wstring_view svName) noexcept
-    {
-        return InternalSetSection(SecParent->Child, Section, svName);
-    }
-
-    EckInline SectionContext CreateSection(
-        std::wstring_view svName,
-        UINT uFlags = INIE_EF_NONE,
-        UINT uId = UINT_MAX) noexcept
-    {
-        return InternalCreateSection(m_Root, uId, svName, uFlags);
-    }
-    EckInline SectionContext CreateSection(
-        const SectionContext& SecParent,
-        std::wstring_view svName,
-        UINT uFlags = INIE_EF_NONE,
-        UINT uId = UINT_MAX) noexcept
-    {
-        return InternalCreateSection(SecParent->Child, uId, svName, uFlags);
-    }
-
-    EckInline void DeleteSection(const SectionContext& Section) noexcept { InternalDeleteSection(m_Root, Section); }
-    EckInline void DeleteSection(
-        const SectionContext& Section,
-        const SectionContext& SecParent) noexcept
-    {
-        InternalDeleteSection(SecParent->Child, Section);
     }
 
     EckInlineNd KeyValueContext GetKeyValue(
         const SectionContext& Section,
-        std::wstring_view svName) noexcept
-    {
-        if (!Section)
-            return {};
-        const auto it = Section->Val.find(svName);
-        return { it == Section->Val.end() ? TKeyValueIterator{} : it };
-    }
-    EckInlineNd CtxKvCst GetKeyValue(
-        const SectionConstContext& Section,
         std::wstring_view svName) const noexcept
     {
         if (!Section)
@@ -993,88 +744,36 @@ public:
 
     EckInlineNd KeyValueContext GetKeyValue(
         std::wstring_view svSection,
-        std::wstring_view svName) noexcept
-    {
-        return GetKeyValue(GetSection(svSection), svName);
-    }
-    EckInlineNd CtxKvCst GetKeyValue(
-        std::wstring_view svSection,
         std::wstring_view svName) const noexcept
     {
         return GetKeyValue(GetSection(svSection), svName);
     }
-
-    EckInline KeyValueContext SetKeyName(
-        const KeyValueContext& Kv,
-        const SectionContext& Section,
-        std::wstring_view svName) noexcept
-    {
-        return InternalSetKeyName(Section->Val, Kv, svName);
-    }
-    EckInline KeyValueContext SetKeyName(
-        std::wstring_view svName,
-        std::wstring_view svSection,
-        std::wstring_view svNewName) noexcept
-    {
-        auto Section = GetSection(svSection);
-        if (!Section)
-            Section = CreateSection(svSection);
-        const auto Kv = GetKeyValue(Section, svName);
-        if (!Kv)
-            return CreateKeyValue(Section, svNewName, {});
-        return SetKeyName(Kv, Section, svNewName);
-    }
-
-    EckInline KeyValueContext CreateKeyValue(
-        const SectionContext& Section,
-        std::wstring_view svName,
-        std::wstring_view svValue,
-        UINT uFlags = INIE_EF_NONE,
-        UINT uId = UINT_MAX) noexcept
-    {
-        return InternalCreateKeyValue(Section->Val, uId, svName, svValue, uFlags);
-    }
-
-    EckInline void SetKeyValue(
-        const SectionContext& Section,
-        std::wstring_view svName,
-        std::wstring_view svValue,
-        UINT uFlags = INIE_EF_NONE) noexcept
-    {
-        auto Kv = GetKeyValue(Section, svName);
-        if (!Kv)
-            Kv = CreateKeyValue(Section, svName, svValue, uFlags);
-        Kv->rsValue.Assign(svValue);
-    }
-
-    EckInline void DeleteKeyValue(
-        const SectionContext& Section,
-        std::wstring_view svName) noexcept
-    {
-        const auto it = Section->Val.find(svName);
-        if (it != Section->Val.end())
-            InternalDeleteKeyValue(Section->Val, it);
-    }
 private:
-    void IntForEachSectionInOrder(std::vector<TSectionIterator>& vSec, TSectionSet& Set) noexcept
+    void InternalForEachSectionInOrder(
+        std::vector<TSectionIterator>& vSec,
+        TSectionSet& Set) noexcept
     {
         for (auto it = m_Root.begin(); it != m_Root.end(); ++it)
         {
             vSec[it->uId] = it;
-            IntForEachSectionInOrder(vSec, it->Child);
+            InternalForEachSectionInOrder(vSec, it->Child);
         }
     }
 public:
-    void ForEachSectionInOrder(auto&& Fn, const SectionContext& Section = {}) noexcept
+    void ForEachSectionInOrder(
+        std::invocable<const Section&> auto&& Fn,
+        const SectionContext& Section = {}) noexcept
     {
         std::vector<TSectionIterator> vSec{ m_uId };
-        IntForEachSectionInOrder(vSec, Section ? Section->Child : m_Root);
+        InternalForEachSectionInOrder(vSec, Section ? Section->Child : m_Root);
         const auto itEnd = std::remove(vSec.begin(), vSec.end(), TSectionIterator{});
         for (auto it = vSec.begin(); it != itEnd; ++it)
             Fn(*it);
     }
 
-    void ForEachValueInOrder(auto&& Fn, const SectionContext& Section) noexcept
+    void ForEachValueInOrder(
+        std::invocable<const KeyValue&> auto&& Fn,
+        const SectionContext& Section) noexcept
     {
         auto& Val = Section->Val;
         std::vector<TKeyValueIterator> vVal{};
