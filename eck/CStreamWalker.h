@@ -37,7 +37,7 @@ public:
     CStreamWalker() = default;
     CStreamWalker(IStream* p) noexcept : m_pStream{ p } {}
 
-    CStreamWalker& Write(PCVOID pSrc, size_t cb)
+    CStreamWalker& Write(_In_reads_bytes_(cb) PCVOID pSrc, size_t cb)
     {
         ULONG cbWritten;
         const auto hr = m_pStream->Write(pSrc, (ULONG)cb, &cbWritten);
@@ -75,7 +75,7 @@ public:
         return Write(Data.Data(), Data.ByteSize());
     }
 
-    CStreamWalker& Read(void* pDst, size_t cb)
+    CStreamWalker& Read(_Out_writes_bytes_all_(cb) void* pDst, size_t cb)
     {
         ULONG cbRead;
         const auto hr = m_pStream->Read(pDst, (ULONG)cb, &cbRead);
@@ -130,7 +130,7 @@ public:
         return *this;
     }
 
-    CStreamWalker& Seek(SSIZE_T x, UINT uOrg, _Out_ size_t* pposNew = nullptr)
+    CStreamWalker& Seek(SSIZE_T x, UINT uOrg, _Out_opt_ size_t* pposNew = nullptr)
     {
         ULARGE_INTEGER uliNew;
         const auto hr = m_pStream->Seek(ToLargeInt(x), uOrg, &uliNew);
@@ -161,8 +161,10 @@ public:
 
     // 此函数返回后当前流位置未定义
     // 若抛出，则流内容未定义
-    void MoveData(size_t posDst, size_t posSrc,
-        size_t cbSize, size_t cbMoveBuf = 4096u, void* pMoveBuf = nullptr)
+    void MoveData(
+        size_t posDst, size_t posSrc, size_t cbSize,
+        size_t cbMoveBuf = 4096u,
+        _Out_writes_bytes_opt_(cbMoveBuf) void* pMoveBuf = nullptr)
     {
         if (posDst == posSrc || cbSize == 0ull)
             return;
