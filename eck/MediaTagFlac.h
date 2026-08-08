@@ -65,8 +65,8 @@ private:
 
     CStringW m_rsVendor{};
 
-    size_t m_posStreamInfoEnd{ CMediaFile::NPos };
-    size_t m_posFlacTagEnd{ CMediaFile::NPos };
+    size_t m_posStreamInfoEnd{ CMediaFile::InvalidPosition };
+    size_t m_posFlacTagEnd{ CMediaFile::InvalidPosition };
 
     // WARNING 函数返回后rb已被移动
     static Result ParseImageBlock(CByteBuffer& rb, PICTURE& Pic) noexcept
@@ -101,7 +101,7 @@ private:
     Result InitializeForWriteTag() noexcept
     {
         const auto& Loc = m_File.GetTagLocation();
-        if (Loc.posFlac == CMediaFile::NPos)
+        if (Loc.posFlac == CMediaFile::InvalidPosition)
             return Result::NoTag;
         m_Stream.Seek(Loc.posFlac) += 4;
         FLAC_BLOCK_HEADER Header;
@@ -439,7 +439,7 @@ public:
     Result ReadTag(UINT uFlags = 0u) noexcept override try
     {
         const auto& Loc = m_File.GetTagLocation();
-        if (Loc.posFlac == CMediaFile::NPos)
+        if (Loc.posFlac == CMediaFile::InvalidPosition)
             return Result::NoTag;
         m_Stream.Seek(Loc.posFlac) += 4;
         FLAC_BLOCK_HEADER Header;
@@ -543,13 +543,13 @@ public:
 
     Result WriteTag(UINT uFlags = 0u) noexcept override try
     {
-        if (m_File.GetTagLocation().posFlac == CMediaFile::NPos)
+        if (m_File.GetTagLocation().posFlac == CMediaFile::InvalidPosition)
             return Result::NoTag;
-        if (m_posFlacTagEnd == CMediaFile::NPos ||
-            m_posStreamInfoEnd == CMediaFile::NPos)
+        if (m_posFlacTagEnd == CMediaFile::InvalidPosition ||
+            m_posStreamInfoEnd == CMediaFile::InvalidPosition)
             InitializeForWriteTag();
-        if (m_posFlacTagEnd == CMediaFile::NPos ||
-            m_posStreamInfoEnd == CMediaFile::NPos)
+        if (m_posFlacTagEnd == CMediaFile::InvalidPosition ||
+            m_posStreamInfoEnd == CMediaFile::InvalidPosition)
             return Result::Tag;
         CByteBuffer rbVorbis{}, rbPic{};
         //
@@ -699,8 +699,8 @@ public:
         m_vBlock.clear();
         m_si = {};
         m_rsVendor.Clear();
-        m_posFlacTagEnd = CMediaFile::NPos;
-        m_posStreamInfoEnd = CMediaFile::NPos;
+        m_posFlacTagEnd = CMediaFile::InvalidPosition;
+        m_posStreamInfoEnd = CMediaFile::InvalidPosition;
     }
 
     BOOL IsEmpty() noexcept override { return m_vItem.empty() && m_vPicture.empty(); }

@@ -543,9 +543,9 @@ public:
                 const auto& Loc = m_File.GetTagLocation();
                 const auto cbFile = m_Stream.GetSize();
                 size_t pos;
-                if (Loc.posV1Ext != CMediaFile::NPos)
+                if (Loc.posV1Ext != CMediaFile::InvalidPosition)
                     pos = Loc.posV1Ext;
-                else if (Loc.posV1 != CMediaFile::NPos)
+                else if (Loc.posV1 != CMediaFile::InvalidPosition)
                     pos = Loc.posV1;
                 else
                     pos = cbFile;
