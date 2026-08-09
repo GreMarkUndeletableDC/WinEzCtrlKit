@@ -124,14 +124,14 @@ public:
     {
         CIniExt ini;
         const auto r = ini.Load(L"[S]\nJustAKeyNoEquals");
-        ExpectResult(IniResult::KvSepNotFound, r);
+        ExpectResult(IniResult::KvEqualNotFound, r);
     }
 
     TEST_METHOD(MissingEqualsSign_Escape)
     {
         CIniExt ini;
         const auto r = ini.Load(L"[S]\nJustAKeyNoEquals", -1, INIE_IF_ESCAPE);
-        ExpectResult(IniResult::KvSepNotFound, r);
+        ExpectResult(IniResult::KvEqualNotFound, r);
     }
 
     TEST_METHOD(TrailingBackslashInSectionName_Escape)

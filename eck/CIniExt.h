@@ -13,11 +13,9 @@ enum class IniResult
     SecIllegalChar,         // 方括号周围存在非法字符
     SecContainerNotMatch,   // 容器未闭合
     SecDuplicate,           // 节名重复
-    KvSepNotFound,          // 键值分隔符"="未找到
+    KvEqualNotFound,        // 键值分隔符"="未找到
     KvEmptyKey,             // 键名为空
     EscapeAtEnd,            // 转义字符"\"后面没有字符
-
-    Max,
 };
 
 enum : UINT
@@ -411,7 +409,7 @@ private:
                 rsKey.PushBackChar(ch);
         }
         if (*psz != '=')
-            return IniResult::KvSepNotFound;
+            return IniResult::KvEqualNotFound;
         ++psz;
         if (!bKeepSpace)
         {
@@ -452,7 +450,7 @@ private:
             cch = cch - (psz - pOrg);
         }
         else
-            return IniResult::KvSepNotFound;
+            return IniResult::KvEqualNotFound;
         if (!bKeepSpace)
         {
             rsKey.TrimRight();
@@ -722,6 +720,8 @@ public:
         const SectionContext& Section,
         std::wstring_view svName) const noexcept
     {
+        if (!Section)
+            return {};
         const auto it = Section->Child.find(svName);
         return { it, it != Section->Child.end() };
     }
