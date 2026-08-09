@@ -45,15 +45,17 @@ namespace Detail
     struct IniContext
     {
         TIterator it;
+        BOOL bValid{};
 
         EckInlineNdCe auto& GetIterator() const noexcept { return it; }
 
         EckInlineNdCe auto operator->() const noexcept { return &*it; }
         EckInlineNd auto& operator*() const noexcept { return *it; }
         EckInlineNdCe auto& Data() noexcept { return *it; }
+        EckInlineNdCe auto& Data() const noexcept { return *it; }
 
-        EckInlineNdCe BOOL IsValid() const noexcept { return it != TIterator{}; }
-        EckInlineNdCe operator BOOL() const noexcept { return IsValid(); }
+        EckInlineNdCe BOOL IsValid() const noexcept { return bValid; }
+        EckInlineNdCe operator BOOL() const noexcept { return bValid; }
     };
 
     template<class TIterator>
@@ -96,7 +98,7 @@ namespace Detail
             else
             {
                 T i;
-                TcvToFloat(GetValue().Data(), GetValue(), i);
+                TcvToFloat(GetValue().Data(), GetValue().Size(), i);
                 return i;
             }
         }
@@ -125,13 +127,11 @@ namespace Detail
 
     struct IniEntry
     {
-        friend class CIniExt;
-    private:
         CStringW rsName{};      // 【禁止外部修改】名称，对于节，为节名，对于键值对，为键名
         mutable UINT uId{};             // 【禁止外部修改】ID
         mutable UINT uFlags{};          // INIE_EF_常量
         mutable CStringW rsComment{};   // 条目后方的注释
-    public:
+
         IniEntry() = default;
         IniEntry(
             std::wstring_view svName,
@@ -152,16 +152,16 @@ namespace Detail
             return uId <=> x.uId;
         }
 
+        operator std::wstring_view() const noexcept { return rsName.ToStringView(); }
+
         EckInlineNdCe auto& GetName() const noexcept { return rsName; }
         EckInlineNdCe auto GetId() const noexcept { return uId; }
     };
 
     struct IniValue : IniEntry
     {
-        friend class CIniExt;
-    private:
         mutable CStringW rsValue{};
-    public:
+
         IniValue() = default;
         IniValue(
             std::wstring_view svName,
@@ -452,7 +452,7 @@ private:
             cch = cch - (psz - pOrg);
         }
         else
-            return IniResult::SecRBracketNotFound;
+            return IniResult::KvSepNotFound;
         if (!bKeepSpace)
         {
             rsKey.TrimRight();
@@ -559,11 +559,11 @@ private:
         }
     }
 public:
-    IniResult Load(PCWCH pszIni, size_t cchIni = -1, UINT uFlags = INIE_IF_NONE) noexcept
+    IniResult Load(PCWCH pszIni, int cchIni = -1, UINT uFlags = INIE_IF_NONE) noexcept
     {
         Clear();
         if (cchIni < 0)
-            cchIni = TcsLength(pszIni);
+            cchIni = (int)TcsLength(pszIni);
         const auto pszEnd = pszIni + cchIni;
         enum class State
         {
@@ -584,7 +584,6 @@ public:
         CStringW rsComment{};
         std::vector<ITEM> stSec{};// 栈顶为当前节
         stSec.reserve(16);
-        stSec.emplace_back();// Dummy
         const Entry* pLastEntry{};
         while (pszIni < pszEnd)
         {
@@ -653,9 +652,8 @@ public:
                         stSec.pop_back();
                         continue;
                     }
-                    if (!stSec.back().bContainer)
+                    if (!stSec.empty() && !stSec.back().bContainer)
                         stSec.pop_back();
-                    EckAssert(!rsName.IsLocal());
                     auto& Set = (stSec.empty() ? m_Root : stSec.back().it->Child);
                     const auto sv = rsName.ToStringView();
                     const UINT uFlags = (bContainer ? INIE_EF_IS_CONTAINER : INIE_EF_NONE) |
@@ -694,11 +692,7 @@ public:
                     return r;
                 if (rsKey.IsEmpty())
                     return IniResult::KvEmptyKey;
-                if (rsKey.IsLocal())
-                    rsKey.Reserve(24);
-                EckAssert(!rsKey.IsLocal());
                 auto& Set = stSec.back().it->Val;
-                const auto sv = rsKey.ToStringView();
                 const auto it = Iterator(Set.emplace(KeyValue{
                     std::move(rsKey),
                     m_uId++,
@@ -721,7 +715,7 @@ public:
     EckInlineNd SectionContext GetSection(std::wstring_view svName) const noexcept
     {
         const auto it = m_Root.find(svName);
-        return { it == m_Root.end() ? TSectionConstIterator{} : it };
+        return { it, it != m_Root.end() };
     }
 
     EckInlineNd SectionContext GetSection(
@@ -729,7 +723,7 @@ public:
         std::wstring_view svName) const noexcept
     {
         const auto it = Section->Child.find(svName);
-        return { it == Section->Child.end() ? TSectionConstIterator{} : it };
+        return { it, it != Section->Child.end() };
     }
 
     EckInlineNd KeyValueContext GetKeyValue(
@@ -739,7 +733,7 @@ public:
         if (!Section)
             return {};
         const auto it = Section->Val.find(svName);
-        return { it == Section->Val.end() ? TKeyValueConstIterator{} : it };
+        return { it, it != Section->Val.end() };
     }
 
     EckInlineNd KeyValueContext GetKeyValue(
@@ -777,7 +771,7 @@ public:
     {
         using TIterator = TKeyValueConstIterator;
         auto& Val = Section->Val;
-        std::vector<> vVal{};
+        std::vector<TIterator> vVal{};
         vVal.reserve(Val.size());
         for (auto it = Val.begin(); it != Val.end(); ++it)
             vVal.emplace_back(it);
