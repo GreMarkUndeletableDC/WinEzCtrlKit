@@ -177,7 +177,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TsArchive.cpp" />
     <ClCompile Include="TsBaseN.cpp" />
     <ClCompile Include="TsCalculator.cpp" />
     <ClCompile Include="TsCBitSet.cpp" />
@@ -193,6 +192,7 @@
     <ClCompile Include="TsGpPtr.cpp" />
     <ClCompile Include="TsJson.cpp" />
     <ClCompile Include="TsMathHelper.cpp" />
+    <ClCompile Include="TsMemoryWalker.cpp" />
     <ClCompile Include="TsRandom.cpp" />
     <ClCompile Include="TsRectOp.cpp" />
     <ClCompile Include="TsRefPtr.cpp" />
