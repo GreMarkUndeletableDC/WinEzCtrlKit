@@ -309,7 +309,7 @@ public:
                     nm.idxItem = lvhti.iItem;
                     nm.uPart = uPart;
                     nm.idxSubTask = idxSubTask;
-                    FillNmhdrAndSendNotify(nm, NM_TGL_TASKCLICKED);
+                    NmFillHeaderAndSend(nm, NM_TGL_TASKCLICKED);
                 }
             }
 

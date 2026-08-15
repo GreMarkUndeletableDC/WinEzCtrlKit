@@ -213,7 +213,7 @@ public:
                 const int xyPos = CursorPointToSqlitPosition(ECK_GET_PT_LPARAM(lParam));
                 NMSPBDRAGGED nm;
                 nm.xyPos = xyPos;
-                FillNmhdrAndSendNotify(nm, NM_SPB_DRAGGED);
+                NmFillHeaderAndSend(nm, NM_SPB_DRAGGED);
             }
         }
         return 0;

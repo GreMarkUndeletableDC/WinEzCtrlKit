@@ -132,13 +132,13 @@ struct SERIALIZE_OPT
         {                           \
             const auto* const pBase = (::eck::CTRLDATA_WND*)pData;      \
             PreDeserialize(pData);  \
-            InternalCreate(pBase->dwExStyle, ClsName, pBase->Text(), pBase->dwStyle, \
+            NativeCreate(pBase->dwExStyle, ClsName, pBase->Text(), pBase->dwStyle, \
                 x, y, cx, cy, hParent, hMenu, HInst, nullptr);  \
             PostDeserialize(pData); \
         }                           \
         else                        \
         {                           \
-            InternalCreate(dwExStyle, ClsName, pszText, dwStyle,     \
+            NativeCreate(dwExStyle, ClsName, pszText, dwStyle,     \
                 x, y, cx, cy, hParent, hMenu, HInst, nullptr);  \
         }                           \
         return m_hWnd;              \
@@ -215,31 +215,8 @@ protected:
 public:
     using HSlot = decltype(m_ec)::HSlot;
 protected:
-    EckInline HWND InternalCreate(DWORD dwExStyle, PCWSTR pszClass, PCWSTR pszText, DWORD dwStyle,
-        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, HINSTANCE hInst, void* pParam,
-        FWindowCreating pfnCreatingProc = nullptr) noexcept
-    {
-        BeginCbtHook(this, pfnCreatingProc);
-#ifdef _DEBUG
-        CreateWindowExW(dwExStyle, pszClass, pszText, dwStyle,
-            x, y, cx, cy, hParent, hMenu, hInst, pParam);
-        if (!m_hWnd)
-        {
-            EckDbgPrintFormatMessage(NaGetLastError());
-            EckDbgBreak();
-        }
-        if (IsWindow(m_hWnd))
-            return m_hWnd;
-        else
-            return m_hWnd = nullptr;
-#else
-        return CreateWindowExW(dwExStyle, pszClass, pszText, dwStyle,
-            x, y, cx, cy, hParent, hMenu, hInst, pParam);
-#endif // _DEBUG
-    }
-
     template<class T>
-    EckInline void FillNmhdr(T& nm, UINT uCode) const noexcept
+    EckInline void NmFillHeader(T& nm, UINT uCode) const noexcept
     {
         static_assert(sizeof(T) >= sizeof(NMHDR));
         auto p = (NMHDR*)&nm;
@@ -247,23 +224,23 @@ protected:
         p->code = uCode;
         p->idFrom = GetDlgCtrlID(GetHandle());
     }
-    EckInline LRESULT SendNotify(auto& nm, HWND hParent) const noexcept
+    EckInline LRESULT NmSend(auto& nm, HWND hParent) const noexcept
     {
         return ::SendMessageW(hParent, WM_NOTIFY, ((NMHDR*)&nm)->idFrom, (LPARAM)&nm);
     }
-    EckInline LRESULT SendNotify(auto& nm) const noexcept
+    EckInline LRESULT NmSend(auto& nm) const noexcept
     {
-        return SendNotify(nm, GetParent(GetHandle()));
+        return NmSend(nm, GetParent(GetHandle()));
     }
-    EckInline LRESULT FillNmhdrAndSendNotify(auto& nm, HWND hParent, UINT uCode) const noexcept
+    EckInline LRESULT NmFillHeaderAndSend(auto& nm, HWND hParent, UINT uCode) const noexcept
     {
-        FillNmhdr(nm, uCode);
-        return SendNotify(nm, hParent);
+        NmFillHeader(nm, uCode);
+        return NmSend(nm, hParent);
     }
-    EckInline LRESULT FillNmhdrAndSendNotify(auto& nm, UINT uCode) const noexcept
+    EckInline LRESULT NmFillHeaderAndSend(auto& nm, UINT uCode) const noexcept
     {
-        FillNmhdr(nm, uCode);
-        return SendNotify(nm);
+        NmFillHeader(nm, uCode);
+        return NmSend(nm);
     }
 
     LRESULT DefaultNotifyMessage(HWND hParent, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
@@ -394,13 +371,6 @@ public:
 
     CWindow() = default;
 
-    /// <summary>
-    /// 构造自句柄。
-    /// 不插入窗口映射，仅用于临时使用
-    /// </summary>
-    /// <param name="hWnd"></param>
-    constexpr CWindow(HWND hWnd) noexcept : m_hWnd{ hWnd } {}
-
     ECK_DISABLE_COPY_MOVE(CWindow);
 
     virtual ~CWindow()
@@ -412,20 +382,18 @@ public:
 #endif // _DEBUG
     }
 
-    // 依附句柄。函数将新句柄插入窗口映射，调用此函数必须满足两个前提：本类不能持有句柄；新句柄未在窗口映射中
+    // 调用函数前本类不能持有句柄，且新句柄必须未被其他CWindow类持有
     virtual void Attach(HWND hWnd) noexcept
     {
         EckAssert(!m_hWnd);// 当前类必须未持有句柄
-        const auto pCtx = PtcCurrent();
-        EckAssert(!pCtx->WmAt(hWnd));// 新句柄必须未被CWindow持有
+        const auto ptc = PtcCurrent();
+        EckAssert(!ptc->WmAt(hWnd));// 新句柄必须未被CWindow持有
         m_hWnd = hWnd;
-        pCtx->WmAdd(hWnd, this, !(GetStyle() & WS_CHILD));
+        ptc->WmAdd(hWnd, this, !(GetStyle() & WS_CHILD));
     }
-
-    // 拆离句柄。 函数将从窗口映射中移除句柄
     [[nodiscard]] virtual HWND Detach() noexcept
     {
-        HWND hWnd = nullptr;
+        HWND hWnd{};
         std::swap(hWnd, m_hWnd);
         const auto ptc = PtcCurrent();
         EckAssert(ptc->WmAt(hWnd) == this);// 检查匹配性
@@ -433,17 +401,31 @@ public:
         return hWnd;
     }
 
-    // 依附句柄，并同步状态
     EckInline virtual void AttachNew(HWND hWnd) noexcept
     {
         CWindow::Attach(hWnd);
         m_pfnRealProc = eck::SetWindowProcedure(hWnd, EckWindowProcedure);
     }
-
-    // 拆离句柄，并重置状态
     EckInline virtual void DetachNew() noexcept
     {
         eck::SetWindowProcedure(Detach(), m_pfnRealProc);
+    }
+
+    EckInline HWND NativeCreate(DWORD dwExStyle, PCWSTR pszClass, PCWSTR pszText, DWORD dwStyle,
+        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, HINSTANCE hInst, void* pParam,
+        FWindowCreating pfnCreatingProc = nullptr) noexcept
+    {
+        BeginCbtHook(this, pfnCreatingProc);
+        CreateWindowExW(dwExStyle, pszClass, pszText, dwStyle,
+            x, y, cx, cy, hParent, hMenu, hInst, pParam);
+#ifdef _DEBUG
+        if (!m_hWnd)
+        {
+            EckDbgPrintFormatMessage(NaGetLastError());
+            EckDbgBreak();
+        }
+#endif // _DEBUG
+        return m_hWnd;
     }
 
     EckInline HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
@@ -451,14 +433,6 @@ public:
     {
         return Create(pszText, dwStyle, dwExStyle, x, y, cx, cy,
             hParent, DwordToPointer<HMENU>(nID), pData);
-    }
-
-    EckInline HWND NativeCreate(DWORD dwExStyle, PCWSTR pszClass, PCWSTR pszText, DWORD dwStyle,
-        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, HINSTANCE hInst, void* pParam,
-        FWindowCreating pfnCreatingProc = nullptr) noexcept
-    {
-        return InternalCreate(dwExStyle, pszClass, pszText, dwStyle,
-            x, y, cx, cy, hParent, hMenu, hInst, pParam, pfnCreatingProc);
     }
 
     virtual HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
@@ -974,7 +948,7 @@ public:
         return { rc.right - rc.left, rc.bottom - rc.top };
     }
 
-    EckInline BOOL ScbEnableArrows(int iOp, int iBarType)
+    EckInline BOOL ScbEnableArrows(int iOp, int iBarType) const noexcept
     {
         return EnableScrollBar(m_hWnd, iBarType, iOp);
     }
@@ -1067,18 +1041,14 @@ public:
         SetScrollInfo(m_hWnd, iType, psi, bRedraw);
     }
 
-    EckInlineNd int GetClientWidth() const noexcept
+    EckInlineNd SIZE GetClientSize() const noexcept
     {
         RECT rc;
         GetClientRect(m_hWnd, &rc);
-        return rc.right;
+        return { rc.right,rc.bottom };
     }
-    EckInlineNd int GetClientHeight() const noexcept
-    {
-        RECT rc;
-        GetClientRect(m_hWnd, &rc);
-        return rc.bottom;
-    }
+    EckInlineNd int GetClientWidth() const noexcept { return GetClientSize().cx; }
+    EckInlineNd int GetClientHeight() const noexcept { return GetClientSize().cy; }
 
     EckInlineNd BOOL IsValid() const noexcept
     {

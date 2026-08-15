@@ -250,7 +250,7 @@ protected:
         else
             pt = { x,y };
 
-        InternalCreate(dwExStyle, pszClass, pszText, dwStyle,
+        NativeCreate(dwExStyle, pszClass, pszText, dwStyle,
             pt.x, pt.y, cx, cy, hParent, hMenu, hInst, pParam, pfnCreatingProc);
         EckAssert(m_bDlgProcInit);
 

@@ -169,7 +169,7 @@ public:
                         cr = PresetColor[p->idx].cr;
                     NMCLPCLRCHANGED nm;
                     nm.cr = cr;
-                    FillNmhdrAndSendNotify(nm, m_hParent, NM_CLP_CLRCHANGED);
+                    NmFillHeaderAndSend(nm, m_hParent, NM_CLP_CLRCHANGED);
                 }
             }
             return 0;

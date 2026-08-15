@@ -44,7 +44,7 @@ public:
                 NMHTTSEL nm;
                 GetCursorPos(&nm.pt);
                 SetCursor(nullptr);
-                FillNmhdrAndSendNotify(nm, NM_HTT_SEL);
+                NmFillHeaderAndSend(nm, NM_HTT_SEL);
             }
             return 0;
 

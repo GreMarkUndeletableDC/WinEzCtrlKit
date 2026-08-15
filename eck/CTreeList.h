@@ -406,7 +406,7 @@ private:
                     m_vItem[idxCurrParent]->idxLastEnd = (int)m_vItem.size();
                 }
 
-                FillNmhdrAndSendNotify(nm, NM_TL_FILLCHILDREN);
+                NmFillHeaderAndSend(nm, NM_TL_FILLCHILDREN);
                 AddVirtualItem(nm.pParent, nm.pChildren, nm.cChildren, iLevel + 1);
             }
 
@@ -468,7 +468,7 @@ private:
         nmcd.iPartIdGlyph = (m_bExpandBtnHot && m_idxHot == idx) ? TVP_HOTGLYPH : TVP_GLYPH;
         nmcd.iStateIdGlyph = (e->uFlags & TLIF_CLOSED) ? GLPS_CLOSED : GLPS_OPENED;
         nmcd.crTextBk = CLR_DEFAULT;
-        const auto uCustom = FillNmhdrAndSendNotify(nmcd, m_hParent, NM_CUSTOMDRAW);
+        const auto uCustom = NmFillHeaderAndSend(nmcd, m_hParent, NM_CUSTOMDRAW);
 
         if (uCustom & CDRF_SKIPDEFAULT)
             goto End;
@@ -684,7 +684,7 @@ private:
         nm.Item.uMask = TLIM_TEXT;
         nm.Item.pszText = m_rsTextBuf.Data();
         nm.Item.cchText = m_rsTextBuf.Size();
-        FillNmhdr(nm, NM_TL_GETDISPINFO);
+        NmFillHeader(nm, NM_TL_GETDISPINFO);
 
         rc.left += m_Ds.cxTextMargin;
         rc.top = rcItem.top;
@@ -700,7 +700,7 @@ private:
                 nm.Item.idxSubItem = m_vCol[i].idxActual;
                 nm.Item.cchText = 0;
                 nm.Item.pszText = nullptr;
-                SendNotify(nm, m_hParent);
+                NmSend(nm, m_hParent);
 #pragma warning(suppress:6387)// nm.Item.pszText可能为NULL
                 DrawTextW(hDC, nm.Item.pszText, nm.Item.cchText, &rc,
                     DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS | DT_NOPREFIX);
@@ -727,7 +727,7 @@ private:
         if (uCustom & CDRF_NOTIFYPOSTPAINT)
         {
             nmcd.dwDrawStage = CDDS_POSTPAINT;
-            SendNotify(nmcd, m_hParent);
+            NmSend(nmcd, m_hParent);
         }
 
     End:;
@@ -776,7 +776,7 @@ private:
         nm.hdc = hDC;
         nm.rc = rc;
         nm.dwDrawStage = CDDS_PREERASE;
-        const auto lRet = FillNmhdrAndSendNotify(nm, m_hParent, NM_CUSTOMDRAW);
+        const auto lRet = NmFillHeaderAndSend(nm, m_hParent, NM_CUSTOMDRAW);
         if (lRet & CDRF_SKIPDEFAULT)
             return;
         if (m_crBkg == CLR_DEFAULT)
@@ -787,7 +787,7 @@ private:
         if (lRet & CDRF_NOTIFYPOSTERASE)
         {
             nm.dwDrawStage = CDDS_POSTERASE;
-            FillNmhdrAndSendNotify(nm, m_hParent, NM_CUSTOMDRAW);
+            NmFillHeaderAndSend(nm, m_hParent, NM_CUSTOMDRAW);
         }
     }
 
@@ -1350,7 +1350,7 @@ private:
                     nm.bRBtn = bRBtn;
                     nm.idx = idx;
                     nm.uKeyFlags = (UINT)wParam;
-                    FillNmhdrAndSendNotify(nm, NM_TL_BEGINDRAG);
+                    NmFillHeaderAndSend(nm, NM_TL_BEGINDRAG);
                 }
                 else // ONLY FOR SINGLE SEL
                 {
@@ -1386,7 +1386,7 @@ private:
         nm.uMsg = uMsg;
         nm.wParam = wParam;
         nm.lParam = lParam;
-        FillNmhdrAndSendNotify(nm, NM_TL_MOUSECLICK);
+        NmFillHeaderAndSend(nm, NM_TL_MOUSECLICK);
     }
 
     void OnKeyDown(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
@@ -1699,7 +1699,7 @@ public:
             nm.uMsg = uMsg;
             nm.wParam = wParam;
             nm.lParam = lParam;
-            FillNmhdrAndSendNotify(nm, NM_TL_MOUSECLICK);
+            NmFillHeaderAndSend(nm, NM_TL_MOUSECLICK);
         }
         [[fallthrough]];
         case WM_NCMOUSEMOVE:
@@ -1771,7 +1771,7 @@ public:
                 case HDN_ITEMCLICKW:
                 {
                     auto nm = *(const NMHEADERW*)lParam;
-                    FillNmhdrAndSendNotify(nm, NM_TL_HD_CLICK);
+                    NmFillHeaderAndSend(nm, NM_TL_HD_CLICK);
                 }
                 return 0;
 
@@ -1844,7 +1844,7 @@ public:
                             nm.idx = idx;
                             nm.idxSubItemDisplay = tlht.idxSubItemDisplay;
                             nm.pt = pt;
-                            if (FillNmhdrAndSendNotify(nm, NM_TL_GETDISPINFO))
+                            if (NmFillHeaderAndSend(nm, NM_TL_GETDISPINFO))
                             {
                                 m_idxToolTip = idx;
                                 m_idxToolTipSubItemDisplay = tlht.idxSubItemDisplay;
@@ -1877,7 +1877,7 @@ public:
                             nm.idx = m_idxToolTip;
                             nm.idxSubItemDisplay = m_idxToolTipSubItemDisplay;
                             nm.pToolTip = &m_ToolTip;
-                            return FillNmhdrAndSendNotify(nm, NM_TL_TTPRESHOW);
+                            return NmFillHeaderAndSend(nm, NM_TL_TTPRESHOW);
                         }
                         else
                         {
@@ -2132,7 +2132,7 @@ public:
                     nm.uKeyFlags = (UINT)wParam;
                     nm.pHitTestInfo = nullptr;
                     nm.idx = -1;
-                    FillNmhdrAndSendNotify(nm, NM_TL_ENDDRAG);
+                    NmFillHeaderAndSend(nm, NM_TL_ENDDRAG);
                 }
             }
 
@@ -2142,7 +2142,7 @@ public:
             nm.uMsg = uMsg;
             nm.wParam = wParam;
             nm.lParam = lParam;
-            FillNmhdrAndSendNotify(nm, NM_TL_MOUSECLICK);
+            NmFillHeaderAndSend(nm, NM_TL_MOUSECLICK);
 
             MSG msg{ Handle,uMsg,wParam,lParam };
             m_ToolTip.RelayEvent(&msg);
@@ -2333,7 +2333,7 @@ public:
         if (m_bFlatMode)
         {
             NMTLFILLALLFLATITEM nm{};
-            FillNmhdrAndSendNotify(nm, NM_TL_FILLALLFLATITEM);
+            NmFillHeaderAndSend(nm, NM_TL_FILLALLFLATITEM);
             if (m_bFlatListFilter)
             {
                 m_vItem.reserve(nm.cItem);
@@ -2353,7 +2353,7 @@ public:
         {
             NMTLFILLCHILDREN nm{};
             nm.bQueryRoot = TRUE;
-            FillNmhdrAndSendNotify(nm, NM_TL_FILLCHILDREN);
+            NmFillHeaderAndSend(nm, NM_TL_FILLCHILDREN);
             BOOL b = FALSE;
             EckCounter(nm.cChildren, i)
             {
@@ -2368,7 +2368,7 @@ public:
                     b = TRUE;
                 }
 
-                FillNmhdrAndSendNotify(nm2, NM_TL_FILLCHILDREN);
+                NmFillHeaderAndSend(nm2, NM_TL_FILLCHILDREN);
                 AddVirtualItem(nm2.pParent, nm2.pChildren, nm2.cChildren, 1);
             }
         }
@@ -2574,7 +2574,7 @@ public:
         nm.Item.pNode = m_vItem[idx];
         nm.Item.uMask = TLIM_TEXT;
         nm.Item.idxSubItem = idxSubItem;
-        FillNmhdrAndSendNotify(nm, NM_TL_GETDISPINFO);
+        NmFillHeaderAndSend(nm, NM_TL_GETDISPINFO);
         if (pcchText)
             *pcchText = nm.Item.cchText;
         return nm.Item.pszText;
@@ -2804,12 +2804,12 @@ public:
             nm.idx = idx;
             nm.idxSubItemDisplay = -1;
             nm.pNode = m_vItem[idx];
-            if (!FillNmhdrAndSendNotify(nm, NM_TL_ITEMCHECKING))
+            if (!NmFillHeaderAndSend(nm, NM_TL_ITEMCHECKING))
             {
                 ToggleCheckItem(idx);
                 RedrawItem(idx);
                 nm.nmhdr.code = NM_TL_ITEMCHECKED;
-                SendNotify(nm);
+                NmSend(nm);
             }
         }
     }
@@ -3090,7 +3090,7 @@ public:
         nm.idx = idx;
         nm.idxSubItemDisplay = -1;
         nm.pNode = e;
-        if (!FillNmhdrAndSendNotify(nm, NM_TL_ITEMEXPANDING))
+        if (!NmFillHeaderAndSend(nm, NM_TL_ITEMEXPANDING))
         {
             e->uFlags ^= TLIF_CLOSED;
             if (e->uFlags & TLIF_CLOSED)// 若项目折叠，则清除所有子项的选中
@@ -3099,7 +3099,7 @@ public:
                 CheckOldDataRange(idx + 1, idx + cChildren, idx);// 限位
             }
             nm.nmhdr.code = NM_TL_ITEMEXPANDED;
-            SendNotify(nm);
+            NmSend(nm);
 
             if (bRebuildTree)
             {
@@ -3133,7 +3133,7 @@ private:
                 CheckOldDataRange(i + 1, i + cChildren, i);// 限位
 
                 nm.pParent = e;
-                SendNotify(nm);
+                NmSend(nm);
                 ExpandItemRecurse_Collapse(nm);
             }
         }
@@ -3150,7 +3150,7 @@ private:
             {
                 e->uFlags &= ~TLIF_CLOSED;
                 nm.pParent = e;
-                SendNotify(nm);
+                NmSend(nm);
                 ExpandItemRecurse_Expand(nm);
             }
         }
@@ -3173,7 +3173,7 @@ private:
                 }
 
                 nm.pParent = e;
-                SendNotify(nm);
+                NmSend(nm);
                 ExpandItemRecurse_Toggle(nm);
             }
         }
@@ -3199,7 +3199,7 @@ public:
         nm.idx = idx;
         nm.idxSubItemDisplay = -iOp - 1;
         nm.pNode = e;
-        if (!FillNmhdrAndSendNotify(nm, NM_TL_ITEMEXPANDING))
+        if (!NmFillHeaderAndSend(nm, NM_TL_ITEMEXPANDING))
         {
             int i = idx + 1;
             NMTLFILLCHILDREN nmfc;
@@ -3213,17 +3213,17 @@ public:
             {
             case TLEIO_COLLAPSE:
                 e->uFlags |= TLIF_CLOSED;
-                SendNotify(nmfc);
+                NmSend(nmfc);
                 ExpandItemRecurse_Collapse(nmfc);
                 break;
             case TLEIO_EXPAND:
                 e->uFlags &= ~TLIF_CLOSED;
-                SendNotify(nmfc);
+                NmSend(nmfc);
                 ExpandItemRecurse_Expand(nmfc);
                 break;
             case TLEIO_TOGGLE:
                 e->uFlags ^= TLIF_CLOSED;
-                SendNotify(nmfc);
+                NmSend(nmfc);
                 ExpandItemRecurse_Toggle(nmfc);
                 break;
             default:
@@ -3341,7 +3341,7 @@ public:
         nm.idxSubItem = ColumnDisplayToActual(idxSubItemDisplay);
         nm.uFlags = TLEDF_BUILDINEDIT;
         GetSubItemRect(idx, idxSubItemDisplay, nm.rc, TRUE);
-        FillNmhdrAndSendNotify(nm, NM_TL_PREEDIT);
+        NmFillHeaderAndSend(nm, NM_TL_PREEDIT);
         if (nm.uFlags & TLEDF_DONTEDIT)
             return;
         m_idxEditing = idx;
@@ -3382,7 +3382,7 @@ public:
         else
             nm.uFlags = (bNotifySave ? TLEDF_SHOULDSAVETEXT : 0);
 
-        FillNmhdrAndSendNotify(nm, NM_TL_POSTEDIT);
+        NmFillHeaderAndSend(nm, NM_TL_POSTEDIT);
         m_idxEditing = m_idxEditingSubItemDisplay = -1;
         if (nm.uFlags & TLEDF_BUILDINEDIT)
             m_Edit.Destroy();

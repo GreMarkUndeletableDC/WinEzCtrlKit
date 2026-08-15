@@ -453,13 +453,13 @@ public:
         {
             const auto* const pBase = (CTRLDATA_WND*)pData;
             PreDeserialize(pData);
-            InternalCreate(pBase->dwExStyle, WC_EDITW, pBase->Text(), pBase->dwStyle,
+            NativeCreate(pBase->dwExStyle, WC_EDITW, pBase->Text(), pBase->dwStyle,
                 x, y, cx, cy, hParent, hMenu, nullptr, nullptr);
             PostDeserialize(pData);
         }
         else
         {
-            InternalCreate(dwExStyle, WC_EDITW, pszText, dwStyle,
+            NativeCreate(dwExStyle, WC_EDITW, pszText, dwStyle,
                 x, y, cx, cy, hParent, hMenu, nullptr, nullptr);
         }
         return m_hWnd;
