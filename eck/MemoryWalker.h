@@ -11,9 +11,23 @@ namespace Detail
         PCBYTE pBase{};
         size_t cbMax{};
         PCBYTE pCurr{};
-        constexpr XptMemoryWalkerRange(PCBYTE b, size_t m, PCBYTE c) noexcept
-            : pBase{ b }, cbMax{ m }, pCurr{ c }
-        {}
+        constexpr XptMemoryWalkerRange(PCBYTE pBase_, size_t cbMax_, PCBYTE pCurr_) noexcept
+            : pBase{ pBase_ }, cbMax{ cbMax_ }, pCurr{ pCurr_ }
+        {
+        }
+    };
+    struct XptMemoryWalkerStringTooLong : XptMemoryWalker
+    {
+        size_t cb{};
+        constexpr XptMemoryWalkerStringTooLong(size_t cb_) noexcept : cb{ cb_ } {}
+    };
+    struct XptMemoryWalkerDataLength : XptMemoryWalker
+    {
+        size_t pos{};
+        size_t cb{};
+        constexpr XptMemoryWalkerDataLength(size_t pos_, size_t cb_) noexcept
+            : pos{ pos_ }, cb{ cb_ } {
+        }
     };
 
     struct CMemoryReaderBase
@@ -23,16 +37,17 @@ namespace Detail
         PCBYTE m_pBase{};
         size_t m_cbMax{};
 
-        EckInline void CheckRange(PCBYTE p) const
+        EckInline void CheckUpperBound(size_t cb) const
         {
-            if (m_pBase + m_cbMax < p)
-                throw XptMemoryWalkerRange{ m_pBase, m_cbMax, p };
+            if (cb > m_cbMax - (m_pMem - m_pBase))
+                throw XptMemoryWalkerRange{ m_pBase, m_cbMax, m_pMem + cb };
         }
     public:
         CMemoryReaderBase() = default;
         constexpr CMemoryReaderBase(_In_reads_bytes_(cbMax) PCVOID p, size_t cbMax) noexcept
             : m_pMem{ (PCBYTE)p }, m_pBase{ (PCBYTE)p }, m_cbMax{ cbMax }
-        {}
+        {
+        }
 
         constexpr void SetData(PCVOID p, size_t cbMax) noexcept
         {
@@ -49,27 +64,28 @@ namespace Detail
         BYTE* m_pBase{};
         size_t m_cbMax{};
 
-        EckInline void CheckRange(BYTE* p) const
+        EckInline void CheckUpperBound(size_t cb) const
         {
-            if (m_pBase + m_cbMax < p)
-                throw XptMemoryWalkerRange{ m_pBase, m_cbMax, p };
+            if (cb > m_cbMax - (m_pMem - m_pBase))
+                throw XptMemoryWalkerRange{ m_pBase, m_cbMax, m_pMem + cb };
         }
     public:
         CMemoryWalkerBase() = default;
         constexpr CMemoryWalkerBase(_Inout_updates_bytes_(cbMax) void* p, size_t cbMax) noexcept
             : m_pMem{ (BYTE*)p }, m_pBase{ (BYTE*)p }, m_cbMax{ cbMax }
-        {}
+        {
+        }
 
         EckInline auto& Write(_In_reads_bytes_(cb) PCVOID pSrc, size_t cb)
         {
-            CheckRange(m_pMem + cb);
+            CheckUpperBound(cb);
             memcpy(m_pMem, pSrc, cb);
             m_pMem += cb;
             return *this;
         }
         EckInline auto& WriteReversed(_In_reads_bytes_(cb) PCVOID pSrc, size_t cb)
         {
-            CheckRange(m_pMem + cb);
+            CheckUpperBound(cb);
             const auto p = (PCBYTE)pSrc;
             for (size_t i = 0; i < cb; ++i)
                 *m_pMem++ = p[cb - 1 - i];
@@ -122,17 +138,31 @@ namespace Detail
     };
 
     template<class T>
-    class CMemoryWalkerWarpper : public T
+    class CMemoryWalkerWrapper : public T
     {
+    private:
+        EckInline void CheckLowerBound(size_t cb) const
+        {
+            if (cb > this->m_pMem - this->m_pBase)
+                throw XptMemoryWalkerRange{ this->m_pBase, this->m_cbMax, this->m_pMem - cb };
+        }
+        EckInline int CheckLengthInt(size_t cch) const
+        {
+            if (cch > (size_t)std::numeric_limits<int>::max())
+                throw XptStringTooLong{ cch };
+            return (int)cch;
+        }
     public:
         using T::T;
 
         using Xpt = XptMemoryWalker;
         using XptRange = XptMemoryWalkerRange;
+        using XptStringTooLong = XptMemoryWalkerStringTooLong;
+        using XptDataLength = XptMemoryWalkerDataLength;
 
         EckInline auto& Read(_Out_writes_bytes_all_(cb) void* pDst, size_t cb)
         {
-            this->CheckRange(this->m_pMem + cb);
+            this->CheckUpperBound(cb);
             memcpy(pDst, this->m_pMem, cb);
             this->m_pMem += cb;
             return *this;
@@ -140,7 +170,7 @@ namespace Detail
 
         EckInline auto& ReadReversed(_Out_writes_bytes_all_(cb) void* pDst, size_t cb)
         {
-            this->CheckRange(this->m_pMem + cb);
+            this->CheckUpperBound(cb);
             const auto p = (BYTE*)pDst;
             for (size_t i = 0; i < cb; ++i)
                 p[cb - 1 - i] = *this->m_pMem++;
@@ -164,8 +194,8 @@ namespace Detail
         template<class T>
         int CountStringLength() const
         {
-            auto p = (const T*)Data();
-            const auto pEnd = (const T*)(this->m_pBase + this->m_cbMax);
+            const T UNALIGNED* p = (const T*)Data();
+            const T UNALIGNED* const pEnd = p + GetRemainingSize() / sizeof(T);
             BOOL bFoundNull{};
             for (; p < pEnd; ++p)
                 if (*p == T{})
@@ -175,24 +205,24 @@ namespace Detail
                 }
             if (!bFoundNull)
                 throw XptMemoryWalkerRange{ this->m_pBase, this->m_cbMax, (PCBYTE)p };
-            return int(p - (const T*)Data());
+            return CheckLengthInt(p - (const T*)Data());
         }
 
         template<class T>
-        int CountStringLengthSafe() const noexcept
+        int CountStringLengthSafe() const
         {
-            auto p = (const T*)Data();
-            const auto pEnd = (const T*)(this->m_pBase + this->m_cbMax);
+            const T UNALIGNED* = (const T*)Data();
+            const T UNALIGNED* pEnd = p + GetRemainingSize() / sizeof(T);
             for (; p < pEnd; ++p)
                 if (*p == T{})
                     break;
-            return int(p - (const T*)Data());
+            return CheckLengthInt(p - (const T*)Data());
         }
 
         template<class T>
         auto& SkipPointer(_Out_ T*& p)
         {
-            this->CheckRange(this->m_pMem + sizeof(T));
+            this->CheckUpperBound(sizeof(T));
             p = (T*)this->m_pMem;
             this->m_pMem += sizeof(T);
             return *this;
@@ -202,13 +232,13 @@ namespace Detail
 
         EckInline auto& operator+=(size_t cb)
         {
-            this->CheckRange(this->m_pMem + cb);
+            this->CheckUpperBound(cb);
             this->m_pMem += cb;
             return *this;
         }
         EckInline auto& operator-=(size_t cb)
         {
-            this->CheckRange(this->m_pMem - cb);
+            this->CheckLowerBound(cb);
             this->m_pMem -= cb;
             return *this;
         }
@@ -225,16 +255,37 @@ namespace Detail
         }
         EckInline auto& Seek(size_t pos)
         {
-            this->CheckRange(this->m_pBase + pos);
+            this->m_pMem = this->m_pBase;
+            this->CheckUpperBound(pos);
             this->m_pMem = this->m_pBase + pos;
             return *this;
         }
         EckInlineCe size_t GetRemainingSize() const noexcept { return this->m_pBase + this->m_cbMax - this->m_pMem; }
         EckInlineCe BOOL IsEnd() const noexcept { return this->m_pMem >= this->m_pBase + this->m_cbMax; }
         EckInlineCe size_t GetPosition() const noexcept { return this->m_pMem - this->m_pBase; }
+
+        EckInlineNdCe BOOL CheckDataLengthSafe(size_t pos, size_t cb) const noexcept
+        {
+            return (pos < this->m_cbMax) && (cb <= this->m_cbMax - pos);
+        }
+        EckInline void CheckDataLength(size_t pos, size_t cb) const
+        {
+            if (!CheckDataLengthSafe(pos, cb))
+                throw XptDataLength{ pos, cb };
+        }
+
+        EckInlineNdCe BOOL CheckDataLengthSafe(size_t cb) const noexcept
+        {
+            return cb <= this->m_cbMax - GetPosition();
+        }
+        EckInline void CheckDataLength(size_t cb) const
+        {
+            if (!CheckDataLengthSafe(cb))
+                throw XptDataLength{ GetPosition(), cb };
+        }
     };
 }
 
-using CMemoryReader = Detail::CMemoryWalkerWarpper<Detail::CMemoryReaderBase>;
-using CMemoryWalker = Detail::CMemoryWalkerWarpper<Detail::CMemoryWalkerBase>;
+using CMemoryReader = Detail::CMemoryWalkerWrapper<Detail::CMemoryReaderBase>;
+using CMemoryWalker = Detail::CMemoryWalkerWrapper<Detail::CMemoryWalkerBase>;
 ECK_NAMESPACE_END

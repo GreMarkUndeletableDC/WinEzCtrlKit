@@ -183,7 +183,6 @@
     <ClCompile Include="eck\CGeometrySinkOffsetTranformer.h" />
     <ClCompile Include="eck\CMediaPlayer.h" />
     <ClCompile Include="eck\CColorReducing.h" />
-    <ClCompile Include="eck\Archive.h" />
     <ClCompile Include="eck\CCowByteBuffer.h" />
     <ClCompile Include="eck\CDuiHeader.h" />
     <ClCompile Include="eck\CDWriteFontFactory.h" />
