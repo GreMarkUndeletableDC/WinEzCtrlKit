@@ -680,9 +680,6 @@
     <ClCompile Include="eck\Check.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\Archive.h">
-      <Filter>ECK Include</Filter>
-    </ClCompile>
     <ClCompile Include="eck\CCowByteBuffer.h">
       <Filter>ECK Include</Filter>
     </ClCompile>

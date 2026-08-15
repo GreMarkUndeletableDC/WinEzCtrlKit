@@ -642,9 +642,9 @@ struct TEXTFRAME : public FRAME
         {
             if (eEncoding == TextEncoding::Latin1 ||
                 eEncoding == TextEncoding::Utf8)
-                cb = w.CountStringLengthSafe<char>();
+                cb = w.CountStringLengthOrEnd<char>();
             else
-                cb = w.CountStringLengthSafe<WCHAR>() * sizeof(WCHAR);
+                cb = w.CountStringLengthOrEnd<WCHAR>() * sizeof(WCHAR);
 
             ConvertTextEncoding(vText.emplace_back(), w, cb, eEncoding);
             if (!w.IsEnd())
@@ -1845,9 +1845,9 @@ struct IPLS final :public FRAME
         {
             if (eEncoding == TextEncoding::Latin1 ||
                 eEncoding == TextEncoding::Utf8)
-                cb = w.CountStringLengthSafe<char>();
+                cb = w.CountStringLengthOrEnd<char>();
             else
-                cb = w.CountStringLengthSafe<WCHAR>() * sizeof(WCHAR);
+                cb = w.CountStringLengthOrEnd<WCHAR>() * sizeof(WCHAR);
 
             auto& e = vMap.emplace_back();
             ConvertTextEncoding(e.rsPosition, w, cb, eEncoding);
@@ -1855,9 +1855,9 @@ struct IPLS final :public FRAME
 
             if (eEncoding == TextEncoding::Latin1 ||
                 eEncoding == TextEncoding::Utf8)
-                cb = w.CountStringLengthSafe<char>();
+                cb = w.CountStringLengthOrEnd<char>();
             else
-                cb = w.CountStringLengthSafe<WCHAR>() * sizeof(WCHAR);
+                cb = w.CountStringLengthOrEnd<WCHAR>() * sizeof(WCHAR);
             if (!cb)
             {
                 vMap.pop_back();
