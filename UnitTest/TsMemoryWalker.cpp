@@ -588,7 +588,7 @@ public:
             ex.pCurr);
     }
 
-    TEST_METHOD(CountStringLengthSafe_ReturnsLengthWhenFound)
+    TEST_METHOD(CountStringLengthOrEnd_ReturnsLengthWhenFound)
     {
         const char buffer[] = "Hello";
 
@@ -599,10 +599,10 @@ public:
 
         Assert::AreEqual(
             5,
-            reader.CountStringLengthSafe<char>());
+            reader.CountStringLengthOrEnd<char>());
     }
 
-    TEST_METHOD(CountStringLengthSafe_ReturnsRemainingLengthWhenNotFound)
+    TEST_METHOD(CountStringLengthOrEnd_ReturnsRemainingLengthWhenNotFound)
     {
         const char buffer[] = {
             'A', 'B', 'C', 'D'
@@ -615,10 +615,10 @@ public:
 
         Assert::AreEqual(
             4,
-            reader.CountStringLengthSafe<char>());
+            reader.CountStringLengthOrEnd<char>());
     }
 
-    TEST_METHOD(CountStringLengthSafe_DoesNotThrowWithoutTerminator)
+    TEST_METHOD(CountStringLengthOrEnd_DoesNotThrowWithoutTerminator)
     {
         const char buffer[] = {
             'A', 'B', 'C', 'D'
@@ -630,7 +630,7 @@ public:
         };
 
         const int length =
-            reader.CountStringLengthSafe<char>();
+            reader.CountStringLengthOrEnd<char>();
 
         Assert::AreEqual(4, length);
         Assert::AreEqual(size_t{ 0 }, reader.GetPosition());

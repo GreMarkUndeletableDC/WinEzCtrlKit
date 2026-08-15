@@ -213,7 +213,7 @@ namespace Detail
         }
 
         template<class T>
-        int CountStringLengthSafe() const
+        int CountStringLengthOrEnd() const
         {
             const T UNALIGNED* p = (const T*)Data();
             const T UNALIGNED* pEnd = p + GetRemainingSize() / sizeof(T);
