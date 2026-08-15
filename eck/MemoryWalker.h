@@ -11,6 +11,7 @@ namespace Detail
         PCBYTE pBase{};
         size_t cbMax{};
         PCBYTE pCurr{};
+        XptMemoryWalkerRange() = default;
         constexpr XptMemoryWalkerRange(PCBYTE pBase_, size_t cbMax_, PCBYTE pCurr_) noexcept
             : pBase{ pBase_ }, cbMax{ cbMax_ }, pCurr{ pCurr_ }
         {
@@ -19,14 +20,17 @@ namespace Detail
     struct XptMemoryWalkerStringTooLong : XptMemoryWalker
     {
         size_t cb{};
+        XptMemoryWalkerStringTooLong() = default;
         constexpr XptMemoryWalkerStringTooLong(size_t cb_) noexcept : cb{ cb_ } {}
     };
     struct XptMemoryWalkerDataLength : XptMemoryWalker
     {
         size_t pos{};
         size_t cb{};
+        XptMemoryWalkerDataLength() = default;
         constexpr XptMemoryWalkerDataLength(size_t pos_, size_t cb_) noexcept
-            : pos{ pos_ }, cb{ cb_ } {
+            : pos{ pos_ }, cb{ cb_ }
+        {
         }
     };
 
@@ -143,7 +147,7 @@ namespace Detail
     private:
         EckInline void CheckLowerBound(size_t cb) const
         {
-            if (cb > this->m_pMem - this->m_pBase)
+            if (cb > size_t(this->m_pMem - this->m_pBase))
                 throw XptMemoryWalkerRange{ this->m_pBase, this->m_cbMax, this->m_pMem - cb };
         }
         EckInline int CheckLengthInt(size_t cch) const
@@ -205,18 +209,18 @@ namespace Detail
                 }
             if (!bFoundNull)
                 throw XptMemoryWalkerRange{ this->m_pBase, this->m_cbMax, (PCBYTE)p };
-            return CheckLengthInt(p - (const T*)Data());
+            return CheckLengthInt(p - (const T UNALIGNED*)Data());
         }
 
         template<class T>
         int CountStringLengthSafe() const
         {
-            const T UNALIGNED* = (const T*)Data();
+            const T UNALIGNED* p = (const T*)Data();
             const T UNALIGNED* pEnd = p + GetRemainingSize() / sizeof(T);
             for (; p < pEnd; ++p)
                 if (*p == T{})
                     break;
-            return CheckLengthInt(p - (const T*)Data());
+            return CheckLengthInt(p - (const T UNALIGNED*)Data());
         }
 
         template<class T>
@@ -255,18 +259,28 @@ namespace Detail
         }
         EckInline auto& Seek(size_t pos)
         {
-            this->m_pMem = this->m_pBase;
-            this->CheckUpperBound(pos);
+            if (pos > this->m_cbMax)
+                throw XptMemoryWalkerRange{ this->m_pBase, this->m_cbMax, this->m_pBase + pos };
             this->m_pMem = this->m_pBase + pos;
             return *this;
         }
-        EckInlineCe size_t GetRemainingSize() const noexcept { return this->m_pBase + this->m_cbMax - this->m_pMem; }
-        EckInlineCe BOOL IsEnd() const noexcept { return this->m_pMem >= this->m_pBase + this->m_cbMax; }
-        EckInlineCe size_t GetPosition() const noexcept { return this->m_pMem - this->m_pBase; }
+
+        EckInlineCe size_t GetRemainingSize() const noexcept
+        {
+            return this->m_pBase + this->m_cbMax - this->m_pMem;
+        }
+        EckInlineCe BOOL IsEnd() const noexcept
+        {
+            return this->m_pMem >= this->m_pBase + this->m_cbMax;
+        }
+        EckInlineCe size_t GetPosition() const noexcept
+        {
+            return this->m_pMem - this->m_pBase;
+        }
 
         EckInlineNdCe BOOL CheckDataLengthSafe(size_t pos, size_t cb) const noexcept
         {
-            return (pos < this->m_cbMax) && (cb <= this->m_cbMax - pos);
+            return (pos <= this->m_cbMax) && (cb <= this->m_cbMax - pos);
         }
         EckInline void CheckDataLength(size_t pos, size_t cb) const
         {
