@@ -12,8 +12,8 @@ class CSplitBar : public CWindow
 {
 public:
     ECK_RTTI(CSplitBar, CWindow);
-    ECK_CWND_SINGLEOWNER_NO_DEF_CONS(CSplitBar);
-    ECK_CWND_CREATE_CLS_HINST(WCN_SPLITBAR, g_hInstance);
+    ECK_W_NONATTACHABLE_NO_CONS(CSplitBar);
+    ECK_W_CREATE_CLASS_INST(WCN_SPLITBAR, g_hInstance);
 private:
     CDummyWindow m_BkMark{};
 

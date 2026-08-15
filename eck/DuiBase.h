@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "DuiDefine.h"
 #include "DuiCompositor.h"
 #include "DuiTheme.h"
 #include "CEasyD2D.h"
@@ -1105,10 +1104,11 @@ private:
         m_vTimeLine.clear();
     }
 public:
-    ECK_CWND_CREATE;
+    ECK_W_CREATE;
     // 一般不覆写此方法
     HWND Create(PCWSTR pszText, DWORD uStyle, DWORD dwExStyle,
-        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, PCVOID pData = nullptr) noexcept override
+        int x, int y, int cx, int cy, HWND hParent,
+        HMENU hMenu, void* pParam = nullptr) noexcept override
     {
         if (m_ePresentMode == PresentMode::FlipSwapChain ||
             m_ePresentMode == PresentMode::DCompositionSurface ||
@@ -1116,8 +1116,8 @@ public:
             dwExStyle |= WS_EX_NOREDIRECTIONBITMAP;
         else if (m_ePresentMode == PresentMode::UpdateLayeredWindow)
             dwExStyle |= WS_EX_LAYERED;
-        return InternalCreate(dwExStyle, WCN_DUIHOST, pszText, uStyle,
-            x, y, cx, cy, hParent, hMenu, g_hInstance, nullptr);
+        return NativeCreate(dwExStyle, WCN_DUIHOST, pszText, uStyle,
+            x, y, cx, cy, hParent, hMenu, g_hInstance, pParam);
     }
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override

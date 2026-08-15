@@ -3,31 +3,12 @@
 #include "DDX.h"
 
 ECK_NAMESPACE_BEGIN
-inline constexpr int CDV_BUTTON_1 = 1;
-
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_BUTTON
-{
-    int iVer;
-    BYTE eCheckState;
-    UINT cchNote;
-    // WCHAR szNote[];// 长度为cchNote + 1
-
-    EckInline constexpr PCWSTR Note() const
-    {
-        return (PCWSTR)PointerSkipType(this);
-    }
-};
-#pragma pack(pop)
-
-
-// 建议直接使用此类代替其他细分类
 class CButton : public CWindow
 {
 public:
     ECK_RTTI(CButton, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CButton);
-    ECK_CWND_CREATE_CLS(WC_BUTTONW);
+    ECK_W_ATTACHABLE(CButton);
+    ECK_W_CREATE_CLASS(WC_BUTTONW);
 
     static constexpr DWORD TypeMask = (BS_PUSHBUTTON | BS_DEFPUSHBUTTON |
         BS_SPLITBUTTON | BS_DEFSPLITBUTTON | BS_COMMANDLINK | BS_DEFCOMMANDLINK |
@@ -85,45 +66,6 @@ public:
     ECK_CWNDPROP_STYLE(ShowText, BS_TEXT);
     ECK_CWNDPROP_STYLE(AlignTop, BS_TOP);
     ECK_CWNDPROP_STYLE(AlignVCenter, BS_VCENTER);
-
-    EckInlineNdCe static PCVOID SkipBaseData(PCVOID p) noexcept
-    {
-        const auto* const p2 = (CTRLDATA_BUTTON*)CWindow::SkipBaseData(p);
-        return PointerStepBytes(p2, sizeof(CTRLDATA_BUTTON) + (p2->cchNote + 1) * sizeof(WCHAR));
-    }
-
-    void SerializeData(CByteBuffer& rb, const SERIALIZE_OPT* pOpt = nullptr) noexcept override
-    {
-        auto cchNote = GetNoteLength();
-        const size_t cbSize = sizeof(CTRLDATA_BUTTON) +
-            (cchNote + 1) * sizeof(WCHAR);
-        CWindow::SerializeData(rb, pOpt);
-        CMemoryWalker w(rb.PushBack(cbSize), cbSize);
-
-        CTRLDATA_BUTTON* p;
-        w.SkipPointer(p);
-        p->iVer = CDV_BUTTON_1;
-        p->eCheckState = GetCheckState();
-        p->cchNote = cchNote;
-        if (cchNote)
-        {
-            ++cchNote;
-            GetNote((PWSTR)w.Data(), cchNote);
-        }
-        else
-            *(PWSTR)w.Data() = L'\0';
-    }
-
-    void PostDeserialize(PCVOID pData) noexcept override
-    {
-        CWindow::PostDeserialize(pData);
-        const auto* const p = (const CTRLDATA_BUTTON*)CWindow::SkipBaseData(pData);
-        if (p->iVer != CDV_BUTTON_1)
-            return;
-        SetCheckState(p->eCheckState);
-        if (p->cchNote)
-            SetNote(p->Note());
-    }
 
     BOOL LoGetIdealSize(LYTSIZE& size) noexcept override
     {

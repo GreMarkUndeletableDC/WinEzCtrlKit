@@ -2,45 +2,12 @@
 #include "CWindow.h"
 
 ECK_NAMESPACE_BEGIN
-inline constexpr int CDV_COMBOBOX_1 = 0;
-
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_COMBOBOX
-{
-    struct ITEM
-    {
-        int cchText;
-        int cy;// 仅设置CBS_OWNERDRAWVARIABLE时有效
-        LPARAM lParam;
-        // WCHAR szText[];// 长度cchText + 1
-    };
-
-    int iVer;
-    UINT cbSize;// 整块数据的大小
-    int idxCurrSel;
-    int cchCueBanner;
-    int cxDropped;
-    int cItem;
-    int cyItem;
-    int cyCombo;
-    LCID lcid;
-    UINT uEditSelStart;
-    UINT uEditSelEnd;
-    int cMinVisible;
-    int cxHorzExtent;
-    int idxTop;
-    BITBOOL bExtendedUI : 1;
-    // WCHAR szCurBanner[];// 长度cchCueBanner + 1
-    // ITEM Items[];// 长度cItem
-};
-#pragma pack(pop)
-
 class CComboBox : public CWindow
 {
 public:
     ECK_RTTI(CComboBox, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CComboBox);
-    ECK_CWND_CREATE_CLS(WC_COMBOBOXW);
+    ECK_W_ATTACHABLE(CComboBox);
+    ECK_W_CREATE_CLASS(WC_COMBOBOXW);
 
     static constexpr DWORD TypeMask = CBS_SIMPLE | CBS_DROPDOWN | CBS_DROPDOWNLIST;
 
@@ -57,124 +24,6 @@ public:
     ECK_CWNDPROP_STYLE_MASK(Simple, CBS_SIMPLE, TypeMask);
     ECK_CWNDPROP_STYLE(Sort, CBS_SORT);
     ECK_CWNDPROP_STYLE(UpperCase, CBS_UPPERCASE);
-
-    EckInlineNdCe static PCVOID SkipBaseData(PCVOID p)
-    {
-        const auto* const p2 = (CTRLDATA_COMBOBOX*)CWindow::SkipBaseData(p);
-        return PointerStepBytes(p2, p2->cbSize);
-    }
-
-    void SerializeData(CByteBuffer& rb, const SERIALIZE_OPT* pOpt = nullptr) noexcept override
-    {
-        __super::SerializeData(rb, pOpt);
-        COMBOBOXINFO cbi;
-        cbi.cbSize = sizeof(cbi);
-        if (GetComboBoxInfomation(&cbi))
-        {
-            const auto pcy = &((RCWH*)rb.PushBack(sizeof(RCWH)))->cy;
-            const auto pWndData = (CTRLDATA_WND*)rb.Data();
-            pWndData->dwStyle |= (GetWindowLongPtrW(cbi.hwndList, GWL_STYLE) &
-                ~(WS_HSCROLL | WS_VSCROLL));
-            GetWindowRect(cbi.hwndList, &cbi.rcItem);
-            GetWindowRect(cbi.hwndCombo, &cbi.rcButton);
-            *pcy = (cbi.rcItem.bottom - cbi.rcItem.top) +
-                (cbi.rcButton.bottom - cbi.rcButton.top);
-            pWndData->uFlags |= SERDF_CY;
-        }
-
-        CStringW rs;
-        GetCueBanner(rs);
-        rb.Reserve(rb.Size() + sizeof(CTRLDATA_COMBOBOX) + rs.ByteSize() + 512);
-        const auto pTemp = (CTRLDATA_COMBOBOX*)rb.PushBack(sizeof(CTRLDATA_COMBOBOX));
-        pTemp->cchCueBanner = rs.Size();
-        const auto ocbHeader = (PCBYTE)pTemp - rb.Data();
-        if (rs.IsEmpty())
-            *(PWSTR)rb.PushBack(sizeof(WCHAR)) = L'\0';
-        else
-            wmemcpy((PWSTR)rb.PushBack(rs.ByteSize()), rs.Data(), rs.ByteSize());
-        const auto cItem = GetItemCount();
-        const BOOL bOdVar = OwnerDrawVariable;
-        if (!pOpt || !(pOpt->uFlags & SERF_NO_COMBO_ITEM))
-        {
-            EckCounter(cItem, i)
-            {
-                const auto cch = GetItemTextLength(i);
-                const auto pItem = (CTRLDATA_COMBOBOX::ITEM*)
-                    rb.PushBack(sizeof(CTRLDATA_COMBOBOX::ITEM) + (cch + 1) * sizeof(WCHAR));
-                pItem->cchText = cch;
-                pItem->lParam = GetItemData(i);
-                if (bOdVar)
-                    pItem->cy = GetItemHeight(i);
-                else
-                    pItem->cy = INT_MIN;
-                GetItemText(i, (PWSTR)PointerSkipType(pItem));
-            }
-        }
-        const auto p = (CTRLDATA_COMBOBOX*)(rb.Data() + ocbHeader);
-        p->iVer = CDV_COMBOBOX_1;
-        p->cbSize = UINT(rb.Size() - ocbHeader);
-        p->idxCurrSel = GetCurrentSelection();
-        p->cxDropped = GetDroppedWidth();
-        p->cItem = cItem;
-        p->cyItem = GetItemHeight(0);
-        p->cyCombo = GetItemHeight(-1);
-        p->lcid = GetLocale();
-        GetEditSelection(&p->uEditSelStart, &p->uEditSelEnd);
-        p->cMinVisible = GetMinimumVisible();
-        p->cxHorzExtent = GetHorizontalExtent();
-        p->idxTop = GetTopIndex();
-        p->bExtendedUI = GetExtendUi();
-    }
-
-    void PostDeserialize(PCVOID pData) noexcept override
-    {
-        __super::PostDeserialize(pData);
-        const auto* const p = (CTRLDATA_COMBOBOX*)__super::SkipBaseData(pData);
-        if (p->iVer < CDV_COMBOBOX_1)
-            return;
-        SetRedraw(FALSE);
-        if (p->cchCueBanner)
-            SetCueBanner((PWSTR)PointerSkipType(p));
-        const auto* pItem = (CTRLDATA_COMBOBOX::ITEM*)
-            ((PWSTR)PointerSkipType(p) + p->cchCueBanner + 1);
-        const auto dwStyle = GetStyle();
-        const BOOL bOdVar = IsBitSet(dwStyle, CBS_OWNERDRAWVARIABLE);
-        const BOOL bShouldInsertStr = ((dwStyle & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE)) ?
-            (dwStyle & CBS_HASSTRINGS) : TRUE);
-        if (p->cItem > 0)
-        {
-            ResetContent();
-            InitialzeStorage(p->cItem, p->cbSize - sizeof(CTRLDATA_COMBOBOX) -
-                (p->cchCueBanner + 1) * sizeof(WCHAR) - p->cItem * sizeof(CTRLDATA_COMBOBOX::ITEM));
-            EckCounter(p->cItem, i)
-            {
-                if (bShouldInsertStr)
-                {
-                    InsertString((PCWSTR)(pItem + 1));
-                    if (pItem->lParam)
-                        SetItemData(i, pItem->lParam);
-                }
-                else
-                    InsertString(pItem->lParam);
-                if (bOdVar)
-                    SetItemHeight(i, pItem->cy);
-                pItem = PointerStepBytes(pItem, sizeof(CTRLDATA_COMBOBOX::ITEM) +
-                    (pItem->cchText + 1) * sizeof(WCHAR));
-            }
-        }
-        SetCurrentSelection(p->idxCurrSel);
-        SetDroppedWidth(p->cxDropped);
-        SetItemHeight(-1, p->cyCombo);
-        if (!bOdVar)
-            SetItemHeight(0, p->cyItem);
-        SetLocale(p->lcid);
-        SetEditSelection((WORD)p->uEditSelStart, (WORD)p->uEditSelEnd);
-        SetMinimumVisible(p->cMinVisible);
-        SetHorizontalExtent(p->cxHorzExtent);
-        SetTopIndex(p->idxTop);
-        SetExtendUi(p->bExtendedUI);
-        SetRedraw(TRUE);
-    }
 
     EckInline int AddString(_In_z_ PCWSTR psz) const noexcept
     {

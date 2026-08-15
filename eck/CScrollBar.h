@@ -6,8 +6,8 @@ class CScrollBar : public CWindow
 {
 public:
     ECK_RTTI(CScrollBar, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CScrollBar);
-    ECK_CWND_CREATE_CLS(WC_SCROLLBARW);
+    ECK_W_ATTACHABLE(CScrollBar);
+    ECK_W_CREATE_CLASS(WC_SCROLLBARW);
 
     ECK_CWNDPROP_STYLE(BottomAlign, SBS_BOTTOMALIGN);
     ECK_CWNDPROP_STYLE(Horz, SBS_HORZ);

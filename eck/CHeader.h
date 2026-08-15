@@ -17,8 +17,8 @@ class CHeader : public CWindow
 {
 public:
     ECK_RTTI(CHeader, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CHeader);
-    ECK_CWND_CREATE_CLS(WC_HEADERW);
+    ECK_W_ATTACHABLE(CHeader);
+    ECK_W_CREATE_CLASS(WC_HEADERW);
 
     ECK_CWNDPROP_STYLE(Buttons, HDS_BUTTONS);
     ECK_CWNDPROP_STYLE(DragDrop, HDS_DRAGDROP);

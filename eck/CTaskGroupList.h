@@ -360,9 +360,9 @@ public:
         return __super::OnMessage(uMsg, wParam, lParam);
     }
 
-    ECK_CWND_CREATE;
+    ECK_W_CREATE;
     HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
-        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, PCVOID pData = nullptr) noexcept override
+        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, void* pParam = nullptr) noexcept override
     {
         dwStyle |= (WS_CHILD | LVS_NOCOLUMNHEADER);
         dwStyle &= ~(LVS_OWNERDATA | LVS_OWNERDRAWFIXED);

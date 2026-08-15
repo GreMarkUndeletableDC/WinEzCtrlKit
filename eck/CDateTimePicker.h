@@ -7,8 +7,8 @@ class CDateTimePicker : public CWindow
 {
 public:
     ECK_RTTI(CDateTimePicker, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CDateTimePicker);
-    ECK_CWND_CREATE_CLS(DATETIMEPICK_CLASSW);
+    ECK_W_ATTACHABLE(CDateTimePicker);
+    ECK_W_CREATE_CLASS(DATETIMEPICK_CLASSW);
 
     constexpr static UINT FormatMask = 0xC;
 

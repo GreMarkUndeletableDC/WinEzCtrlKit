@@ -8,8 +8,8 @@ private:
     BOOL m_bAutoDarkMode{ TRUE };
 public:
     ECK_RTTI(CMonthCalendar, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CMonthCalendar);
-    ECK_CWND_CREATE_CLS(MONTHCAL_CLASSW);
+    ECK_W_ATTACHABLE(CMonthCalendar);
+    ECK_W_CREATE_CLASS(MONTHCAL_CLASSW);
 
     ECK_CWNDPROP_STYLE(DayState, MCS_DAYSTATE);
     ECK_CWNDPROP_STYLE(MultiSelect, MCS_MULTISELECT);

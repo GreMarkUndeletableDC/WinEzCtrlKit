@@ -2,15 +2,6 @@
 #include "CWindow.h"
 
 ECK_NAMESPACE_BEGIN
-inline constexpr int CDV_STATIC_1 = 1;
-
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_STATIC
-{
-    int iVer;
-};
-#pragma pack(pop)
-
 inline constexpr DWORD StaticTypeMask = (SS_LEFT | SS_CENTER | SS_RIGHT | SS_ICON |
     SS_BLACKRECT | SS_GRAYRECT | SS_WHITERECT | SS_BLACKFRAME | SS_GRAYFRAME |
     SS_WHITEFRAME | SS_USERITEM | SS_SIMPLE | SS_LEFTNOWORDWRAP | SS_OWNERDRAW |
@@ -20,8 +11,8 @@ class CStatic : public CWindow
 {
 public:
     ECK_RTTI(CStatic, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CStatic);
-    ECK_CWND_CREATE_CLS(WC_STATICW);
+    ECK_W_ATTACHABLE(CStatic);
+    ECK_W_CREATE_CLASS(WC_STATICW);
 
     ECK_CWNDPROP_STYLE(ShowBitmap, SS_BITMAP);
     ECK_CWNDPROP_STYLE_MASK(BlackFrame, SS_BLACKFRAME, StaticTypeMask);
@@ -52,21 +43,6 @@ public:
     ECK_CWNDPROP_STYLE_MASK(WhiteFrame, SS_WHITEFRAME, StaticTypeMask);
     ECK_CWNDPROP_STYLE_MASK(WhiteRect, SS_WHITERECT, StaticTypeMask);
     ECK_CWNDPROP_STYLE(WordEllipsis, SS_WORDELLIPSIS);
-
-    EckInlineNdCe static PCVOID SkipBaseData(PCVOID p)
-    {
-        return PointerStepBytes(CWindow::SkipBaseData(p), sizeof(CTRLDATA_STATIC));
-    }
-
-    void SerializeData(CByteBuffer& rb, const SERIALIZE_OPT* pOpt = nullptr) noexcept override
-    {
-        CWindow::SerializeData(rb, pOpt);
-        constexpr auto cbSize = sizeof(CTRLDATA_STATIC);
-        CMemoryWalker w(rb.PushBack(cbSize), cbSize);
-        CTRLDATA_STATIC* p;
-        w.SkipPointer(p);
-        p->iVer = CDV_STATIC_1;
-    }
 
     EckInline HICON GetIcon() const noexcept
     {

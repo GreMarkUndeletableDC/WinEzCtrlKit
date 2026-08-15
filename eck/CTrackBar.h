@@ -7,8 +7,8 @@ class CTrackBar : public CWindow
 {
 public:
     ECK_RTTI(CTrackBar, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CTrackBar);
-    ECK_CWND_CREATE_CLS(TRACKBAR_CLASSW);
+    ECK_W_ATTACHABLE(CTrackBar);
+    ECK_W_CREATE_CLASS(TRACKBAR_CLASSW);
 
     ECK_CWNDPROP_STYLE(AutoTicks, TBS_AUTOTICKS);
     ECK_CWNDPROP_STYLE(Vertical, TBS_VERT);

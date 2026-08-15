@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "DuiDefine.h"
 #include "UiTheme.h"
 #include "UiColor.h"
 #include "Color.h"

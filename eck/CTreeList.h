@@ -226,8 +226,8 @@ class CTreeList : public CWindow
     friend class CTLEditExt;
 public:
     ECK_RTTI(CTreeList, CWindow);
-    ECK_CWND_SINGLEOWNER(CTreeList);
-    ECK_CWND_CREATE_CLS_HINST(WCN_TREELIST, g_hInstance);
+    ECK_W_NONATTACHABLE(CTreeList);
+    ECK_W_CREATE_CLASS_INST(WCN_TREELIST, g_hInstance);
 
     enum
     {

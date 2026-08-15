@@ -7,8 +7,8 @@ class CComboBoxNew : public CWindow
 {
 public:
     ECK_RTTI(CComboBoxNew, CWindow);
-    ECK_CWND_SINGLEOWNER(CComboBoxNew);
-    ECK_CWND_CREATE_CLS_HINST(WCN_COMBOBOXNEW, g_hInstance);
+    ECK_W_NONATTACHABLE(CComboBoxNew);
+    ECK_W_CREATE_CLASS_INST(WCN_COMBOBOXNEW, g_hInstance);
 
     enum class View :BYTE
     {
@@ -415,9 +415,6 @@ public:
         {
             m_hParent = ((CREATESTRUCTW*)lParam)->hwndParent;
             m_iDpi = GetDpi(Handle);
-#if _DEBUG
-            m_LB.DbgTag = L"CComboBoxNew::m_LB";
-#endif
             m_LB.Create(nullptr, WS_POPUP | WS_BORDER,
                 WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_TOPMOST,
                 0, 0, ((CREATESTRUCTW*)lParam)->cx, 500, Handle, nullptr);

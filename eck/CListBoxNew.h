@@ -52,15 +52,7 @@ struct NMLBNSEARCH
     LBNITEM Item;// idxItem表示起始项目（含）
 };
 
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_LBN
-{
-    int iVer = 0;
 
-
-    // 
-};
-#pragma pack(pop)
 /*
 * LBN产生的通知
 * 特定通知：
@@ -80,8 +72,8 @@ class CListBoxNew : public CWindow
 {
 public:
     ECK_RTTI(CListBoxNew, CWindow);
-    ECK_CWND_SINGLEOWNER(CListBoxNew);
-    ECK_CWND_CREATE_CLS_HINST(WCN_LISTBOXNEW, g_hInstance);
+    ECK_W_NONATTACHABLE(CListBoxNew);
+    ECK_W_CREATE_CLASS_INST(WCN_LISTBOXNEW, g_hInstance);
 private:
     CSelectionRange m_SelRange{};
     int m_cItem{};

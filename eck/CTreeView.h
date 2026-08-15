@@ -25,8 +25,8 @@ class CTreeView : public CWindow
 {
 public:
     ECK_RTTI(CTreeView, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CTreeView);
-    ECK_CWND_CREATE_CLS(WC_TREEVIEWW);
+    ECK_W_ATTACHABLE(CTreeView);
+    ECK_W_CREATE_CLASS(WC_TREEVIEWW);
 
     ECK_CWNDPROP_STYLE(CheckBoxes, TVS_CHECKBOXES);
     ECK_CWNDPROP_STYLE(DisableDragDrop, TVS_DISABLEDRAGDROP);

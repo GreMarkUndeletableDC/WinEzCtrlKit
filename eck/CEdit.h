@@ -4,30 +4,6 @@
 #include "Check.h"
 
 ECK_NAMESPACE_BEGIN
-inline constexpr int CDV_EDIT_1 = 0;
-
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_EDIT
-{
-    int iVer;
-    WCHAR chPassword;
-    ECKENUM eTransMode;
-    int iSelStart;
-    int iSelEnd;
-    int cchCueBanner;
-    int cchLimit;
-    // WCHAR szCueBanner[];
-
-    EckInline PCWSTR CueBanner() const noexcept
-    {
-        if (cchCueBanner)
-            return PCWSTR(this + 1);
-        else
-            return nullptr;
-    }
-};
-#pragma pack(pop)
-
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5// 1809+
 #define ECK_CWNDPROP_EDE_STYLE(Name, Style)				\
 	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
@@ -48,8 +24,8 @@ class CEdit : public CWindow
 {
 public:
     ECK_RTTI(CEdit, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CEdit);
-    ECK_CWND_CREATE_CLS(WC_EDITW);
+    ECK_W_ATTACHABLE(CEdit);
+    ECK_W_CREATE_CLASS(WC_EDITW);
 
     enum class TransMode
     {
@@ -79,44 +55,6 @@ public:
     ECK_CWNDPROP_EDE_STYLE(ConvertEolOnPaste, ES_EX_CONVERT_EOL_ON_PASTE);
     ECK_CWNDPROP_EDE_STYLE(Zoomable, ES_EX_ZOOMABLE);
 #endif// NTDDI_VERSION >= NTDDI_WIN10_RS5
-
-    EckInline constexpr static PCVOID SkipBaseData(PCVOID p) noexcept
-    {
-        return (PCBYTE)p + sizeof(CTRLDATA_EDIT) +
-            (((const CTRLDATA_EDIT*)p)->cchCueBanner + 1) * sizeof(WCHAR);
-    }
-
-    void SerializeData(CByteBuffer& rb, const SERIALIZE_OPT* pOpt = nullptr) noexcept override
-    {
-        const auto rsCueBanner = GetCueBanner((pOpt && pOpt->cchTextBuf ?
-            pOpt->cchTextBuf : MAX_PATH));
-        const size_t cbSize = sizeof(CTRLDATA_EDIT) + rsCueBanner.ByteSize();
-        __super::SerializeData(rb, pOpt);
-        const auto p = (CTRLDATA_EDIT*)rb.PushBack(cbSize);
-        p->iVer = CDV_EDIT_1;
-        p->chPassword = GetPasswordChar();
-        p->eTransMode = (ECKENUM)GetTransformMode();
-        GetSelection(&p->iSelStart, &p->iSelEnd);
-        p->cchCueBanner = rsCueBanner.Size();
-        p->cchLimit = GetLimitText();
-        if (p->cchCueBanner)
-            wmemcpy(PWSTR(p + 1), rsCueBanner.Data(), rsCueBanner.Size() + 1);
-        else
-            *PWSTR(p + 1) = L'\0';
-    }
-
-    void PostDeserialize(PCVOID pData) noexcept override
-    {
-        __super::PostDeserialize(pData);
-        const auto* const p = (CTRLDATA_EDIT*)__super::SkipBaseData(pData);
-        if (p->iVer != CDV_EDIT_1)
-            return;
-        SetPasswordChar(p->chPassword);
-        SetTransformMode((TransMode)p->eTransMode);
-        SetSelection(p->iSelStart, p->iSelEnd);
-        SetCueBanner(p->CueBanner(), TRUE);
-        SetLimitText(p->cchLimit);
-    }
 
     EckInline BOOL CanUndo() const noexcept
     {

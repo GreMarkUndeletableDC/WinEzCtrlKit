@@ -57,8 +57,8 @@ class CHexEdit : public CWindow
 {
 public:
     ECK_RTTI(CHexEdit, CWindow);
-    ECK_CWND_SINGLEOWNER_NO_DEF_CONS(CHexEdit);
-    ECK_CWND_CREATE_CLS_HINST(WCN_HEXEDIT, g_hInstance);
+    ECK_W_NONATTACHABLE_NO_CONS(CHexEdit);
+    ECK_W_CREATE_CLASS_INST(WCN_HEXEDIT, g_hInstance);
 private:
     struct CHAR_COL
     {

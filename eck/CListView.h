@@ -23,8 +23,8 @@ class CListView : public CWindow
 {
 public:
     ECK_RTTI(CListView, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CListView);
-    ECK_CWND_CREATE_CLS(WC_LISTVIEWW);
+    ECK_W_ATTACHABLE(CListView);
+    ECK_W_CREATE_CLASS(WC_LISTVIEWW);
 
     ECK_CWNDPROP_STYLE(AlignLeft, LVS_ALIGNLEFT);
     ECK_CWNDPROP_STYLE(AlignTop, LVS_ALIGNTOP);

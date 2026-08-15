@@ -8,8 +8,8 @@ class CLink : public CWindow
 {
 public:
     ECK_RTTI(CLink, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CLink);
-    ECK_CWND_CREATE_CLS(WC_LINK);
+    ECK_W_ATTACHABLE(CLink);
+    ECK_W_CREATE_CLASS(WC_LINK);
 
     ECK_CWNDPROP_STYLE(Transparent, LWS_TRANSPARENT);
     ECK_CWNDPROP_STYLE(IgnoreReturn, LWS_IGNORERETURN);

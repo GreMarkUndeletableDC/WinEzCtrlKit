@@ -439,9 +439,9 @@ public:
         return __super::OnNotifyMessage(hParent, uMsg, wParam, lParam, bProcessed);
     }
 
-    ECK_CWND_CREATE;
+    ECK_W_CREATE;
     HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
-        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, PCVOID pData = nullptr) noexcept override
+        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, void* pParam = nullptr) noexcept override
     {
         if (m_bChangeCreateStyle)
             if (m_bMultiLine)
@@ -449,20 +449,8 @@ public:
                     (m_bAutoWrap ? 0 : ES_AUTOHSCROLL));
             else
                 dwStyle |= ES_AUTOHSCROLL;
-        if (pData)
-        {
-            const auto* const pBase = (CTRLDATA_WND*)pData;
-            PreDeserialize(pData);
-            NativeCreate(pBase->dwExStyle, WC_EDITW, pBase->Text(), pBase->dwStyle,
-                x, y, cx, cy, hParent, hMenu, nullptr, nullptr);
-            PostDeserialize(pData);
-        }
-        else
-        {
-            NativeCreate(dwExStyle, WC_EDITW, pszText, dwStyle,
-                x, y, cx, cy, hParent, hMenu, nullptr, nullptr);
-        }
-        return m_hWnd;
+        return __super::Create(pszText, dwStyle, dwExStyle,
+            x, y, cx, cy, hParent, hMenu, pParam);
     };
 
     BOOL LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept override

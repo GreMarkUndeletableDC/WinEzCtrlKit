@@ -548,13 +548,6 @@ struct OWNED_RAW_BUFFER
 #pragma endregion Type
 
 #pragma region Constant
-// 控件序列化数据对齐
-#ifdef _WIN64
-#define ECK_CTRLDATA_ALIGN	8
-#else
-#define ECK_CTRLDATA_ALIGN	4
-#endif
-
 constexpr inline auto Int32StringBufferSize = std::max({
     _MAX_ITOSTR_BASE16_COUNT,_MAX_ITOSTR_BASE10_COUNT,_MAX_ITOSTR_BASE8_COUNT,
     _MAX_LTOSTR_BASE16_COUNT ,_MAX_LTOSTR_BASE10_COUNT ,_MAX_LTOSTR_BASE8_COUNT,

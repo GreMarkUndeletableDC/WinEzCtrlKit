@@ -6,8 +6,8 @@ class CListBox : public CWindow
 {
 public:
     ECK_RTTI(CListBox, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CListBox);
-    ECK_CWND_CREATE_CLS(WC_LISTBOXW);
+    ECK_W_ATTACHABLE(CListBox);
+    ECK_W_CREATE_CLASS(WC_LISTBOXW);
 
     ECK_CWNDPROP_STYLE(ComboList, LBS_COMBOBOX);
     ECK_CWNDPROP_STYLE(DisableNoScroll, LBS_DISABLENOSCROLL);
