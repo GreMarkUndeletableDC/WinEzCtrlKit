@@ -339,7 +339,7 @@ private:
     CFileEnumeratorSingle m_EnumFile{};
     PWSTR m_pszSendToPath{};// CoTaskMemFree
     int m_cchSendToPath{};
-    CIniExtMut m_IniDesktop{};
+    CIniExt m_IniDesktop{};
 public:
     void Reset() noexcept
     {
