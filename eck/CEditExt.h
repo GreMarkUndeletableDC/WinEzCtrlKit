@@ -25,19 +25,18 @@ public:
         Priv_NeedFilterKey = Password,// 仅供内部使用
     };
 protected:
-    CStringW m_rsCueBanner{};			// 输入提示
+    CStringW m_rsCueBanner{};
 
-    COLORREF m_crText{ CLR_DEFAULT };	// 文本颜色
-    COLORREF m_crTextBk{ CLR_DEFAULT };	// 文本背景色
-    COLORREF m_crBk{ CLR_DEFAULT };		// 编辑框背景色
+    COLORREF m_crText{ CLR_DEFAULT };
+    COLORREF m_crTextBk{ CLR_DEFAULT };
+    COLORREF m_crBk{ CLR_DEFAULT };
 
-    int m_cyText{};		// 文本高度
-    int m_cxWnd{};		// 客户区宽度
-    int m_cyWnd{};		// 客户区高度
-    RECT m_rcMargins{};	// 边距
+    int m_cyText{};
+    int m_cxWnd{}, m_cyWnd{};
+    RECT m_rcMargins{};
 
-    WCHAR m_chMask{};	// 掩码字符
-    InputMode m_iInputMode{ InputMode::Normal };// 输入方式
+    WCHAR m_chMask{};
+    InputMode m_iInputMode{ InputMode::Normal };
 
     BITBOOL m_bAutoWrap : 1 = TRUE;				// [多行][延迟标志]自动换行，不加入ES_AUTOHSCROLL
     BITBOOL m_bMultiLineCueBanner : 1 = TRUE;	// [多行]显示提示
@@ -439,9 +438,9 @@ public:
         return __super::OnNotifyMessage(hParent, uMsg, wParam, lParam, bProcessed);
     }
 
-    ECK_CWND_CREATE;
+    ECK_W_CREATE;
     HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
-        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, PCVOID pData = nullptr) noexcept override
+        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, void* pParam = nullptr) noexcept override
     {
         if (m_bChangeCreateStyle)
             if (m_bMultiLine)
@@ -449,20 +448,8 @@ public:
                     (m_bAutoWrap ? 0 : ES_AUTOHSCROLL));
             else
                 dwStyle |= ES_AUTOHSCROLL;
-        if (pData)
-        {
-            const auto* const pBase = (CTRLDATA_WND*)pData;
-            PreDeserialize(pData);
-            InternalCreate(pBase->dwExStyle, WC_EDITW, pBase->Text(), pBase->dwStyle,
-                x, y, cx, cy, hParent, hMenu, nullptr, nullptr);
-            PostDeserialize(pData);
-        }
-        else
-        {
-            InternalCreate(dwExStyle, WC_EDITW, pszText, dwStyle,
-                x, y, cx, cy, hParent, hMenu, nullptr, nullptr);
-        }
-        return m_hWnd;
+        return __super::Create(pszText, dwStyle, dwExStyle,
+            x, y, cx, cy, hParent, hMenu, pParam);
     };
 
     BOOL LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept override
@@ -481,7 +468,7 @@ public:
     {
         switch (ePart)
         {
-        case ColorPart::Text: m_crText = cr; break;
+        case ColorPart::Text:   m_crText = cr;   break;
         case ColorPart::TextBk: m_crTextBk = cr; break;
         case ColorPart::Bk:
             m_crBk = cr;
@@ -494,10 +481,10 @@ public:
     {
         switch (ePart)
         {
-        case ColorPart::Text: return m_crText;
+        case ColorPart::Text:   return m_crText;
         case ColorPart::TextBk: return m_crTextBk;
-        case ColorPart::Bk: return m_crBk;
-        default: return CLR_INVALID;
+        case ColorPart::Bk:     return m_crBk;
+        default:                return CLR_INVALID;
         }
     }
 

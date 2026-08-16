@@ -6,8 +6,8 @@ class CIPEdit : public CWindow
 {
 public:
     ECK_RTTI(CIPEdit, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CIPEdit);
-    ECK_CWND_CREATE_CLS(WC_IPADDRESSW);
+    ECK_W_ATTACHABLE(CIPEdit);
+    ECK_W_CREATE_CLASS(WC_IPADDRESSW);
 
     EckInline void Clear() const noexcept
     {

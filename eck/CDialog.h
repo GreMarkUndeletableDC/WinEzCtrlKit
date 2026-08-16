@@ -135,9 +135,16 @@ public:
         }
         break;
         case WM_CTLCOLORSTATIC:
-            if ((!m_bClrDisableEdit && CWindow((HWND)lParam).GetWindowClass() == WC_EDITW))
-                break;
-            [[fallthrough]];
+        {
+            if (!m_bClrDisableEdit)
+            {
+                WCHAR szCls[ARRAYSIZE(WC_EDITW) + 1];
+                if (GetClassNameW((HWND)lParam, szCls, ARRAYSIZE(szCls)) &&
+                    _wcsicmp(szCls, WC_EDITW) == 0)
+                    break;
+            }
+        }
+        [[fallthrough]];
         case WM_CTLCOLORBTN:
         case WM_CTLCOLORDLG:
         case WM_CTLCOLOREDIT:
@@ -250,7 +257,7 @@ protected:
         else
             pt = { x,y };
 
-        InternalCreate(dwExStyle, pszClass, pszText, dwStyle,
+        NativeCreate(dwExStyle, pszClass, pszText, dwStyle,
             pt.x, pt.y, cx, cy, hParent, hMenu, hInst, pParam, pfnCreatingProc);
         EckAssert(m_bDlgProcInit);
 

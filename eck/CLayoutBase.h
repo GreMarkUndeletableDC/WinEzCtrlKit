@@ -202,7 +202,7 @@ protected:
 
     void ArgMoveObject(const ITEMBASE& e, const LYTRECT& rc) noexcept
     {
-        const auto hWnd = e.pObject->LoGetHWND();
+        const auto hWnd = e.pObject->LoGetWindowHandle();
         if (hWnd && m_hDwpCurrent)
         {
             if (IsBitSet(e.uFlags, LF_FIX))

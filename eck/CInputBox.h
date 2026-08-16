@@ -40,7 +40,7 @@ class CInputBox : public CDialogNew
 {
 public:
     ECK_RTTI(CInputBox, CDialogNew);
-    ECK_CWND_SINGLEOWNER(CInputBox);
+    ECK_W_NONATTACHABLE(CInputBox);
 private:
     INPUTBOXOPT* m_pOpt{};
 

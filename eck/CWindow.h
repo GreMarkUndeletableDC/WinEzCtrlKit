@@ -1,189 +1,130 @@
 ﻿#pragma once
 #include "WindowHelper.h"
-#include "MemoryWalker.h"
 #include "ILayout.h"
 #include "CEventChain.h"
-#include "NativeWrapper.h"
+#include "CString.h"
 
 ECK_NAMESPACE_BEGIN
 enum class FrameType
 {
-    Min,
-    None = Min,	// 无边框
-    Sunken,	// 凹入式
-    Raised,	// 凸出式
-    Flat,	// 浅凹入式
-    Box,	// 镜框式
-    Single,	// 单线边框式
-    Max = Single
+    None,   // 无边框
+    Sunken, // 凹入式
+    Raised, // 凸出式
+    Flat,   // 浅凹入式
+    Box,    // 镜框式
+    Single, // 单线边框式
 };
 
 enum class ScrollType
 {
-    Min,
-    None = Min,	// 无
-    Horz,	// 水平滚动条
-    Vert,	// 垂直滚动条
-    Both,	// 水平和垂直滚动条
-    Max = Both
+    None,   // 无
+    Horizontal,   // 水平滚动条
+    Vertical,   // 垂直滚动条
+    Both,   // 水平和垂直滚动条
 };
 
-
-constexpr inline int CDV_WND_1 = 0;
-
-// CTRLDATA_WND::uFlags
-enum : UINT
-{
-    SERDF_SBH = 1u << 0,
-    SERDF_SBV = 1u << 1,
-    SERDF_IMAGELIST = 1u << 2,
-    SERDF_X = 1u << 3,
-    SERDF_Y = 1u << 4,
-    SERDF_CX = 1u << 5,
-    SERDF_CY = 1u << 6,
-    SERDF_POSSIZE = SERDF_X | SERDF_Y | SERDF_CX | SERDF_CY,
-};
-
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_WND
-{
-    UINT uFlags;
-    int iVer;
-    int cchText;
-    DWORD dwStyle;
-    DWORD dwExStyle;
-    // WCHAR szText[];
-    // SCROLLINFO siHorz;// SERDF_SBH设置时
-    // SCROLLINFO siVert;// SERDF_SBV设置时
-    // RCWH rcPos;// SERDF_X、SERDF_Y、SERDF_CX、SERDF_CY中的一个被设置时才附加此结构
-
-    constexpr PCWSTR Text() const noexcept
-    {
-        if (cchText)
-            return (PCWSTR)(this + 1);
-        else
-            return nullptr;
-    }
-
-    constexpr size_t Size() const noexcept
-    {
-        return sizeof(CTRLDATA_WND) + (cchText + 1) * sizeof(WCHAR) +
-            ((uFlags & SERDF_SBH) ? sizeof(SCROLLINFO) : 0) +
-            ((uFlags & SERDF_SBV) ? sizeof(SCROLLINFO) : 0) +
-            ((uFlags & SERDF_POSSIZE) ? sizeof(RCWH) : 0);
-    }
-
-    constexpr RCWH* PosSize() const noexcept
-    {
-        if (!(uFlags & SERDF_POSSIZE))
-            return nullptr;
-        return (RCWH*)((PCBYTE)this + Size() - sizeof(RCWH));
-    }
-
-    constexpr SCROLLINFO* ScrollInfoHorz() const noexcept
-    {
-        if (!(uFlags & SERDF_SBH))
-            return nullptr;
-        return (SCROLLINFO*)((PCBYTE)this + sizeof(CTRLDATA_WND) + (cchText + 1) * sizeof(WCHAR));
-    }
-
-    constexpr SCROLLINFO* ScrollInfoVert() const noexcept
-    {
-        if (!(uFlags & SERDF_SBV))
-            return nullptr;
-        return (SCROLLINFO*)((PCBYTE)this + sizeof(CTRLDATA_WND) + (cchText + 1) * sizeof(WCHAR) +
-            ((uFlags & SERDF_SBH) ? sizeof(SCROLLINFO) : 0));
-    }
-};
-#pragma pack(pop)
-
-// SERIALIZE_OPT::uFlags
-enum : UINT
-{
-    SERF_NO_COMBO_ITEM = 1u << 0,		// 一般供ComboBoxEx使用，指示CComboBox不要序列化项目数据
-    SERF_EXCLUDE_IMAGELIST = 1u << 1,	// 不要序列化图像列表数据
-};
-
-struct SERIALIZE_OPT
-{
-    UINT uFlags;
-    int cchTextBuf;
-    void* pUserData;
-};
+// Create =======================================================
 
 // 生成以ID创建的方法
-#define ECK_CWND_CREATE                                         \
-    HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle, \
-        int x, int y, int cx, int cy, HWND hParent,             \
-        int nID, ::eck::PCVOID pData = nullptr) noexcept        \
-    {                                                           \
-        return Create(pszText, dwStyle, dwExStyle, x, y, cx, cy,\
-            hParent, ::eck::DwordToPointer<HMENU>(nID), pData);         \
+#define ECK_W_CREATE                                             \
+    HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,  \
+        int x, int y, int cx, int cy, HWND hParent,              \
+        int nId, void* pParam = nullptr) noexcept                \
+    {                                                            \
+        return Create(pszText, dwStyle, dwExStyle, x, y, cx, cy, \
+            hParent, ::eck::DwordToPointer<HMENU>(nId), pParam); \
     }
 
 // 按类名和实例句柄生成创建方法
-#define ECK_CWND_CREATE_CLS_HINST(ClsName, HInst)               \
-    ECK_CWND_CREATE                     \
-    HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle, \
-        int x, int y, int cx, int cy, HWND hParent,             \
-        HMENU hMenu, ::eck::PCVOID pData = nullptr) noexcept override   \
-    {                               \
-        if (pData)                  \
-        {                           \
-            const auto* const pBase = (::eck::CTRLDATA_WND*)pData;      \
-            PreDeserialize(pData);  \
-            InternalCreate(pBase->dwExStyle, ClsName, pBase->Text(), pBase->dwStyle, \
-                x, y, cx, cy, hParent, hMenu, HInst, nullptr);  \
-            PostDeserialize(pData); \
-        }                           \
-        else                        \
-        {                           \
-            InternalCreate(dwExStyle, ClsName, pszText, dwStyle,     \
-                x, y, cx, cy, hParent, hMenu, HInst, nullptr);  \
-        }                           \
-        return m_hWnd;              \
+#define ECK_W_CREATE_CLASS_INST(ClassName, HInst)                \
+    ECK_W_CREATE                                                 \
+    HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,  \
+        int x, int y, int cx, int cy, HWND hParent,              \
+        HMENU hMenu, void* pParam = nullptr) noexcept override   \
+    {                                                            \
+        NativeCreate(dwExStyle, ClassName, pszText, dwStyle,     \
+            x, y, cx, cy, hParent, hMenu, HInst, pParam);        \
+        return m_hWnd;                                           \
     }
 
 // 按类名生成创建方法
-#define ECK_CWND_CREATE_CLS(ClsName) ECK_CWND_CREATE_CLS_HINST(ClsName, nullptr)
+#define ECK_W_CREATE_CLASS(ClassName) ECK_W_CREATE_CLASS_INST(ClassName, nullptr)
 
-#define ECK_CWND_DISABLE_ATTACH \
-    void Attach(HWND hWnd) noexcept override \
-    {                           \
+// Attach / Detach ==============================================
+
+#define ECK_W_DISABLE_ATTACH                                                    \
+    void Attach(HWND hWnd) noexcept override                                    \
+    {                                                                           \
         EckDbgPrintWithLocation(L"** WARNING ** CWindow::Attach is disabled."); \
-        abort();                \
-    }                           \
-    HWND Detach() noexcept override     \
-    {                           \
+        abort();                                                                \
+    }                                                                           \
+    HWND Detach() noexcept override                                             \
+    {                                                                           \
         EckDbgPrintWithLocation(L"** WARNING ** CWindow::Detach is disabled."); \
-        abort();                \
-        return nullptr;         \
+        abort();                                                                \
+        return nullptr;                                                         \
     }
 
-#define ECK_CWND_DISABLE_ATTACHNEW      \
-    void AttachNew(HWND hWnd) noexcept override \
-    {                                   \
+#define ECK_W_DISABLE_ATTACHNEW                                                    \
+    void AttachNew(HWND hWnd) noexcept override                                    \
+    {                                                                              \
         EckDbgPrintWithLocation(L"** WARNING ** CWindow::AttachNew is disabled."); \
-        abort();                        \
-    }                                   \
-    void DetachNew() noexcept override  \
-    {                                   \
+        abort();                                                                   \
+    }                                                                              \
+    void DetachNew() noexcept override                                             \
+    {                                                                              \
         EckDbgPrintWithLocation(L"** WARNING ** CWindow::DetachNew is disabled."); \
-        abort();                        \
+        abort();                                                                   \
     }
 
-#define ECK_CWND_SINGLEOWNER(Class)     \
+#define ECK_W_NONATTACHABLE(Class)      \
     Class() = default;                  \
-    ECK_CWND_DISABLE_ATTACH             \
-    ECK_CWND_DISABLE_ATTACHNEW
+    ECK_W_DISABLE_ATTACH                \
+    ECK_W_DISABLE_ATTACHNEW
 
-#define ECK_CWND_SINGLEOWNER_NO_DEF_CONS(Class) \
-    ECK_CWND_DISABLE_ATTACH                     \
-    ECK_CWND_DISABLE_ATTACHNEW
+#define ECK_W_NONATTACHABLE_NO_CONS(Class) \
+    ECK_W_DISABLE_ATTACH                \
+    ECK_W_DISABLE_ATTACHNEW
 
-#define ECK_CWND_NOSINGLEOWNER(Class)   \
+#define ECK_W_ATTACHABLE(Class)         \
     Class() = default;                  \
     Class(HWND hWnd) { m_hWnd = hWnd; }
+
+// Style Get/Set =================================================
+
+#define ECK_W_STYLE_GETSET(Name, Style)                   \
+    BOOL StyleGet##Name() const                           \
+    {                                                     \
+        if constexpr (Style == 0)                         \
+            return !GetStyle();                           \
+        else                                              \
+            return IsBitSet(GetStyle(), Style);           \
+    }                                                     \
+    void StyleSet##Name(BOOL b)	const                     \
+    {                                                     \
+        ModifyStyle((b ? Style : 0), Style, GWL_STYLE);   \
+    }
+
+#define ECK_W_STYLE_GETSET_MASK(Name, Style, Mask)        \
+    BOOL StyleGet##Name() const                           \
+    {                                                     \
+        if constexpr (Style == 0)                         \
+            return !(GetStyle() & Mask);                  \
+        else                                              \
+            return IsBitSet(GetStyle(), Style);           \
+    }                                                     \
+    void StyleSet##Name(BOOL b)	const                     \
+    {                                                     \
+        SetStyle((GetStyle() & ~Mask) | (b ? Style : 0)); \
+    }
+
+#define ECK_W_STYLE(Name, Style)                          \
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;    \
+    ECK_W_STYLE_GETSET(Name, Style)
+
+#define ECK_W_STYLE_MASK(Name, Style, Mask)               \
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;    \
+    ECK_W_STYLE_GETSET_MASK(Name, Style, Mask)
 
 class CWindow;
 
@@ -196,7 +137,6 @@ struct BBMSG
     LRESULT lResult;
 };
 
-// 窗口句柄到CWindow指针
 EckInline CWindow* CWindowFromHandle(HWND hWnd) noexcept { return PtcCurrent()->WmAt(hWnd); }
 
 class CWindow : public ILayout
@@ -204,10 +144,6 @@ class CWindow : public ILayout
     friend HHOOK BeginCbtHook(CWindow*, FWindowCreating) noexcept;
 public:
     ECK_RTTI(CWindow, ILayout);
-
-#ifdef _DEBUG
-    CStringW DbgTag{};
-#endif
 protected:
     HWND m_hWnd{};
     WNDPROC m_pfnRealProc{ DefWindowProcW };
@@ -215,31 +151,8 @@ protected:
 public:
     using HSlot = decltype(m_ec)::HSlot;
 protected:
-    EckInline HWND InternalCreate(DWORD dwExStyle, PCWSTR pszClass, PCWSTR pszText, DWORD dwStyle,
-        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, HINSTANCE hInst, void* pParam,
-        FWindowCreating pfnCreatingProc = nullptr) noexcept
-    {
-        BeginCbtHook(this, pfnCreatingProc);
-#ifdef _DEBUG
-        CreateWindowExW(dwExStyle, pszClass, pszText, dwStyle,
-            x, y, cx, cy, hParent, hMenu, hInst, pParam);
-        if (!m_hWnd)
-        {
-            EckDbgPrintFormatMessage(NaGetLastError());
-            EckDbgBreak();
-        }
-        if (IsWindow(m_hWnd))
-            return m_hWnd;
-        else
-            return m_hWnd = nullptr;
-#else
-        return CreateWindowExW(dwExStyle, pszClass, pszText, dwStyle,
-            x, y, cx, cy, hParent, hMenu, hInst, pParam);
-#endif // _DEBUG
-    }
-
     template<class T>
-    EckInline void FillNmhdr(T& nm, UINT uCode) const noexcept
+    EckInline void NmFillHeader(T& nm, UINT uCode) const noexcept
     {
         static_assert(sizeof(T) >= sizeof(NMHDR));
         auto p = (NMHDR*)&nm;
@@ -247,23 +160,23 @@ protected:
         p->code = uCode;
         p->idFrom = GetDlgCtrlID(GetHandle());
     }
-    EckInline LRESULT SendNotify(auto& nm, HWND hParent) const noexcept
+    EckInline LRESULT NmSend(auto& nm, HWND hParent) const noexcept
     {
         return ::SendMessageW(hParent, WM_NOTIFY, ((NMHDR*)&nm)->idFrom, (LPARAM)&nm);
     }
-    EckInline LRESULT SendNotify(auto& nm) const noexcept
+    EckInline LRESULT NmSend(auto& nm) const noexcept
     {
-        return SendNotify(nm, GetParent(GetHandle()));
+        return NmSend(nm, GetParent(GetHandle()));
     }
-    EckInline LRESULT FillNmhdrAndSendNotify(auto& nm, HWND hParent, UINT uCode) const noexcept
+    EckInline LRESULT NmFillHeaderAndSend(auto& nm, HWND hParent, UINT uCode) const noexcept
     {
-        FillNmhdr(nm, uCode);
-        return SendNotify(nm, hParent);
+        NmFillHeader(nm, uCode);
+        return NmSend(nm, hParent);
     }
-    EckInline LRESULT FillNmhdrAndSendNotify(auto& nm, UINT uCode) const noexcept
+    EckInline LRESULT NmFillHeaderAndSend(auto& nm, UINT uCode) const noexcept
     {
-        FillNmhdr(nm, uCode);
-        return SendNotify(nm);
+        NmFillHeader(nm, uCode);
+        return NmSend(nm);
     }
 
     LRESULT DefaultNotifyMessage(HWND hParent, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
@@ -386,21 +299,8 @@ public:
         return lResult;
     }
 
-    /// <summary>
-    /// 是否可更改句柄所有权
-    /// </summary>
-    /// <returns>若类与HWND没有强联系则返回FALSE，否则返回TRUE，此时不能执行依附拆离等操作</returns>
-    EckInlineNdCe static BOOL IsSingleOwner() noexcept { return FALSE; }
-
     CWindow() = default;
-
-    /// <summary>
-    /// 构造自句柄。
-    /// 不插入窗口映射，仅用于临时使用
-    /// </summary>
-    /// <param name="hWnd"></param>
     constexpr CWindow(HWND hWnd) noexcept : m_hWnd{ hWnd } {}
-
     ECK_DISABLE_COPY_MOVE(CWindow);
 
     virtual ~CWindow()
@@ -412,20 +312,18 @@ public:
 #endif // _DEBUG
     }
 
-    // 依附句柄。函数将新句柄插入窗口映射，调用此函数必须满足两个前提：本类不能持有句柄；新句柄未在窗口映射中
+    // 调用函数前本类不能持有句柄，且新句柄必须未被其他CWindow类持有
     virtual void Attach(HWND hWnd) noexcept
     {
         EckAssert(!m_hWnd);// 当前类必须未持有句柄
-        const auto pCtx = PtcCurrent();
-        EckAssert(!pCtx->WmAt(hWnd));// 新句柄必须未被CWindow持有
+        const auto ptc = PtcCurrent();
+        EckAssert(!ptc->WmAt(hWnd));// 新句柄必须未被CWindow持有
         m_hWnd = hWnd;
-        pCtx->WmAdd(hWnd, this, !(GetStyle() & WS_CHILD));
+        ptc->WmAdd(hWnd, this, !(GetStyle() & WS_CHILD));
     }
-
-    // 拆离句柄。 函数将从窗口映射中移除句柄
     [[nodiscard]] virtual HWND Detach() noexcept
     {
-        HWND hWnd = nullptr;
+        HWND hWnd{};
         std::swap(hWnd, m_hWnd);
         const auto ptc = PtcCurrent();
         EckAssert(ptc->WmAt(hWnd) == this);// 检查匹配性
@@ -433,123 +331,57 @@ public:
         return hWnd;
     }
 
-    // 依附句柄，并同步状态
     EckInline virtual void AttachNew(HWND hWnd) noexcept
     {
         CWindow::Attach(hWnd);
         m_pfnRealProc = eck::SetWindowProcedure(hWnd, EckWindowProcedure);
     }
-
-    // 拆离句柄，并重置状态
     EckInline virtual void DetachNew() noexcept
     {
         eck::SetWindowProcedure(Detach(), m_pfnRealProc);
-    }
-
-    EckInline HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
-        int x, int y, int cx, int cy, HWND hParent, int nID, PCVOID pData = nullptr) noexcept
-    {
-        return Create(pszText, dwStyle, dwExStyle, x, y, cx, cy,
-            hParent, DwordToPointer<HMENU>(nID), pData);
     }
 
     EckInline HWND NativeCreate(DWORD dwExStyle, PCWSTR pszClass, PCWSTR pszText, DWORD dwStyle,
         int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, HINSTANCE hInst, void* pParam,
         FWindowCreating pfnCreatingProc = nullptr) noexcept
     {
-        return InternalCreate(dwExStyle, pszClass, pszText, dwStyle,
-            x, y, cx, cy, hParent, hMenu, hInst, pParam, pfnCreatingProc);
+        BeginCbtHook(this, pfnCreatingProc);
+        CreateWindowExW(dwExStyle, pszClass, pszText, dwStyle,
+            x, y, cx, cy, hParent, hMenu, hInst, pParam);
+        EndCbtHook();
+        return m_hWnd;
+    }
+
+    EckInline HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
+        int x, int y, int cx, int cy, HWND hParent, int nId, void* pParam = nullptr) noexcept
+    {
+        return Create(pszText, dwStyle, dwExStyle, x, y, cx, cy,
+            hParent, DwordToPointer<HMENU>(nId), pParam);
     }
 
     virtual HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
-        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, PCVOID pData = nullptr) noexcept
+        int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, void* pParam = nullptr) noexcept
     {
         EckDbgPrintWithLocation(L"** ERROR ** CWindow::Create未实现");
         EckDbgBreak();
         abort();
     }
 
-    /// <summary>
-    /// 序列化数据。
-    /// 子类若要存储额外数据，一般情况下应首先调用基类的此方法，然后再序列化自己的数据
-    /// </summary>
-    /// <param name="rb">字节集</param>
-    /// <param name="pOpt">可选的序列化选项</param>
-    virtual void SerializeData(CByteBuffer& rb, const SERIALIZE_OPT* pOpt = nullptr) noexcept
-    {
-        CStringW rsText = GetText();
-        const auto dwStyle = GetStyle();
-
-        const size_t cbSize = sizeof(CTRLDATA_WND) + rsText.ByteSize() +
-            (IsBitSet(dwStyle, WS_HSCROLL) ? sizeof(SCROLLINFO) : 0) +
-            (IsBitSet(dwStyle, WS_VSCROLL) ? sizeof(SCROLLINFO) : 0);
-
-        CMemoryWalker w(rb.PushBack(cbSize), cbSize);
-        CTRLDATA_WND* p;
-        w.SkipPointer(p);
-        p->uFlags = 0u;
-        p->iVer = CDV_WND_1;
-        p->cchText = rsText.Size();
-        p->dwStyle = dwStyle;
-        p->dwExStyle = GetExStyle();
-        w << rsText;
-        SCROLLINFO* psi;
-        if (IsBitSet(dwStyle, WS_HSCROLL))
-        {
-            p->uFlags |= SERDF_SBH;
-            w.SkipPointer(psi);
-            ScbGetInfomation(SB_HORZ, psi);
-        }
-        if (IsBitSet(dwStyle, WS_VSCROLL))
-        {
-            p->uFlags |= SERDF_SBV;
-            w.SkipPointer(psi);
-            ScbGetInfomation(SB_VERT, psi);
-        }
-    }
-
-    virtual void PreDeserialize(PCVOID pData) noexcept {}
-
-    virtual void PostDeserialize(PCVOID pData) noexcept
-    {
-        const auto* const p = (const CTRLDATA_WND*)pData;
-        const auto* psi = (const SCROLLINFO*)SkipBaseData(pData);
-        if (p->uFlags & SERDF_SBH)
-        {
-            ScbSetInfomation(SB_HORZ, psi);
-            ++psi;
-        }
-        if (p->uFlags & SERDF_SBV)
-            ScbSetInfomation(SB_VERT, psi);
-    }
-
-    /// <summary>
-    /// 消息处理函数
-    /// </summary>
     virtual LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
     {
         return CallWindowProcW(m_pfnRealProc, Handle, uMsg, wParam, lParam);
     }
 
-    /// <summary>
-    /// 消息过滤器
-    /// </summary>
-    /// <param name="Msg">MSG结构</param>
-    /// <returns>若要禁止派发该消息则返回TRUE，否则返回FALSE</returns>
+    // 返回TRUE禁止派发该消息
     virtual BOOL PreTranslateMessage(const MSG& Msg) noexcept
     {
         return FALSE;
     }
 
-    /// <summary>
-    /// 父窗口通知类消息映射。接收下列通知：
-    /// 所有者项目系列（WM_XxxITEM）
-    /// 标准通知系列（WM_COMMAND、WM_NOTIFY）
-    /// 着色系列（WM_CTLCOLORXxx）
-    /// 滚动条系列（WM_VSCROLL、WM_HSCROLL）
-    /// </summary>
-    /// <param name="bProcessed">若设为TRUE，则父窗口不再继续处理，调用函数前保证其为FALSE</param>
-    /// <returns>消息返回值</returns>
+    // 所有者项目系列（WM_XxxITEM）
+    // 标准通知系列（WM_COMMAND、WM_NOTIFY）
+    // 着色系列（WM_CTLCOLORXxx）
+    // 滚动条系列（WM_VSCROLL、WM_HSCROLL）
     virtual LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
         WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept
     {
@@ -604,65 +436,7 @@ public:
         return { TLytCoord(size.cx), TLytCoord(size.cy) };
     }
     void LoShow(BOOL bShow) noexcept override { Show(bShow ? SW_SHOW : SW_HIDE); }
-    HWND LoGetHWND() noexcept override { return GetHandle(); }
-
-    // 跳到当前类序列化数据的尾部
-    EckInlineNdCe static PCVOID SkipBaseData(PCVOID p) noexcept
-    {
-        return PointerStepBytes(p, ((const CTRLDATA_WND*)p)->Size());
-    }
-
-    HWND ReCreate(
-        std::optional<DWORD> dwNewStyle = std::nullopt,
-        std::optional<DWORD> dwNewExStyle = std::nullopt,
-        std::optional<RECT> rcPos = std::nullopt,
-        const SERIALIZE_OPT* pSerOpt = nullptr) noexcept
-    {
-        CByteBuffer rb{};
-        SerializeData(rb, pSerOpt);
-        const HWND hParent = GetParent(m_hWnd);
-        const int iID = GetDlgCtrlID(m_hWnd);
-        const HFONT hFont = GetFont();
-
-        RCWH NewPos;
-        if (!rcPos.has_value())
-        {
-            RECT rc;
-            GetWindowRect(m_hWnd, &rc);
-            ScreenToClient(hParent, &rc);
-            NewPos = { rc.left,rc.top,rc.right - rc.left,rc.bottom - rc.top };
-        }
-        else
-        {
-            NewPos = { rcPos.value().left,rcPos.value().top,
-                rcPos.value().right - rcPos.value().left,
-                rcPos.value().bottom - rcPos.value().top };
-        }
-
-        const auto pData = (CTRLDATA_WND*)rb.Data();
-        if (dwNewStyle.has_value())
-            pData->dwStyle = dwNewStyle.value();
-        if (dwNewExStyle.has_value())
-            pData->dwExStyle = dwNewExStyle.value();
-        if (pData->uFlags & SERDF_X)
-            NewPos.x = pData->PosSize()->x;
-        if (pData->uFlags & SERDF_Y)
-            NewPos.y = pData->PosSize()->y;
-        if (pData->uFlags & SERDF_CX)
-            NewPos.cx = pData->PosSize()->cx;
-        if (pData->uFlags & SERDF_CY)
-            NewPos.cy = pData->PosSize()->cy;
-
-        Destroy();
-        Create(nullptr, 0, 0, NewPos.x, NewPos.y,
-            NewPos.cx, NewPos.cy, hParent, iID, rb.Data());
-        if (pData->uFlags & SERDF_SBH)
-            ScbSetInfomation(SB_HORZ, pData->ScrollInfoHorz());
-        if (pData->uFlags & SERDF_SBV)
-            ScbSetInfomation(SB_VERT, pData->ScrollInfoVert());
-        SetFont(hFont);
-        return m_hWnd;
-    }
+    HWND LoGetWindowHandle() noexcept override { return GetHandle(); }
 
     EckInlineNdCe HWND GetHandle() const noexcept { return m_hWnd; }
 
@@ -696,8 +470,8 @@ public:
         {
         case FrameType::Sunken: dwExStyle |= WS_EX_CLIENTEDGE; break;
         case FrameType::Raised: dwExStyle |= (WS_EX_WINDOWEDGE | WS_EX_DLGMODALFRAME); break;
-        case FrameType::Flat:	dwExStyle |= WS_EX_STATICEDGE; break;
-        case FrameType::Box:	dwExStyle |= (WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE); break;
+        case FrameType::Flat:   dwExStyle |= WS_EX_STATICEDGE; break;
+        case FrameType::Box:    dwExStyle |= (WS_EX_DLGMODALFRAME | WS_EX_CLIENTEDGE); break;
         case FrameType::Single: dwStyle |= WS_BORDER; break;
         }
 
@@ -734,11 +508,11 @@ public:
             ShowScrollBar(m_hWnd, SB_VERT, FALSE);
             ShowScrollBar(m_hWnd, SB_HORZ, FALSE);
             break;
-        case ScrollType::Horz:
+        case ScrollType::Horizontal:
             ShowScrollBar(m_hWnd, SB_VERT, FALSE);
             ShowScrollBar(m_hWnd, SB_HORZ, TRUE);
             break;
-        case ScrollType::Vert:
+        case ScrollType::Vertical:
             ShowScrollBar(m_hWnd, SB_VERT, TRUE);
             ShowScrollBar(m_hWnd, SB_HORZ, FALSE);
             break;
@@ -753,9 +527,9 @@ public:
         const BOOL bVSB = IsBitSet(GetWindowLongPtrW(m_hWnd, GWL_STYLE), WS_VSCROLL);
         const BOOL bHSB = IsBitSet(GetWindowLongPtrW(m_hWnd, GWL_STYLE), WS_HSCROLL);
         if (bVSB)
-            return bHSB ? ScrollType::Both : ScrollType::Vert;
+            return bHSB ? ScrollType::Both : ScrollType::Vertical;
         if (bHSB)
-            return ScrollType::Horz;
+            return ScrollType::Horizontal;
         return ScrollType::None;
     }
 
@@ -974,7 +748,7 @@ public:
         return { rc.right - rc.left, rc.bottom - rc.top };
     }
 
-    EckInline BOOL ScbEnableArrows(int iOp, int iBarType)
+    EckInline BOOL ScbEnableArrows(int iOp, int iBarType) const noexcept
     {
         return EnableScrollBar(m_hWnd, iBarType, iOp);
     }
@@ -1067,18 +841,14 @@ public:
         SetScrollInfo(m_hWnd, iType, psi, bRedraw);
     }
 
-    EckInlineNd int GetClientWidth() const noexcept
+    EckInlineNd SIZE GetClientSize() const noexcept
     {
         RECT rc;
         GetClientRect(m_hWnd, &rc);
-        return rc.right;
+        return { rc.right,rc.bottom };
     }
-    EckInlineNd int GetClientHeight() const noexcept
-    {
-        RECT rc;
-        GetClientRect(m_hWnd, &rc);
-        return rc.bottom;
-    }
+    EckInlineNd int GetClientWidth() const noexcept { return GetClientSize().cx; }
+    EckInlineNd int GetClientHeight() const noexcept { return GetClientSize().cy; }
 
     EckInlineNd BOOL IsValid() const noexcept
     {

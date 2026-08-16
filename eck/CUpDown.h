@@ -6,17 +6,17 @@ class CUpDown : public CWindow
 {
 public:
     ECK_RTTI(CUpDown, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CUpDown);
-    ECK_CWND_CREATE_CLS(UPDOWN_CLASSW);
+    ECK_W_ATTACHABLE(CUpDown);
+    ECK_W_CREATE_CLASS(UPDOWN_CLASSW);
 
-    ECK_CWNDPROP_STYLE(AlignLeft, UDS_ALIGNLEFT);
-    ECK_CWNDPROP_STYLE(AlignRight, UDS_ALIGNRIGHT);
-    ECK_CWNDPROP_STYLE(ArrowKeys, UDS_ARROWKEYS);
-    ECK_CWNDPROP_STYLE(AutoBuddy, UDS_AUTOBUDDY);
-    ECK_CWNDPROP_STYLE(Horizontal, UDS_HORZ);
-    ECK_CWNDPROP_STYLE(NoThousands, UDS_NOTHOUSANDS);
-    ECK_CWNDPROP_STYLE(SetBuddyInt, UDS_SETBUDDYINT);
-    ECK_CWNDPROP_STYLE(Wrap, UDS_WRAP);
+    ECK_W_STYLE(AlignmentLeft, UDS_ALIGNLEFT);
+    ECK_W_STYLE(AlignmentRight, UDS_ALIGNRIGHT);
+    ECK_W_STYLE(ArrowKeys, UDS_ARROWKEYS);
+    ECK_W_STYLE(AutoBuddy, UDS_AUTOBUDDY);
+    ECK_W_STYLE(Horizontal, UDS_HORZ);
+    ECK_W_STYLE(NoThousands, UDS_NOTHOUSANDS);
+    ECK_W_STYLE(SetBuddyInt, UDS_SETBUDDYINT);
+    ECK_W_STYLE(Wrap, UDS_WRAP);
 
     EckInline int GetAcceleration(
         _Out_writes_opt_(cBuf) UDACCEL* pBuf, int cBuf) const noexcept

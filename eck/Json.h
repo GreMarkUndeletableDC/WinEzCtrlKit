@@ -63,7 +63,7 @@ namespace Detail
     {
         using T1 = std::remove_cvref_t<T>;
         if constexpr (std::is_integral_v<T1>)
-            return This.ArrAt(x);
+            return This.ArrayAt(x);
         else if constexpr (
             std::is_convertible_v<T1, PCCH> ||
             std::is_convertible_v<T1, PCBYTE> ||
@@ -115,44 +115,48 @@ namespace Detail
         void* m_pVal{};
     public:
         constexpr CValueBase(void* p) noexcept : m_pVal{ p } {}
-        EckInlineNd YyType GetType() const noexcept { return unsafe_yyjson_get_type(m_pVal); }
-        EckInlineNd YySubType GetSubType() const noexcept { return unsafe_yyjson_get_subtype(m_pVal); }
-        EckInlineNd uint8_t GetTag() const noexcept { return unsafe_yyjson_get_tag(m_pVal); }
-        EckInlineNd PCSTR GetTypeDescription() const noexcept { return yyjson_get_type_desc((yyjson_val*)m_pVal); }
+        EckInlineNd YyType GetType() const noexcept { return yyjson_get_type((YyValue*)m_pVal); }
+        EckInlineNd YySubType GetSubType() const noexcept { return yyjson_get_subtype((YyValue*)m_pVal); }
+        EckInlineNd uint8_t GetTag() const noexcept { return yyjson_get_tag((YyValue*)m_pVal); }
+        EckInlineNd PCSTR GetTypeDescription() const noexcept { return yyjson_get_type_desc((YyValue*)m_pVal); }
 
-        EckInline bool EqualString(_In_z_ PCSTR pszStr) const noexcept { return yyjson_equals_str((yyjson_val*)m_pVal, pszStr); }
+        EckInline bool EqualString(_In_z_ PCSTR pszStr) const noexcept { return yyjson_equals_str((YyValue*)m_pVal, pszStr); }
         EckInline bool EqualString(
             _In_reads_(cchStr) PCSTR pszStr,
             size_t cchStr) const noexcept
         {
-            return yyjson_equals_strn((yyjson_val*)m_pVal, pszStr, cchStr);
+            return yyjson_equals_strn((YyValue*)m_pVal, pszStr, cchStr);
         }
 
-        EckInlineNd bool IsNull() const noexcept { return unsafe_yyjson_is_null(m_pVal); }
-        EckInlineNd bool IsTrue() const noexcept { return unsafe_yyjson_is_true(m_pVal); }
-        EckInlineNd bool IsFalse() const noexcept { return unsafe_yyjson_is_false(m_pVal); }
-        EckInlineNd bool IsBool() const noexcept { return unsafe_yyjson_is_bool(m_pVal); }
-        EckInlineNd bool IsUInt64() const noexcept { return unsafe_yyjson_is_uint(m_pVal); }
-        EckInlineNd bool IsInt64() const noexcept { return unsafe_yyjson_is_sint(m_pVal); }
-        EckInlineNd bool IsInt() const noexcept { return unsafe_yyjson_is_int(m_pVal); }
-        EckInlineNd bool IsReal() const noexcept { return unsafe_yyjson_is_real(m_pVal); }
-        EckInlineNd bool IsNumber() const noexcept { return unsafe_yyjson_is_num(m_pVal); }
-        EckInlineNd bool IsString() const noexcept { return unsafe_yyjson_is_str(m_pVal); }
-        EckInlineNd bool IsArray() const noexcept { return unsafe_yyjson_is_arr(m_pVal); }
-        EckInlineNd bool IsObject() const noexcept { return unsafe_yyjson_is_obj(m_pVal); }
-        EckInlineNd bool IsContainer() const noexcept { return unsafe_yyjson_is_ctn(m_pVal); }
-        EckInlineNd bool IsRaw() const noexcept { return unsafe_yyjson_is_raw(m_pVal); }
+        EckInlineNd bool IsNull() const noexcept { return yyjson_is_null((YyValue*)m_pVal); }
+        EckInlineNd bool IsTrue() const noexcept { return yyjson_is_true((YyValue*)m_pVal); }
+        EckInlineNd bool IsFalse() const noexcept { return yyjson_is_false((YyValue*)m_pVal); }
+        EckInlineNd bool IsBool() const noexcept { return yyjson_is_bool((YyValue*)m_pVal); }
+        EckInlineNd bool IsUInt64() const noexcept { return yyjson_is_uint((YyValue*)m_pVal); }
+        EckInlineNd bool IsInt64() const noexcept { return yyjson_is_sint((YyValue*)m_pVal); }
+        EckInlineNd bool IsInt() const noexcept { return yyjson_is_int((YyValue*)m_pVal); }
+        EckInlineNd bool IsReal() const noexcept { return yyjson_is_real((YyValue*)m_pVal); }
+        EckInlineNd bool IsNumber() const noexcept { return yyjson_is_num((YyValue*)m_pVal); }
+        EckInlineNd bool IsString() const noexcept { return yyjson_is_str((YyValue*)m_pVal); }
+        EckInlineNd bool IsArray() const noexcept { return yyjson_is_arr((YyValue*)m_pVal); }
+        EckInlineNd bool IsObject() const noexcept { return yyjson_is_obj((YyValue*)m_pVal); }
+        EckInlineNd bool IsContainer() const noexcept { return yyjson_is_ctn((YyValue*)m_pVal); }
+        EckInlineNd bool IsRaw() const noexcept { return yyjson_is_raw((YyValue*)m_pVal); }
 
-        EckInlineNd PCSTR GetRaw() const noexcept { return yyjson_get_raw((yyjson_val*)m_pVal); }
-        EckInlineNd bool GetBool() const noexcept { return yyjson_get_bool((yyjson_val*)m_pVal); }
-        EckInlineNd uint64_t GetUInt64() const noexcept { return yyjson_get_uint((yyjson_val*)m_pVal); }
-        EckInlineNd int64_t GetInt64() const noexcept { return yyjson_get_sint((yyjson_val*)m_pVal); }
-        EckInlineNd int GetInt() const noexcept { return yyjson_get_int((yyjson_val*)m_pVal); }
-        EckInlineNd double GetReal() const noexcept { return yyjson_get_real((yyjson_val*)m_pVal); }
-        EckInlineNd double GetNumber() const noexcept { return yyjson_get_num((yyjson_val*)m_pVal); }
-        EckInlineNd PCSTR GetString() const noexcept { return yyjson_get_str((yyjson_val*)m_pVal); }
-        EckInlineNd size_t GetLength() const noexcept { return yyjson_get_len((yyjson_val*)m_pVal); }
-        EckInlineNd std::string_view GetStringView() const noexcept { return { GetString(), GetLength() }; }
+        EckInlineNd PCSTR GetRaw() const noexcept { return yyjson_get_raw((YyValue*)m_pVal); }
+        EckInlineNd bool GetBool() const noexcept { return yyjson_get_bool((YyValue*)m_pVal); }
+        EckInlineNd uint64_t GetUInt64() const noexcept { return yyjson_get_uint((YyValue*)m_pVal); }
+        EckInlineNd int64_t GetInt64() const noexcept { return yyjson_get_sint((YyValue*)m_pVal); }
+        EckInlineNd int GetInt() const noexcept { return yyjson_get_int((YyValue*)m_pVal); }
+        EckInlineNd double GetReal() const noexcept { return yyjson_get_real((YyValue*)m_pVal); }
+        EckInlineNd double GetNumber() const noexcept { return yyjson_get_num((YyValue*)m_pVal); }
+        EckInlineNd PCSTR GetString() const noexcept { return yyjson_get_str((YyValue*)m_pVal); }
+        EckInlineNd size_t GetLength() const noexcept { return yyjson_get_len((YyValue*)m_pVal); }
+        EckInlineNd std::string_view GetStringView() const noexcept
+        {
+            const auto p = GetString();
+            return { p, p ? GetLength() : 0 };
+        }
         EckInlineNd CStringW GetStringW() const noexcept { return EcdMultiByteToWide(GetString(), (int)GetLength(), CP_UTF8); }
     };
 }
@@ -184,13 +188,13 @@ public:
         return yyjson_set_strn(GetPointer(), pszVal, cchVal);
     }
 
-    EckInlineNd size_t ArrSize() const noexcept { return yyjson_arr_size(GetPointer()); }
-    EckInlineNd CValue ArrAt(size_t idx) const noexcept { return yyjson_arr_get(GetPointer(), idx); }
-    EckInlineNd CValue ArrFront() const noexcept { return yyjson_arr_get_first(GetPointer()); }
-    EckInlineNd CValue ArrBack() const noexcept { return yyjson_arr_get_last(GetPointer()); }
-    EckInlineNd size_t ObjSize() const noexcept { return yyjson_obj_size(GetPointer()); }
-    EckInlineNd CValue ObjAt(_In_z_ PCSTR pszKey) const noexcept { return yyjson_obj_get(GetPointer(), pszKey); }
-    EckInlineNd CValue ObjAt(
+    EckInlineNd size_t ArraySize() const noexcept { return yyjson_arr_size(GetPointer()); }
+    EckInlineNd CValue ArrayAt(size_t idx) const noexcept { return yyjson_arr_get(GetPointer(), idx); }
+    EckInlineNd CValue ArrayFront() const noexcept { return yyjson_arr_get_first(GetPointer()); }
+    EckInlineNd CValue ArrayBack() const noexcept { return yyjson_arr_get_last(GetPointer()); }
+    EckInlineNd size_t ObjectSize() const noexcept { return yyjson_obj_size(GetPointer()); }
+    EckInlineNd CValue ObjectAt(_In_z_ PCSTR pszKey) const noexcept { return yyjson_obj_get(GetPointer(), pszKey); }
+    EckInlineNd CValue ObjectAt(
         _In_reads_(cchKey) PCSTR pszKey,
         size_t cchKey) const noexcept
     {
@@ -499,32 +503,32 @@ public:
     EckInlineNdCe auto GetPointer() const noexcept { return (YyMutableValue*)m_pVal; }
     EckInlineNdCe BOOL IsValid() const noexcept { return !!m_pVal; }
 
-    EckInline void SetRaw(
+    EckInline bool SetRaw(
         _In_reads_or_z_(cchRaw) PCSTR pszRaw,
         size_t cchRaw = MaxSizeT) const noexcept
     {
-        return unsafe_yyjson_set_raw(GetPointer(), pszRaw, cchRaw);
+        return yyjson_mut_set_raw(GetPointer(), pszRaw, cchRaw);
     }
-    EckInline void SetNull() const noexcept { return unsafe_yyjson_set_null(GetPointer()); }
-    EckInline void SetBool(bool bVal) const noexcept { return unsafe_yyjson_set_bool(GetPointer(), bVal); }
-    EckInline void SetUInt64(uint64_t uVal) const noexcept { return unsafe_yyjson_set_uint(GetPointer(), uVal); }
-    EckInline void SetInt64(int64_t iVal) const noexcept { return unsafe_yyjson_set_sint(GetPointer(), iVal); }
-    EckInline void SetInt(int iVal) const noexcept { return unsafe_yyjson_set_sint(GetPointer(), iVal); }
-    EckInline void SetReal(double dVal) const noexcept { return unsafe_yyjson_set_real(GetPointer(), dVal); }
-    EckInline void SetString(_In_z_ PCSTR pszVal) const noexcept { return unsafe_yyjson_set_str(GetPointer(), pszVal); }
-    EckInline void SetString(
+    EckInline bool SetNull() const noexcept { return yyjson_mut_set_null(GetPointer()); }
+    EckInline bool SetBool(bool bVal) const noexcept { return yyjson_mut_set_bool(GetPointer(), bVal); }
+    EckInline bool SetUInt64(uint64_t uVal) const noexcept { return yyjson_mut_set_uint(GetPointer(), uVal); }
+    EckInline bool SetInt64(int64_t iVal) const noexcept { return yyjson_mut_set_sint(GetPointer(), iVal); }
+    EckInline bool SetInt(int iVal) const noexcept { return yyjson_mut_set_sint(GetPointer(), iVal); }
+    EckInline bool SetReal(double dVal) const noexcept { return yyjson_mut_set_real(GetPointer(), dVal); }
+    EckInline bool SetString(_In_z_ PCSTR pszVal) const noexcept { return yyjson_mut_set_str(GetPointer(), pszVal); }
+    EckInline bool SetString(
         _In_reads_(cchVal) PCSTR pszVal,
         size_t cchVal) const noexcept
     {
-        return unsafe_yyjson_set_strn(GetPointer(), pszVal, cchVal);
+        return yyjson_mut_set_strn(GetPointer(), pszVal, cchVal);
     }
-    EckInline void SetArray(size_t c = 0) const noexcept { return unsafe_yyjson_set_arr(GetPointer(), c); }
-    EckInline void SetObject(size_t c = 0) const noexcept { return unsafe_yyjson_set_obj(GetPointer(), c); }
+    EckInline bool SetArray() const noexcept { return yyjson_mut_set_arr(GetPointer()); }
+    EckInline bool SetObject() const noexcept { return yyjson_mut_set_obj(GetPointer()); }
 
-    EckInlineNd size_t ArrSize() const noexcept { return yyjson_mut_arr_size(GetPointer()); }
-    EckInlineNd CMutableValue ArrAt(size_t idx) const noexcept { return yyjson_mut_arr_get(GetPointer(), idx); }
-    EckInlineNd CMutableValue ArrFront() const noexcept { return yyjson_mut_arr_get_first(GetPointer()); }
-    EckInlineNd CMutableValue ArrBack() const noexcept { return yyjson_mut_arr_get_last(GetPointer()); }
+    EckInlineNd size_t ArraySize() const noexcept { return yyjson_mut_arr_size(GetPointer()); }
+    EckInlineNd CMutableValue ArrayAt(size_t idx) const noexcept { return yyjson_mut_arr_get(GetPointer(), idx); }
+    EckInlineNd CMutableValue ArrayFront() const noexcept { return yyjson_mut_arr_get_first(GetPointer()); }
+    EckInlineNd CMutableValue ArrayBack() const noexcept { return yyjson_mut_arr_get_last(GetPointer()); }
     EckInline BOOL ArrInsert(size_t idx, CMutableValue Val) const noexcept
     {
         return yyjson_mut_arr_insert(GetPointer(), Val.GetPointer(), idx);
@@ -545,9 +549,9 @@ public:
     EckInline BOOL ArrClear() const noexcept { return yyjson_mut_arr_clear(GetPointer()); }
     EckInline BOOL ArrRotate(size_t idx) const noexcept { return yyjson_mut_arr_rotate(GetPointer(), idx); }
 
-    EckInlineNd size_t ObjSize() const noexcept { return yyjson_mut_obj_size(GetPointer()); }
-    EckInlineNd CMutableValue ObjAt(_In_z_ PCSTR pszKey) const noexcept { return yyjson_mut_obj_get(GetPointer(), pszKey); }
-    EckInlineNd CMutableValue ObjAt(
+    EckInlineNd size_t ObjectSize() const noexcept { return yyjson_mut_obj_size(GetPointer()); }
+    EckInlineNd CMutableValue ObjectAt(_In_z_ PCSTR pszKey) const noexcept { return yyjson_mut_obj_get(GetPointer(), pszKey); }
+    EckInlineNd CMutableValue ObjectAt(
         _In_reads_(cchKey) PCSTR pszKey,
         size_t cchKey) const noexcept
     {
