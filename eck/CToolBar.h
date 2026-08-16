@@ -2,21 +2,21 @@
 #include "CWindow.h"
 
 ECK_NAMESPACE_BEGIN
-#define ECK_CWNDPROP_TLBE_STYLE(Name, Style)			\
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-	BOOL StyleGet##Name() const noexcept							\
-	{													\
-		if constexpr (Style == 0)						\
-			return !GetTBExtendStyle();					\
-		else											\
-			return IsBitSet(GetTBExtendStyle(), Style);	\
-	}													\
-	void StyleSet##Name(BOOL b) const noexcept					\
-	{													\
-		if (b)											\
-			SetTBExtendStyle(GetTBExtendStyle() | Style);	\
-		else											\
-			SetTBExtendStyle(GetTBExtendStyle() & ~Style);	\
+#define ECK_W_TLBE_STYLE(Name, Style)                      \
+	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;     \
+	BOOL StyleGet##Name() const noexcept                   \
+	{                                                      \
+		if constexpr (Style == 0)                          \
+			return !GetTBExtendStyle();                    \
+		else                                               \
+			return IsBitSet(GetTBExtendStyle(), Style);    \
+	}                                                      \
+	void StyleSet##Name(BOOL b) const noexcept             \
+	{                                                      \
+		if (b)                                             \
+			SetTBExtendStyle(GetTBExtendStyle() | Style);  \
+		else                                               \
+			SetTBExtendStyle(GetTBExtendStyle() & ~Style); \
 	}
 
 constexpr inline DWORD ToolBarPrettyStyle = TBSTYLE_LIST | TBSTYLE_TRANSPARENT |
@@ -29,18 +29,18 @@ public:
     ECK_W_ATTACHABLE(CToolBar);
     ECK_W_CREATE_CLASS(TOOLBARCLASSNAMEW);
 
-    ECK_CWNDPROP_STYLE(AltDrag, TBSTYLE_ALTDRAG);
-    ECK_CWNDPROP_STYLE(CustomErase, TBSTYLE_CUSTOMERASE);
-    ECK_CWNDPROP_STYLE(Flat, TBSTYLE_FLAT);
-    ECK_CWNDPROP_STYLE(List, TBSTYLE_LIST);
-    ECK_CWNDPROP_STYLE(RegisterDrop, TBSTYLE_REGISTERDROP);
-    ECK_CWNDPROP_STYLE(ToolTips, TBSTYLE_TOOLTIPS);
-    ECK_CWNDPROP_STYLE(Transparent, TBSTYLE_TRANSPARENT);
-    ECK_CWNDPROP_STYLE(Wrapable, TBSTYLE_WRAPABLE);
-    ECK_CWNDPROP_TLBE_STYLE(DrawDropDownArrows, TBSTYLE_EX_DRAWDDARROWS);
-    ECK_CWNDPROP_TLBE_STYLE(HideClippedButtons, TBSTYLE_EX_HIDECLIPPEDBUTTONS);
-    ECK_CWNDPROP_TLBE_STYLE(DoubleBuffer, TBSTYLE_EX_DOUBLEBUFFER);
-    ECK_CWNDPROP_TLBE_STYLE(MixedButtons, TBSTYLE_EX_MIXEDBUTTONS);
+    ECK_W_STYLE(AltDrag, TBSTYLE_ALTDRAG);
+    ECK_W_STYLE(CustomErase, TBSTYLE_CUSTOMERASE);
+    ECK_W_STYLE(Flat, TBSTYLE_FLAT);
+    ECK_W_STYLE(List, TBSTYLE_LIST);
+    ECK_W_STYLE(RegisterDrop, TBSTYLE_REGISTERDROP);
+    ECK_W_STYLE(ToolTips, TBSTYLE_TOOLTIPS);
+    ECK_W_STYLE(Transparent, TBSTYLE_TRANSPARENT);
+    ECK_W_STYLE(Wrapable, TBSTYLE_WRAPABLE);
+    ECK_W_TLBE_STYLE(DrawDropDownArrows, TBSTYLE_EX_DRAWDDARROWS);
+    ECK_W_TLBE_STYLE(HideClippedButtons, TBSTYLE_EX_HIDECLIPPEDBUTTONS);
+    ECK_W_TLBE_STYLE(DoubleBuffer, TBSTYLE_EX_DOUBLEBUFFER);
+    ECK_W_TLBE_STYLE(MixedButtons, TBSTYLE_EX_MIXEDBUTTONS);
 
     EckInline int AddBitmap(int cBitmaps, HINSTANCE hInstance, UINT_PTR nID) const noexcept
     {

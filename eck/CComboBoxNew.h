@@ -10,7 +10,7 @@ public:
     ECK_W_NONATTACHABLE(CComboBoxNew);
     ECK_W_CREATE_CLASS_INST(WCN_COMBOBOXNEW, g_hInstance);
 
-    enum class View :BYTE
+    enum class View : BYTE
     {
         DropDown,
         DropDownEdit,

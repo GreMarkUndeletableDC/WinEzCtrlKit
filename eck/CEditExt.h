@@ -25,19 +25,18 @@ public:
         Priv_NeedFilterKey = Password,// 仅供内部使用
     };
 protected:
-    CStringW m_rsCueBanner{};			// 输入提示
+    CStringW m_rsCueBanner{};
 
-    COLORREF m_crText{ CLR_DEFAULT };	// 文本颜色
-    COLORREF m_crTextBk{ CLR_DEFAULT };	// 文本背景色
-    COLORREF m_crBk{ CLR_DEFAULT };		// 编辑框背景色
+    COLORREF m_crText{ CLR_DEFAULT };
+    COLORREF m_crTextBk{ CLR_DEFAULT };
+    COLORREF m_crBk{ CLR_DEFAULT };
 
-    int m_cyText{};		// 文本高度
-    int m_cxWnd{};		// 客户区宽度
-    int m_cyWnd{};		// 客户区高度
-    RECT m_rcMargins{};	// 边距
+    int m_cyText{};
+    int m_cxClient{}, m_cyClient{};
+    RECT m_rcMargins{};
 
-    WCHAR m_chMask{};	// 掩码字符
-    InputMode m_iInputMode{ InputMode::Normal };// 输入方式
+    WCHAR m_chMask{};
+    InputMode m_iInputMode{ InputMode::Normal };
 
     BITBOOL m_bAutoWrap : 1 = TRUE;				// [多行][延迟标志]自动换行，不加入ES_AUTOHSCROLL
     BITBOOL m_bMultiLineCueBanner : 1 = TRUE;	// [多行]显示提示
@@ -63,9 +62,9 @@ protected:
         return
         {
             0,
-            (m_cyWnd - m_cyText) / 2,
-            m_cxWnd,
-            (m_cyWnd - m_cyText) / 2 + m_cyText
+            (m_cyClient - m_cyText) / 2,
+            m_cxClient,
+            (m_cyClient - m_cyText) / 2 + m_cyText
         };
     }
 
@@ -331,7 +330,7 @@ public:
             if (GetMultiLine())
                 return 0;
             const HDC hDC = GetWindowDC(Handle);
-            RECT rcWnd{ 0,0,m_cxWnd,m_cyWnd };
+            RECT rcWnd{ 0,0,m_cxClient,m_cyClient };
             const RECT rcText{ GetSingleLineTextRect() };
             // 非客户区矩形减掉边框
             rcWnd.left += m_rcMargins.left;
@@ -366,8 +365,8 @@ public:
         case WM_WINDOWPOSCHANGED:
         {
             const auto* const pwp = (WINDOWPOS*)lParam;
-            m_cxWnd = pwp->cx;
-            m_cyWnd = pwp->cy;
+            m_cxClient = pwp->cx;
+            m_cyClient = pwp->cy;
         }
         break;
 
@@ -458,7 +457,7 @@ public:
         if (!GetMultiLine())
         {
             if (Size.cx <= 0)
-                Size.cx = (TLytCoord)m_cxWnd;
+                Size.cx = (TLytCoord)m_cxClient;
             Size.cy = TLytCoord(m_cyText + DaGetSystemMetrics(SM_CYEDGE, GetDpi(Handle)) * 2);
             return TRUE;
         }
@@ -469,7 +468,7 @@ public:
     {
         switch (ePart)
         {
-        case ColorPart::Text: m_crText = cr; break;
+        case ColorPart::Text:   m_crText = cr;   break;
         case ColorPart::TextBk: m_crTextBk = cr; break;
         case ColorPart::Bk:
             m_crBk = cr;
@@ -482,10 +481,10 @@ public:
     {
         switch (ePart)
         {
-        case ColorPart::Text: return m_crText;
+        case ColorPart::Text:   return m_crText;
         case ColorPart::TextBk: return m_crTextBk;
-        case ColorPart::Bk: return m_crBk;
-        default: return CLR_INVALID;
+        case ColorPart::Bk:     return m_crBk;
+        default:                return CLR_INVALID;
         }
     }
 

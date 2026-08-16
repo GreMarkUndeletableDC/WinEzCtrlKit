@@ -18,11 +18,12 @@ enum class FrameType
 enum class ScrollType
 {
     None,   // 无
-    Horz,   // 水平滚动条
-    Vert,   // 垂直滚动条
+    Horizontal,   // 水平滚动条
+    Vertical,   // 垂直滚动条
     Both,   // 水平和垂直滚动条
 };
 
+// Create =======================================================
 
 // 生成以ID创建的方法
 #define ECK_W_CREATE                                             \
@@ -48,6 +49,8 @@ enum class ScrollType
 
 // 按类名生成创建方法
 #define ECK_W_CREATE_CLASS(ClassName) ECK_W_CREATE_CLASS_INST(ClassName, nullptr)
+
+// Attach / Detach ==============================================
 
 #define ECK_W_DISABLE_ATTACH                                                    \
     void Attach(HWND hWnd) noexcept override                                    \
@@ -86,6 +89,42 @@ enum class ScrollType
 #define ECK_W_ATTACHABLE(Class)         \
     Class() = default;                  \
     Class(HWND hWnd) { m_hWnd = hWnd; }
+
+// Style Get/Set =================================================
+
+#define ECK_W_STYLE_GETSET(Name, Style)                   \
+    BOOL StyleGet##Name() const                           \
+    {                                                     \
+        if constexpr (Style == 0)                         \
+            return !GetStyle();                           \
+        else                                              \
+            return IsBitSet(GetStyle(), Style);           \
+    }                                                     \
+    void StyleSet##Name(BOOL b)	const                     \
+    {                                                     \
+        ModifyStyle((b ? Style : 0), Style, GWL_STYLE);   \
+    }
+
+#define ECK_W_STYLE_GETSET_MASK(Name, Style, Mask)        \
+    BOOL StyleGet##Name() const                           \
+    {                                                     \
+        if constexpr (Style == 0)                         \
+            return !(GetStyle() & Mask);                  \
+        else                                              \
+            return IsBitSet(GetStyle(), Style);           \
+    }                                                     \
+    void StyleSet##Name(BOOL b)	const                     \
+    {                                                     \
+        SetStyle((GetStyle() & ~Mask) | (b ? Style : 0)); \
+    }
+
+#define ECK_W_STYLE(Name, Style)                          \
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;    \
+    ECK_W_STYLE_GETSET(Name, Style)
+
+#define ECK_W_STYLE_MASK(Name, Style, Mask)               \
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;    \
+    ECK_W_STYLE_GETSET_MASK(Name, Style, Mask)
 
 class CWindow;
 
@@ -309,6 +348,7 @@ public:
         BeginCbtHook(this, pfnCreatingProc);
         CreateWindowExW(dwExStyle, pszClass, pszText, dwStyle,
             x, y, cx, cy, hParent, hMenu, hInst, pParam);
+        EndCbtHook();
         return m_hWnd;
     }
 
@@ -468,11 +508,11 @@ public:
             ShowScrollBar(m_hWnd, SB_VERT, FALSE);
             ShowScrollBar(m_hWnd, SB_HORZ, FALSE);
             break;
-        case ScrollType::Horz:
+        case ScrollType::Horizontal:
             ShowScrollBar(m_hWnd, SB_VERT, FALSE);
             ShowScrollBar(m_hWnd, SB_HORZ, TRUE);
             break;
-        case ScrollType::Vert:
+        case ScrollType::Vertical:
             ShowScrollBar(m_hWnd, SB_VERT, TRUE);
             ShowScrollBar(m_hWnd, SB_HORZ, FALSE);
             break;
@@ -487,9 +527,9 @@ public:
         const BOOL bVSB = IsBitSet(GetWindowLongPtrW(m_hWnd, GWL_STYLE), WS_VSCROLL);
         const BOOL bHSB = IsBitSet(GetWindowLongPtrW(m_hWnd, GWL_STYLE), WS_HSCROLL);
         if (bVSB)
-            return bHSB ? ScrollType::Both : ScrollType::Vert;
+            return bHSB ? ScrollType::Both : ScrollType::Vertical;
         if (bHSB)
-            return ScrollType::Horz;
+            return ScrollType::Horizontal;
         return ScrollType::None;
     }
 

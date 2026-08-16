@@ -5,18 +5,18 @@
 
 ECK_NAMESPACE_BEGIN
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5// 1809+
-#define ECK_CWNDPROP_EDE_STYLE(Name, Style)				\
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-	BOOL StyleGet##Name() const							\
-	{													\
-		if constexpr (Style == 0)						\
-			return !GetEDExtendStyle();					\
-		else											\
-			return IsBitSet(GetEDExtendStyle(), Style);	\
-	}													\
-	void StyleSet##Name(BOOL b) const					\
-	{													\
-		SetEDExtendStyle(b ? Style : 0, Style);			\
+#define ECK_W_EDE_STYLE(Name, Style)                    \
+	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+	BOOL StyleGet##Name() const                         \
+	{                                                   \
+		if constexpr (Style == 0)                       \
+			return !GetEDExtendStyle();                 \
+		else                                            \
+			return IsBitSet(GetEDExtendStyle(), Style); \
+	}                                                   \
+	void StyleSet##Name(BOOL b) const                   \
+	{                                                   \
+		SetEDExtendStyle(b ? Style : 0, Style);         \
 	}
 #endif// NTDDI_VERSION >= NTDDI_WIN10_RS5
 
@@ -34,26 +34,26 @@ public:
         ToUpperCase
     };
 
-    ECK_CWNDPROP_STYLE(AutoHScroll, ES_AUTOHSCROLL);
-    ECK_CWNDPROP_STYLE(AutoVScroll, ES_AUTOVSCROLL);
-    ECK_CWNDPROP_STYLE(Center, ES_CENTER);
-    ECK_CWNDPROP_STYLE(Left, ES_LEFT);
-    ECK_CWNDPROP_STYLE(Lowercase, ES_LOWERCASE);
-    ECK_CWNDPROP_STYLE(Multiline, ES_MULTILINE);
-    ECK_CWNDPROP_STYLE(NoHideSel, ES_NOHIDESEL);
-    ECK_CWNDPROP_STYLE(Number, ES_NUMBER);
-    ECK_CWNDPROP_STYLE(OemConvert, ES_OEMCONVERT);
-    ECK_CWNDPROP_STYLE(Password, ES_PASSWORD);
-    ECK_CWNDPROP_STYLE(ReadOnly, ES_READONLY);
-    ECK_CWNDPROP_STYLE(Right, ES_RIGHT);
-    ECK_CWNDPROP_STYLE(Uppercase, ES_UPPERCASE);
-    ECK_CWNDPROP_STYLE(WantReturn, ES_WANTRETURN);
+    ECK_W_STYLE(AutoHScroll, ES_AUTOHSCROLL);
+    ECK_W_STYLE(AutoVScroll, ES_AUTOVSCROLL);
+    ECK_W_STYLE(Center, ES_CENTER);
+    ECK_W_STYLE(Left, ES_LEFT);
+    ECK_W_STYLE(Lowercase, ES_LOWERCASE);
+    ECK_W_STYLE(Multiline, ES_MULTILINE);
+    ECK_W_STYLE(NoHideSel, ES_NOHIDESEL);
+    ECK_W_STYLE(Number, ES_NUMBER);
+    ECK_W_STYLE(OemConvert, ES_OEMCONVERT);
+    ECK_W_STYLE(Password, ES_PASSWORD);
+    ECK_W_STYLE(ReadOnly, ES_READONLY);
+    ECK_W_STYLE(AlignmentRight, ES_RIGHT);
+    ECK_W_STYLE(Uppercase, ES_UPPERCASE);
+    ECK_W_STYLE(WantReturn, ES_WANTRETURN);
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5// 1809+
-    ECK_CWNDPROP_EDE_STYLE(AllowEolCR, ES_EX_ALLOWEOL_CR);
-    ECK_CWNDPROP_EDE_STYLE(AllowEolLF, ES_EX_ALLOWEOL_LF);
-    ECK_CWNDPROP_EDE_STYLE(AllowEolAll, ES_EX_ALLOWEOL_ALL);
-    ECK_CWNDPROP_EDE_STYLE(ConvertEolOnPaste, ES_EX_CONVERT_EOL_ON_PASTE);
-    ECK_CWNDPROP_EDE_STYLE(Zoomable, ES_EX_ZOOMABLE);
+    ECK_W_EDE_STYLE(AllowEolCr, ES_EX_ALLOWEOL_CR);
+    ECK_W_EDE_STYLE(AllowEolLf, ES_EX_ALLOWEOL_LF);
+    ECK_W_EDE_STYLE(AllowEolAll, ES_EX_ALLOWEOL_ALL);
+    ECK_W_EDE_STYLE(ConvertEolOnPaste, ES_EX_CONVERT_EOL_ON_PASTE);
+    ECK_W_EDE_STYLE(Zoomable, ES_EX_ZOOMABLE);
 #endif// NTDDI_VERSION >= NTDDI_WIN10_RS5
 
     EckInline BOOL CanUndo() const noexcept

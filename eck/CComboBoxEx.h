@@ -4,18 +4,18 @@
 #include "CStreamView.h"
 
 ECK_NAMESPACE_BEGIN
-#define ECK_CWNDPROP_CBE_STYLE(Name, Style)				\
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-    BOOL StyleGet##Name() const							\
-    {													\
-        if constexpr (Style == 0)						\
-            return !GetExtendedStyle();					\
-        else											\
-            return IsBitSet(GetExtendedStyle(), Style);	\
-    }													\
-    void StyleSet##Name(BOOL b) const					\
-    {													\
-        SetExtendedStyle(b ? Style : 0, Style);			\
+#define ECK_W_CBE_STYLE(Name, Style)                    \
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+    BOOL StyleGet##Name() const                         \
+    {                                                   \
+        if constexpr (Style == 0)                       \
+            return !GetExtendedStyle();                 \
+        else                                            \
+            return IsBitSet(GetExtendedStyle(), Style); \
+    }                                                   \
+    void StyleSet##Name(BOOL b) const                   \
+    {                                                   \
+        SetExtendedStyle(b ? Style : 0, Style);         \
     }
 
 class CComboBoxEx : public CComboBox
@@ -25,12 +25,12 @@ public:
     ECK_W_ATTACHABLE(CComboBoxEx);
     ECK_W_CREATE_CLASS(WC_COMBOBOXEXW);
 
-    ECK_CWNDPROP_CBE_STYLE(CaseSensitive, CBES_EX_CASESENSITIVE);
-    ECK_CWNDPROP_CBE_STYLE(NoEditImage, CBES_EX_NOEDITIMAGE);
-    ECK_CWNDPROP_CBE_STYLE(NoEditImageIndent, CBES_EX_NOEDITIMAGEINDENT);
-    ECK_CWNDPROP_CBE_STYLE(NoSizeLimit, CBES_EX_NOSIZELIMIT);
-    ECK_CWNDPROP_CBE_STYLE(PathWordBreakProc, CBES_EX_PATHWORDBREAKPROC);
-    ECK_CWNDPROP_CBE_STYLE(TextEndEllipsis, CBES_EX_TEXTENDELLIPSIS);
+    ECK_W_CBE_STYLE(CaseSensitive, CBES_EX_CASESENSITIVE);
+    ECK_W_CBE_STYLE(NoEditImage, CBES_EX_NOEDITIMAGE);
+    ECK_W_CBE_STYLE(NoEditImageIndent, CBES_EX_NOEDITIMAGEINDENT);
+    ECK_W_CBE_STYLE(NoSizeLimit, CBES_EX_NOSIZELIMIT);
+    ECK_W_CBE_STYLE(PathWordBreakProc, CBES_EX_PATHWORDBREAKPROC);
+    ECK_W_CBE_STYLE(TextEndEllipsis, CBES_EX_TEXTENDELLIPSIS);
 
     /// <summary>
     /// 删除项目

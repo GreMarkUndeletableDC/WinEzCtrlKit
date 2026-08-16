@@ -1053,7 +1053,7 @@ void ThreadUninitialize() noexcept;
 EckInlineNd ThreadContext* PtcCurrent() noexcept { return (ThreadContext*)TlsGetValue(GetThreadContextTlsSlot()); }
 
 HHOOK BeginCbtHook(CWindow* pCurrWnd, FWindowCreating pfnCreatingProc = nullptr) noexcept;
-void EndCbtHook() noexcept;
+BOOL EndCbtHook() noexcept;
 
 /// <summary>
 /// 过滤消息。

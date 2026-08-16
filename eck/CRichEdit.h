@@ -5,32 +5,32 @@
 #include <Richole.h>
 
 ECK_NAMESPACE_BEGIN
-#define ECK_CWNDPROP_REE_STYLE(Name, Style)				\
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-	BOOL StyleGet##Name() const noexcept							\
-	{													\
-		if constexpr (Style == 0)						\
-			return !GetEditStyle();						\
-		else											\
-			return IsBitSet(GetEditStyle(), Style);		\
-	}													\
-	void StyleSet##Name(BOOL b) const noexcept					\
-	{													\
-		SetEditStyle(b ? Style : 0, Style);				\
+#define ECK_W_REE_STYLE(Name, Style)                    \
+	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+	BOOL StyleGet##Name() const noexcept                \
+	{                                                   \
+		if constexpr (Style == 0)                       \
+			return !GetEditStyle();                     \
+		else                                            \
+			return IsBitSet(GetEditStyle(), Style);     \
+	}                                                   \
+	void StyleSet##Name(BOOL b) const noexcept          \
+	{                                                   \
+		SetEditStyle(b ? Style : 0, Style);             \
 	}
 
-#define ECK_CWNDPROP_REEEX_STYLE(Name, Style)			\
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-	BOOL StyleGet##Name() const noexcept							\
-	{													\
-		if constexpr (Style == 0)						\
-			return !GetEditStyleEx();					\
-		else											\
-			return IsBitSet(GetEditStyleEx(), Style);	\
-	}													\
-	void StyleSet##Name(BOOL b) const noexcept					\
-	{													\
-		SetEditStyleEx(b ? Style : 0, Style);			\
+#define ECK_W_REEEX_STYLE(Name, Style)                  \
+	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+	BOOL StyleGet##Name() const noexcept                \
+	{                                                   \
+		if constexpr (Style == 0)                       \
+			return !GetEditStyleEx();                   \
+		else                                            \
+			return IsBitSet(GetEditStyleEx(), Style);   \
+	}                                                   \
+	void StyleSet##Name(BOOL b) const noexcept          \
+	{                                                   \
+		SetEditStyleEx(b ? Style : 0, Style);           \
 	}
 
 class CRichEdit : public CWindow
@@ -40,62 +40,62 @@ public:
     ECK_W_ATTACHABLE(CRichEdit);
     ECK_W_CREATE_CLASS(MSFTEDIT_CLASS);
 
-    ECK_CWNDPROP_STYLE(AutoHScroll, ES_AUTOHSCROLL);
-    ECK_CWNDPROP_STYLE(AutoVScroll, ES_AUTOVSCROLL);
-    ECK_CWNDPROP_STYLE(Center, ES_CENTER);
-    ECK_CWNDPROP_STYLE(Left, ES_LEFT);
-    ECK_CWNDPROP_STYLE(Multiline, ES_MULTILINE);
-    ECK_CWNDPROP_STYLE(NoHideSel, ES_NOHIDESEL);
-    ECK_CWNDPROP_STYLE(Number, ES_NUMBER);
-    ECK_CWNDPROP_STYLE(Password, ES_PASSWORD);
-    ECK_CWNDPROP_STYLE(ReadOnly, ES_READONLY);
-    ECK_CWNDPROP_STYLE(Right, ES_RIGHT);
-    ECK_CWNDPROP_STYLE(WantReturn, ES_WANTRETURN);
-    ECK_CWNDPROP_STYLE(DisableNoScroll, ES_DISABLENOSCROLL);
-    ECK_CWNDPROP_STYLE(NoIme, ES_NOIME);
-    ECK_CWNDPROP_STYLE(NoOleDragDrop, ES_NOOLEDRAGDROP);
-    ECK_CWNDPROP_STYLE(SaveSel, ES_SAVESEL);
-    ECK_CWNDPROP_STYLE(SelectionBar, ES_SELECTIONBAR);
-    ECK_CWNDPROP_STYLE(SelfIme, ES_SELFIME);
-    ECK_CWNDPROP_STYLE(Sunken, ES_SUNKEN);
-    ECK_CWNDPROP_STYLE(Vertical, ES_VERTICAL);
-    ECK_CWNDPROP_REE_STYLE(BeepOnMaxText, SES_BEEPONMAXTEXT);
-    ECK_CWNDPROP_REE_STYLE(BiDi, SES_BIDI);
-    ECK_CWNDPROP_REE_STYLE(CtfAllowEmbed, SES_CTFALLOWEMBED);
-    ECK_CWNDPROP_REE_STYLE(CtfAllowProofing, SES_CTFALLOWPROOFING);
-    ECK_CWNDPROP_REE_STYLE(CtfAllowSmartTag, SES_CTFALLOWSMARTTAG);
-    ECK_CWNDPROP_REE_STYLE(DraftMode, SES_DRAFTMODE);
-    ECK_CWNDPROP_REE_STYLE(EmulateSysEdit, SES_EMULATESYSEDIT);
-    ECK_CWNDPROP_REE_STYLE(ExtendBackColor, SES_EXTENDBACKCOLOR);
-    ECK_CWNDPROP_REE_STYLE(HideGridLines, SES_HIDEGRIDLINES);
-    ECK_CWNDPROP_REE_STYLE(LowerCase, SES_LOWERCASE);
-    ECK_CWNDPROP_REE_STYLE(NoFocusLinkNotify, SES_NOFOCUSLINKNOTIFY);
-    ECK_CWNDPROP_REE_STYLE(NoImeEs, SES_NOIME);
-    ECK_CWNDPROP_REE_STYLE(NoInputSequenceCheck, SES_NOINPUTSEQUENCECHK);
-    ECK_CWNDPROP_REE_STYLE(ScrollOnKillFocus, SES_SCROLLONKILLFOCUS);
-    ECK_CWNDPROP_REE_STYLE(UpperCase, SES_UPPERCASE);
-    ECK_CWNDPROP_REE_STYLE(UseActiveImm, SES_USEAIMM);
-    ECK_CWNDPROP_REE_STYLE(UseAtFont, SES_USEATFONT);
-    ECK_CWNDPROP_REE_STYLE(UseCtf, SES_USECTF);
-    ECK_CWNDPROP_REE_STYLE(ConvertCrCrLfToCr, SES_XLTCRCRLFTOCR);
-    ECK_CWNDPROP_REEEX_STYLE(HandleFriendlyUrl, SES_EX_HANDLEFRIENDLYURL);
-    ECK_CWNDPROP_REEEX_STYLE(MultiTouch, SES_EX_MULTITOUCH);
-    ECK_CWNDPROP_REEEX_STYLE(NoAcetateSelection, SES_EX_NOACETATESELECTION);
-    ECK_CWNDPROP_REEEX_STYLE(NoMath, SES_EX_NOMATH);
-    ECK_CWNDPROP_REEEX_STYLE(NoTable, SES_EX_NOTABLE);
-    ECK_CWNDPROP_REEEX_STYLE(UseSingleLine, SES_EX_USESINGLELINE);
-    ECK_CWNDPROP_REEEX_STYLE(HideTempFormat, SES_EX_HIDETEMPFORMAT);
-    ECK_CWNDPROP_REEEX_STYLE(UseMouseWParam, SES_EX_USEMOUSEWPARAM);
+    ECK_W_STYLE(AutoHScroll, ES_AUTOHSCROLL);
+    ECK_W_STYLE(AutoVScroll, ES_AUTOVSCROLL);
+    ECK_W_STYLE(AlignmentCenter, ES_CENTER);
+    ECK_W_STYLE(AlignmentLeft, ES_LEFT);
+    ECK_W_STYLE(MultiLine, ES_MULTILINE);
+    ECK_W_STYLE(NoHideSelection, ES_NOHIDESEL);
+    ECK_W_STYLE(Number, ES_NUMBER);
+    ECK_W_STYLE(Password, ES_PASSWORD);
+    ECK_W_STYLE(ReadOnly, ES_READONLY);
+    ECK_W_STYLE(AlignmentRight, ES_RIGHT);
+    ECK_W_STYLE(WantReturn, ES_WANTRETURN);
+    ECK_W_STYLE(DisableNoScroll, ES_DISABLENOSCROLL);
+    ECK_W_STYLE(NoIme, ES_NOIME);
+    ECK_W_STYLE(NoOleDragDrop, ES_NOOLEDRAGDROP);
+    ECK_W_STYLE(SaveSelection, ES_SAVESEL);
+    ECK_W_STYLE(SelectionBar, ES_SELECTIONBAR);
+    ECK_W_STYLE(SelfIme, ES_SELFIME);
+    ECK_W_STYLE(Sunken, ES_SUNKEN);
+    ECK_W_STYLE(Vertical, ES_VERTICAL);
+    ECK_W_REE_STYLE(BeepOnMaxText, SES_BEEPONMAXTEXT);
+    ECK_W_REE_STYLE(BiDi, SES_BIDI);
+    ECK_W_REE_STYLE(CtfAllowEmbed, SES_CTFALLOWEMBED);
+    ECK_W_REE_STYLE(CtfAllowProofing, SES_CTFALLOWPROOFING);
+    ECK_W_REE_STYLE(CtfAllowSmartTag, SES_CTFALLOWSMARTTAG);
+    ECK_W_REE_STYLE(DraftMode, SES_DRAFTMODE);
+    ECK_W_REE_STYLE(EmulateSystemEdit, SES_EMULATESYSEDIT);
+    ECK_W_REE_STYLE(ExtendBackColor, SES_EXTENDBACKCOLOR);
+    ECK_W_REE_STYLE(HideGridLines, SES_HIDEGRIDLINES);
+    ECK_W_REE_STYLE(LowerCase, SES_LOWERCASE);
+    ECK_W_REE_STYLE(NoFocusLinkNotify, SES_NOFOCUSLINKNOTIFY);
+    ECK_W_REE_STYLE(NoImeEs, SES_NOIME);
+    ECK_W_REE_STYLE(NoInputSequenceCheck, SES_NOINPUTSEQUENCECHK);
+    ECK_W_REE_STYLE(ScrollOnKillFocus, SES_SCROLLONKILLFOCUS);
+    ECK_W_REE_STYLE(UpperCase, SES_UPPERCASE);
+    ECK_W_REE_STYLE(UseActiveImm, SES_USEAIMM);
+    ECK_W_REE_STYLE(UseAtFont, SES_USEATFONT);
+    ECK_W_REE_STYLE(UseCtf, SES_USECTF);
+    ECK_W_REE_STYLE(ConvertCrCrLfToCr, SES_XLTCRCRLFTOCR);
+    ECK_W_REEEX_STYLE(HandleFriendlyUrl, SES_EX_HANDLEFRIENDLYURL);
+    ECK_W_REEEX_STYLE(MultiTouch, SES_EX_MULTITOUCH);
+    ECK_W_REEEX_STYLE(NoAcetateSelection, SES_EX_NOACETATESELECTION);
+    ECK_W_REEEX_STYLE(NoMath, SES_EX_NOMATH);
+    ECK_W_REEEX_STYLE(NoTable, SES_EX_NOTABLE);
+    ECK_W_REEEX_STYLE(UseSingleLine, SES_EX_USESINGLELINE);
+    ECK_W_REEEX_STYLE(HideTempFormat, SES_EX_HIDETEMPFORMAT);
+    ECK_W_REEEX_STYLE(UseMouseWParam, SES_EX_USEMOUSEWPARAM);
 #if NTDDI_VERSION >= NTDDI_WINBLUE
-    ECK_CWNDPROP_REE_STYLE(CtfNoLock, SES_CTFNOLOCK);
-    ECK_CWNDPROP_REE_STYLE(DefaultLatinLiga, SES_DEFAULTLATINLIGA);
-    ECK_CWNDPROP_REE_STYLE(Emulate1_0, SES_EMULATE10);
-    ECK_CWNDPROP_REE_STYLE(HyperLinkTooltips, SES_HYPERLINKTOOLTIPS);
-    ECK_CWNDPROP_REE_STYLE(LogicalCaret, SES_LOGICALCARET);
-    ECK_CWNDPROP_REE_STYLE(MultiSelect, SES_MULTISELECT);
-    ECK_CWNDPROP_REE_STYLE(NoEastAsianLineHeightAdjust, SES_NOEALINEHEIGHTADJUST);
-    ECK_CWNDPROP_REE_STYLE(SmartDrapDrop, SES_SMARTDRAGDROP);
-    ECK_CWNDPROP_REE_STYLE(WordDragDrop, SES_WORDDRAGDROP);
+    ECK_W_REE_STYLE(CtfNoLock, SES_CTFNOLOCK);
+    ECK_W_REE_STYLE(DefaultLatinLiga, SES_DEFAULTLATINLIGA);
+    ECK_W_REE_STYLE(Emulate1_0, SES_EMULATE10);
+    ECK_W_REE_STYLE(HyperLinkTooltips, SES_HYPERLINKTOOLTIPS);
+    ECK_W_REE_STYLE(LogicalCaret, SES_LOGICALCARET);
+    ECK_W_REE_STYLE(MultiSelect, SES_MULTISELECT);
+    ECK_W_REE_STYLE(NoEastAsianLineHeightAdjust, SES_NOEALINEHEIGHTADJUST);
+    ECK_W_REE_STYLE(SmartDrapDrop, SES_SMARTDRAGDROP);
+    ECK_W_REE_STYLE(WordDragDrop, SES_WORDDRAGDROP);
 #endif
 
     /// <summary>

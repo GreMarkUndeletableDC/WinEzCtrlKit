@@ -2,23 +2,23 @@
 #include "CWindow.h"
 
 ECK_NAMESPACE_BEGIN
-constexpr inline UINT TVS_EX_ALL{/*TVS_EX_NOSINGLECOLLAPSE | TVS_EX_MULTISELECT |*/
-    TVS_EX_DOUBLEBUFFER | TVS_EX_NOINDENTSTATE | TVS_EX_RICHTOOLTIP | TVS_EX_AUTOHSCROLL |
-    TVS_EX_FADEINOUTEXPANDOS | TVS_EX_PARTIALCHECKBOXES | TVS_EX_EXCLUSIONCHECKBOXES |
-    TVS_EX_DIMMEDCHECKBOXES | TVS_EX_DRAWIMAGEASYNC };
+constexpr inline UINT TVS_EX_ALL = /*TVS_EX_NOSINGLECOLLAPSE | TVS_EX_MULTISELECT |*/
+TVS_EX_DOUBLEBUFFER | TVS_EX_NOINDENTSTATE | TVS_EX_RICHTOOLTIP | TVS_EX_AUTOHSCROLL |
+TVS_EX_FADEINOUTEXPANDOS | TVS_EX_PARTIALCHECKBOXES | TVS_EX_EXCLUSIONCHECKBOXES |
+TVS_EX_DIMMEDCHECKBOXES | TVS_EX_DRAWIMAGEASYNC;
 
-#define ECK_CWNDPROP_TVE_STYLE(Name, Style)				\
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-	BOOL StyleGet##Name() const noexcept							\
-	{													\
-		if constexpr (Style == 0)						\
-			return !GetTVExtendStyle();				\
-		else											\
-			return IsBitSet(GetTVExtendStyle(), Style);	\
-	}													\
-	void StyleSet##Name(BOOL b) const noexcept					\
-	{													\
-		SetTVExtendStyle(b ? Style : 0, Style);			\
+#define ECK_W_TVE_STYLE(Name, Style)                    \
+	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+	BOOL StyleGet##Name() const noexcept                \
+	{                                                   \
+		if constexpr (Style == 0)                       \
+			return !GetTVExtendStyle();                 \
+		else                                            \
+			return IsBitSet(GetTVExtendStyle(), Style); \
+	}                                                   \
+	void StyleSet##Name(BOOL b) const noexcept          \
+	{                                                   \
+		SetTVExtendStyle(b ? Style : 0, Style);         \
 	}
 
 class CTreeView : public CWindow
@@ -28,32 +28,32 @@ public:
     ECK_W_ATTACHABLE(CTreeView);
     ECK_W_CREATE_CLASS(WC_TREEVIEWW);
 
-    ECK_CWNDPROP_STYLE(CheckBoxes, TVS_CHECKBOXES);
-    ECK_CWNDPROP_STYLE(DisableDragDrop, TVS_DISABLEDRAGDROP);
-    ECK_CWNDPROP_STYLE(EditLabels, TVS_EDITLABELS);
-    ECK_CWNDPROP_STYLE(FullRowSelect, TVS_FULLROWSELECT);
-    ECK_CWNDPROP_STYLE(HasButtons, TVS_HASBUTTONS);
-    ECK_CWNDPROP_STYLE(HasLines, TVS_HASLINES);
-    ECK_CWNDPROP_STYLE(InfoTip, TVS_INFOTIP);
-    ECK_CWNDPROP_STYLE(LinesAtRoot, TVS_LINESATROOT);
-    ECK_CWNDPROP_STYLE(NoHScroll, TVS_NOHSCROLL);
-    ECK_CWNDPROP_STYLE(NonEvenHeight, TVS_NONEVENHEIGHT);
-    ECK_CWNDPROP_STYLE(NoScroll, TVS_NOSCROLL);
-    ECK_CWNDPROP_STYLE(NoToolTips, TVS_NOTOOLTIPS);
-    ECK_CWNDPROP_STYLE(RtlReading, TVS_RTLREADING);
-    ECK_CWNDPROP_STYLE(ShowSelAlways, TVS_SHOWSELALWAYS);
-    ECK_CWNDPROP_STYLE(SingleExpand, TVS_SINGLEEXPAND);
-    ECK_CWNDPROP_STYLE(TrackSelect, TVS_TRACKSELECT);
-    ECK_CWNDPROP_TVE_STYLE(AutoHScroll, TVS_EX_AUTOHSCROLL);
-    ECK_CWNDPROP_TVE_STYLE(DimmedCheckboxes, TVS_EX_DIMMEDCHECKBOXES);
-    ECK_CWNDPROP_TVE_STYLE(DoubleBuffer, TVS_EX_DOUBLEBUFFER);
-    ECK_CWNDPROP_TVE_STYLE(DrawImageAsync, TVS_EX_DRAWIMAGEASYNC);
-    ECK_CWNDPROP_TVE_STYLE(ExclusionCheckboxes, TVS_EX_EXCLUSIONCHECKBOXES);
-    ECK_CWNDPROP_TVE_STYLE(FadeInOutExpandos, TVS_EX_FADEINOUTEXPANDOS);
-    ECK_CWNDPROP_TVE_STYLE(NoIndentState, TVS_EX_NOINDENTSTATE);
-    ECK_CWNDPROP_TVE_STYLE(NoSingleCollapse, TVS_EX_NOSINGLECOLLAPSE);
-    ECK_CWNDPROP_TVE_STYLE(PartialCheckboxes, TVS_EX_PARTIALCHECKBOXES);
-    ECK_CWNDPROP_TVE_STYLE(RichTooltip, TVS_EX_RICHTOOLTIP);
+    ECK_W_STYLE(CheckBoxes, TVS_CHECKBOXES);
+    ECK_W_STYLE(DisableDragDrop, TVS_DISABLEDRAGDROP);
+    ECK_W_STYLE(EditLabels, TVS_EDITLABELS);
+    ECK_W_STYLE(FullRowSelect, TVS_FULLROWSELECT);
+    ECK_W_STYLE(HasButtons, TVS_HASBUTTONS);
+    ECK_W_STYLE(HasLines, TVS_HASLINES);
+    ECK_W_STYLE(InformationTip, TVS_INFOTIP);
+    ECK_W_STYLE(LinesAtRoot, TVS_LINESATROOT);
+    ECK_W_STYLE(NoHScroll, TVS_NOHSCROLL);
+    ECK_W_STYLE(NonEvenHeight, TVS_NONEVENHEIGHT);
+    ECK_W_STYLE(NoScroll, TVS_NOSCROLL);
+    ECK_W_STYLE(NoToolTips, TVS_NOTOOLTIPS);
+    ECK_W_STYLE(RtlReading, TVS_RTLREADING);
+    ECK_W_STYLE(ShowSelAlways, TVS_SHOWSELALWAYS);
+    ECK_W_STYLE(SingleExpand, TVS_SINGLEEXPAND);
+    ECK_W_STYLE(TrackSelect, TVS_TRACKSELECT);
+    ECK_W_TVE_STYLE(AutoHScroll, TVS_EX_AUTOHSCROLL);
+    ECK_W_TVE_STYLE(DimmedCheckboxes, TVS_EX_DIMMEDCHECKBOXES);
+    ECK_W_TVE_STYLE(DoubleBuffer, TVS_EX_DOUBLEBUFFER);
+    ECK_W_TVE_STYLE(DrawImageAsynchronous, TVS_EX_DRAWIMAGEASYNC);
+    ECK_W_TVE_STYLE(ExclusionCheckboxes, TVS_EX_EXCLUSIONCHECKBOXES);
+    ECK_W_TVE_STYLE(FadeInOutExpandos, TVS_EX_FADEINOUTEXPANDOS);
+    ECK_W_TVE_STYLE(NoIndentState, TVS_EX_NOINDENTSTATE);
+    ECK_W_TVE_STYLE(NoSingleCollapse, TVS_EX_NOSINGLECOLLAPSE);
+    ECK_W_TVE_STYLE(PartialCheckboxes, TVS_EX_PARTIALCHECKBOXES);
+    ECK_W_TVE_STYLE(RichTooltip, TVS_EX_RICHTOOLTIP);
 protected:
     BOOL m_bAutoDarkMode{ TRUE };
 public:

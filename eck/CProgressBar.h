@@ -9,10 +9,10 @@ public:
     ECK_W_ATTACHABLE(CProgressBar);
     ECK_W_CREATE_CLASS(PROGRESS_CLASSW);
 
-    ECK_CWNDPROP_STYLE(Marquee, PBS_MARQUEE);
-    ECK_CWNDPROP_STYLE(Smooth, PBS_SMOOTH);
-    ECK_CWNDPROP_STYLE(SmoothReverse, PBS_SMOOTHREVERSE);
-    ECK_CWNDPROP_STYLE(Vertical, PBS_VERTICAL);
+    ECK_W_STYLE(Marquee, PBS_MARQUEE);
+    ECK_W_STYLE(Smooth, PBS_SMOOTH);
+    ECK_W_STYLE(SmoothReverse, PBS_SMOOTHREVERSE);
+    ECK_W_STYLE(Vertical, PBS_VERTICAL);
 
     EckInline int DeltaPosition(int iDelta) const noexcept
     {
