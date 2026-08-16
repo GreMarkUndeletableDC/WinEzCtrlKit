@@ -1,6 +1,10 @@
 ﻿#include "pch.h"
 #include "../eck/CIniExt.h"
 
+#include <set>
+#include <string>
+#include <vector>
+
 using namespace eck;
 
 static void ExpectResult(IniResult eExpected, IniResult eActual)
@@ -522,6 +526,376 @@ public:
         r = ini.Load(L"[Good]\nK=V\n");
         ExpectResult(IniResult::Ok, r);
         Assert::IsTrue(ini.GetKeyValue(L"Good", L"K").GetString() == L"V"sv);
+    }
+
+    // ------------------------------------------------------------------
+    // CIniExtT 模板实例化：IsOrderedMap / IsAllowMultiKeys / IsCaseSensitive
+    // ------------------------------------------------------------------
+
+    TEST_METHOD(OrderedMap_ForEachKeyValueInSortedOrder)
+    {
+        CIniExtT<true> ini;
+        const auto r = ini.Load(L"[S]\nZ=1\nA=2\nM=3\n");
+        ExpectResult(IniResult::Ok, r);
+
+        const auto sec = ini.GetSection(L"S");
+        Assert::IsTrue((bool)sec);
+
+        std::vector<std::wstring> keys;
+        sec->ForEachKeyValue([&](const auto& kv)
+            {
+                keys.emplace_back(kv.GetName().ToStringView());
+            });
+        // 有序容器按键名升序排列：A, M, Z
+        Assert::AreEqual<size_t>(3, keys.size());
+        Assert::IsTrue(keys[0] == L"A"sv);
+        Assert::IsTrue(keys[1] == L"M"sv);
+        Assert::IsTrue(keys[2] == L"Z"sv);
+    }
+
+    TEST_METHOD(AllowMultiKeys_Ordered_AllKeysStored)
+    {
+        CIniExtT<true, true> ini;
+        const auto r = ini.Load(L"[S]\nK=1\nK=2\nK=3\n");
+        ExpectResult(IniResult::Ok, r);
+
+        const auto sec = ini.GetSection(L"S");
+        Assert::IsTrue((bool)sec);
+
+        // multiset::find 返回首个等价元素。
+        Assert::IsTrue(ini.GetKeyValue(sec, L"K").GetString() == L"1"sv);
+
+        int n = 0;
+        std::multiset<std::wstring> seen;
+        sec->ForEachKeyValue([&](const auto& kv)
+            {
+                ++n;
+                seen.emplace(kv.rsValue.ToStringView());
+            });
+        Assert::AreEqual(3, n);
+        Assert::AreEqual<size_t>(1, seen.count(L"1"));
+        Assert::AreEqual<size_t>(1, seen.count(L"2"));
+        Assert::AreEqual<size_t>(1, seen.count(L"3"));
+    }
+
+    TEST_METHOD(AllowMultiKeys_Unordered_AllKeysStored)
+    {
+        CIniExtT<false, true> ini;
+        const auto r = ini.Load(L"[S]\nK=1\nK=2\nK=3\n");
+        ExpectResult(IniResult::Ok, r);
+
+        const auto sec = ini.GetSection(L"S");
+        Assert::IsTrue((bool)sec);
+        // 无序多重集至少能找到其中一个键。
+        Assert::IsTrue((bool)ini.GetKeyValue(sec, L"K"));
+
+        int n = 0;
+        sec->ForEachKeyValue([&](const auto&) { ++n; });
+        Assert::AreEqual(3, n);
+    }
+
+    TEST_METHOD(AllowMultiKeys_DuplicateContainerAllowed)
+    {
+        CIniExtT<false, true> ini;
+        const auto r = ini.Load(L"[>A]\nK=1\n[<A]\n[>A]\nK=2\n[<A]\n");
+        ExpectResult(IniResult::Ok, r);
+        Assert::IsTrue((bool)ini.GetSection(L"A"));
+    }
+
+    TEST_METHOD(CaseInsensitive_GetSectionAndKeyValue)
+    {
+        CIniExtT<false, false, false> ini;
+        const auto r = ini.Load(L"[Section]\nKey=Value\n");
+        ExpectResult(IniResult::Ok, r);
+
+        Assert::IsTrue((bool)ini.GetSection(L"section"));
+        Assert::IsTrue((bool)ini.GetSection(L"SECTION"));
+        Assert::IsTrue(ini.GetKeyValue(L"Section", L"key").GetString() == L"Value"sv);
+        Assert::IsTrue(ini.GetKeyValue(L"section", L"KEY").GetString() == L"Value"sv);
+    }
+
+    TEST_METHOD(CaseSensitive_DefaultDistinguishesCase)
+    {
+        CIniExt ini;
+        ini.Load(L"[Section]\nKey=Value\n");
+        Assert::IsFalse((bool)ini.GetSection(L"section"));
+        Assert::IsFalse((bool)ini.GetSection(L"SECTION"));
+        Assert::IsFalse((bool)ini.GetKeyValue(L"Section", L"key"));
+    }
+
+    TEST_METHOD(CombinedTemplate_OrderedMultiCaseInsensitive)
+    {
+        CIniExtT<true, true, false> ini;
+        const auto r = ini.Load(L"[S]\nB=1\nA=2\nA=3\n");
+        ExpectResult(IniResult::Ok, r);
+
+        // 不区分大小写查找节。
+        const auto sec = ini.GetSection(L"s");
+        Assert::IsTrue((bool)sec);
+
+        std::vector<std::wstring> names;
+        sec->ForEachKeyValue([&](const auto& kv)
+            {
+                names.emplace_back(kv.GetName().ToStringView());
+            });
+        // 有序且不区分大小写排序：A, A, B
+        Assert::AreEqual<size_t>(3, names.size());
+        Assert::IsTrue(names[0] == L"A"sv);
+        Assert::IsTrue(names[1] == L"A"sv);
+        Assert::IsTrue(names[2] == L"B"sv);
+    }
+
+    // ------------------------------------------------------------------
+    // 遍历 API：ForEachSectionInOrder / ForEachValueInOrder /
+    //           ForEachKeyValue / ForEachChild
+    // ------------------------------------------------------------------
+
+    TEST_METHOD(ForEachSectionInOrder_IsInsertionOrder)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[>P]\n[>C]\n[<C]\n[<P]\n[Z]\n");
+
+        std::vector<std::wstring> all;
+        ini.ForEachSectionInOrder([&](const auto& sec)
+            {
+                all.emplace_back(sec.GetName().ToStringView());
+            });
+        // 深度优先 + 按 uId 排序 => 插入顺序：P, C, Z
+        Assert::AreEqual<size_t>(3, all.size());
+        Assert::IsTrue(all[0] == L"P"sv);
+        Assert::IsTrue(all[1] == L"C"sv);
+        Assert::IsTrue(all[2] == L"Z"sv);
+
+        // 指定父节时只遍历其子树。
+        std::vector<std::wstring> sub;
+        ini.ForEachSectionInOrder([&](const auto& sec)
+            {
+                sub.emplace_back(sec.GetName().ToStringView());
+            }, ini.GetSection(L"P"));
+        Assert::AreEqual<size_t>(1, sub.size());
+        Assert::IsTrue(sub[0] == L"C"sv);
+    }
+
+    TEST_METHOD(ForEachValueInOrder_IsInsertionOrder)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK3=3\nK1=1\nK2=2\n");
+        const auto sec = ini.GetSection(L"S");
+
+        std::vector<std::wstring> vals;
+        ini.ForEachValueInOrder([&](const auto& kv)
+            {
+                vals.emplace_back(kv.rsValue.ToStringView());
+            }, sec);
+        // 按插入顺序：3, 1, 2
+        Assert::AreEqual<size_t>(3, vals.size());
+        Assert::IsTrue(vals[0] == L"3"sv);
+        Assert::IsTrue(vals[1] == L"1"sv);
+        Assert::IsTrue(vals[2] == L"2"sv);
+    }
+
+    TEST_METHOD(ForEachKeyValue_IteratesAll)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nA=1\nB=2\nC=3\n");
+        const auto sec = ini.GetSection(L"S");
+
+        int n = 0;
+        sec->ForEachKeyValue([&](const auto&) { ++n; });
+        Assert::AreEqual(3, n);
+    }
+
+    TEST_METHOD(ForEachChild_IteratesChildSections)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[>P]\n[Child1]\nK=V\n[>Child2]\n[<Child2]\n[<P]\n");
+        const auto p = ini.GetSection(L"P");
+        Assert::IsTrue((bool)p);
+
+        std::vector<std::wstring> names;
+        p->ForEachChild([&](const auto& sec)
+            {
+                names.emplace_back(sec.GetName().ToStringView());
+            });
+        Assert::AreEqual<size_t>(2, names.size());
+    }
+
+    // ------------------------------------------------------------------
+    // 条目内省 API 与标志位
+    // ------------------------------------------------------------------
+
+    TEST_METHOD(GetIdAndGetName)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK=V\n");
+        const auto sec = ini.GetSection(L"S");
+        const auto kv = ini.GetKeyValue(sec, L"K");
+
+        Assert::IsTrue(sec->GetName().ToStringView() == L"S"sv);
+        Assert::AreEqual<UINT>(0, sec->GetId());
+        Assert::IsTrue(kv->GetName().ToStringView() == L"K"sv);
+        Assert::AreEqual<UINT>(1, kv->GetId());
+    }
+
+    TEST_METHOD(EntryOperatorWstringView)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK=V\n");
+        const auto sec = ini.GetSection(L"S");
+        const auto kv = ini.GetKeyValue(sec, L"K");
+        Assert::IsTrue(static_cast<std::wstring_view>(*sec) == L"S"sv);
+        Assert::IsTrue(static_cast<std::wstring_view>(*kv) == L"K"sv);
+    }
+
+    TEST_METHOD(CommentAttachedToKeyValue)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK=V;comment\n");
+        const auto kv = ini.GetKeyValue(L"S", L"K");
+        Assert::IsTrue((bool)kv);
+        Assert::IsTrue((bool)(kv->uFlags & INIE_EF_HAS_COMMENTS));
+        Assert::IsTrue(kv->rsComment.ToStringView() == L"comment"sv);
+    }
+
+    TEST_METHOD(CommentAttachedToSection)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S];section comment\nK=V\n");
+        const auto sec = ini.GetSection(L"S");
+        Assert::IsTrue((bool)(sec->uFlags & INIE_EF_HAS_COMMENTS));
+        Assert::IsTrue(sec->rsComment.ToStringView() == L"section comment"sv);
+    }
+
+    TEST_METHOD(ContainerSectionHasFlag)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[>A]\n[<A]\n[B]\n");
+        const auto a = ini.GetSection(L"A");
+        const auto b = ini.GetSection(L"B");
+        Assert::IsTrue((bool)(a->uFlags & INIE_EF_IS_CONTAINER));
+        Assert::IsFalse((bool)(b->uFlags & INIE_EF_IS_CONTAINER));
+    }
+
+    // ------------------------------------------------------------------
+    // 补充边界场景
+    // ------------------------------------------------------------------
+
+    TEST_METHOD(EmptyValue)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK=\n");
+        const auto kv = ini.GetKeyValue(L"S", L"K");
+        Assert::IsTrue((bool)kv);
+        Assert::IsTrue((bool)kv.IsEmpty());
+        Assert::IsTrue(kv.GetString() == L""sv);
+        Assert::AreEqual(42, kv.GetInt<int>(42));
+        Assert::IsTrue((bool)kv.GetBool(TRUE));
+        Assert::IsFalse((bool)kv.GetBool(FALSE));
+    }
+
+    TEST_METHOD(EscapeCarriageReturnAndNul)
+    {
+        CIniExtT<> ini;
+        const auto r = ini.Load(L"[S]\nK=a\\rb\\0c\n", -1, INIE_IF_ESCAPE);
+        ExpectResult(IniResult::Ok, r);
+
+        std::wstring expected;
+        expected += L'a';
+        expected += L'\r';
+        expected += L'b';
+        expected += L'\0';
+        expected += L'c';
+        Assert::IsTrue(ini.GetKeyValue(L"S", L"K").GetString() == std::wstring_view(expected));
+    }
+
+    TEST_METHOD(GetInt_LongLong)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nA=1234567890123\n");
+        Assert::AreEqual<long long>(
+            1234567890123LL, ini.GetKeyValue(L"S", L"A").GetInt<long long>());
+    }
+
+    TEST_METHOD(GetFloat_Float)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nA=1.5\n");
+        Assert::AreEqual(1.5f, ini.GetKeyValue(L"S", L"A").GetFloat<float>(), 0.001f);
+    }
+
+    TEST_METHOD(GetSectionOnInvalidSectionContext)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK=V\n");
+        const auto bad = ini.GetSection(L"Missing");
+        Assert::IsFalse((bool)bad);
+        Assert::IsFalse((bool)ini.GetSection(bad, L"X"));
+        Assert::IsFalse((bool)ini.GetKeyValue(bad, L"K"));
+    }
+
+    TEST_METHOD(ClearResetsIds)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[A]\nK=1\n");
+        Assert::AreEqual<UINT>(0, ini.GetSection(L"A")->GetId());
+        ini.Clear();
+        ini.Load(L"[B]\n");
+        Assert::AreEqual<UINT>(0, ini.GetSection(L"B")->GetId());
+    }
+
+    // ------------------------------------------------------------------
+    // 回归测试：静态走查修复的缺陷
+    // ------------------------------------------------------------------
+
+    TEST_METHOD(GetKey_ReturnsKeyName)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK=V\n");
+        const auto kv = ini.GetKeyValue(L"S", L"K");
+        Assert::IsTrue((bool)kv);
+        Assert::IsTrue(kv.GetKey().ToStringView() == L"K"sv);
+    }
+
+    TEST_METHOD(TrailingBackslashInValue_Escape)
+    {
+        CIniExtT<> ini;
+        const auto r = ini.Load(L"[S]\nK=a\\", -1, INIE_IF_ESCAPE);
+        ExpectResult(IniResult::EscapeAtEnd, r);
+    }
+
+    TEST_METHOD(BareCloseDirectiveWithEmptyStack)
+    {
+        CIniExtT<> ini;
+        const auto r = ini.Load(L"[<]\n");
+        ExpectResult(IniResult::SecContainerNotMatch, r);
+    }
+
+    TEST_METHOD(ForEachValueInOrder_InvalidSection)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK=V\n");
+        const auto bad = ini.GetSection(L"Missing");
+        int n = 0;
+        ini.ForEachValueInOrder([&](const auto&) { ++n; }, bad);
+        Assert::AreEqual(0, n);
+    }
+
+    TEST_METHOD(EmptyValueAtEndOfInput)
+    {
+        CIniExtT<> ini;
+        const auto r = ini.Load(L"[S]\nK=");
+        ExpectResult(IniResult::Ok, r);
+        const auto kv = ini.GetKeyValue(L"S", L"K");
+        Assert::IsTrue((bool)kv);
+        Assert::IsTrue((bool)kv.IsEmpty());
+    }
+
+    TEST_METHOD(GetEnumeration_OnConstContext)
+    {
+        CIniExtT<> ini;
+        ini.Load(L"[S]\nK=1\n");
+        const auto kv = ini.GetKeyValue(L"S", L"K");
+        Assert::IsTrue(kv.GetEnumeration<ETestEnum>() == ETestEnum::B);
     }
 };
 TS_NS_END

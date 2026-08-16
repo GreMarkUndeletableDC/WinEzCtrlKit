@@ -59,7 +59,7 @@ namespace Detail
     template<class TIterator>
     struct IniContextKeyValue : IniContext<TIterator>
     {
-        EckInlineNdCe const CStringW& GetKey() const noexcept { return this->Data().rsKey; }
+        EckInlineNdCe const CStringW& GetKey() const noexcept { return this->Data().rsName; }
         EckInlineNdCe const CStringW& GetValue() const noexcept { return this->Data().rsValue; }
 
         EckInlineNd BOOL IsEmpty() const noexcept
@@ -116,7 +116,7 @@ namespace Detail
         }
 
         template<CcpEnumeration T>
-        EckInline T GetEnumeration(T eDef = T{}) noexcept
+        EckInline T GetEnumeration(T eDef = T{}) const noexcept
         {
             using TUnderlying = std::underlying_type_t<T>;
             return (T)GetInt<TUnderlying>((TUnderlying)eDef);
@@ -253,12 +253,12 @@ public:
     public:
         using Detail::IniEntry::IniEntry;
 
-        EckInline void ForEachKeyValue(std::invocable<const KeyValue&> auto&& Fn) noexcept
+        EckInline void ForEachKeyValue(std::invocable<const KeyValue&> auto&& Fn) const noexcept
         {
             for (auto& e : Val)
                 Fn(e);
         }
-        EckInline void ForEachChild(std::invocable<const Section&> auto&& Fn) noexcept
+        EckInline void ForEachChild(std::invocable<const Section&> auto&& Fn) const noexcept
         {
             for (auto& e : Child)
                 Fn(e);
@@ -423,6 +423,8 @@ private:
             const auto ch = *psz;
             if (ch == '\\')// 转义字符
             {
+                if (psz + 1 >= pszEnd)
+                    return IniResult::EscapeAtEnd;
                 auto ch2 = *++psz;
                 if (EscapeChar(ch2))
                     rsVal.PushBackChar(ch2);
@@ -455,7 +457,7 @@ private:
         if (!bKeepSpace)
         {
             rsKey.TrimRight();
-            if (IsBreakLineOrCommentChar(*psz))
+            if (cch && IsBreakLineOrCommentChar(*psz))
                 return IniResult::Ok;
             const auto pL = TrimStringLeft(psz, (int)cch);
             cch -= (pL - psz);
@@ -523,11 +525,11 @@ private:
     void ForEachEntry(Section& Section, auto&& Fn) noexcept
     {
         for (auto& Val : Section.Val)
-            Fn(Val.second);
+            Fn(Val);
         for (auto& Child : Section.Child)
         {
-            Fn(Child.second);
-            ForEachEntry(Child.second, Fn);
+            Fn(Child);
+            ForEachEntry(Child, Fn);
         }
     }
 
@@ -642,10 +644,10 @@ public:
                         return IniResult::SecEmptyName;
                     if (rsName.Front() == '<')// 闭合容器节
                     {
+                        if (stSec.empty())
+                            return IniResult::SecContainerNotMatch;
                         if (rsName.Size() > 1)// 如果不止"<"一个字符，则校验当前栈顶
                         {
-                            if (stSec.empty())
-                                return IniResult::SecContainerNotMatch;
                             if (rsName.SubStringView(1, rsName.Size() - 1) !=
                                 stSec.back().it->rsName.ToStringView())
                                 return IniResult::SecContainerNotMatch;
@@ -777,6 +779,8 @@ public:
         std::invocable<const KeyValue&> auto&& Fn,
         const SectionContext& Section) noexcept
     {
+        if (!Section)
+            return;
         using TIterator = TKeyValueConstIterator;
         auto& Val = Section->Val;
         std::vector<TIterator> vVal{};
