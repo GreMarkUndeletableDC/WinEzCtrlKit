@@ -576,6 +576,7 @@ public:
                 return lResult;
         }
         else if ((uMsg >= WM_KEYFIRST && uMsg <= WM_IME_KEYLAST) ||
+            (uMsg >= WM_IME_SETCONTEXT && uMsg <= WM_IME_KEYUP) ||
             uMsg == WM_TIMER)
         {
             if (uMsg == WM_KEYDOWN)
