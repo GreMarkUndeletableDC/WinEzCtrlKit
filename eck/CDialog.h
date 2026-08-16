@@ -136,12 +136,13 @@ public:
         break;
         case WM_CTLCOLORSTATIC:
         {
-            if (m_bClrDisableEdit)
-                break;
-            WCHAR szCls[ARRAYSIZE(WC_EDITW) + 1];
-            if (GetClassNameW((HWND)lParam, szCls, ARRAYSIZE(szCls)) &&
-                _wcsicmp(szCls, WC_EDITW) == 0)
-                break;
+            if (!m_bClrDisableEdit)
+            {
+                WCHAR szCls[ARRAYSIZE(WC_EDITW) + 1];
+                if (GetClassNameW((HWND)lParam, szCls, ARRAYSIZE(szCls)) &&
+                    _wcsicmp(szCls, WC_EDITW) == 0)
+                    break;
+            }
         }
         [[fallthrough]];
         case WM_CTLCOLORBTN:
