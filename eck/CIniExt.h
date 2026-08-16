@@ -179,10 +179,11 @@ namespace Detail
     };
 }
 
-constexpr inline bool IsOrderedMap = false;
-constexpr inline bool IsAllowMultiKeys = false;
-constexpr inline bool IsCaseSensitive = true;
-class CIniExt
+template<
+    bool IsOrderedMap = false,
+    bool IsAllowMultiKeys = false,
+    bool IsCaseSensitive = true>
+class CIniExtT
 {
 public:
     using Entry = Detail::IniEntry;
@@ -244,7 +245,8 @@ public:
 
     struct Section : Detail::IniEntry
     {
-        friend class CIniExt;
+        template<bool, bool, bool>
+        friend class CIniExtT;
     private:
         mutable TKeyValueSet Val{};    // 【禁止外部修改】所有值
         mutable TSectionSet Child{};// 【禁止外部修改】子节
@@ -265,7 +267,6 @@ public:
 
     struct Comment
     {
-    public:
         CStringW rsName{};
         UINT uId{};
     };
@@ -800,4 +801,6 @@ public:
         m_uId = 0;
     }
 };
+
+using CIniExt = CIniExtT<>;
 ECK_NAMESPACE_END
