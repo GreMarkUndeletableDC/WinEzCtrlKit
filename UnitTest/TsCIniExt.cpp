@@ -1,10 +1,6 @@
 ﻿#include "pch.h"
 #include "../eck/CIniExt.h"
 
-#include <set>
-#include <string>
-#include <vector>
-
 using namespace eck;
 
 static void ExpectResult(IniResult eExpected, IniResult eActual)
