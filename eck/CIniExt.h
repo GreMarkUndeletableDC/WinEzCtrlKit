@@ -126,7 +126,7 @@ namespace Detail
     struct IniEntry
     {
         CStringW rsName{};      // 【禁止外部修改】名称，对于节，为节名，对于键值对，为键名
-        mutable UINT uId{};             // 【禁止外部修改】ID
+        UINT uId{};             // 【禁止外部修改】ID
         mutable UINT uFlags{};          // INIE_EF_常量
         mutable CStringW rsComment{};   // 条目后方的注释
 
@@ -158,7 +158,7 @@ namespace Detail
 
     struct IniValue : IniEntry
     {
-        mutable CStringW rsValue{};
+        CStringW rsValue{};
 
         IniValue() = default;
         IniValue(
@@ -408,7 +408,7 @@ private:
             else// 常规字符
                 rsKey.PushBackChar(ch);
         }
-        if (*psz != '=')
+        if (psz == pszEnd || *psz != '=')
             return IniResult::KvEqualNotFound;
         ++psz;
         if (!bKeepSpace)
@@ -643,6 +643,8 @@ public:
                     {
                         if (rsName.Size() > 1)// 如果不止"<"一个字符，则校验当前栈顶
                         {
+                            if (stSec.empty())
+                                return IniResult::SecContainerNotMatch;
                             if (rsName.SubStringView(1, rsName.Size() - 1) !=
                                 stSec.back().it->rsName.ToStringView())
                                 return IniResult::SecContainerNotMatch;
@@ -745,11 +747,11 @@ public:
 private:
     void InternalForEachSectionInOrder(
         std::vector<TSectionConstIterator>& vSec,
-        TSectionSet& Set) noexcept
+        TSectionSet& Set) const noexcept
     {
         for (auto it = Set.begin(); it != Set.end(); ++it)
         {
-            vSec[it->uId] = it;
+            vSec.emplace_back(it);
             InternalForEachSectionInOrder(vSec, it->Child);
         }
     }
@@ -758,11 +760,16 @@ public:
         std::invocable<const Section&> auto&& Fn,
         const SectionContext& Section = {}) noexcept
     {
-        std::vector<TSectionConstIterator> vSec{ m_uId };
+        using TIterator = TSectionConstIterator;
+        std::vector<TIterator> vSec{};
         InternalForEachSectionInOrder(vSec, Section ? Section->Child : m_Root);
-        const auto itEnd = std::remove(vSec.begin(), vSec.end(), TSectionConstIterator{});
-        for (auto it = vSec.begin(); it != itEnd; ++it)
-            Fn(*it);
+        std::sort(vSec.begin(), vSec.end(),
+            [](const TIterator& x1, const TIterator& x2) noexcept
+            {
+                return x1->uId < x2->uId;
+            });
+        for (const auto& e : vSec)
+            Fn(*e);
     }
 
     void ForEachValueInOrder(
@@ -780,8 +787,8 @@ public:
             {
                 return x1->uId < x2->uId;
             });
-        for (auto e : vVal)
-            Fn(e);
+        for (const auto& e : vVal)
+            Fn(*e);
     }
 
     EckInlineNd BOOL IsEmpty() const noexcept { return m_Root.empty(); }
