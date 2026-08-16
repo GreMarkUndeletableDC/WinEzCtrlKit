@@ -401,8 +401,8 @@ private:
 
     EckInlineNdCe BOOL UiaIsInitialized() const noexcept { return !!m_pUia.Get(); }
 public:
-    ECK_CWND_SINGLEOWNER(CElementContainer);
-    ECK_CWND_CREATE_CLS_HINST(WCN_DUIHOST, g_hInstance);
+    ECK_W_NONATTACHABLE(CElementContainer);
+    ECK_W_CREATE_CLASS_INST(WCN_DUIHOST, g_hInstance);
 public:
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {

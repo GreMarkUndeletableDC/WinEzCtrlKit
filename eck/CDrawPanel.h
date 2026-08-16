@@ -10,8 +10,8 @@ class CDrawPanel : public CWindow
 {
 public:
     ECK_RTTI(CDrawPanel, CWindow);
-    ECK_CWND_SINGLEOWNER(CDrawPanel);
-    ECK_CWND_CREATE_CLS_HINST(WCN_DRAWPANEL, g_hInstance);
+    ECK_W_NONATTACHABLE(CDrawPanel);
+    ECK_W_CREATE_CLASS_INST(WCN_DRAWPANEL, g_hInstance);
 private:
     CMemoryDC m_DC{};
     GpGraphics* m_pGraphics{};
@@ -86,8 +86,8 @@ class CDrawPanelD2D : public CWindow
 {
 public:
     ECK_RTTI(CDrawPanelD2D, CWindow);
-    ECK_CWND_SINGLEOWNER(CDrawPanelD2D);
-    ECK_CWND_CREATE_CLS_HINST(WCN_DRAWPANEL, g_hInstance);
+    ECK_W_NONATTACHABLE(CDrawPanelD2D);
+    ECK_W_CREATE_CLASS_INST(WCN_DRAWPANEL, g_hInstance);
 private:
     CEasyD2D m_D2D{};
 public:

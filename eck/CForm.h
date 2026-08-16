@@ -8,8 +8,8 @@ class CForm : public CWindow
 {
 public:
     ECK_RTTI(CForm, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CForm);
-    ECK_CWND_CREATE_CLS_HINST(WCN_FORM, g_hInstance);
+    ECK_W_ATTACHABLE(CForm);
+    ECK_W_CREATE_CLASS_INST(WCN_FORM, g_hInstance);
 private:
     HBITMAP m_hbmBk{};
     int m_cxImage{},

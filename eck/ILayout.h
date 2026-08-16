@@ -51,7 +51,7 @@ struct __declspec(novtable) ILayout : public CObject
     virtual void LoCommit() noexcept {}
     // 若当前类为窗口，则返回窗口句柄
     // 内置布局器使用DeferWindowPos，而不是LoSetXxx
-    virtual HWND LoGetHWND() noexcept { return nullptr; }
+    virtual HWND LoGetWindowHandle() noexcept { return nullptr; }
     // 指示布局持有数据已使用指定DPI缩放，通常仅对非原子布局生效
     virtual void LoInitializeDpi(int iDpi) noexcept {}
     // 布局的DPI已改变，通常仅对非原子布局生效
@@ -62,7 +62,7 @@ struct __declspec(novtable) ILayout : public CObject
     //
     // 使用布局器时，必须对最顶层布局器显式调用LoDwpAttach，内置布局器自动传播
     // 到其下的所有子布局
-    // WARNING Win32要求被录制窗口必须具有相同的父窗口，若确实可能发生此情况，
+    // WARNING Win32要求被录制窗口必须具有相同的父窗口，若确实可能违反此限制，
     // 调用方可对布局器使用SetUseDwp
     virtual BOOL LoDwpAttach(HDWP hDwp) noexcept { return FALSE; }
     // 取回DWP句柄，若返回值有效，所有权归属调用方

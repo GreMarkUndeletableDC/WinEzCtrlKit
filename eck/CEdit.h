@@ -4,43 +4,19 @@
 #include "Check.h"
 
 ECK_NAMESPACE_BEGIN
-inline constexpr int CDV_EDIT_1 = 0;
-
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_EDIT
-{
-    int iVer;
-    WCHAR chPassword;
-    ECKENUM eTransMode;
-    int iSelStart;
-    int iSelEnd;
-    int cchCueBanner;
-    int cchLimit;
-    // WCHAR szCueBanner[];
-
-    EckInline PCWSTR CueBanner() const noexcept
-    {
-        if (cchCueBanner)
-            return PCWSTR(this + 1);
-        else
-            return nullptr;
-    }
-};
-#pragma pack(pop)
-
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5// 1809+
-#define ECK_CWNDPROP_EDE_STYLE(Name, Style)				\
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-	BOOL StyleGet##Name() const							\
-	{													\
-		if constexpr (Style == 0)						\
-			return !GetEDExtendStyle();					\
-		else											\
-			return IsBitSet(GetEDExtendStyle(), Style);	\
-	}													\
-	void StyleSet##Name(BOOL b) const					\
-	{													\
-		SetEDExtendStyle(b ? Style : 0, Style);			\
+#define ECK_W_EDE_STYLE(Name, Style)                    \
+	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+	BOOL StyleGet##Name() const                         \
+	{                                                   \
+		if constexpr (Style == 0)                       \
+			return !GetEDExtendStyle();                 \
+		else                                            \
+			return IsBitSet(GetEDExtendStyle(), Style); \
+	}                                                   \
+	void StyleSet##Name(BOOL b) const                   \
+	{                                                   \
+		SetEDExtendStyle(b ? Style : 0, Style);         \
 	}
 #endif// NTDDI_VERSION >= NTDDI_WIN10_RS5
 
@@ -48,8 +24,8 @@ class CEdit : public CWindow
 {
 public:
     ECK_RTTI(CEdit, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CEdit);
-    ECK_CWND_CREATE_CLS(WC_EDITW);
+    ECK_W_ATTACHABLE(CEdit);
+    ECK_W_CREATE_CLASS(WC_EDITW);
 
     enum class TransMode
     {
@@ -58,65 +34,27 @@ public:
         ToUpperCase
     };
 
-    ECK_CWNDPROP_STYLE(AutoHScroll, ES_AUTOHSCROLL);
-    ECK_CWNDPROP_STYLE(AutoVScroll, ES_AUTOVSCROLL);
-    ECK_CWNDPROP_STYLE(Center, ES_CENTER);
-    ECK_CWNDPROP_STYLE(Left, ES_LEFT);
-    ECK_CWNDPROP_STYLE(Lowercase, ES_LOWERCASE);
-    ECK_CWNDPROP_STYLE(Multiline, ES_MULTILINE);
-    ECK_CWNDPROP_STYLE(NoHideSel, ES_NOHIDESEL);
-    ECK_CWNDPROP_STYLE(Number, ES_NUMBER);
-    ECK_CWNDPROP_STYLE(OemConvert, ES_OEMCONVERT);
-    ECK_CWNDPROP_STYLE(Password, ES_PASSWORD);
-    ECK_CWNDPROP_STYLE(ReadOnly, ES_READONLY);
-    ECK_CWNDPROP_STYLE(Right, ES_RIGHT);
-    ECK_CWNDPROP_STYLE(Uppercase, ES_UPPERCASE);
-    ECK_CWNDPROP_STYLE(WantReturn, ES_WANTRETURN);
+    ECK_W_STYLE(AutoHScroll, ES_AUTOHSCROLL);
+    ECK_W_STYLE(AutoVScroll, ES_AUTOVSCROLL);
+    ECK_W_STYLE(AlignmentCenter, ES_CENTER);
+    ECK_W_STYLE(AlignmentLeft, ES_LEFT);
+    ECK_W_STYLE(Lowercase, ES_LOWERCASE);
+    ECK_W_STYLE(Multiline, ES_MULTILINE);
+    ECK_W_STYLE(NoHideSel, ES_NOHIDESEL);
+    ECK_W_STYLE(Number, ES_NUMBER);
+    ECK_W_STYLE(OemConvert, ES_OEMCONVERT);
+    ECK_W_STYLE(Password, ES_PASSWORD);
+    ECK_W_STYLE(ReadOnly, ES_READONLY);
+    ECK_W_STYLE(AlignmentRight, ES_RIGHT);
+    ECK_W_STYLE(Uppercase, ES_UPPERCASE);
+    ECK_W_STYLE(WantReturn, ES_WANTRETURN);
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5// 1809+
-    ECK_CWNDPROP_EDE_STYLE(AllowEolCR, ES_EX_ALLOWEOL_CR);
-    ECK_CWNDPROP_EDE_STYLE(AllowEolLF, ES_EX_ALLOWEOL_LF);
-    ECK_CWNDPROP_EDE_STYLE(AllowEolAll, ES_EX_ALLOWEOL_ALL);
-    ECK_CWNDPROP_EDE_STYLE(ConvertEolOnPaste, ES_EX_CONVERT_EOL_ON_PASTE);
-    ECK_CWNDPROP_EDE_STYLE(Zoomable, ES_EX_ZOOMABLE);
+    ECK_W_EDE_STYLE(AllowEolCr, ES_EX_ALLOWEOL_CR);
+    ECK_W_EDE_STYLE(AllowEolLf, ES_EX_ALLOWEOL_LF);
+    ECK_W_EDE_STYLE(AllowEolAll, ES_EX_ALLOWEOL_ALL);
+    ECK_W_EDE_STYLE(ConvertEolOnPaste, ES_EX_CONVERT_EOL_ON_PASTE);
+    ECK_W_EDE_STYLE(Zoomable, ES_EX_ZOOMABLE);
 #endif// NTDDI_VERSION >= NTDDI_WIN10_RS5
-
-    EckInline constexpr static PCVOID SkipBaseData(PCVOID p) noexcept
-    {
-        return (PCBYTE)p + sizeof(CTRLDATA_EDIT) +
-            (((const CTRLDATA_EDIT*)p)->cchCueBanner + 1) * sizeof(WCHAR);
-    }
-
-    void SerializeData(CByteBuffer& rb, const SERIALIZE_OPT* pOpt = nullptr) noexcept override
-    {
-        const auto rsCueBanner = GetCueBanner((pOpt && pOpt->cchTextBuf ?
-            pOpt->cchTextBuf : MAX_PATH));
-        const size_t cbSize = sizeof(CTRLDATA_EDIT) + rsCueBanner.ByteSize();
-        __super::SerializeData(rb, pOpt);
-        const auto p = (CTRLDATA_EDIT*)rb.PushBack(cbSize);
-        p->iVer = CDV_EDIT_1;
-        p->chPassword = GetPasswordChar();
-        p->eTransMode = (ECKENUM)GetTransformMode();
-        GetSelection(&p->iSelStart, &p->iSelEnd);
-        p->cchCueBanner = rsCueBanner.Size();
-        p->cchLimit = GetLimitText();
-        if (p->cchCueBanner)
-            wmemcpy(PWSTR(p + 1), rsCueBanner.Data(), rsCueBanner.Size() + 1);
-        else
-            *PWSTR(p + 1) = L'\0';
-    }
-
-    void PostDeserialize(PCVOID pData) noexcept override
-    {
-        __super::PostDeserialize(pData);
-        const auto* const p = (CTRLDATA_EDIT*)__super::SkipBaseData(pData);
-        if (p->iVer != CDV_EDIT_1)
-            return;
-        SetPasswordChar(p->chPassword);
-        SetTransformMode((TransMode)p->eTransMode);
-        SetSelection(p->iSelStart, p->iSelEnd);
-        SetCueBanner(p->CueBanner(), TRUE);
-        SetLimitText(p->cchLimit);
-    }
 
     EckInline BOOL CanUndo() const noexcept
     {

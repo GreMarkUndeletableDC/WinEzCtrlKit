@@ -874,7 +874,7 @@ private:
             const auto rsText = m_pEdit->GetText();
             nm.item.pszText = (PWSTR)rsText.Data();
             nm.item.cchTextMax = rsText.Size();
-            if (FillNmhdrAndSendNotify(nm, LVN_ENDLABELEDITW))
+            if (NmFillHeaderAndSend(nm, LVN_ENDLABELEDITW))
             {
                 if (bSave)
                     if (m_pfnOwnerData)
@@ -902,7 +902,7 @@ private:
         else
         {
             nm.item.cchTextMax = (bSave ? 0 : -1);
-            FillNmhdrAndSendNotify(nm, LVN_ENDLABELEDITW);
+            NmFillHeaderAndSend(nm, LVN_ENDLABELEDITW);
         }
     }
 
@@ -1031,7 +1031,7 @@ private:
             NMLVDISPINFOW nm{};
             nm.item.iSubItem = m_idxEditSubItem;
             nm.item.lParam = (LPARAM)&edi;
-            if (FillNmhdrAndSendNotify(nm, LVN_BEGINLABELEDITW))
+            if (NmFillHeaderAndSend(nm, LVN_BEGINLABELEDITW))
                 m_idxEditing = -1;
         }
         else

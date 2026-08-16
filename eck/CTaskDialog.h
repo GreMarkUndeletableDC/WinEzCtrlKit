@@ -6,7 +6,7 @@ class CTaskDialog : public CDialog
 {
 public:
     ECK_RTTI(CTaskDialog, CDialog);
-    ECK_CWND_SINGLEOWNER(CTaskDialog);
+    ECK_W_NONATTACHABLE(CTaskDialog);
 public:
     struct DLGCTX
     {

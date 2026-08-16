@@ -3,49 +3,49 @@
 #include "CMemoryDC.h"
 
 ECK_NAMESPACE_BEGIN
-#define ECK_CWNDPROP_TABE_STYLE(Name, Style)			\
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-	BOOL StyleGet##Name() const noexcept							\
-	{													\
-		if constexpr (Style == 0)						\
-			return !GetTABExtendStyle();				\
-		else											\
-			return IsBitSet(GetTABExtendStyle(), Style);\
-	}													\
-	void StyleSet##Name(BOOL b) const noexcept					\
-	{													\
-		SetTABExtendStyle(b ? Style : 0, Style);		\
+#define ECK_W_TABE_STYLE(Name, Style)                    \
+	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;   \
+	BOOL StyleGet##Name() const noexcept                 \
+	{                                                    \
+		if constexpr (Style == 0)                        \
+			return !GetTABExtendStyle();                 \
+		else                                             \
+			return IsBitSet(GetTABExtendStyle(), Style); \
+	}                                                    \
+	void StyleSet##Name(BOOL b) const noexcept           \
+	{                                                    \
+		SetTABExtendStyle(b ? Style : 0, Style);         \
 	}
 
 class CTab : public CWindow
 {
 public:
     ECK_RTTI(CTab, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CTab);
-    ECK_CWND_CREATE_CLS(WC_TABCONTROLW);
+    ECK_W_ATTACHABLE(CTab);
+    ECK_W_CREATE_CLASS(WC_TABCONTROLW);
 
-    ECK_CWNDPROP_STYLE(ItemBottom, TCS_BOTTOM);
-    ECK_CWNDPROP_STYLE(Buttons, TCS_BUTTONS);
-    ECK_CWNDPROP_STYLE(FixedWidth, TCS_FIXEDWIDTH);
-    ECK_CWNDPROP_STYLE(FlatButtons, TCS_FLATBUTTONS);
-    ECK_CWNDPROP_STYLE(FocusNever, TCS_FOCUSNEVER);
-    ECK_CWNDPROP_STYLE(FocusOnButtonDown, TCS_FOCUSONBUTTONDOWN);
-    ECK_CWNDPROP_STYLE(ForceIconLeft, TCS_FORCEICONLEFT);
-    ECK_CWNDPROP_STYLE(ForceLabelLeft, TCS_FORCELABELLEFT);
-    ECK_CWNDPROP_STYLE(HotTrack, TCS_HOTTRACK);
-    ECK_CWNDPROP_STYLE(MultiLine, TCS_MULTILINE);
-    ECK_CWNDPROP_STYLE(MultiSelect, TCS_MULTISELECT);
-    ECK_CWNDPROP_STYLE(OwnerDrawFixed, TCS_OWNERDRAWFIXED);
-    ECK_CWNDPROP_STYLE(RaggedRight, TCS_RAGGEDRIGHT);
-    ECK_CWNDPROP_STYLE(ItemRight, TCS_RIGHT);
-    ECK_CWNDPROP_STYLE(RightJustify, TCS_RIGHTJUSTIFY);
-    ECK_CWNDPROP_STYLE(ScrollOpposite, TCS_SCROLLOPPOSITE);
-    ECK_CWNDPROP_STYLE(SingleLine, TCS_SINGLELINE);
-    ECK_CWNDPROP_STYLE(Tabs, TCS_TABS);
-    ECK_CWNDPROP_STYLE(ToolTips, TCS_TOOLTIPS);
-    ECK_CWNDPROP_STYLE(Vertical, TCS_VERTICAL);
-    ECK_CWNDPROP_TABE_STYLE(FlatSeparators, TCS_EX_FLATSEPARATORS);
-    ECK_CWNDPROP_TABE_STYLE(RegisterDrop, TCS_EX_REGISTERDROP);
+    ECK_W_STYLE(ItemBottom, TCS_BOTTOM);
+    ECK_W_STYLE(Buttons, TCS_BUTTONS);
+    ECK_W_STYLE(FixedWidth, TCS_FIXEDWIDTH);
+    ECK_W_STYLE(FlatButtons, TCS_FLATBUTTONS);
+    ECK_W_STYLE(FocusNever, TCS_FOCUSNEVER);
+    ECK_W_STYLE(FocusOnButtonDown, TCS_FOCUSONBUTTONDOWN);
+    ECK_W_STYLE(ForceIconLeft, TCS_FORCEICONLEFT);
+    ECK_W_STYLE(ForceLabelLeft, TCS_FORCELABELLEFT);
+    ECK_W_STYLE(HotTrack, TCS_HOTTRACK);
+    ECK_W_STYLE(MultiLine, TCS_MULTILINE);
+    ECK_W_STYLE(MultiSelect, TCS_MULTISELECT);
+    ECK_W_STYLE(OwnerDrawFixed, TCS_OWNERDRAWFIXED);
+    ECK_W_STYLE(RaggedRight, TCS_RAGGEDRIGHT);
+    ECK_W_STYLE(ItemRight, TCS_RIGHT);
+    ECK_W_STYLE(RightJustify, TCS_RIGHTJUSTIFY);
+    ECK_W_STYLE(ScrollOpposite, TCS_SCROLLOPPOSITE);
+    ECK_W_STYLE(SingleLine, TCS_SINGLELINE);
+    ECK_W_STYLE(Tabs, TCS_TABS);
+    ECK_W_STYLE(ToolTips, TCS_TOOLTIPS);
+    ECK_W_STYLE(Vertical, TCS_VERTICAL);
+    ECK_W_TABE_STYLE(FlatSeparators, TCS_EX_FLATSEPARATORS);
+    ECK_W_TABE_STYLE(RegisterDrop, TCS_EX_REGISTERDROP);
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {

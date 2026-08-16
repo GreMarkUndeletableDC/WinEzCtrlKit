@@ -52,15 +52,7 @@ struct NMLBNSEARCH
     LBNITEM Item;// idxItem表示起始项目（含）
 };
 
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_LBN
-{
-    int iVer = 0;
 
-
-    // 
-};
-#pragma pack(pop)
 /*
 * LBN产生的通知
 * 特定通知：
@@ -80,8 +72,8 @@ class CListBoxNew : public CWindow
 {
 public:
     ECK_RTTI(CListBoxNew, CWindow);
-    ECK_CWND_SINGLEOWNER(CListBoxNew);
-    ECK_CWND_CREATE_CLS_HINST(WCN_LISTBOXNEW, g_hInstance);
+    ECK_W_NONATTACHABLE(CListBoxNew);
+    ECK_W_CREATE_CLASS_INST(WCN_LISTBOXNEW, g_hInstance);
 private:
     CSelectionRange m_SelRange{};
     int m_cItem{};
@@ -151,7 +143,7 @@ private:
         nm.idxEnd = idxEnd;
         nm.uFlagsOld = uOldFlags;
         nm.uFlagsNew = uNewFlags;
-        return FillNmhdrAndSendNotify(nm, m_hParent, NM_LBN_ITEMCHANGED);
+        return NmFillHeaderAndSend(nm, m_hParent, NM_LBN_ITEMCHANGED);
     }
 
     LRESULT NotifyItemChanged(int idx, UINT uOldFlags, UINT uNewFlags) noexcept
@@ -181,7 +173,7 @@ private:
 
         LRESULT lRet;
         NMCUSTOMDRAWEXT ne;
-        FillNmhdr(ne, NM_CUSTOMDRAW);
+        NmFillHeader(ne, NM_CUSTOMDRAW);
         ne.hdc = m_DC.GetDC();
         ne.lItemlParam = 0;
         ne.crBk = CLR_DEFAULT;
@@ -194,7 +186,7 @@ private:
         ne.dwItemSpec = 0;
         ne.uItemState = 0;
         ne.lItemlParam = 0;
-        lRet = SendNotify(ne, m_hParent);
+        lRet = NmSend(ne, m_hParent);
         if (!(lRet & CDRF_SKIPDEFAULT))
         {
             if (ne.crBk != CLR_DEFAULT)
@@ -207,14 +199,14 @@ private:
         if (lRet & CDRF_NOTIFYPOSTERASE)
         {
             ne.dwDrawStage = CDDS_POSTERASE;
-            SendNotify(ne, m_hParent);
+            NmSend(ne, m_hParent);
         }
 
         if (!GetItemCount())
             goto SkipDrawItem;
 
         ne.dwDrawStage = CDDS_PREPAINT;
-        lRet = SendNotify(ne, m_hParent);
+        lRet = NmSend(ne, m_hParent);
         if (!(lRet & CDRF_SKIPDEFAULT))
         {
             const auto idxTop = (int)std::max(m_idxTop + (int)ps.rcPaint.top / m_cyItem - 1, m_idxTop);
@@ -235,7 +227,7 @@ private:
         if (lRet & CDRF_NOTIFYPOSTPAINT)
         {
             ne.dwDrawStage = CDDS_POSTPAINT;
-            SendNotify(ne, m_hParent);
+            NmSend(ne, m_hParent);
         }
     SkipDrawItem:
         BitBltPs(&ps, ne.hdc);
@@ -571,7 +563,7 @@ private:
             if (!PointInRect(rc, POINT{ x,y }))// 光标在窗口外，关闭列表
             {
                 NMHDR nm;
-                FillNmhdr(nm, NM_LBN_DISMISS);
+                NmFillHeader(nm, NM_LBN_DISMISS);
                 ::SendMessageW(m_hComboBox, WM_NOTIFY, nm.idFrom, (LPARAM)&nm);
                 return;
             }
@@ -640,7 +632,7 @@ private:
                 NMLBNDRAG nm;
                 nm.idx = idx;
                 nm.uKeyFlags = uKeyFlags;
-                FillNmhdrAndSendNotify(nm, m_hParent, NM_LBN_BEGINDRAG);
+                NmFillHeaderAndSend(nm, m_hParent, NM_LBN_BEGINDRAG);
             }
             else if (m_bExtendSel || (!m_bExtendSel && !m_bMultiSel))// 扩展多选或单选
                 BeginDraggingSelect(idx);
@@ -703,7 +695,7 @@ private:
         ne.crBk = CLR_DEFAULT;
         ne.iStateId = iState;
         ne.iPartId = LVP_LISTITEM;
-        const auto lRet = bNotifyItemDraw ? SendNotify(ne, m_hParent) : 0;
+        const auto lRet = bNotifyItemDraw ? NmSend(ne, m_hParent) : 0;
         if (!(lRet & CDRF_SKIPDEFAULT))
         {
             BOOL bFillBk{};
@@ -755,7 +747,7 @@ private:
         if (lRet & CDRF_NOTIFYPOSTPAINT)
         {
             ne.dwDrawStage = CDDS_ITEMPOSTPAINT;
-            SendNotify(ne, m_hParent);
+            NmSend(ne, m_hParent);
         }
     }
 
@@ -788,7 +780,7 @@ private:
     LRESULT CbNotifyDismiss() noexcept
     {
         NMHDR nm;
-        return FillNmhdrAndSendNotify(nm, m_hParent, NM_LBN_DISMISS);
+        return NmFillHeaderAndSend(nm, m_hParent, NM_LBN_DISMISS);
     }
 public:
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
@@ -893,7 +885,7 @@ public:
                 NMMOUSENOTIFY nm;
                 nm.pt = ECK_GET_PT_LPARAM(lParam);
                 nm.uKeyFlags = (UINT)wParam;
-                FillNmhdrAndSendNotify(nm, m_hParent, NM_RCLICK);
+                NmFillHeaderAndSend(nm, m_hParent, NM_RCLICK);
             }
         }
         break;
@@ -914,7 +906,7 @@ public:
                     NMLBNDRAG nm;
                     nm.idx = HitTest(pt.x, pt.y);
                     nm.uKeyFlags = (UINT)wParam;
-                    FillNmhdrAndSendNotify(nm, m_hParent, NM_LBN_ENDDRAG);
+                    NmFillHeaderAndSend(nm, m_hParent, NM_LBN_ENDDRAG);
                 }
             }
         }
@@ -1079,7 +1071,7 @@ public:
 
             NMFOCUS nm;
             nm.hWnd = (HWND)wParam;
-            FillNmhdrAndSendNotify(nm, m_hParent, NM_SETFOCUS);
+            NmFillHeaderAndSend(nm, m_hParent, NM_SETFOCUS);
         }
         break;
 
@@ -1089,7 +1081,7 @@ public:
 
             NMFOCUS nm;
             nm.hWnd = (HWND)wParam;
-            FillNmhdrAndSendNotify(nm, m_hParent, NM_KILLFOCUS);
+            NmFillHeaderAndSend(nm, m_hParent, NM_KILLFOCUS);
         }
         break;
 
@@ -1158,7 +1150,7 @@ public:
         CheckOldData();
         ReCalculateScrollBar();
         NMHDR nm;
-        FillNmhdrAndSendNotify(nm, m_hParent, NM_LBN_ITEMSTANDBY);
+        NmFillHeaderAndSend(nm, m_hParent, NM_LBN_ITEMSTANDBY);
     }
 
     EckInlineNdCe int GetItemCount() noexcept { return m_cItem; }
@@ -1369,7 +1361,7 @@ public:
         EckAssert(nm.Item.idxItem >= 0 && nm.Item.idxItem < GetItemCount());
         nm.Item.pszText = m_rsTextBuf.Data();
         nm.Item.cchText = m_rsTextBuf.Size();
-        return FillNmhdrAndSendNotify(nm, m_hParent, NM_LBN_GETDISPINFO);
+        return NmFillHeaderAndSend(nm, m_hParent, NM_LBN_GETDISPINFO);
     }
 
     int SearchItem(PCWSTR pszText, int cchText = -1,
@@ -1382,17 +1374,17 @@ public:
         nm.Item.pszText = pszText;
         nm.Item.cchText = cchText < 0 ? (int)wcslen(pszText) : cchText;
         nm.Item.idxItem = idxStart;
-        if (FillNmhdrAndSendNotify(nm, m_hParent, NM_LBN_SEARCH))
+        if (NmFillHeaderAndSend(nm, m_hParent, NM_LBN_SEARCH))
             return nm.Item.idxItem;
         else
         {
             NMLBNGETDISPINFO nm;
-            FillNmhdr(nm, NM_LBN_GETDISPINFO);
+            NmFillHeader(nm, NM_LBN_GETDISPINFO);
             for (nm.Item.idxItem = idxStart; nm.Item.idxItem < GetItemCount(); ++nm.Item.idxItem)
             {
                 nm.Item.pszText = m_rsTextBuf.Data();
                 nm.Item.cchText = m_rsTextBuf.Size();
-                if (FillNmhdrAndSendNotify(nm, m_hParent, NM_LBN_GETDISPINFO))
+                if (NmFillHeaderAndSend(nm, m_hParent, NM_LBN_GETDISPINFO))
                 {
                     if (uFlags & LBN_SF_CASEINSENSITIVE)
                         if (uFlags & LBN_SF_WHOLE)

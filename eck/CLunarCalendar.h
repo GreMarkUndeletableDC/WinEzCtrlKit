@@ -7,8 +7,8 @@ class CLunarCalendar :public CWindow
 {
 public:
     ECK_RTTI(CLunarCalendar, CWindow);
-    ECK_CWND_SINGLEOWNER(CLunarCalendar);
-    ECK_CWND_CREATE_CLS_HINST(WCN_LUNARCALENDAR, g_hInstance);
+    ECK_W_NONATTACHABLE(CLunarCalendar);
+    ECK_W_CREATE_CLASS_INST(WCN_LUNARCALENDAR, g_hInstance);
 
     HTHEME m_hTheme{};
 

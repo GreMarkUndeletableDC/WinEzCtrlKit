@@ -6,8 +6,8 @@ class CHotKey : public CWindow
 {
 public:
     ECK_RTTI(CHotKey, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CHotKey);
-    ECK_CWND_CREATE_CLS(HOTKEY_CLASSW);
+    ECK_W_ATTACHABLE(CHotKey);
+    ECK_W_CREATE_CLASS(HOTKEY_CLASSW);
 
     /// <summary>
     /// 取热键

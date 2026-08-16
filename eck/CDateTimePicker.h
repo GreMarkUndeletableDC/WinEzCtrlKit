@@ -7,19 +7,19 @@ class CDateTimePicker : public CWindow
 {
 public:
     ECK_RTTI(CDateTimePicker, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CDateTimePicker);
-    ECK_CWND_CREATE_CLS(DATETIMEPICK_CLASSW);
+    ECK_W_ATTACHABLE(CDateTimePicker);
+    ECK_W_CREATE_CLASS(DATETIMEPICK_CLASSW);
 
     constexpr static UINT FormatMask = 0xC;
 
-    ECK_CWNDPROP_STYLE(AppCanParse, DTS_APPCANPARSE);
-    ECK_CWNDPROP_STYLE(LongDateFormat, DTS_LONGDATEFORMAT);
-    ECK_CWNDPROP_STYLE(RightAlign, DTS_RIGHTALIGN);
-    ECK_CWNDPROP_STYLE(ShowNone, DTS_SHOWNONE);
-    ECK_CWNDPROP_STYLE(ShortDateFormat, DTS_SHORTDATEFORMAT);
-    ECK_CWNDPROP_STYLE_MASK(ShortDateCenturyFormat, DTS_SHORTDATECENTURYFORMAT, FormatMask);
-    ECK_CWNDPROP_STYLE_MASK(TimeFormat, DTS_TIMEFORMAT, FormatMask);
-    ECK_CWNDPROP_STYLE(UpDown, DTS_UPDOWN);
+    ECK_W_STYLE(AppCanParse, DTS_APPCANPARSE);
+    ECK_W_STYLE(LongDateFormat, DTS_LONGDATEFORMAT);
+    ECK_W_STYLE(AlignmentRight, DTS_RIGHTALIGN);
+    ECK_W_STYLE(ShowNone, DTS_SHOWNONE);
+    ECK_W_STYLE(ShortDateFormat, DTS_SHORTDATEFORMAT);
+    ECK_W_STYLE_MASK(ShortDateCenturyFormat, DTS_SHORTDATECENTURYFORMAT, FormatMask);
+    ECK_W_STYLE_MASK(TimeFormat, DTS_TIMEFORMAT, FormatMask);
+    ECK_W_STYLE(UpDown, DTS_UPDOWN);
 
     void CloseMonthCalendar() const noexcept
     {

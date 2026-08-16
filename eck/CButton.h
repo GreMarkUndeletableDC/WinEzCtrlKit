@@ -3,33 +3,14 @@
 #include "DDX.h"
 
 ECK_NAMESPACE_BEGIN
-inline constexpr int CDV_BUTTON_1 = 1;
-
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_BUTTON
-{
-    int iVer;
-    BYTE eCheckState;
-    UINT cchNote;
-    // WCHAR szNote[];// 长度为cchNote + 1
-
-    EckInline constexpr PCWSTR Note() const
-    {
-        return (PCWSTR)PointerSkipType(this);
-    }
-};
-#pragma pack(pop)
-
-
-// 建议直接使用此类代替其他细分类
 class CButton : public CWindow
 {
 public:
     ECK_RTTI(CButton, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CButton);
-    ECK_CWND_CREATE_CLS(WC_BUTTONW);
+    ECK_W_ATTACHABLE(CButton);
+    ECK_W_CREATE_CLASS(WC_BUTTONW);
 
-    static constexpr DWORD TypeMask = (BS_PUSHBUTTON | BS_DEFPUSHBUTTON |
+    constexpr static DWORD TypeMask = (BS_PUSHBUTTON | BS_DEFPUSHBUTTON |
         BS_SPLITBUTTON | BS_DEFSPLITBUTTON | BS_COMMANDLINK | BS_DEFCOMMANDLINK |
         BS_RADIOBUTTON | BS_AUTORADIOBUTTON | BS_CHECKBOX | BS_AUTOCHECKBOX |
         BS_3STATE | BS_AUTO3STATE | BS_GROUPBOX);
@@ -37,7 +18,7 @@ public:
     enum class Type
     {
         PushButton,
-        DefPushButton,
+        DefaultPushButton,
         CheckBox,
         AutoCheckButton,
         RadioButton,
@@ -49,81 +30,42 @@ public:
         PushBox,// 与PushButton类似，但仅显示文本
         OwnerDraw,
         SplitButton,
-        DefSplitButton,
+        DefaultSplitButton,
         CommandLink,
-        DefCommandLink,
+        DefaultCommandLink,
 
         Unknown = -1
     };
 public:
-    ECK_CWNDPROP_STYLE_MASK(TripleState, BS_3STATE, TypeMask);
-    ECK_CWNDPROP_STYLE_MASK(AutoTripleState, BS_AUTO3STATE, TypeMask);
-    ECK_CWNDPROP_STYLE_MASK(AutoCheckButton, BS_AUTOCHECKBOX, TypeMask);
-    ECK_CWNDPROP_STYLE_MASK(AutoRadioButton, BS_AUTORADIOBUTTON, TypeMask);
-    ECK_CWNDPROP_STYLE(ShowBitmap, BS_BITMAP);
-    ECK_CWNDPROP_STYLE(AlignBottom, BS_BOTTOM);
-    ECK_CWNDPROP_STYLE(AlignCenter, BS_CENTER);
-    ECK_CWNDPROP_STYLE_MASK(CheckBox, BS_CHECKBOX, TypeMask);
-    ECK_CWNDPROP_STYLE(CommandLink, BS_COMMANDLINK);
-    ECK_CWNDPROP_STYLE(DefCommandLink, BS_DEFCOMMANDLINK);
-    ECK_CWNDPROP_STYLE_MASK(DefPushButton, BS_DEFPUSHBUTTON, TypeMask);
-    ECK_CWNDPROP_STYLE(DefSplitButton, BS_DEFSPLITBUTTON);
-    ECK_CWNDPROP_STYLE_MASK(GroupBox, BS_GROUPBOX, TypeMask);
-    ECK_CWNDPROP_STYLE(ShowIcon, BS_ICON);
-    ECK_CWNDPROP_STYLE(Flat, BS_FLAT);
-    ECK_CWNDPROP_STYLE(AlignLeft, BS_LEFT);
-    ECK_CWNDPROP_STYLE(MultiLine, BS_MULTILINE);
-    ECK_CWNDPROP_STYLE(Notify, BS_NOTIFY);
-    ECK_CWNDPROP_STYLE_MASK(OwnerDraw, BS_OWNERDRAW, TypeMask);
-    ECK_CWNDPROP_STYLE_MASK(PushBox, BS_PUSHBOX, TypeMask);
-    ECK_CWNDPROP_STYLE_MASK(PushButton, BS_PUSHBUTTON, TypeMask);
-    ECK_CWNDPROP_STYLE(PushLike, BS_PUSHLIKE);
-    ECK_CWNDPROP_STYLE_MASK(RadioButton, BS_RADIOBUTTON, TypeMask);
-    ECK_CWNDPROP_STYLE(AlignRight, BS_RIGHT);
-    ECK_CWNDPROP_STYLE(RightButton, BS_RIGHTBUTTON);
-    ECK_CWNDPROP_STYLE(SplitButton, BS_SPLITBUTTON);
-    ECK_CWNDPROP_STYLE(ShowText, BS_TEXT);
-    ECK_CWNDPROP_STYLE(AlignTop, BS_TOP);
-    ECK_CWNDPROP_STYLE(AlignVCenter, BS_VCENTER);
-
-    EckInlineNdCe static PCVOID SkipBaseData(PCVOID p) noexcept
-    {
-        const auto* const p2 = (CTRLDATA_BUTTON*)CWindow::SkipBaseData(p);
-        return PointerStepBytes(p2, sizeof(CTRLDATA_BUTTON) + (p2->cchNote + 1) * sizeof(WCHAR));
-    }
-
-    void SerializeData(CByteBuffer& rb, const SERIALIZE_OPT* pOpt = nullptr) noexcept override
-    {
-        auto cchNote = GetNoteLength();
-        const size_t cbSize = sizeof(CTRLDATA_BUTTON) +
-            (cchNote + 1) * sizeof(WCHAR);
-        CWindow::SerializeData(rb, pOpt);
-        CMemoryWalker w(rb.PushBack(cbSize), cbSize);
-
-        CTRLDATA_BUTTON* p;
-        w.SkipPointer(p);
-        p->iVer = CDV_BUTTON_1;
-        p->eCheckState = GetCheckState();
-        p->cchNote = cchNote;
-        if (cchNote)
-        {
-            ++cchNote;
-            GetNote((PWSTR)w.Data(), cchNote);
-        }
-        else
-            *(PWSTR)w.Data() = L'\0';
-    }
-
-    void PostDeserialize(PCVOID pData) noexcept override
-    {
-        CWindow::PostDeserialize(pData);
-        const auto* const p = (const CTRLDATA_BUTTON*)CWindow::SkipBaseData(pData);
-        if (p->iVer != CDV_BUTTON_1)
-            return;
-        SetCheckState(p->eCheckState);
-        if (p->cchNote)
-            SetNote(p->Note());
-    }
+    ECK_W_STYLE_MASK(TripleState, BS_3STATE, TypeMask);
+    ECK_W_STYLE_MASK(AutoTripleState, BS_AUTO3STATE, TypeMask);
+    ECK_W_STYLE_MASK(AutoCheckButton, BS_AUTOCHECKBOX, TypeMask);
+    ECK_W_STYLE_MASK(AutoRadioButton, BS_AUTORADIOBUTTON, TypeMask);
+    ECK_W_STYLE(ShowBitmap, BS_BITMAP);
+    ECK_W_STYLE(AlignmentBottom, BS_BOTTOM);
+    ECK_W_STYLE(AlignmentCenter, BS_CENTER);
+    ECK_W_STYLE_MASK(CheckBox, BS_CHECKBOX, TypeMask);
+    ECK_W_STYLE(CommandLink, BS_COMMANDLINK);
+    ECK_W_STYLE(DefaultCommandLink, BS_DEFCOMMANDLINK);
+    ECK_W_STYLE_MASK(DefaultPushButton, BS_DEFPUSHBUTTON, TypeMask);
+    ECK_W_STYLE(DefaultSplitButton, BS_DEFSPLITBUTTON);
+    ECK_W_STYLE_MASK(GroupBox, BS_GROUPBOX, TypeMask);
+    ECK_W_STYLE(ShowIcon, BS_ICON);
+    ECK_W_STYLE(Flat, BS_FLAT);
+    ECK_W_STYLE(AlignmentLeft, BS_LEFT);
+    ECK_W_STYLE(MultiLine, BS_MULTILINE);
+    ECK_W_STYLE(Notify, BS_NOTIFY);
+    ECK_W_STYLE_MASK(OwnerDraw, BS_OWNERDRAW, TypeMask);
+    ECK_W_STYLE_MASK(PushBox, BS_PUSHBOX, TypeMask);
+    ECK_W_STYLE_MASK(PushButton, BS_PUSHBUTTON, TypeMask);
+    ECK_W_STYLE(PushLike, BS_PUSHLIKE);
+    ECK_W_STYLE_MASK(RadioButton, BS_RADIOBUTTON, TypeMask);
+    ECK_W_STYLE(AlignmentRight, BS_RIGHT);
+    ECK_W_STYLE(RightButton, BS_RIGHTBUTTON);
+    ECK_W_STYLE(SplitButton, BS_SPLITBUTTON);
+    ECK_W_STYLE(ShowText, BS_TEXT);
+    ECK_W_STYLE(AlignmentTop, BS_TOP);
+    ECK_W_STYLE(AlignmentVCenter, BS_VCENTER);
 
     BOOL LoGetIdealSize(LYTSIZE& size) noexcept override
     {
@@ -278,27 +220,27 @@ public:
         SetStyle(dwStyle);
     }
 
-    void SetAlignment(BOOL bHAlign, Alignment iAlign) const noexcept
+    void SetAlignment(BOOL bHAlign, Alignment eAlign) const noexcept
     {
         auto dwStyle = GetStyle();
         if (bHAlign)
         {
             dwStyle &= (~(BS_LEFT | BS_CENTER | BS_RIGHT));
-            switch (iAlign)
+            switch (eAlign)
             {
-            case Alignment::Near: dwStyle |= BS_LEFT; break;
+            case Alignment::Near:   dwStyle |= BS_LEFT;   break;
             case Alignment::Center: dwStyle |= BS_CENTER; break;
-            case Alignment::Far: dwStyle |= BS_RIGHT; break;
+            case Alignment::Far:    dwStyle |= BS_RIGHT;  break;
             }
         }
         else
         {
             dwStyle &= (~(BS_TOP | BS_VCENTER | BS_BOTTOM));
-            switch (iAlign)
+            switch (eAlign)
             {
-            case Alignment::Near: dwStyle |= BS_TOP; break;
+            case Alignment::Near:   dwStyle |= BS_TOP;     break;
             case Alignment::Center: dwStyle |= BS_VCENTER; break;
-            case Alignment::Far: dwStyle |= BS_BOTTOM; break;
+            case Alignment::Far:    dwStyle |= BS_BOTTOM;  break;
             }
         }
         SetStyle(dwStyle);

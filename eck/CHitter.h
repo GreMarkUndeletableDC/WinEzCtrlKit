@@ -12,8 +12,8 @@ class CHitter : public CWindow
 {
 public:
     ECK_RTTI(CHitter, CWindow);
-    ECK_CWND_SINGLEOWNER(CHitter);
-    ECK_CWND_CREATE_CLS_HINST(WCN_HITTER, g_hInstance);
+    ECK_W_NONATTACHABLE(CHitter);
+    ECK_W_CREATE_CLASS_INST(WCN_HITTER, g_hInstance);
 private:
     HCURSOR m_hcNormal{};
     HCURSOR m_hcHit{};
@@ -44,7 +44,7 @@ public:
                 NMHTTSEL nm;
                 GetCursorPos(&nm.pt);
                 SetCursor(nullptr);
-                FillNmhdrAndSendNotify(nm, NM_HTT_SEL);
+                NmFillHeaderAndSend(nm, NM_HTT_SEL);
             }
             return 0;
 

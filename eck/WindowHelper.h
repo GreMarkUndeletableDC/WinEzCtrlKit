@@ -20,40 +20,6 @@
 #define ECK_HANDLE_WM_DPICHANGED(hWnd, wParam, lParam, fn) \
     ((fn)((hWnd), (int)(short)LOWORD(wParam), (int)(short)HIWORD(wParam), (RECT*)(lParam)), 0L)
 
-#define ECK_STYLE_GETSET(Name, Style)					\
-    BOOL StyleGet##Name() const							\
-    {													\
-        if constexpr (Style == 0)						\
-            return !GetStyle();							\
-        else											\
-            return IsBitSet(GetStyle(), Style);			\
-    }													\
-    void StyleSet##Name(BOOL b)	const					\
-    {													\
-        ModifyStyle((b ? Style : 0), Style, GWL_STYLE); \
-    }
-
-#define ECK_STYLE_GETSET_MASK(Name, Style, Mask)		\
-    BOOL StyleGet##Name() const							\
-    {													\
-        if constexpr (Style == 0)						\
-            return !(GetStyle() & Mask);				\
-        else											\
-            return IsBitSet(GetStyle(), Style);			\
-    }													\
-    void StyleSet##Name(BOOL b)	const					\
-    {													\
-        SetStyle((GetStyle() & ~Mask) | (b ? Style : 0));\
-    }
-
-#define ECK_CWNDPROP_STYLE(Name, Style)					\
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-    ECK_STYLE_GETSET(Name, Style)
-
-#define ECK_CWNDPROP_STYLE_MASK(Name, Style, Mask)		\
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-    ECK_STYLE_GETSET_MASK(Name, Style, Mask)
-
 ECK_NAMESPACE_BEGIN
 #pragma region DPI
 inline int GetDpi(HWND hWnd) noexcept

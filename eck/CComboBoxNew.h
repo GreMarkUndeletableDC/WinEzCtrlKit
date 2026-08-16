@@ -7,10 +7,10 @@ class CComboBoxNew : public CWindow
 {
 public:
     ECK_RTTI(CComboBoxNew, CWindow);
-    ECK_CWND_SINGLEOWNER(CComboBoxNew);
-    ECK_CWND_CREATE_CLS_HINST(WCN_COMBOBOXNEW, g_hInstance);
+    ECK_W_NONATTACHABLE(CComboBoxNew);
+    ECK_W_CREATE_CLASS_INST(WCN_COMBOBOXNEW, g_hInstance);
 
-    enum class View :BYTE
+    enum class View : BYTE
     {
         DropDown,
         DropDownEdit,
@@ -68,7 +68,7 @@ protected:
 
         RECT rc{ 0,0,m_cxClient,m_cyClient };
         NMCUSTOMDRAWEXT ne;
-        FillNmhdr(ne, NM_CUSTOMDRAW);
+        NmFillHeader(ne, NM_CUSTOMDRAW);
         ne.hdc = m_DC.GetDC();
         ne.rc = rc;
         ne.dwItemSpec = 0;
@@ -99,7 +99,7 @@ protected:
         }
 
         ne.dwDrawStage = CDDS_PREPAINT;
-        const auto lRet = SendNotify(ne, m_hParent);
+        const auto lRet = NmSend(ne, m_hParent);
         if (lRet & CDRF_SKIPDEFAULT)
             goto SkipDef;
 
@@ -148,7 +148,7 @@ protected:
         if (lRet & CDRF_NOTIFYPOSTPAINT)
         {
             ne.dwDrawStage = CDDS_POSTPAINT;
-            SendNotify(ne, m_hParent);
+            NmSend(ne, m_hParent);
         }
         BitBltPs(&ps, m_DC.GetDC());
         EndPaint(hWnd, wParam, ps);
@@ -415,9 +415,6 @@ public:
         {
             m_hParent = ((CREATESTRUCTW*)lParam)->hwndParent;
             m_iDpi = GetDpi(Handle);
-#if _DEBUG
-            m_LB.DbgTag = L"CComboBoxNew::m_LB";
-#endif
             m_LB.Create(nullptr, WS_POPUP | WS_BORDER,
                 WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_TOPMOST,
                 0, 0, ((CREATESTRUCTW*)lParam)->cx, 500, Handle, nullptr);
