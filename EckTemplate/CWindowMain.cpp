@@ -34,9 +34,6 @@ LRESULT CWindowMain::OnCreate(CREATESTRUCT* pcs) noexcept
     const auto cy = DpiScale(30, m_iDpi);
     const auto cxED = DpiScale(300, m_iDpi);
 
-    m_CBRememberPassword.DbgTag = L"CBRememberPassword";
-    m_CBShowPassword.DbgTag = L"CBShowPassword";
-
     Ui::ERR_CTX ErrCtx{};
     const auto r = Ui::Create(this, ErrCtx,
         Ui::VBox{
