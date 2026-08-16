@@ -2221,12 +2221,14 @@ HHOOK BeginCbtHook(CWindow* pCurrWnd, FWindowCreating pfnCreatingProc) noexcept
     return ptc->hhkCbtCreate;
 }
 
-void EndCbtHook() noexcept
+BOOL EndCbtHook() noexcept
 {
     const auto ptc = PtcCurrent();
-    EckAssert(ptc->hhkCbtCreate);
+    if (!ptc->hhkCbtCreate)
+        return FALSE;
     UnhookWindowsHookEx(ptc->hhkCbtCreate);
     ptc->hhkCbtCreate = nullptr;
+    return TRUE;
 }
 
 BOOL PreTranslateMessage(const MSG& Msg) noexcept

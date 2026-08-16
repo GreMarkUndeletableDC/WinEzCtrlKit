@@ -2,18 +2,6 @@
 #include "CStatic.h"
 
 ECK_NAMESPACE_BEGIN
-inline constexpr int CDV_COLOR_PICK_BLOCK_1 = 1;
-
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
-struct CTRLDATA_COLOR_PICK_BLOCK
-{
-    int iVer;
-    COLORREF crCust[16];
-    COLORREF cr;
-    UINT uCCFlags;
-};
-#pragma pack(pop)
-
 class CColorPickBlock : public CStatic
 {
 public:
@@ -30,34 +18,6 @@ private:
         m_uCcFlags = CC_FULLOPEN;
     }
 public:
-    EckInlineNdCe static PCVOID SkipBaseData(PCVOID p) noexcept
-    {
-        return PointerStepBytes(__super::SkipBaseData(p), sizeof(CTRLDATA_COLOR_PICK_BLOCK));
-    }
-
-    void SerializeData(CByteBuffer& rb, const SERIALIZE_OPT* pOpt = nullptr) noexcept override
-    {
-        __super::SerializeData(rb, pOpt);
-        constexpr auto cbSize = sizeof(CTRLDATA_COLOR_PICK_BLOCK);
-        CMemoryWalker w(rb.PushBack(cbSize), cbSize);
-        CTRLDATA_COLOR_PICK_BLOCK* p;
-        w.SkipPointer(p);
-        p->iVer = CDV_COLOR_PICK_BLOCK_1;
-        memcpy(p->crCust, m_crCust, sizeof(m_crCust));
-        p->cr = m_cr;
-        p->uCCFlags = m_uCcFlags;
-    }
-
-    void PostDeserialize(PCVOID pData) noexcept override
-    {
-        __super::PostDeserialize(pData);
-        const auto* const p = (CTRLDATA_COLOR_PICK_BLOCK*)__super::SkipBaseData(pData);
-
-        memcpy(m_crCust, p->crCust, sizeof(m_crCust));
-        m_cr = p->cr;
-        m_uCcFlags = p->uCCFlags;
-    }
-
     void AttachNew(HWND hWnd) noexcept override
     {
         __super::AttachNew(hWnd);

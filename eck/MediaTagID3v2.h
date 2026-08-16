@@ -35,7 +35,7 @@ public:
     enum class TextEncodingRestriction : BYTE
     {
         No,
-        OnlyLatin1OrU8
+        OnlyLatin1OrUtf8
     };
     enum class TextFieldSizeRestriction : BYTE
     {
@@ -79,7 +79,7 @@ private:
 
     size_t m_cbTag{};       // 标签长度
     size_t m_cbPrependTag{};// 前置标签长度
-    size_t m_SeekVal{ CMediaFile::NPos };// 根据SEEK帧查找到的后置标签位置
+    size_t m_SeekVal{ CMediaFile::InvalidPosition };// 根据SEEK帧查找到的后置标签位置
 
 
     Result TagpParseFrameBody(
@@ -87,13 +87,13 @@ private:
         _Out_opt_ size_t* pposActualEnd = nullptr) noexcept
     {
         if (pposActualEnd)
-            *pposActualEnd = CMediaFile::NPos;
+            *pposActualEnd = CMediaFile::InvalidPosition;
 
         posEnd = std::min(posEnd, m_Stream.GetSize());
         ID3v2_FRAME_HEADER FrameHdr;
         Result r;
         CByteBuffer rbFrame;
-        const ID3v2::FRAME::SERIAL_CTX SerialCtx
+        const ID3v2::FRAME::SERIAL_CONTEXT SerialCtx
         {
             .rbWork = m_rbWork,
             .pTagHdr = &m_Header,
@@ -189,9 +189,9 @@ private:
     Result PreReadWrite() noexcept
     {
         const auto& Loc = m_File.GetTagLocation();
-        if (Loc.posV2 != CMediaFile::NPos)
+        if (Loc.posV2 != CMediaFile::InvalidPosition)
             m_Stream.Seek(Loc.posV2);
-        else if (Loc.posV2Footer != CMediaFile::NPos)
+        else if (Loc.posV2Footer != CMediaFile::InvalidPosition)
             m_Stream.Seek(Loc.posV2FooterHdr);
         else
         {
@@ -647,7 +647,7 @@ public:
         if (!(mi.uMaskChecked & MIM_LYRICS))
         {
             auto e = std::make_unique<ID3v2::USLT>();
-            e->eEncoding = ID3v2::TextEncoding::UTF8;
+            e->eEncoding = ID3v2::TextEncoding::Utf8;
             if (bMove)
                 e->rsLrc = std::move(mi.rsLrc);
             else
@@ -657,7 +657,7 @@ public:
         if (!(mi.uMaskChecked & MIM_COMMENT))
         {
             auto e = std::make_unique<ID3v2::COMM>();
-            e->eEncoding = ID3v2::TextEncoding::UTF8;
+            e->eEncoding = ID3v2::TextEncoding::Utf8;
             TagpSetComment(e.get(), mi.slComment, Opt);
             m_vItem.emplace_back(std::move(e));
         }
@@ -685,7 +685,7 @@ public:
     Result ReadTag(UINT uFlags = 0u) noexcept override try
     {
         ItmClear();
-        m_SeekVal = CMediaFile::NPos;
+        m_SeekVal = CMediaFile::InvalidPosition;
         m_cbPrependTag = 0u;
 
         Result r;
@@ -694,7 +694,7 @@ public:
 
         const auto& Loc = m_File.GetTagLocation();
         size_t posActualEnd;
-        if (Loc.posV2 != CMediaFile::NPos)
+        if (Loc.posV2 != CMediaFile::InvalidPosition)
         {
             m_Stream.Seek(Loc.posV2 + sizeof(ID3v2_HEADER));
             if (m_Header.Flags & ID3V2HF_EXTENDED_HEADER)
@@ -712,7 +712,7 @@ public:
             if (m_cbPrependTag > m_cbTag)
                 return Result::Length;
             // 若找到了SEEK帧，则移至其指示的位置继续解析，此时不可能含有空白填充
-            if (m_SeekVal != CMediaFile::NPos)
+            if (m_SeekVal != CMediaFile::InvalidPosition)
             {
                 m_SeekVal += (m_cbPrependTag + Loc.posV2);
                 // 追加标签末尾超出文件长度
@@ -723,7 +723,7 @@ public:
                 r = TagpParseFrameBody(m_SeekVal + m_cbTag);
             }
         }
-        else if (Loc.posV2Footer != CMediaFile::NPos)
+        else if (Loc.posV2Footer != CMediaFile::InvalidPosition)
         {
             m_Stream.Seek(Loc.posV2Footer);
             r = TagpParseFrameBody(Loc.posV2Footer + m_cbTag);
@@ -755,8 +755,8 @@ public:
         const auto& Loc = m_File.GetTagLocation();
 
         const BOOL bOnlyAppend =
-            Loc.posV2Footer != CMediaFile::NPos &&
-            Loc.posV2 == CMediaFile::NPos;
+            Loc.posV2Footer != CMediaFile::InvalidPosition &&
+            Loc.posV2 == CMediaFile::InvalidPosition;
         const BOOL bShouldAppend = (uFlags & MIF_APPEND_TAG);
 
         ID3v2_HEADER Hdr{ m_Header };
@@ -770,7 +770,7 @@ public:
         if (uFlags & MIF_CREATE_ID3V2_EXT_HEADER)
             Hdr.Flags |= ID3V2HF_EXTENDED_HEADER;
 
-        const ID3v2::FRAME::SERIAL_CTX SerialCtx
+        const ID3v2::FRAME::SERIAL_CONTEXT SerialCtx
         {
             .rbWork = m_rbWork,
             .pTagHdr = &m_Header,
@@ -797,14 +797,14 @@ public:
         const BOOL bAllowPadding = (uFlags & MIF_ALLOW_PADDING) &&
             !(!rbPrepend.IsEmpty() && !rbAppend.IsEmpty());
 
-        size_t ocbNextTag{ CMediaFile::NPos };
-        size_t dHdrFooterToEnd{ CMediaFile::NPos };
+        size_t ocbNextTag{ CMediaFile::InvalidPosition };
+        size_t dHdrFooterToEnd{ CMediaFile::InvalidPosition };
         //
         // 写入后置标签
         //
         if (!rbAppend.IsEmpty())
         {
-            if (Loc.posV2Footer != CMediaFile::NPos)// 后置标签本身存在
+            if (Loc.posV2Footer != CMediaFile::InvalidPosition)// 后置标签本身存在
             {
                 if (m_cbTag < rbAppend.Size())
                 {
@@ -822,9 +822,9 @@ public:
                 }
                 m_Stream.Seek(Loc.posV2Footer);
             }
-            else if (m_SeekVal != CMediaFile::NPos)// 后置标签已通过SEEK帧定位
+            else if (m_SeekVal != CMediaFile::InvalidPosition)// 后置标签已通过SEEK帧定位
             {
-                EckAssert(m_cbTag != CMediaFile::NPos);
+                EckAssert(m_cbTag != CMediaFile::InvalidPosition);
                 const auto cbOldAppend = m_cbTag - m_cbPrependTag;
                 if (cbOldAppend < rbAppend.Size())
                 {
@@ -846,9 +846,9 @@ public:
             {
                 size_t posInsert;
                 // 插入到ID3v1前，若无则插入到文件末尾
-                if (Loc.posV1Ext != CMediaFile::NPos)
+                if (Loc.posV1Ext != CMediaFile::InvalidPosition)
                     posInsert = Loc.posV1Ext;
-                else if (Loc.posV1 != CMediaFile::NPos)
+                else if (Loc.posV1 != CMediaFile::InvalidPosition)
                     posInsert = Loc.posV1;
                 else
                     posInsert = m_Stream.GetSize();
@@ -856,7 +856,7 @@ public:
                 m_Stream.Seek(posInsert);
             }
 
-            if (Loc.posV2 == CMediaFile::NPos)
+            if (Loc.posV2 == CMediaFile::InvalidPosition)
                 ocbNextTag = m_Stream.GetPosition();
             else
                 ocbNextTag = m_Stream.GetPosition() - m_cbPrependTag - Loc.posV2 - 10;
@@ -870,7 +870,7 @@ public:
             else
                 dHdrFooterToEnd = m_Stream.GetSize() - m_Stream.GetPosition();
         }
-        else if (Loc.posV2Footer != CMediaFile::NPos)// 删除先前的后置标签
+        else if (Loc.posV2Footer != CMediaFile::InvalidPosition)// 删除先前的后置标签
         {
             m_Stream.Erase(Loc.posV2Footer,
                 m_cbTag - m_cbPrependTag + sizeof(ID3v2_HEADER));
@@ -883,7 +883,7 @@ public:
         size_t cbPrependTotal = rbPrepend.Size();
         if (cbPrependTotal)
         {
-            if (!bSeekFrameFound && ocbNextTag != CMediaFile::NPos)// 补下SEEK帧
+            if (!bSeekFrameFound && ocbNextTag != CMediaFile::InvalidPosition)// 补下SEEK帧
             {
                 ID3v2::SEEK Seek{};
                 Seek.bFileAlterDiscard = TRUE;
@@ -905,9 +905,9 @@ public:
             }
             //
             size_t cbPadding{};
-            if (Loc.posV2 != CMediaFile::NPos)
+            if (Loc.posV2 != CMediaFile::InvalidPosition)
             {
-                const auto cbPrependOld = m_SeekVal == CMediaFile::NPos ?
+                const auto cbPrependOld = m_SeekVal == CMediaFile::InvalidPosition ?
                     m_cbTag : m_cbPrependTag;
                 if (cbPrependOld < cbPrependTotal)
                 {
@@ -951,14 +951,14 @@ public:
                 m_Stream.Write(&ExtHdrBuf, cbExtHdr);
             m_Stream << rbPrepend;
             // BACKFILL 若标签尾写入挂起，完成之
-            if (dHdrFooterToEnd != CMediaFile::NPos)
+            if (dHdrFooterToEnd != CMediaFile::InvalidPosition)
             {
                 m_Stream.Seek(dHdrFooterToEnd, STREAM_SEEK_END);
                 memcpy(Hdr.Header, "3DI", 3);
                 m_Stream << Hdr;
             }
         }
-        else if (Loc.posV2 != CMediaFile::NPos)// 删除先前的前置标签
+        else if (Loc.posV2 != CMediaFile::InvalidPosition)// 删除先前的前置标签
             m_Stream.Erase(Loc.posV2, m_cbPrependTag + sizeof(ID3v2_HEADER));
         m_Stream.Commit();
         return Result::Ok;
@@ -980,7 +980,7 @@ public:
         m_ExtHdrInfo = {};
         m_cbTag = 0u;
         m_cbPrependTag = 0u;
-        m_SeekVal = CMediaFile::NPos;
+        m_SeekVal = CMediaFile::InvalidPosition;
     }
 
     BOOL IsEmpty() noexcept override { return m_vItem.empty(); }

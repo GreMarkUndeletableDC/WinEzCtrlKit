@@ -174,7 +174,7 @@ public:
                     m_posBegin += e.cbActual;
                 }
             }
-            return Result::MpegSynchronizeFailed;
+            return Result::MpegSynchronization;
         }
     SyncSucceed:
         m_Info.eVersion = Version((byHdr[1] >> 3) & 0b11_by);

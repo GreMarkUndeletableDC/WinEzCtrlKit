@@ -5,74 +5,74 @@ ECK_NAMESPACE_BEGIN
 using FLvItemCompare = int(CALLBACK*)(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 using FLvItemCompareEx = int(CALLBACK*)(int idx1, int idx2, LPARAM lParamSort);
 
-#define ECK_CWNDPROP_LVE_STYLE(Name, Style)				\
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;	\
-	BOOL StyleGet##Name() const							\
-	{													\
-		if constexpr (Style == 0)						\
-			return !GetLVExtendStyle();					\
-		else											\
-			return IsBitSet(GetLVExtendStyle(), Style);	\
-	}													\
-	void StyleSet##Name(BOOL b) const					\
-	{													\
-		SetLVExtendStyle(b ? Style : 0, Style);			\
+#define ECK_W_LVE_STYLE(Name, Style)                    \
+	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+	BOOL StyleGet##Name() const                         \
+	{                                                   \
+		if constexpr (Style == 0)                       \
+			return !GetLVExtendStyle();                 \
+		else                                            \
+			return IsBitSet(GetLVExtendStyle(), Style); \
+	}                                                   \
+	void StyleSet##Name(BOOL b) const                   \
+	{                                                   \
+		SetLVExtendStyle(b ? Style : 0, Style);         \
 	}
 
 class CListView : public CWindow
 {
 public:
     ECK_RTTI(CListView, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CListView);
-    ECK_CWND_CREATE_CLS(WC_LISTVIEWW);
+    ECK_W_ATTACHABLE(CListView);
+    ECK_W_CREATE_CLASS(WC_LISTVIEWW);
 
-    ECK_CWNDPROP_STYLE(AlignLeft, LVS_ALIGNLEFT);
-    ECK_CWNDPROP_STYLE(AlignTop, LVS_ALIGNTOP);
-    ECK_CWNDPROP_STYLE(AutoArrange, LVS_AUTOARRANGE);
-    ECK_CWNDPROP_STYLE(EditLabels, LVS_EDITLABELS);
-    ECK_CWNDPROP_STYLE_MASK(ViewIcon, LVS_ICON, LVS_TYPEMASK);
-    ECK_CWNDPROP_STYLE_MASK(ViewList, LVS_LIST, LVS_TYPEMASK);
-    ECK_CWNDPROP_STYLE(NoColumnHeader, LVS_NOCOLUMNHEADER);
-    ECK_CWNDPROP_STYLE(NoLabelWrap, LVS_NOLABELWRAP);
-    ECK_CWNDPROP_STYLE(NoScroll, LVS_NOSCROLL);
-    ECK_CWNDPROP_STYLE(NoSortHeader, LVS_NOSORTHEADER);
-    ECK_CWNDPROP_STYLE(OwnerData, LVS_OWNERDATA);
-    ECK_CWNDPROP_STYLE_MASK(ViewReport, LVS_REPORT, LVS_TYPEMASK);
-    ECK_CWNDPROP_STYLE(ShareImageLists, LVS_SHAREIMAGELISTS);
-    ECK_CWNDPROP_STYLE(ShowSelAlways, LVS_SHOWSELALWAYS);
-    ECK_CWNDPROP_STYLE(SingleSel, LVS_SINGLESEL);
-    ECK_CWNDPROP_STYLE_MASK(ViewSmallIcon, LVS_SMALLICON, LVS_TYPEMASK);
-    ECK_CWNDPROP_STYLE(SortAscending, LVS_SORTASCENDING);
-    ECK_CWNDPROP_STYLE(SortDescending, LVS_SORTDESCENDING);
-    ECK_CWNDPROP_LVE_STYLE(AutoAutoArrange, LVS_EX_AUTOAUTOARRANGE);
-    ECK_CWNDPROP_LVE_STYLE(AutoCheckSelect, LVS_EX_AUTOCHECKSELECT);
-    ECK_CWNDPROP_LVE_STYLE(AutoSizeColumns, LVS_EX_AUTOSIZECOLUMNS);
-    ECK_CWNDPROP_LVE_STYLE(BorderSelect, LVS_EX_BORDERSELECT);
-    ECK_CWNDPROP_LVE_STYLE(Checkboxes, LVS_EX_CHECKBOXES);
-    ECK_CWNDPROP_LVE_STYLE(ColumnOverflow, LVS_EX_COLUMNOVERFLOW);
-    ECK_CWNDPROP_LVE_STYLE(ColumnSnapPoints, LVS_EX_COLUMNSNAPPOINTS);
-    ECK_CWNDPROP_LVE_STYLE(DoubleBuffer, LVS_EX_DOUBLEBUFFER);
-    ECK_CWNDPROP_LVE_STYLE(FlatSB, LVS_EX_FLATSB);
-    ECK_CWNDPROP_LVE_STYLE(FullRowSelect, LVS_EX_FULLROWSELECT);
-    ECK_CWNDPROP_LVE_STYLE(GridLines, LVS_EX_GRIDLINES);
-    ECK_CWNDPROP_LVE_STYLE(HeaderDragDrop, LVS_EX_HEADERDRAGDROP);
-    ECK_CWNDPROP_LVE_STYLE(HeaderInAllViews, LVS_EX_HEADERINALLVIEWS);
-    ECK_CWNDPROP_LVE_STYLE(HideLabels, LVS_EX_HIDELABELS);
-    ECK_CWNDPROP_LVE_STYLE(InfoTip, LVS_EX_INFOTIP);
-    ECK_CWNDPROP_LVE_STYLE(JustifyColumns, LVS_EX_JUSTIFYCOLUMNS);
-    ECK_CWNDPROP_LVE_STYLE(LabelTip, LVS_EX_LABELTIP);
-    ECK_CWNDPROP_LVE_STYLE(MultiWorkAreas, LVS_EX_MULTIWORKAREAS);
-    ECK_CWNDPROP_LVE_STYLE(OneClickActivate, LVS_EX_ONECLICKACTIVATE);
-    ECK_CWNDPROP_LVE_STYLE(Regional, LVS_EX_REGIONAL);
-    ECK_CWNDPROP_LVE_STYLE(SimpleSelect, LVS_EX_SIMPLESELECT);
-    ECK_CWNDPROP_LVE_STYLE(SnapToGrid, LVS_EX_SNAPTOGRID);
-    ECK_CWNDPROP_LVE_STYLE(SubItemImages, LVS_EX_SUBITEMIMAGES);
-    ECK_CWNDPROP_LVE_STYLE(TrackSelect, LVS_EX_TRACKSELECT);
-    ECK_CWNDPROP_LVE_STYLE(TransparentBk, LVS_EX_TRANSPARENTBKGND);
-    ECK_CWNDPROP_LVE_STYLE(TransparentShadowText, LVS_EX_TRANSPARENTSHADOWTEXT);
-    ECK_CWNDPROP_LVE_STYLE(TwoClickActivate, LVS_EX_TWOCLICKACTIVATE);
-    ECK_CWNDPROP_LVE_STYLE(UnderlineCold, LVS_EX_UNDERLINECOLD);
-    ECK_CWNDPROP_LVE_STYLE(UnderlineHot, LVS_EX_UNDERLINEHOT);
+    ECK_W_STYLE(AlignmentLeft, LVS_ALIGNLEFT);
+    ECK_W_STYLE(AlignmentTop, LVS_ALIGNTOP);
+    ECK_W_STYLE(AutoArrange, LVS_AUTOARRANGE);
+    ECK_W_STYLE(EditLabels, LVS_EDITLABELS);
+    ECK_W_STYLE_MASK(ViewIcon, LVS_ICON, LVS_TYPEMASK);
+    ECK_W_STYLE_MASK(ViewList, LVS_LIST, LVS_TYPEMASK);
+    ECK_W_STYLE(NoColumnHeader, LVS_NOCOLUMNHEADER);
+    ECK_W_STYLE(NoLabelWrap, LVS_NOLABELWRAP);
+    ECK_W_STYLE(NoScroll, LVS_NOSCROLL);
+    ECK_W_STYLE(NoSortHeader, LVS_NOSORTHEADER);
+    ECK_W_STYLE(OwnerData, LVS_OWNERDATA);
+    ECK_W_STYLE_MASK(ViewReport, LVS_REPORT, LVS_TYPEMASK);
+    ECK_W_STYLE(ShareImageLists, LVS_SHAREIMAGELISTS);
+    ECK_W_STYLE(ShowSelectionAlways, LVS_SHOWSELALWAYS);
+    ECK_W_STYLE(SingleSelect, LVS_SINGLESEL);
+    ECK_W_STYLE_MASK(ViewSmallIcon, LVS_SMALLICON, LVS_TYPEMASK);
+    ECK_W_STYLE(SortAscending, LVS_SORTASCENDING);
+    ECK_W_STYLE(SortDescending, LVS_SORTDESCENDING);
+    ECK_W_LVE_STYLE(AutoAutoArrange, LVS_EX_AUTOAUTOARRANGE);
+    ECK_W_LVE_STYLE(AutoCheckSelect, LVS_EX_AUTOCHECKSELECT);
+    ECK_W_LVE_STYLE(AutoSizeColumns, LVS_EX_AUTOSIZECOLUMNS);
+    ECK_W_LVE_STYLE(BorderSelect, LVS_EX_BORDERSELECT);
+    ECK_W_LVE_STYLE(CheckBoxes, LVS_EX_CHECKBOXES);
+    ECK_W_LVE_STYLE(ColumnOverflow, LVS_EX_COLUMNOVERFLOW);
+    ECK_W_LVE_STYLE(ColumnSnapPoints, LVS_EX_COLUMNSNAPPOINTS);
+    ECK_W_LVE_STYLE(DoubleBuffer, LVS_EX_DOUBLEBUFFER);
+    ECK_W_LVE_STYLE(FlatScrollBar, LVS_EX_FLATSB);
+    ECK_W_LVE_STYLE(FullRowSelect, LVS_EX_FULLROWSELECT);
+    ECK_W_LVE_STYLE(GridLines, LVS_EX_GRIDLINES);
+    ECK_W_LVE_STYLE(HeaderDragDrop, LVS_EX_HEADERDRAGDROP);
+    ECK_W_LVE_STYLE(HeaderInAllViews, LVS_EX_HEADERINALLVIEWS);
+    ECK_W_LVE_STYLE(HideLabels, LVS_EX_HIDELABELS);
+    ECK_W_LVE_STYLE(InformationTip, LVS_EX_INFOTIP);
+    ECK_W_LVE_STYLE(JustifyColumns, LVS_EX_JUSTIFYCOLUMNS);
+    ECK_W_LVE_STYLE(LabelTip, LVS_EX_LABELTIP);
+    ECK_W_LVE_STYLE(MultiWorkAreas, LVS_EX_MULTIWORKAREAS);
+    ECK_W_LVE_STYLE(OneClickActivate, LVS_EX_ONECLICKACTIVATE);
+    ECK_W_LVE_STYLE(Regional, LVS_EX_REGIONAL);
+    ECK_W_LVE_STYLE(SimpleSelect, LVS_EX_SIMPLESELECT);
+    ECK_W_LVE_STYLE(SnapToGrid, LVS_EX_SNAPTOGRID);
+    ECK_W_LVE_STYLE(SubItemImages, LVS_EX_SUBITEMIMAGES);
+    ECK_W_LVE_STYLE(TrackSelect, LVS_EX_TRACKSELECT);
+    ECK_W_LVE_STYLE(TransparentBackground, LVS_EX_TRANSPARENTBKGND);
+    ECK_W_LVE_STYLE(TransparentShadowText, LVS_EX_TRANSPARENTSHADOWTEXT);
+    ECK_W_LVE_STYLE(TwoClickActivate, LVS_EX_TWOCLICKACTIVATE);
+    ECK_W_LVE_STYLE(UnderlineCold, LVS_EX_UNDERLINECOLD);
+    ECK_W_LVE_STYLE(UnderlineHot, LVS_EX_UNDERLINEHOT);
 protected:
     BOOL m_bAutoDarkMode{ TRUE };
 public:

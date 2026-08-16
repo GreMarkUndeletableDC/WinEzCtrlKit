@@ -290,7 +290,7 @@ public:
     Result SimpleGet(SimpleData& mi, const SIMPLE_OPT& Opt) noexcept override
     {
         mi.Clear();
-        if (m_File.GetTagLocation().posV1 == CMediaFile::NPos)
+        if (m_File.GetTagLocation().posV1 == CMediaFile::InvalidPosition)
             return Result::NoTag;
         const auto bMove = Opt.uFlags & SMOF_MOVE;
 
@@ -390,7 +390,7 @@ public:
     Result ReadTag(UINT uFlags = 0u) noexcept override try
     {
         const auto& Loc = m_File.GetTagLocation();
-        if (Loc.posV1 == CMediaFile::NPos)
+        if (Loc.posV1 == CMediaFile::InvalidPosition)
         {
             m_bEmpty = TRUE;
             return Result::NoTag;
@@ -400,7 +400,7 @@ public:
         szTemp[60] = '\0';// Guard
         int cchTemp;
 
-        if (Loc.posV1Ext == CMediaFile::NPos)
+        if (Loc.posV1Ext == CMediaFile::InvalidPosition)
         {
             m_Stream.Seek(Loc.posV1 + 3);
             TagpReadString(szTemp, 30, cchTemp, m_Info.rsTitle);
@@ -434,7 +434,7 @@ public:
                 m_Info.uEndSec = 0;
             // 移动到ID3v1位置继续解析，跳过"TAG"标记3字节，
             // 标题、艺术家、专辑共90字节
-            if (Loc.posV1 == CMediaFile::NPos)
+            if (Loc.posV1 == CMediaFile::InvalidPosition)
             {
                 m_Info.usYear = 0;
                 m_Info.rsComment.Clear();
@@ -488,9 +488,9 @@ public:
         rsTemp.Reserve(60);
 
         const auto& Loc = m_File.GetTagLocation();
-        if (Loc.posV1Ext == CMediaFile::NPos)
+        if (Loc.posV1Ext == CMediaFile::InvalidPosition)
             if (uFlags & MIF_CREATE_ID3V1_EXT)
-                if (Loc.posV1 == CMediaFile::NPos)
+                if (Loc.posV1 == CMediaFile::InvalidPosition)
                     m_Stream.SeekToEnd();
                 else
                     m_Stream.Seek(Loc.posV1);

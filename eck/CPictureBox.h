@@ -14,8 +14,8 @@ class CPictureBox : public CWindow
 {
 public:
     ECK_RTTI(CPictureBox, CWindow);
-    ECK_CWND_SINGLEOWNER(CPictureBox);
-    ECK_CWND_CREATE_CLS_HINST(WCN_PICTUREBOX, g_hInstance);
+    ECK_W_NONATTACHABLE(CPictureBox);
+    ECK_W_CREATE_CLASS_INST(WCN_PICTUREBOX, g_hInstance);
 private:
     HBITMAP m_hBitmap{};
     GpImage* m_pGpImage{};

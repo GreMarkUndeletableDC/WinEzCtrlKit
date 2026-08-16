@@ -401,8 +401,8 @@ private:
 
     EckInlineNdCe BOOL UiaIsInitialized() const noexcept { return !!m_pUia.Get(); }
 public:
-    ECK_CWND_SINGLEOWNER(CElementContainer);
-    ECK_CWND_CREATE_CLS_HINST(WCN_DUIHOST, g_hInstance);
+    ECK_W_NONATTACHABLE(CElementContainer);
+    ECK_W_CREATE_CLASS_INST(WCN_DUIHOST, g_hInstance);
 public:
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {
@@ -436,7 +436,7 @@ public:
                 tme.hwndTrack = Handle;
                 TrackMouseEvent(&tme);
             }
-            goto CallDefault;
+            return 0;
         }
         else if (uMsg >= WM_NCMOUSEMOVE && uMsg <= WM_NCXBUTTONDBLCLK)
         {
@@ -479,7 +479,8 @@ public:
             }
             goto CallDefault;
         }
-        else if (uMsg >= WM_KEYFIRST && uMsg <= WM_IME_KEYLAST)
+        else if ((uMsg >= WM_KEYFIRST && uMsg <= WM_IME_KEYLAST) ||
+            (uMsg >= WM_IME_SETCONTEXT && uMsg <= WM_IME_KEYUP))
         {
             if (!m_pEleFocus)
                 goto CallDefault;
@@ -515,8 +516,7 @@ public:
             }
             break;
             }
-            m_pEleFocus->CallEvent(uMsg, wParam, lParam);
-            goto CallDefault;
+            return m_pEleFocus->CallEvent(uMsg, wParam, lParam);
         }
 
         switch (uMsg)

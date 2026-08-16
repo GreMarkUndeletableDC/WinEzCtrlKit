@@ -6,11 +6,11 @@ class CStatusBar : public CWindow
 {
 public:
     ECK_RTTI(CStatusBar, CWindow);
-    ECK_CWND_NOSINGLEOWNER(CStatusBar);
-    ECK_CWND_CREATE_CLS(STATUSCLASSNAMEW);
+    ECK_W_ATTACHABLE(CStatusBar);
+    ECK_W_CREATE_CLASS(STATUSCLASSNAMEW);
 
-    ECK_CWNDPROP_STYLE(SizeGrip, SBARS_SIZEGRIP);
-    ECK_CWNDPROP_STYLE(ToolTips, SBARS_TOOLTIPS);
+    ECK_W_STYLE(SizeGrip, SBARS_SIZEGRIP);
+    ECK_W_STYLE(ToolTips, SBARS_TOOLTIPS);
 
     /// <summary>
     /// 取边框尺寸

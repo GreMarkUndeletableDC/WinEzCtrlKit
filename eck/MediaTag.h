@@ -116,7 +116,7 @@ enum class Result
     EmptyData,          // 某数据为空
     ReservedData,       // 保留部分或未定义部分填入错误信息
     NoTag,              // 文件中无标签或标签还未被读入
-    MpegSynchronizeFailed,// MPEG同步失败
+    MpegSynchronization,// MPEG同步失败
     NotSupport,         // 不支持请求的操作
     OutOfMemory,        // 内存不足
     FileAccessDenied,   // 无法访问文件
@@ -499,17 +499,17 @@ EckInlineNdCe void TagUIntToSynchronizationSafeInt(_Out_writes_bytes_(4) BYTE* p
     p[1] = (dw >> 14) & 0b0111'1111;
     p[0] = (dw >> 21) & 0b0111'1111;
 }
-EckNfInlineNdCe BOOL TagCheckId3v2Header(const ID3v2_HEADER& hdr,
+EckNfInlineNdCe BOOL TagCheckId3v2Header(const ID3v2_HEADER& Hdr,
     BOOL bHeaderOrFooter = TRUE) noexcept
 {
     return (bHeaderOrFooter ?
-        memcmp(hdr.Header, "ID3", 3) == 0 :
-        memcmp(hdr.Header, "3DI", 3) == 0) &&
-        hdr.Ver < 0xFF && hdr.Revision < 0xFF &&
-        (hdr.Flags & 0b1111) == 0 &&
-        hdr.Size[0] < 0x80 && hdr.Size[1] < 0x80 &&
-        hdr.Size[2] < 0x80 && hdr.Size[3] < 0x80 &&
-        TagSynchronizationSafeIntToUInt(hdr.Size) != 0;
+        memcmp(Hdr.Header, "ID3", 3) == 0 :
+        memcmp(Hdr.Header, "3DI", 3) == 0) &&
+        Hdr.Ver < 0xFF && Hdr.Revision < 0xFF &&
+        (Hdr.Flags & 0b1111) == 0 &&
+        Hdr.Size[0] < 0x80 && Hdr.Size[1] < 0x80 &&
+        Hdr.Size[2] < 0x80 && Hdr.Size[3] < 0x80 &&
+        TagSynchronizationSafeIntToUInt(Hdr.Size) != 0;
 }
 
 struct FLAC_BLOCK_HEADER
@@ -531,7 +531,7 @@ struct APE_HEADER
 static_assert(sizeof(APE_HEADER) == 32);
 
 // APE头标志
-enum :UINT
+enum : UINT
 {
     APE_READ_ONLY = 1u << 0,
     APE_IS_HEADER = 1u << 29,
@@ -539,14 +539,14 @@ enum :UINT
     APE_HAS_HEADER = 1u << 31,
 };
 
-EckNfInlineNd BOOL TagCheckApeHeader(const APE_HEADER& hdr) noexcept
+EckNfInlineNd BOOL TagCheckApeHeader(const APE_HEADER& Hdr) noexcept
 {
-    return memcmp(hdr.byPreamble, "APETAGEX", 8) == 0 &&
-        (hdr.dwVer == 1000u || hdr.dwVer == 2000u) &&
-        (hdr.dwFlags & 0b0001'1111'1111'1111'1111'1111'1111'1000u) == 0 &&
-        hdr.cItems <= 65536 &&
-        hdr.cbBody >= sizeof(APE_HEADER) &&
-        *(ULONGLONG*)hdr.byReserved == 0ull;
+    return memcmp(Hdr.byPreamble, "APETAGEX", 8) == 0 &&
+        (Hdr.dwVer == 1000u || Hdr.dwVer == 2000u) &&
+        (Hdr.dwFlags & 0b0001'1111'1111'1111'1111'1111'1111'1000u) == 0 &&
+        Hdr.cItems <= 65536 &&
+        Hdr.cbBody >= sizeof(APE_HEADER) &&
+        *(ULONGLONG*)Hdr.byReserved == 0ull;
 }
 
 inline BOOL TagGetNumberAndTotal(std::wstring_view sv,
@@ -573,28 +573,28 @@ inline BOOL TagGetNumberAndTotal(std::wstring_view sv,
 class CMediaFile final
 {
 public:
-    constexpr static size_t NPos = MaxSizeT;
+    constexpr static size_t InvalidPosition = MaxSizeT;
 private:
     ComPtr<IStream> m_pStream{};
     UINT m_uTagType{};
 
     struct TAG_LOCATION
     {
-        size_t posV2{ NPos };           // ID3v2标签头的位置
-        size_t posV2Footer{ NPos };     // ID3v2标签尾内容的位置
-        size_t posV2FooterHdr{ NPos };  // ID3v2标签尾结构位置
-        size_t cbID3v2{};               // 若无标签头则为0，若有标签头则与头中的Size字段相同，不处理预置/追加组合的判长
+        size_t posV2{ InvalidPosition };            // ID3v2标签头的位置
+        size_t posV2Footer{ InvalidPosition };      // ID3v2标签尾内容的位置
+        size_t posV2FooterHdr{ InvalidPosition };   // ID3v2标签尾结构位置
+        size_t cbID3v2{};   // 若无标签头则为0，若有标签头则与头中的Size字段相同，不处理预置/追加组合的判长
 
-        size_t posV1{ NPos };       // ID3v1位置
-        size_t posV1Ext{ NPos };    // 扩展ID3v1位置
+        size_t posV1{ InvalidPosition };            // ID3v1位置
+        size_t posV1Ext{ InvalidPosition };         // 扩展ID3v1位置
 
-        size_t posApeHdr{ NPos };   // APE标签头/尾结构的位置
-        size_t posApe{ NPos };      // APE标签内容开始位置
-        size_t posApeTag{ NPos };   // APE标签开始位置
-        size_t cbApeTag{};          // 整个标签的大小
-        BOOL bPrependApe{};         // 是否为预置APE标签
+        size_t posApeHdr{ InvalidPosition };        // APE标签头/尾结构的位置
+        size_t posApe{ InvalidPosition };           // APE标签内容开始位置
+        size_t posApeTag{ InvalidPosition };        // APE标签开始位置
+        size_t cbApeTag{};  // 整个标签的大小
+        BOOL bPrependApe{}; // 是否为预置APE标签
 
-        size_t posFlac{ NPos };     // Flac标签头位置
+        size_t posFlac{ InvalidPosition };     // Flac标签头位置
     }  m_Loc{};
 
     // 如果APE未被识别，尝试根据ID3v2位置识别APE标签
@@ -602,10 +602,10 @@ private:
     // 此函数依赖cbId3v2的值，因此当流抛出时放弃当前查找
     void DetectApeById3v2(CStreamWalker& w) noexcept try
     {
-        if (m_Loc.cbID3v2 && m_Loc.posApe == NPos)
+        if (m_Loc.cbID3v2 && m_Loc.posApe == InvalidPosition)
         {
             APE_HEADER Hdr{};
-            if (m_Loc.posV2 != NPos)// 检查前置ID3v2后面
+            if (m_Loc.posV2 != InvalidPosition)// 检查前置ID3v2后面
             {
                 w.Seek(m_Loc.posV2 + m_Loc.cbID3v2) >> Hdr;
                 if (TagCheckApeHeader(Hdr) && (Hdr.dwFlags & APE_IS_HEADER))
@@ -618,7 +618,7 @@ private:
                     m_Loc.bPrependApe = TRUE;
                 }
             }
-            else if (m_Loc.posV2Footer != NPos &&
+            else if (m_Loc.posV2Footer != InvalidPosition &&
                 m_Loc.posV2Footer >= m_Loc.cbID3v2 + 32u)// 检查追加ID3v2前面
             {
                 w.Seek(m_Loc.posV2Footer - m_Loc.cbID3v2 - 32u) >> Hdr;
@@ -698,9 +698,9 @@ private:
         }
         // 查找APE
         size_t cbID3v1{};
-        if (m_Loc.posV1Ext != NPos)
+        if (m_Loc.posV1Ext != InvalidPosition)
             cbID3v1 = 227u + 128u;
-        else if (m_Loc.posV1 != NPos)
+        else if (m_Loc.posV1 != InvalidPosition)
             cbID3v1 = 128u;
         if (cbSize > cbID3v1 + sizeof(APE_HEADER))
         {
@@ -758,7 +758,7 @@ private:
                 {
                     size_t cbFrames{};
                     // 若未找到标签头，则应从尾部扫描，检查是否有追加标签
-                    if (m_Loc.posV1Ext != NPos)
+                    if (m_Loc.posV1Ext != InvalidPosition)
                     {
                         if (cbSize > 128u + 227u + 10u)
                         {
@@ -778,7 +778,7 @@ private:
                             }
                         }
                     }
-                    else if (m_Loc.posV1 != NPos)
+                    else if (m_Loc.posV1 != InvalidPosition)
                     {
                         if (cbSize > 128u + 10u)
                         {
@@ -829,7 +829,7 @@ private:
 
     void DetectFlac(CStreamWalker& w) noexcept try
     {
-        if (m_Loc.posV2 == NPos)
+        if (m_Loc.posV2 == InvalidPosition)
             w.SeekToBegin();
         else
             w.Seek(m_Loc.posV2 + m_Loc.cbID3v2 + 10);
