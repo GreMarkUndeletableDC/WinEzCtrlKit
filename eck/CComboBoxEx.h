@@ -1,7 +1,5 @@
 ﻿#pragma once
 #include "CComboBox.h"
-#include "CByteBufferStream.h"
-#include "CStreamView.h"
 
 ECK_NAMESPACE_BEGIN
 #define ECK_W_CBE_STYLE(Name, Style)                    \

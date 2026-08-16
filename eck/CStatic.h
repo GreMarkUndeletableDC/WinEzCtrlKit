@@ -37,7 +37,7 @@ public:
     ECK_W_STYLE(RealSizeImage, SS_REALSIZEIMAGE);
     ECK_W_STYLE(RealSizeControl, SS_REALSIZECONTROL);
     ECK_W_STYLE_MASK(AlignmentRight, SS_RIGHT, StaticTypeMask);
-    ECK_W_STYLE(RightJust, SS_RIGHTJUST);
+    ECK_W_STYLE(RightJustify, SS_RIGHTJUST);
     ECK_W_STYLE_MASK(Simple, SS_SIMPLE, StaticTypeMask);
     ECK_W_STYLE(Sunken, SS_SUNKEN);
     ECK_W_STYLE_MASK(WhiteFrame, SS_WHITEFRAME, StaticTypeMask);

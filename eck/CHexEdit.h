@@ -3,7 +3,6 @@
 #include "CMemoryDC.h"
 
 ECK_NAMESPACE_BEGIN
-#pragma pack(push, ECK_CTRLDATA_ALIGN)
 struct CTRLDATA_HEXEDIT
 {
     int cCol;
@@ -30,7 +29,6 @@ struct CTRLDATA_HEXEDIT
     size_t posSelStart{};
     size_t posSelEnd{};
 };
-#pragma pack(pop)
 
 struct HEHITTEST
 {

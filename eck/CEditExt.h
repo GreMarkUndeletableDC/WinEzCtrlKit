@@ -32,7 +32,7 @@ protected:
     COLORREF m_crBk{ CLR_DEFAULT };
 
     int m_cyText{};
-    int m_cxClient{}, m_cyClient{};
+    int m_cxWnd{}, m_cyWnd{};
     RECT m_rcMargins{};
 
     WCHAR m_chMask{};
@@ -62,9 +62,9 @@ protected:
         return
         {
             0,
-            (m_cyClient - m_cyText) / 2,
-            m_cxClient,
-            (m_cyClient - m_cyText) / 2 + m_cyText
+            (m_cyWnd - m_cyText) / 2,
+            m_cxWnd,
+            (m_cyWnd - m_cyText) / 2 + m_cyText
         };
     }
 
@@ -330,7 +330,7 @@ public:
             if (GetMultiLine())
                 return 0;
             const HDC hDC = GetWindowDC(Handle);
-            RECT rcWnd{ 0,0,m_cxClient,m_cyClient };
+            RECT rcWnd{ 0,0,m_cxWnd,m_cyWnd };
             const RECT rcText{ GetSingleLineTextRect() };
             // 非客户区矩形减掉边框
             rcWnd.left += m_rcMargins.left;
@@ -365,8 +365,8 @@ public:
         case WM_WINDOWPOSCHANGED:
         {
             const auto* const pwp = (WINDOWPOS*)lParam;
-            m_cxClient = pwp->cx;
-            m_cyClient = pwp->cy;
+            m_cxWnd = pwp->cx;
+            m_cyWnd = pwp->cy;
         }
         break;
 
@@ -457,7 +457,7 @@ public:
         if (!GetMultiLine())
         {
             if (Size.cx <= 0)
-                Size.cx = (TLytCoord)m_cxClient;
+                Size.cx = (TLytCoord)m_cxWnd;
             Size.cy = TLytCoord(m_cyText + DaGetSystemMetrics(SM_CYEDGE, GetDpi(Handle)) * 2);
             return TRUE;
         }

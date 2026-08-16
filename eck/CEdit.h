@@ -36,8 +36,8 @@ public:
 
     ECK_W_STYLE(AutoHScroll, ES_AUTOHSCROLL);
     ECK_W_STYLE(AutoVScroll, ES_AUTOVSCROLL);
-    ECK_W_STYLE(Center, ES_CENTER);
-    ECK_W_STYLE(Left, ES_LEFT);
+    ECK_W_STYLE(AlignmentCenter, ES_CENTER);
+    ECK_W_STYLE(AlignmentLeft, ES_LEFT);
     ECK_W_STYLE(Lowercase, ES_LOWERCASE);
     ECK_W_STYLE(Multiline, ES_MULTILINE);
     ECK_W_STYLE(NoHideSel, ES_NOHIDESEL);

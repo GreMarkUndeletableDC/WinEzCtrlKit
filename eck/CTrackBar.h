@@ -18,7 +18,7 @@ public:
     ECK_W_STYLE(TicksLeft, TBS_LEFT);
     ECK_W_STYLE(TicksRight, TBS_RIGHT);
     ECK_W_STYLE(TicksBoth, TBS_BOTH);
-    ECK_W_STYLE(Noticks, TBS_NOTICKS);
+    ECK_W_STYLE(NoTicks, TBS_NOTICKS);
     ECK_W_STYLE(EnableSelRange, TBS_ENABLESELRANGE);
     ECK_W_STYLE(FixedLength, TBS_FIXEDLENGTH);
     ECK_W_STYLE(NoThumb, TBS_NOTHUMB);
@@ -26,7 +26,7 @@ public:
     ECK_W_STYLE(Reversed, TBS_REVERSED);
     ECK_W_STYLE(DownIsLeft, TBS_DOWNISLEFT);
     ECK_W_STYLE(NotifyBeforeMove, TBS_NOTIFYBEFOREMOVE);
-    ECK_W_STYLE(TransparentBack, TBS_TRANSPARENTBKGND);
+    ECK_W_STYLE(TransparentBackground, TBS_TRANSPARENTBKGND);
 
     EckInline void ClearSelection(BOOL bRedraw) const noexcept
     {

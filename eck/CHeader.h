@@ -30,7 +30,7 @@ public:
     ECK_W_STYLE(HotTrack, HDS_HOTTRACK);
     ECK_W_STYLE(CheckBoxes, HDS_CHECKBOXES);
     ECK_W_STYLE(NoSizing, HDS_NOSIZING);
-    ECK_W_STYLE(OverFlow, HDS_OVERFLOW);
+    ECK_W_STYLE(Overflow, HDS_OVERFLOW);
 public:
     /// <summary>
     /// 清除筛选器
