@@ -136,7 +136,11 @@ public:
         break;
         case WM_CTLCOLORSTATIC:
         {
-            if ((!m_bClrDisableEdit && CWindow((HWND)lParam).GetWindowClass() == WC_EDITW))
+            if (m_bClrDisableEdit)
+                break;
+            WCHAR szCls[ARRAYSIZE(WC_EDITW) + 1];
+            if (GetClassNameW((HWND)lParam, szCls, ARRAYSIZE(szCls)) &&
+                _wcsicmp(szCls, WC_EDITW) == 0)
                 break;
         }
         [[fallthrough]];
