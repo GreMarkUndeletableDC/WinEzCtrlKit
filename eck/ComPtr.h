@@ -115,8 +115,8 @@ public:
         return &p;
     }
 
-    EckInlineNdCe TInterface*& AtSelf() noexcept { return p; }
-    EckInlineNdCe TInterface*& AtSelfClear() noexcept
+    EckInlineNdCe TInterface*& Self() noexcept { return p; }
+    EckInlineNdCe TInterface*& SelfClear() noexcept
     {
         ReleaseIt();
         return p;

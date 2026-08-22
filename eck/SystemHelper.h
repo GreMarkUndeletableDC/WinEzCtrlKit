@@ -129,7 +129,7 @@ inline HRESULT WmiQueryClassProperty(
 
     ComPtr<IWbemServices> pServices;
     ComPtr<IWbemLocator> pLocator;
-    if (FAILED(hr = WmiConnectNamespace(pServices.AtSelf(), pLocator.AtSelf())))
+    if (FAILED(hr = WmiConnectNamespace(pServices.Self(), pLocator.Self())))
         return hr;
     return WmiQueryClassProperty(pszWql, pszProp, Var, pServices.Get());
 }
@@ -193,7 +193,7 @@ inline HRESULT GetCpuInfomation(CPUINFO& ci) noexcept
 
     ComPtr<IWbemServices> pServices;
     ComPtr<IWbemLocator> pLocator;
-    if (FAILED(hr = WmiConnectNamespace(pServices.AtSelf(), pLocator.AtSelf())))
+    if (FAILED(hr = WmiConnectNamespace(pServices.Self(), pLocator.Self())))
         return hr;
 
     VARIANT Var{};
