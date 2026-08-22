@@ -866,7 +866,7 @@ public:
         if (bEnable)
         {
             ComPtr<IDropTarget> pTarget;
-            hr = GetDropTarget(pTarget.AtSelf());
+            hr = GetDropTarget(pTarget.Self());
             if (FAILED(hr))
                 return hr;
             hr = RegisterDragDrop(Handle, pTarget.Get());

@@ -14,7 +14,7 @@ LRESULT CWindowMain::OnCreate()
     StUpdateColorizationColor();
 
     ComPtr<IDWriteTextFormat> pTf;
-    eck::DftCreateDWrite(pTf.AtSelf());
+    eck::DftCreateDWrite(pTf.Self());
 
     const eck::LYTMARGINS Mar{ .b = 8.f };
     {

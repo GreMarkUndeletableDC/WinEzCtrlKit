@@ -1261,7 +1261,7 @@ public:
         {
             m_Stock.cxCache = cxPhy;
             m_Stock.cyCache = cyPhy;
-            RdCreateBitmap(cxPhy, cyPhy, m_Stock.pCacheBitmap.AtSelfClear());
+            RdCreateBitmap(cxPhy, cyPhy, m_Stock.pCacheBitmap.SelfClear());
         }
     }
     void CcReserveBitmapLogical(float cx, float cy) noexcept
@@ -1719,7 +1719,7 @@ inline HRESULT CElement::CompUpdateCacheBitmap(float cx, float cy) noexcept
     else
     {
         ComPtr<ID2D1Bitmap1> pBitmap;
-        hr = GetWindow().RdCreateBitmap(cxPhy, cyPhy, pBitmap.AtSelf());
+        hr = GetWindow().RdCreateBitmap(cxPhy, cyPhy, pBitmap.Self());
         Bitmap.Set(pBitmap.Get());
     }
     m_pCompositor->EleUpdateCacheBitmap(Bitmap);

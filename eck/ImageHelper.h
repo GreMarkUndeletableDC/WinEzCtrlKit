@@ -180,7 +180,7 @@ inline HRESULT WicLoadSource(
     WICBitmapInterpolationMode eInterMode = WICBitmapInterpolationModeLinear) noexcept
 {
     ComPtr<IWICBitmapDecoder> pDecoder;
-    const auto hr = WicCreateDecoder(pDecoder.AtSelf(), pszFile);
+    const auto hr = WicCreateDecoder(pDecoder.Self(), pszFile);
     if (FAILED(hr))
     {
         pSource = nullptr;
@@ -197,7 +197,7 @@ inline HRESULT WicLoadSource(
     WICBitmapInterpolationMode eInterMode = WICBitmapInterpolationModeLinear) noexcept
 {
     ComPtr<IWICBitmapDecoder> pDecoder;
-    const auto hr = WicCreateDecoder(pDecoder.AtSelf(), pStream);
+    const auto hr = WicCreateDecoder(pDecoder.Self(), pStream);
     if (FAILED(hr))
     {
         pSource = nullptr;
@@ -566,10 +566,10 @@ inline HRESULT D2DLoadBitmap(
     pD2DBitmap = nullptr;
     HRESULT hr;
     ComPtr<IWICBitmapDecoder> pDecoder;
-    if (FAILED(hr = WicCreateDecoder(pDecoder.AtSelf(), pszFile)))
+    if (FAILED(hr = WicCreateDecoder(pDecoder.Self(), pszFile)))
         return hr;
     ComPtr<IWICBitmapSource> pBitmap;
-    if (FAILED(hr = WicLoadSource(pBitmap.AtSelf(), pDecoder.Get(), cxNew, cyNew)))
+    if (FAILED(hr = WicLoadSource(pBitmap.Self(), pDecoder.Get(), cxNew, cyNew)))
         return hr;
     return pRT->CreateBitmapFromWicBitmap(pBitmap.Get(), &pD2DBitmap);
 }
