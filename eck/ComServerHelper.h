@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CRegistryKey.h"
-#include "ProcModule.h"
+#include "ProcessModule.h"
 
 ECK_NAMESPACE_BEGIN
 enum class ThreadingModel

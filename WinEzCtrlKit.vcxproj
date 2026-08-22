@@ -293,7 +293,7 @@
     <ClCompile Include="eck\DistortImage.h" />
     <ClCompile Include="eck\GeometryRender.h" />
     <ClCompile Include="eck\IMemoryView.h" />
-    <ClCompile Include="eck\ProcModule.h" />
+    <ClCompile Include="eck\ProcessModule.h" />
     <ClCompile Include="eck\LocaleStringUtility.h" />
     <ClCompile Include="eck\LunarDateTimeHelper.h" />
     <ClCompile Include="eck\Lyric.h" />
@@ -374,7 +374,7 @@
     <ClCompile Include="eck\LunarDateTable.h" />
     <ClCompile Include="eck\MathHelper.h" />
     <ClCompile Include="eck\CProcessorUsage.h" />
-    <ClCompile Include="eck\ProcThrdHelper.h" />
+    <ClCompile Include="eck\ProcessThreadHelper.h" />
     <ClCompile Include="eck\Snapshot.h" />
     <ClCompile Include="eck\StringConvert.h" />
     <ClCompile Include="eck\StringUtility.h" />

@@ -5,4 +5,4 @@
 #include "CMemoryDC.h"
 #include "GraphicsHelper.h"
 #include "CSrwLock.h"
-#include "ProcModule.h"
+#include "ProcessModule.h"

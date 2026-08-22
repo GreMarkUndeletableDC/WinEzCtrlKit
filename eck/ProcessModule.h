@@ -6,24 +6,25 @@ struct CLoaderLockGuard
 {
     CLoaderLockGuard() { RtlEnterCriticalSection(NtCurrentPeb()->LoaderLock); }
     ~CLoaderLockGuard() { RtlLeaveCriticalSection(NtCurrentPeb()->LoaderLock); }
+    ECK_DISABLE_COPY_MOVE(CLoaderLockGuard);
 };
 
-inline LDR_DATA_TABLE_ENTRY* FindModuleEntry(
+inline const LDR_DATA_TABLE_ENTRY* FindModuleEntry(
     void* pBase,
     std::wstring_view svModuleName = {},
     std::wstring_view svModulePath = {}) noexcept
 {
-    EckAssert(RtlIsCriticalSectionLocked(NtCurrentPeb()->LoaderLock));
+    EckAssert(RtlIsCriticalSectionLockedByThread(NtCurrentPeb()->LoaderLock));
     const auto pHead = &NtCurrentPeb()->Ldr->InLoadOrderModuleList;
     for (auto p = pHead->Flink; p != pHead; p = p->Flink)
     {
         // InLoadOrderModuleList刚好指向LDR_DATA_TABLE_ENTRY中的第一个字段
-        const auto pEntry = (LDR_DATA_TABLE_ENTRY*)p;
+        const auto pEntry = (const LDR_DATA_TABLE_ENTRY*)p;
         if ((!pBase || pEntry->DllBase == pBase) &&
-            (!svModuleName.empty() || TcsIsStartWithLength2I(
+            (svModuleName.empty() || TcsIsStartWithLength2I(
                 pEntry->BaseDllName.Buffer, pEntry->BaseDllName.Length / sizeof(WCHAR),
                 svModuleName.data(), svModuleName.size())) &&
-            (!svModulePath.empty() || TcsIsStartWithLength2I(
+            (svModulePath.empty() || TcsIsStartWithLength2I(
                 pEntry->FullDllName.Buffer, pEntry->FullDllName.Length / sizeof(WCHAR),
                 svModulePath.data(), svModulePath.size())))
         {
@@ -35,7 +36,7 @@ inline LDR_DATA_TABLE_ENTRY* FindModuleEntry(
 
 inline BOOL GetModuleFile(void* pBase, CStringW& rsFileName) noexcept
 {
-    CLoaderLockGuard _{};
+    const CLoaderLockGuard _{};
     const auto pEntry = FindModuleEntry(pBase);
     if (pEntry)
     {

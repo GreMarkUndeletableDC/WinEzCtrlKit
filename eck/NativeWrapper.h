@@ -162,6 +162,7 @@ inline NTSTATUS NaDeviceIoControl(
 }
 
 EckInlineNd ULONG NaGetLastError() noexcept { return NtCurrentTeb()->LastErrorValue; }
+EckInline void NaSetLastError(ULONG u) noexcept { NtCurrentTeb()->LastErrorValue = u; }
 
 EckInlineNd PCWSTR NaGetNtSystemRoot() noexcept
 {
