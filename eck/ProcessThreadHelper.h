@@ -97,7 +97,11 @@ inline NTSTATUS GetProcessPath(
     const auto pus = (UNICODE_STRING*)rsPath.Data();
     if (NT_SUCCESS(nts) && !RtlIsNullOrEmptyUnicodeString(pus))
     {
-        rsPath.Erase(0, int(pus->Buffer - (PWCH)rsPath.Data()));
+        TcsMoveLengthEnd(
+            rsPath.Data(),
+            pus->Buffer,
+            pus->Length / sizeof(WCHAR));
+        rsPath.ReSize(int(pus->Length / sizeof(WCHAR)));
         if (bDosPath)
             return FileNtPathToDosPath(rsPath);
         return STATUS_SUCCESS;
