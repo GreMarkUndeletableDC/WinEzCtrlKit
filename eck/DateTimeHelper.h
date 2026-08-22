@@ -332,7 +332,7 @@ inline BOOL FormatDate(
     if (!cchDate)
         return FALSE;
     return !!GetDateFormatEx(pszLocale, uFlags, &st, pszFmt,
-        rs.PushBackNoExtra(cchDate), cchDate, nullptr);
+        rs.PushBackNoExtra(cchDate - 1), cchDate, nullptr);
 }
 
 inline BOOL FormatTime(
@@ -347,7 +347,7 @@ inline BOOL FormatTime(
     if (!cchTime)
         return FALSE;
     return !!GetTimeFormatEx(pszLocale, uFlags, &st, pszFmt,
-        rs.PushBackNoExtra(cchTime), cchTime);
+        rs.PushBackNoExtra(cchTime - 1), cchTime);
 }
 
 inline BOOL FormatDateTime(

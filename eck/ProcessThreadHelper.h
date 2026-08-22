@@ -527,14 +527,17 @@ namespace Detail
         int msTimeOut,
         _Out_ HICON& hIcon) noexcept
     {
-        return !!SendMessageTimeoutW(
+        if (SendMessageTimeoutW(
             hWnd,
             WM_GETICON,
             nIconType,
             0,
             SMTO_ABORTIFHUNG | SMTO_BLOCK | SMTO_ERRORONEXIT,
             msTimeOut,
-            (DWORD_PTR*)&hIcon);
+            (DWORD_PTR*)&hIcon))
+            return TRUE;
+        hIcon = nullptr;
+        return FALSE;
     }
 }
 
