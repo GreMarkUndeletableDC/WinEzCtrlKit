@@ -588,7 +588,7 @@ _Ret_maybenull_
 /// <param name="bFileIcon">返回图标类型，若为文件图标则为TRUE，此时调用方负责释放图标资源</param>
 /// <param name="bSmall">是否获取小图标</param>
 /// <param name="msTimeOut">超时</param>
-/// <returns>图标句柄，失败返回nullptr</returns>
+/// <returns>图标句柄</returns>
 _Ret_maybenull_
 [[nodiscard]] inline HICON GetWindowIcon(
     HWND hWnd,
