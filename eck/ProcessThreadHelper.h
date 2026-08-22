@@ -101,7 +101,7 @@ inline NTSTATUS GetProcessPath(
             rsPath.Data(),
             pus->Buffer,
             pus->Length / sizeof(WCHAR));
-        rsPath.ReSize(int(pus->Length / sizeof(WCHAR)));
+        rsPath.ReSize(pus->Length / sizeof(WCHAR));
         if (bDosPath)
             return FileNtPathToDosPath(rsPath);
         return STATUS_SUCCESS;
