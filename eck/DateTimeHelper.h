@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ECK.h"
+#include "CString.h"
 
 ECK_NAMESPACE_BEGIN
 struct CEDate
@@ -10,20 +10,20 @@ struct CEDate
 };
 
 #ifdef _DEBUG
-#define EckVerifyCeDate(x)														\
-            EckAssert(x.byMonth >= 1 &&											\
-                x.byMonth <= 12 &&												\
-                x.byDay >= 1 &&													\
+#define EckVerifyCeDate(x)              \
+            EckAssert(x.byMonth >= 1 && \
+                x.byMonth <= 12 &&      \
+                x.byDay >= 1 &&         \
                 x.byDay <= GetMonthDays(x.wYear, x.byMonth))
 #else
 #define EckVerifyCeDate(x) ;
 #endif // _DEBUG
 
-inline constexpr BYTE CeMonthDays[12]{ 31,0,31,30,31,30,31,31,30,31,30,31 };
+inline constexpr BYTE CeMonthDays[12]{ 31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-inline constexpr USHORT MonthDaysSumLeapYear[12]{ 0,31,60,91,121,152,182,213,244,274,305,335 };
+inline constexpr USHORT MonthDaysSumLeapYear[12]{ 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335 };
 
-inline constexpr USHORT MonthDaysSum[12]{ 0,31,59,90,120,151,181,212,243,273,304,334 };
+inline constexpr USHORT MonthDaysSum[12]{ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
 inline constexpr BYTE DayInMonthLeapYear[]
 {
@@ -318,5 +318,63 @@ EckInlineNdCe SYSTEMTIME UnixTimestampToSystemTimeMs(ULONGLONG ull) noexcept
     ull *= 10000ull;
     ull += 116444736000000000ull;
     return NtTimeToSystemTime(ull);
+}
+
+inline BOOL FormatDate(
+    Eck_Append_buffer_ CStringW& rs,
+    const SYSTEMTIME& st,
+    _In_opt_z_ PCWSTR pszFmt = nullptr,
+    UINT uFlags = 0u,
+    _In_opt_z_ PCWSTR pszLocale = LOCALE_NAME_USER_DEFAULT) noexcept
+{
+    const int cchDate = GetDateFormatEx(
+        pszLocale, uFlags, &st, pszFmt, nullptr, 0, nullptr);
+    if (!cchDate)
+        return FALSE;
+    return !!GetDateFormatEx(pszLocale, uFlags, &st, pszFmt,
+        rs.PushBackNoExtra(cchDate), cchDate, nullptr);
+}
+
+inline BOOL FormatTime(
+    Eck_Append_buffer_ CStringW& rs,
+    const SYSTEMTIME& st,
+    _In_opt_z_ PCWSTR pszFmt = nullptr,
+    UINT uFlags = 0u,
+    _In_opt_z_ PCWSTR pszLocale = LOCALE_NAME_USER_DEFAULT) noexcept
+{
+    const int cchTime = GetTimeFormatEx(
+        pszLocale, uFlags, &st, pszFmt, nullptr, 0);
+    if (!cchTime)
+        return FALSE;
+    return !!GetTimeFormatEx(pszLocale, uFlags, &st, pszFmt,
+        rs.PushBackNoExtra(cchTime), cchTime);
+}
+
+inline BOOL FormatDateTime(
+    Eck_Append_buffer_ CStringW& rs,
+    const SYSTEMTIME& st,
+    _In_opt_z_ PCWSTR pszFmtDate = nullptr,
+    _In_opt_z_ PCWSTR pszFmtTime = nullptr,
+    DWORD dwFlagsDate = 0u,
+    DWORD dwFlagsTime = 0u,
+    _In_opt_z_ PCWSTR pszLocale = LOCALE_NAME_USER_DEFAULT) noexcept
+{
+    int cchDate = GetDateFormatEx(
+        pszLocale, dwFlagsDate, &st, pszFmtDate, nullptr, 0, nullptr);
+    int cchTime = GetTimeFormatEx(
+        pszLocale, dwFlagsTime, &st, pszFmtTime, nullptr, 0);
+    if (!cchDate || !cchTime)
+        return FALSE;
+
+    auto p = rs.PushBackNoExtra(cchDate - 1 + cchTime - 1 + 1);
+
+    GetDateFormatEx(
+        pszLocale, dwFlagsDate, &st, pszFmtDate, p, cchDate, nullptr);
+    p += (cchDate - 1);
+    *p++ = L' ';
+
+    GetTimeFormatEx(
+        pszLocale, dwFlagsTime, &st, pszFmtTime, p, cchTime);
+    return TRUE;
 }
 ECK_NAMESPACE_END

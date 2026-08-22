@@ -8,46 +8,57 @@
 
 #include <intrin.h>
 #include <wbemcli.h>
-#include <comdef.h>
 
 ECK_NAMESPACE_BEGIN
+const CStringW& GetRunningPath() noexcept;// ECK.cpp
+
 inline COLORREF GetCursorPositionColor() noexcept
 {
     POINT pt;
     GetCursorPos(&pt);
-    const HDC hDC = GetDC(nullptr);
+    const auto hDC = GetDC(nullptr);
     const auto cr = GetPixel(hDC, pt.x, pt.y);
     ReleaseDC(nullptr, hDC);
     return cr;
 }
 
-inline HRESULT WmiConnectNamespace(_Out_ IWbemServices*& pWbemSrv,
-    _Out_ IWbemLocator*& pWbemLoc) noexcept
+inline HRESULT WmiConnectNamespace(
+    _Out_ IWbemServices*& pWbemServices,
+    _Out_ IWbemLocator*& pWbemLocator,
+    _In_opt_z_ PCWSTR pszNamespace = L"ROOT\\CIMV2") noexcept
 {
-    pWbemSrv = nullptr;
-    pWbemLoc = nullptr;
+    pWbemServices = nullptr;
+    pWbemLocator = nullptr;
     HRESULT hr;
-    if (FAILED(hr = CoInitializeSecurity(nullptr, -1, nullptr, nullptr, RPC_C_AUTHN_LEVEL_DEFAULT,
-        RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE, nullptr)))
+
+    ComPtr<IWbemLocator> pLocator;
+    hr = pLocator.CreateInstance(CLSID_WbemLocator);
+    if (FAILED(hr))
         return hr;
-    if (FAILED(hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pWbemLoc))))
+
+    ComPtr<IWbemServices> pServices;
+    const UniquePtr<DelBStr> bstrNamespace{ SysAllocString(pszNamespace) };
+    if (!bstrNamespace)
+        return E_OUTOFMEMORY;
+    hr = pLocator->ConnectServer(bstrNamespace.get(),
+        nullptr, nullptr, 0, 0, 0, 0, &pServices);
+    if (FAILED(hr))
         return hr;
-    if (FAILED(hr = pWbemLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"),
-        nullptr, nullptr, 0, 0, 0, 0, &pWbemSrv)))
-    {
-        pWbemLoc->Release();
-        pWbemLoc = nullptr;
+
+    hr = CoSetProxyBlanket(
+        pServices.Get(),
+        RPC_C_AUTHN_WINNT,
+        RPC_C_AUTHZ_NONE,
+        nullptr,
+        RPC_C_AUTHN_LEVEL_CALL,
+        RPC_C_IMP_LEVEL_IMPERSONATE,
+        nullptr,
+        EOAC_NONE);
+    if (FAILED(hr))
         return hr;
-    }
-    if (FAILED(hr = CoSetProxyBlanket(pWbemSrv, RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, nullptr,
-        RPC_C_AUTHN_LEVEL_CALL, RPC_C_IMP_LEVEL_IMPERSONATE, nullptr, EOAC_NONE)))
-    {
-        pWbemSrv->Release();
-        pWbemSrv = nullptr;
-        pWbemLoc->Release();
-        pWbemLoc = nullptr;
-        return hr;
-    }
+
+    pWbemServices = pServices.Detach();
+    pWbemLocator = pLocator.Detach();
     return S_OK;
 }
 
@@ -55,24 +66,48 @@ inline HRESULT WmiConnectNamespace(_Out_ IWbemServices*& pWbemSrv,
 /// WMI查询类属性
 /// </summary>
 /// <param name="pszWql">WQL语句</param>
-/// <param name="pszProp">属性</param>
-/// <param name="Var">查询结果，调用方必须对其调用VariantClear以解分配</param>
-/// <param name="pWbemSrv">IWbemServices指针，使用此接口执行查询</param>
+/// <param name="pszProp">属性名</param>
+/// <param name="Var">
+/// 查询结果，如果失败，函数使用VariantClear清除此结构，
+/// 调用方不再使用此结构时也应调用VariantClear
+/// </param>
+/// <param name="pWbemServices">IWbemServices指针，使用此接口执行查询</param>
 /// <returns>HRESULT</returns>
-inline HRESULT WmiQueryClassProperty(_In_ PCWSTR pszWql, _In_ PCWSTR pszProp,
-    _Inout_ VARIANT& Var, _In_ IWbemServices* pWbemSrv) noexcept
+inline HRESULT WmiQueryClassProperty(
+    _In_ PCWSTR pszWql,
+    _In_ PCWSTR pszProp,
+    _Inout_ VARIANT& Var,
+    _In_ IWbemServices* pWbemServices) noexcept
 {
     HRESULT hr;
+
     ComPtr<IEnumWbemClassObject> pEnum;
-    if (FAILED(hr = pWbemSrv->ExecQuery(_bstr_t(L"WQL"), _bstr_t(pszWql),
-        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum)))
+    const UniquePtr<DelBStr> bstrLang{ SysAllocString(L"WQL") };
+    const UniquePtr<DelBStr> bstrWql{ SysAllocString(pszWql) };
+    if (!bstrLang || !bstrWql)
+        return E_OUTOFMEMORY;
+    hr = pWbemServices->ExecQuery(
+        bstrLang.get(),
+        bstrWql.get(),
+        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+        nullptr,
+        &pEnum);
+    if (FAILED(hr))
+    {
+        VariantClear(&Var);
         return hr;
-    ComPtr<IWbemClassObject> pClsObj;
-    ULONG ulReturned;
-    hr = pEnum->Next(WBEM_INFINITE, 1, &pClsObj, &ulReturned);
-    if (FAILED(hr) || ulReturned != 1)
+    }
+
+    ComPtr<IWbemClassObject> pClassObject;
+    ULONG cReturned;
+    hr = pEnum->Next(WBEM_INFINITE, 1, &pClassObject, &cReturned);
+    if (FAILED(hr) || cReturned != 1)
+    {
+        VariantClear(&Var);
         return hr;
-    return pClsObj->Get(pszProp, 0, &Var, nullptr, nullptr);
+    }
+
+    return pClassObject->Get(pszProp, 0, &Var, nullptr, nullptr);
 }
 
 /// <summary>
@@ -80,20 +115,23 @@ inline HRESULT WmiQueryClassProperty(_In_ PCWSTR pszWql, _In_ PCWSTR pszProp,
 /// </summary>
 /// <param name="pszWql">WQL语句</param>
 /// <param name="pszProp">属性</param>
-/// <param name="Var">查询结果</param>
+/// <param name="Var">
+/// 查询结果，如果失败，函数使用VariantClear清除此结构，
+/// 调用方不再使用此结构时也应调用VariantClear
+/// </param>
 /// <returns>HRESULT</returns>
-inline HRESULT WmiQueryClassProperty(_In_ PCWSTR pszWql,
-    _In_ PCWSTR pszProp, _Inout_  VARIANT& Var) noexcept
+inline HRESULT WmiQueryClassProperty(
+    _In_ PCWSTR pszWql,
+    _In_ PCWSTR pszProp,
+    _Inout_ VARIANT& Var) noexcept
 {
-    IWbemServices* pWbemSrv;
-    IWbemLocator* pWbemLoc;
     HRESULT hr;
-    if (FAILED(hr = WmiConnectNamespace(pWbemSrv, pWbemLoc)))
+
+    ComPtr<IWbemServices> pServices;
+    ComPtr<IWbemLocator> pLocator;
+    if (FAILED(hr = WmiConnectNamespace(pServices.AtSelf(), pLocator.AtSelf())))
         return hr;
-    hr = WmiQueryClassProperty(pszWql, pszProp, Var, pWbemSrv);
-    pWbemSrv->Release();
-    pWbemLoc->Release();
-    return hr;
+    return WmiQueryClassProperty(pszWql, pszProp, Var, pServices.Get());
 }
 
 struct CPUINFO
@@ -151,62 +189,57 @@ inline HRESULT GetCpuInfomation(CPUINFO& ci) noexcept
     int cch = swprintf(ci.rsSerialNum.Data(), L"%08X%08X", Register[3], Register[0]);
     ci.rsSerialNum.ReSize(cch);
 
-    IWbemServices* pWbemSrv;
-    IWbemLocator* pWbemLoc;
     HRESULT hr;
-    if (FAILED(hr = WmiConnectNamespace(pWbemSrv, pWbemLoc)))
+
+    ComPtr<IWbemServices> pServices;
+    ComPtr<IWbemLocator> pLocator;
+    if (FAILED(hr = WmiConnectNamespace(pServices.AtSelf(), pLocator.AtSelf())))
         return hr;
 
     VARIANT Var{};
-    IEnumWbemClassObject* pEnum;
-    if (FAILED(hr = pWbemSrv->ExecQuery(_bstr_t(L"WQL"), _bstr_t(L"Select * From Win32_Processor"),
-        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &pEnum)))
-    {
-        pWbemSrv->Release();
-        pWbemLoc->Release();
+    ComPtr<IEnumWbemClassObject> pEnum;
+    const UniquePtr<DelBStr> bstrLang{ SysAllocString(L"WQL") };
+    const UniquePtr<DelBStr> bstrWql{ SysAllocString(L"Select * From Win32_Processor") };
+    if (!bstrLang || !bstrWql)
+        return E_OUTOFMEMORY;
+    hr = pServices->ExecQuery(
+        bstrLang.get(),
+        bstrWql.get(),
+        WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+        nullptr,
+        &pEnum);
+    if (FAILED(hr))
         return hr;
-    }
-    IWbemClassObject* pClsObj;
-    ULONG ulReturned;
-    hr = pEnum->Next(WBEM_INFINITE, 1, &pClsObj, &ulReturned);
-    if (ulReturned == 1)
+    ComPtr<IWbemClassObject> pClassObject;
+    ULONG cReturned;
+    hr = pEnum->Next(WBEM_INFINITE, 1, &pClassObject, &cReturned);
+    if (cReturned == 1)
     {
-        // 取描述
-        if (SUCCEEDED(pClsObj->Get(L"Description", 0, &Var, nullptr, nullptr)))
+        if (SUCCEEDED(pClassObject->Get(L"Description", 0, &Var, nullptr, nullptr)))
         {
             ci.rsDescription.AssignBSTR(Var.bstrVal);
             VariantClear(&Var);
         }
-        // 取二级缓存
-        if (SUCCEEDED(pClsObj->Get(L"L2CacheSize", 0, &Var, nullptr, nullptr)))
+        if (SUCCEEDED(pClassObject->Get(L"L2CacheSize", 0, &Var, nullptr, nullptr)))
             ci.uL2Cache = Var.uintVal;
-        // 取三级缓存
-        if (SUCCEEDED(pClsObj->Get(L"L3CacheSize", 0, &Var, nullptr, nullptr)))
+        if (SUCCEEDED(pClassObject->Get(L"L3CacheSize", 0, &Var, nullptr, nullptr)))
             ci.uL3Cache = Var.uintVal;
-        // 取数据宽度
-        if (SUCCEEDED(pClsObj->Get(L"DataWidth", 0, &Var, nullptr, nullptr)))
+        if (SUCCEEDED(pClassObject->Get(L"DataWidth", 0, &Var, nullptr, nullptr)))
             ci.uDataWidth = Var.uiVal;
-        // 取核心数
-        if (SUCCEEDED(pClsObj->Get(L"NumberOfCores", 0, &Var, nullptr, nullptr)))
+        if (SUCCEEDED(pClassObject->Get(L"NumberOfCores", 0, &Var, nullptr, nullptr)))
             ci.cCore = Var.uintVal;
-        // 取线程数
-        if (SUCCEEDED(pClsObj->Get(L"ThreadCount", 0, &Var, nullptr, nullptr)))
+        if (SUCCEEDED(pClassObject->Get(L"ThreadCount", 0, &Var, nullptr, nullptr)))
             ci.cThread = Var.uintVal;
-        // 取最大时钟速度
-        if (SUCCEEDED(pClsObj->Get(L"MaxClockSpeed", 0, &Var, nullptr, nullptr)))
+        if (SUCCEEDED(pClassObject->Get(L"MaxClockSpeed", 0, &Var, nullptr, nullptr)))
             ci.uMaxClockSpeed = Var.uintVal;
-        pClsObj->Release();
     }
-    pEnum->Release();
-    pWbemSrv->Release();
-    pWbemLoc->Release();
     return S_OK;
 #else
     return E_NOTIMPL;
 #endif// __arm__
 }
 
-inline BOOL GetDesktopPartHWnd(
+inline BOOL GetDesktopPartHandle(
     _Out_ HWND& hPmOrWorkerW,
     _Out_ HWND& hDefView,
     _Out_ HWND& hLV) noexcept
@@ -233,17 +266,17 @@ inline BOOL GetDesktopPartHWnd(
 inline BOOL ShowDesktop(BOOL bShow, BOOL bIgnoreProgman = TRUE) noexcept
 {
     HWND hPmOrWorkerW, hDefView, hLV;
-    if (!GetDesktopPartHWnd(hPmOrWorkerW, hDefView, hLV))
+    if (!GetDesktopPartHandle(hPmOrWorkerW, hDefView, hLV))
         return FALSE;
-    const int iSw = (bShow ? SW_SHOWNOACTIVATE : SW_HIDE);
-    ShowWindowAsync(hLV, iSw);
-    ShowWindowAsync(hDefView, iSw);
+    const int sw = (bShow ? SW_SHOWNOACTIVATE : SW_HIDE);
+    ShowWindowAsync(hLV, sw);
+    ShowWindowAsync(hDefView, sw);
     if (!bIgnoreProgman)
-        ShowWindowAsync(hPmOrWorkerW, iSw);
+        ShowWindowAsync(hPmOrWorkerW, sw);
     return TRUE;
 }
 
-inline BOOL GetTaskBarPartHWnd(
+inline BOOL GetTaskBarPartHandle(
     _Out_ HWND& hTaskBar,
     _Out_writes_opt_(*pcSecondary) HWND* phSecondary = nullptr,
     _Inout_opt_ size_t* pcSecondary = nullptr) noexcept
@@ -274,17 +307,19 @@ inline BOOL ShowTaskBar(BOOL bShow, BOOL bIgnoreSecondary = FALSE) noexcept
 {
     HWND hTaskBar, hSecondary[16];
     size_t cSecondary = ARRAYSIZE(hSecondary);
-    if (!GetTaskBarPartHWnd(hTaskBar, hSecondary,
+    if (!GetTaskBarPartHandle(
+        hTaskBar,
+        hSecondary,
         bIgnoreSecondary ? nullptr : &cSecondary))
         return FALSE;
-    const int iSw = (bShow ? SW_SHOWNOACTIVATE : SW_HIDE);
+    const int sw = (bShow ? SW_SHOWNOACTIVATE : SW_HIDE);
     if (bIgnoreSecondary)
-        ShowWindowAsync(hTaskBar, iSw);
+        ShowWindowAsync(hTaskBar, sw);
     else// 使用ShowWindowAsync会导致副屏任务栏隐藏后再次显示
     {
-        ShowWindow(hTaskBar, iSw);
+        ShowWindow(hTaskBar, sw);
         EckCounter(cSecondary, i)
-            ShowWindow(hSecondary[i], iSw);
+            ShowWindow(hSecondary[i], sw);
     }
     return TRUE;
 }
@@ -305,15 +340,16 @@ struct FILEVERINFO
     CStringW SpecialBuild;
 };
 
-inline BOOL GetFileVersionInformation(PCWSTR pszFile, FILEVERINFO& fvi) noexcept
+inline BOOL GetFileVersionInformation(
+    _In_z_ PCWSTR pszFile,
+    Eck_Out_buffer_ FILEVERINFO& fvi) noexcept
 {
     const DWORD cbBuf = GetFileVersionInfoSizeW(pszFile, nullptr);
     if (!cbBuf)
         return FALSE;
-    void* pBuf = malloc(cbBuf);
-    CheckPointer(pBuf);
-    UniquePtr<DelMA<void>> _(pBuf);
-    if (!GetFileVersionInfoW(pszFile, 0, cbBuf, pBuf))
+    const UniquePtr<DelMA<void>> pBuf{ malloc(cbBuf) };
+    CheckPointer(pBuf.get());
+    if (!GetFileVersionInfoW(pszFile, 0, cbBuf, pBuf.get()))
         return FALSE;
 
     struct
@@ -322,139 +358,78 @@ inline BOOL GetFileVersionInformation(PCWSTR pszFile, FILEVERINFO& fvi) noexcept
         WORD wCodePage;
     }*pLangCp;
     UINT cbLangCp;
-    if (!VerQueryValueW(pBuf, LR"(\VarFileInfo\Translation)", (void**)&pLangCp, &cbLangCp))
+    if (!VerQueryValueW(
+        pBuf.get(),
+        LR"(\VarFileInfo\Translation)",
+        (void**)&pLangCp,
+        &cbLangCp))
         return FALSE;
 
     WCHAR szLangCp[9];
     _swprintf(szLangCp, L"%04X%04X", pLangCp[0].wLanguage, pLangCp[0].wCodePage);
-    CStringW rsSub = CStringW(LR"(\StringFileInfo\)") + szLangCp + L"\\";
-    const auto pszName = rsSub.PushBackNoExtra(20);
+
+    constexpr WCHAR StringBlock[]{ LR"(\StringFileInfo\)" };
+    WCHAR szSub[ARRAYSIZE(StringBlock) + ARRAYSIZE(szLangCp) + 24];
+    auto p = szSub;
+    EckCopyConstStringW(p, StringBlock);
+    p += (ARRAYSIZE(StringBlock) - 1);
+    EckCopyConstStringW(p, szLangCp);
+    p += (ARRAYSIZE(szLangCp) - 1);
+    *p++ = L'\\';
 
     void* pStr;
     UINT cchStr;
-    EckCopyConstStringW(pszName, L"Comment");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"Comment");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.Comment.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"InternalName");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"InternalName");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.InternalName.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"ProductName");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"ProductName");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.ProductName.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"CompanyName");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"CompanyName");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.CompanyName.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"LegalCopyright");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"LegalCopyright");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.LegalCopyright.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"ProductVersion");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"ProductVersion");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.ProductVersion.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"FileDescription");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"FileDescription");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.FileDescription.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"LegalTrademarks");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"LegalTrademarks");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.LegalTrademarks.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"PrivateBuild");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"PrivateBuild");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.PrivateBuild.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"FileVersion");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"FileVersion");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.FileVersion.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"OriginalFilename");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"OriginalFilename");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.OriginalFilename.Assign((PCWSTR)pStr, (int)cchStr);
 
-    EckCopyConstStringW(pszName, L"SpecialBuild");
-    VerQueryValueW(pBuf, rsSub.Data(), &pStr, &cchStr);
+    EckCopyConstStringW(p, L"SpecialBuild");
+    VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.SpecialBuild.Assign((PCWSTR)pStr, (int)cchStr);
     return TRUE;
 }
 
-namespace Detail
-{
-    template<class T>
-    EckInlineNdCe INPUT KeyboardEventGetArg(T wVk) noexcept
-    {
-        return INPUT{ .type = INPUT_KEYBOARD ,.ki = { static_cast<WORD>(wVk) } };
-    }
-}
-
-/// <summary>
-/// 模拟按键。
-/// 函数顺序按下参数中提供的键，然后倒序将它们放开
-/// </summary>
-/// <param name="wVk">虚拟键代码</param>
-/// <returns>SendInput的返回值</returns>
-template<class...T>
-inline UINT KeyboardEvent(T...wVk) noexcept
-{
-    INPUT Args[]{ Detail::KeyboardEventGetArg(wVk)... };
-    INPUT input[ARRAYSIZE(Args) * 2];
-    memcpy(input, Args, sizeof(Args));
-    for (auto& e : Args)
-        e.ki.dwFlags = KEYEVENTF_KEYUP;
-    std::reverse(Args, Args + ARRAYSIZE(Args));
-    memcpy(input + ARRAYSIZE(Args), Args, sizeof(Args));
-    return SendInput(ARRAYSIZE(input), input, sizeof(INPUT));
-}
-
-const CStringW& GetRunningPath() noexcept;
-
-EckInline BOOL SystemTimeToULongLong(const SYSTEMTIME& st, ULONGLONG& ull) noexcept
-{
-    return SystemTimeToFileTime(&st, (FILETIME*)&ull);
-}
-
-inline CStringW FormatDate(const SYSTEMTIME& st, PCWSTR pszFmt = nullptr, UINT uFlags = 0u,
-    PCWSTR pszLocale = LOCALE_NAME_USER_DEFAULT) noexcept
-{
-    const int cchDate = GetDateFormatEx(pszLocale, uFlags, &st, pszFmt, nullptr, 0, nullptr);
-    if (!cchDate)
-        return {};
-    CStringW rs(cchDate);
-    GetDateFormatEx(pszLocale, uFlags, &st, pszFmt, rs.Data(), cchDate, nullptr);
-    return rs;
-}
-
-inline CStringW FormatTime(const SYSTEMTIME& st, PCWSTR pszFmt = nullptr, UINT uFlags = 0u,
-    PCWSTR pszLocale = LOCALE_NAME_USER_DEFAULT) noexcept
-{
-    const int cchTime = GetTimeFormatEx(pszLocale, uFlags, &st, pszFmt, nullptr, 0);
-    if (!cchTime)
-        return {};
-    CStringW rs(cchTime);
-    GetTimeFormatEx(pszLocale, uFlags, &st, pszFmt, rs.Data(), cchTime);
-    return rs;
-}
-
-inline CStringW FormatDateTime(const SYSTEMTIME& st,
-    PCWSTR pszFmtDate = nullptr, PCWSTR pszFmtTime = nullptr, DWORD dwFlags = 0u,
-    PCWSTR pszLocale = LOCALE_NAME_USER_DEFAULT) noexcept
-{
-    const int cchDate = GetDateFormatEx(pszLocale, dwFlags, &st, pszFmtDate, nullptr, 0, nullptr);
-    const int cchTime = GetTimeFormatEx(pszLocale, dwFlags, &st, pszFmtTime, nullptr, 0);
-    if (!cchDate || !cchTime)
-        return {};
-    CStringW rs(cchTime + cchDate - 2 + 1);
-    GetDateFormatEx(pszLocale, dwFlags, &st, pszFmtDate, rs.Data(), cchDate, nullptr);
-    GetTimeFormatEx(pszLocale, dwFlags, &st, pszFmtTime, rs.Data() + cchDate, cchTime);
-    rs[cchDate - 1] = L' ';
-    return rs;
-}
-
-inline void InputChar(WCHAR ch, BOOL bExtended = FALSE, BOOL bReplaceEndOfLine = TRUE) noexcept
+inline void InputChar(WCHAR ch, BOOL bReplaceEndOfLine = TRUE) noexcept
 {
     INPUT input[2]{ {.type = INPUT_KEYBOARD } };
     if (bReplaceEndOfLine && (ch == L'\r' || ch == L'\n'))
@@ -470,11 +445,13 @@ inline void InputChar(WCHAR ch, BOOL bExtended = FALSE, BOOL bReplaceEndOfLine =
     SendInput(ARRAYSIZE(input), input, sizeof(INPUT));
 }
 
-inline void InputChar(PCWSTR pszText, int cchText = -1,
-    BOOL bExtended = FALSE, BOOL bReplaceEndOfLine = TRUE) noexcept
+inline void InputChar(
+    _In_reads_or_z_(cchText) PCWSTR pszText,
+    int cchText = -1,
+    BOOL bReplaceEndOfLine = TRUE) noexcept
 {
     if (cchText < 0)
-        cchText = (int)wcslen(pszText);
+        cchText = (int)TcsLength(pszText);
     if (bReplaceEndOfLine)
         for (int i{}; i < cchText;)
         {
@@ -484,12 +461,12 @@ inline void InputChar(PCWSTR pszText, int cchText = -1,
                 ch = L'\n';
                 ++i;
             }
-            InputChar(ch, bExtended);
+            InputChar(ch, bReplaceEndOfLine);
         }
     else
     {
         EckCounter(cchText, i)
-            InputChar(pszText[i], bExtended);
+            InputChar(pszText[i], bReplaceEndOfLine);
     }
 }
 
@@ -526,8 +503,11 @@ inline SIZE GetCursorSize(int iDpi) noexcept
     return { (int)dwBaseSize,(int)dwBaseSize };
 }
 
-inline NTSTATUS ExpandEnvironmentString(CStringW& rsDst,
-    _In_reads_or_z_(cchSrc) PCWCH pszSrc, int cchSrc = -1, int cchInitialBuf = 80) noexcept
+inline NTSTATUS ExpandEnvironmentString(
+    Eck_Append_buffer_ CStringW& rsDst,
+    _In_reads_or_z_(cchSrc) PCWCH pszSrc,
+    int cchSrc = -1,
+    int cchInitialBuf = 80) noexcept
 {
     if (cchSrc < 0)
         cchSrc = (int)TcsLength(pszSrc);

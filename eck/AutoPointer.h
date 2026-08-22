@@ -23,6 +23,7 @@ ECK_DECL_HANDLE_DELETER(HBrush, HBRUSH, DeleteObject);
 ECK_DECL_HANDLE_DELETER(HPen, HPEN, DeleteObject);
 ECK_DECL_HANDLE_DELETER(HNtObject, HANDLE, CloseHandle);// 不使用NtClose，CloseHandle进行必要的无效检查
 ECK_DECL_HANDLE_DELETER(HTheme, HTHEME, CloseThemeData);
+ECK_DECL_HANDLE_DELETER(BStr, BSTR, SysFreeString);
 
 template<class T_ = void>
 struct DelMA
