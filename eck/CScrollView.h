@@ -196,7 +196,12 @@ public:
 
     EckInlineNdCe BOOL IsMinimum() const noexcept { return GetPosition() <= GetMinimum(); }
     EckInlineNdCe BOOL IsMaximum() const noexcept { return GetPosition() >= GetMaxWithPage(); }
-    EckInlineNdCe BOOL CanMove(T d) const noexcept { return d > 0 ? !IsMaximum() : !IsMinimum(); }
+    EckInlineNdCe BOOL CanMove(T d) const noexcept
+    {
+        if (d == 0)
+            return FALSE;
+        return d > 0 ? !IsMaximum() : !IsMinimum();
+    }
 };
 
 using CScrollView = CScrollViewT<int>;
