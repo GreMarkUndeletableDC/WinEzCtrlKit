@@ -164,7 +164,7 @@ public:
                     e.rsKey.CompareI("TRACKTOTAL"sv) == 0)
                 {
                     const auto& rs = e.GetStringList()[0];
-                    if (TcvToInt(rs.Data(), rs.Size(), mi.cTotalTrack) == TcvResult::Ok)
+                    if (TcvToInt(rs.Data(), rs.Size(), mi.cTotalTrack).eResult == TcvResult::Ok)
                         mi.uMaskChecked |= MIM_TRACK;
                 }
             }
@@ -274,18 +274,18 @@ public:
             if (mi.nTrack >= 0)// 尝试写入音轨/总轨
             {
                 svKey = "TRACK"sv;
-                TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.nTrack, 10, TRUE, &p);
+                p = TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.nTrack, 10, TRUE).pEnd;
                 if (mi.cTotalTrack)
                 {
                     *p++ = L'/';
-                    TcvFromInt(p, size_t(szBuf + ARRAYSIZE(szBuf) - p),
-                        mi.cTotalTrack, 10, TRUE, &p);
+                    p = TcvFromInt(p, size_t(szBuf + ARRAYSIZE(szBuf) - p),
+                        mi.cTotalTrack, 10, TRUE).pEnd;
                 }
             }
             else if (mi.cTotalTrack > 0)// 尝试写入总轨
             {
                 svKey = "TOTALTRACKS"sv;
-                TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.cTotalTrack, 10, TRUE, &p);
+                p = TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.cTotalTrack, 10, TRUE).pEnd;
             }
 
             if (!svKey.empty() && p != szBuf)

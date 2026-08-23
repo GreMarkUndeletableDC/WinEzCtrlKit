@@ -127,9 +127,8 @@ namespace TypeIo
     {
         const auto cchExtra = TcvIntBufferSize<TFmtInt>(v.Radix, v.FillWidth);
         const auto p = (TChar*)c.rbDst.PushBack(cchExtra * 2);
-        TChar* pEnd;
-        TcvFromInt(p, cchExtra, v.Num, v.Radix, TRUE, &pEnd, v.FillWidth, v.FillChar);
-        c.rbDst.ReSize((BYTE*)pEnd - c.rbDst.Data());
+        const auto r = TcvFromInt(p, cchExtra, v.Num, v.Radix, TRUE, v.FillWidth, v.FillChar);
+        c.rbDst.ReSize((BYTE*)r.pEnd - c.rbDst.Data());
         return Ret::Ok;
     }
     template<class TChar>
@@ -176,11 +175,10 @@ namespace TypeIo
     {
         const auto pEnd = (const TChar*)c.pEnd;
         const auto pCurr = (const TChar*)c.pCurr;
-        const TChar* pScanEnd;
-        const auto r = TcvToInt(pCurr, pEnd - pCurr, i, 0, &pScanEnd);
-        if (r == TcvResult::Ok || r == TcvResult::Overflow)
+        const auto r = TcvToInt(pCurr, pEnd - pCurr, i, 0);
+        if (r.eResult == TcvResult::Ok || r.eResult == TcvResult::Overflow)
         {
-            c.pCurr = (PCBYTE)pScanEnd;
+            c.pCurr = (PCBYTE)r.pEnd;
             return Ret::Ok;
         }
         else

@@ -1117,33 +1117,30 @@ public:
         using TInt = UnderlyingType_T<T>;
         const auto cchBuf = TcvIntBufferSize<TInt>(iRadix, cchFillTo);
         const auto p = PushBackNoExtra((int)cchBuf);
-        PWCH pEnd;
         const auto r = TcvFromInt(p, cchBuf, (TInt)x,
-            iRadix, bUpperCase, &pEnd, cchFillTo, chFill);
-        ReSize(int(pEnd - Data()));
-        return r;
+            iRadix, bUpperCase, cchFillTo, chFill);
+        ReSize(int(r.pEnd - Data()));
+        return r.eResult;
     }
     template<std::floating_point T>
     TcvResult PushBackNumber(
         T x,
         int iPrecision = 6,
-        TcvFloatFmt eFmt = TcvFloatFmt::General) noexcept
+        TcvFloatFormat eFmt = TcvFloatFormat::General) noexcept
     {
         const auto cchOld = Size();
-        PWCH pEnd;
-        TcvResult r;
         int cchBuf = 24;
         PushBackNoExtra(cchBuf);
         EckLoop()
         {
-            r = TcvFromFloat(Data() + cchOld, cchBuf, x,
-                &pEnd, eFmt, iPrecision);
-            if (r == TcvResult::Ok)
+            const auto r = TcvFromFloat(Data() + cchOld, cchBuf, x,
+                eFmt, iPrecision);
+            if (r.eResult == TcvResult::Ok)
             {
-                ReSize(int(pEnd - Data()));
+                ReSize(int(r.pEnd - Data()));
                 break;
             }
-            else if (r == TcvResult::BufferTooSmall)
+            else if (r.eResult == TcvResult::BufferTooSmall)
             {
                 cchBuf = cchBuf * 3 / 2;
                 PushBack(cchBuf);
@@ -1151,7 +1148,7 @@ public:
             else
             {
                 ReSize(cchOld);
-                return r;
+                return r.eResult;
             }
         }
         return TcvResult::Ok;
@@ -1415,7 +1412,7 @@ EckInlineNd CStringW ToString(T x,
 }
 template<std::floating_point T>
 EckInlineNd CStringW ToString(T x, int iPrecision = 6,
-    TcvFloatFmt eFmt = TcvFloatFmt::General) noexcept
+    TcvFloatFormat eFmt = TcvFloatFormat::General) noexcept
 {
     CStringW rs{};
     rs.PushBackNumber(x, iPrecision, eFmt);

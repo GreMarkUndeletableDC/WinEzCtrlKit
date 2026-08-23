@@ -43,7 +43,7 @@ std::span<const TQueryKv> ApiParseQueryString(
 void ApiParseInt(std::string_view sv, _Inout_ int& i) noexcept
 {
     int j;
-    if (TcvToInt(sv.data(), sv.size(), j, 10) == TcvResult::Ok)
+    if (TcvToInt(sv.data(), sv.size(), j, 10).eResult == TcvResult::Ok)
         i = j;
 }
 

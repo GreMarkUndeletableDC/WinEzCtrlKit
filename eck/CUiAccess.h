@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CString.h"
-#include "ProcThrdHelper.h"
+#include "ProcessThreadHelper.h"
 #include "CNtObject.h"
 
 ECK_NAMESPACE_BEGIN
