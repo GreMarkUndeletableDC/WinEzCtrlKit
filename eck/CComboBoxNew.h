@@ -511,8 +511,8 @@ public:
         m_LB.Show(SW_HIDE);
     }
 
-    EckInlineNdCe auto& GetListBox() noexcept { return m_LB; }
-    EckInlineNdCe auto& GetEdit() noexcept { return *m_pED; }
+    EckInlineNd auto& GetListBox() noexcept { return m_LB; }
+    EckInlineNd auto& GetEdit() noexcept { return *m_pED; }
 
     void GetEditRect(_Out_ RCWH& rc) noexcept
     {
