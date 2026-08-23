@@ -244,7 +244,7 @@ public:
                     e.rsKey.CompareI("TRACKTOTAL"sv) == 0)
                 {
                     if (TcvToInt(e.rsValue.Data(), e.rsValue.Size(),
-                        mi.cTotalTrack) == TcvResult::Ok)
+                        mi.cTotalTrack).eResult == TcvResult::Ok)
                         mi.uMaskChecked |= MIM_TRACK;
                 }
             }
@@ -390,16 +390,17 @@ public:
         if (mi.uMask & MIM_TRACK)
         {
             WCHAR szBuf[TcvIntBufferSize<UINT>() * 2 + 1];
-            PWCH p;
             if (mi.nTrack >= 0)
             {
-                TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.nTrack, 10, TRUE, &p);
+                const auto p = TcvFromInt(
+                    szBuf, ARRAYSIZE(szBuf), mi.nTrack, 10, TRUE).pEnd;
                 if (p != szBuf)
                     m_vItem.emplace_back("TRACKNUMBER"sv, CStringW{ szBuf, int(p - szBuf) });
             }
             if (mi.cTotalTrack > 0)
             {
-                TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.cTotalTrack, 10, TRUE, &p);
+                const auto p = TcvFromInt(
+                    szBuf, ARRAYSIZE(szBuf), mi.cTotalTrack, 10, TRUE).pEnd;
                 if (p != szBuf)
                     m_vItem.emplace_back("TRACKTOTAL"sv, CStringW{ szBuf, int(p - szBuf) });
             }

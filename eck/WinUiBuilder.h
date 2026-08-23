@@ -212,8 +212,7 @@ namespace Detail
             TcsCopyLength(p, sv.data(), sv.size());
             p += sv.size();
 
-            PWCH pEnd;
-            TcvFromInt(p, cchBuf, idxNode, 10, TRUE, &pEnd);
+            const auto pEnd = TcvFromInt(p, cchBuf, idxNode, 10, TRUE).pEnd;
             ErrCtx.rsPath.ReSize(int(pEnd - ErrCtx.rsPath.Data()));
         }
         void Pop() noexcept

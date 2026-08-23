@@ -552,17 +552,17 @@ EckNfInlineNd BOOL TagCheckApeHeader(const APE_HEADER& Hdr) noexcept
 inline BOOL TagGetNumberAndTotal(std::wstring_view sv,
     _Out_ int& nNum, _Out_ int& nTotal) noexcept
 {
-    PCWCH pEnd;
-    if (TcvToInt(sv.data(), sv.size(), nNum, 10, &pEnd) != TcvResult::Ok)
+    const auto r = TcvToInt(sv.data(), sv.size(), nNum, 10);
+    if (r.eResult != TcvResult::Ok)
     {
         nTotal = 0;
         return FALSE;
     }
-    const auto posSlash = sv.find(L'/', size_t(pEnd - sv.data()));
+    const auto posSlash = sv.find(L'/', size_t(r.pEnd - sv.data()));
     if (posSlash != std::wstring_view::npos)
     {
         if (TcvToInt(sv.data() + posSlash + 1,
-            sv.size() - (posSlash + 1), nTotal) != TcvResult::Ok)
+            sv.size() - (posSlash + 1), nTotal).eResult != TcvResult::Ok)
             return FALSE;
     }
     else

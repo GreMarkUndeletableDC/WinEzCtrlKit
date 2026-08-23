@@ -119,7 +119,6 @@ inline TcvReturn<TPointer> TcvToInt(
     else
         Max = TUnsigned(std::numeric_limits<TInt>::max());
     TUnsigned Result{};
-    const auto pBegin = p;
     for (; p < pEnd; ++p)
     {
         const auto ch = *p;
