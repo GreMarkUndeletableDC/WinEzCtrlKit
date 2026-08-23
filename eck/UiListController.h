@@ -354,6 +354,7 @@ private:
     BITBOOL m_bEnableDragSel : 1{ TRUE };
     BITBOOL m_bVarItemHeight : 1{};
     BITBOOL m_bEnableHeader : 1{};
+    BITBOOL m_bClearSelInSpace : 1{ TRUE };
 
     BITBOOL m_bDraggingSel : 1{};
     BITBOOL m_bPendingDragSel : 1{};
@@ -867,6 +868,9 @@ public:
             !idx.IsValid())
             m_bPendingDragSel = TRUE;
 
+        if (!m_bClearSelInSpace && !idx.IsValid())
+            return;
+
         switch (m_eSelection)
         {
         case Selection::Single:
@@ -1215,6 +1219,9 @@ public:
     {
         m_bGroup = bGroup;
     }
+
+    EckInlineNdCe BOOL GetClearSelectionInSpace() const noexcept { return m_bClearSelInSpace; }
+    void SetClearSelectionInSpace(BOOL b) noexcept { m_bClearSelInSpace = b; }
 };
 ECK_LC_NAMESPACE_END
 ECK_UIBASIC_NAMESPACE_END
