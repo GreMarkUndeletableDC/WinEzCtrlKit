@@ -105,8 +105,8 @@ public:
     EckInlineCe void SetViewSize(T ViewSize) noexcept { m_ViewSize = ViewSize; }
     EckInlineCe T GetViewSize() const noexcept { return m_ViewSize; }
 
-    EckInlineCe void SetMinThumbSize(T MinThumbSize) noexcept { m_MinThumbSize = MinThumbSize; }
-    EckInlineCe T GetMinThumbSize() const noexcept { return m_MinThumbSize; }
+    EckInlineCe void SetMinimumThumbSize(T MinThumbSize) noexcept { m_MinThumbSize = MinThumbSize; }
+    EckInlineCe T GetMinimumThumbSize() const noexcept { return m_MinThumbSize; }
 
     EckInlineCe T GetThumbSize() const noexcept
     {
@@ -114,7 +114,7 @@ public:
         if (d <= 0)
             return InvalidValue;
         const T i = GetPage() * GetViewSize() / d;
-        return std::max(GetMinThumbSize(), i);
+        return std::max(GetMinimumThumbSize(), i);
     }
 
     EckInlineCe T GetThumbPosition(T ThumbSize) const noexcept
@@ -138,15 +138,19 @@ public:
         m_oxyThumbCursor = xy - GetThumbPosition();
     }
 
-    EckInlineCe void OnMouseMove(T xy) noexcept
+    EckInlineCe BOOL OnMouseMove(T xy) noexcept
     {
         EckAssert(m_bLBtnDown);
         if (!IsValid())
-            return;
-        SetPosition(GetMinimum() +
+            return FALSE;
+        const auto pos = GetMinimum() +
             (xy - m_oxyThumbCursor) *
             GetRangeDistance() /
-            (GetViewSize() - GetThumbSize()));
+            (GetViewSize() - GetThumbSize());
+        if (!CanMove(pos - GetPosition()))
+            return FALSE;
+        SetPosition(pos);
+        return TRUE;
     }
 
     EckInlineCe void OnLButtonUp() noexcept
@@ -187,7 +191,16 @@ public:
     // 是否有必要显示滚动条
     EckInlineCe BOOL IsVisible() const noexcept
     {
-        return IsValid() && GetViewSize() > GetMinThumbSize();
+        return IsValid() && GetViewSize() > GetMinimumThumbSize();
+    }
+
+    EckInlineNdCe BOOL IsMinimum() const noexcept { return GetPosition() <= GetMinimum(); }
+    EckInlineNdCe BOOL IsMaximum() const noexcept { return GetPosition() >= GetMaxWithPage(); }
+    EckInlineNdCe BOOL CanMove(T d) const noexcept
+    {
+        if (d == 0)
+            return FALSE;
+        return d > 0 ? !IsMaximum() : !IsMinimum();
     }
 };
 

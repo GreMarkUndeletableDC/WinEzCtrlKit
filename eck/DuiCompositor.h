@@ -16,12 +16,7 @@ struct COMP_RENDER_INFO
 };
 
 // 表示一个特定的混合操作，默认的实现不执行任何操作
-// NOTE 260503
-// 之前的设计中，Compositor应当实现为与元素无关，在长期使用过程中
-// 发现此规则没有太大必要。同时，一般只有少数元素使用Compositor，
-// 为了减少CElement的字段数量，将各种混合相关的矩形移出，这样Compositor
-// 成为了CElement属性的一个扩展。
-// 原有接口的CElement参数已删除，同时由于Compositor与元素一对一，移除引用计数
+// 与元素一对一，生命周期与元素一致，混合相关矩形已从元素迁移到混合器（260503）
 struct CCompositor
 {
 private:
@@ -34,7 +29,9 @@ public:
     // DUI系统保留此函数，应用程序不得调用
     void EleUpdateCompositedRect(const D2D1_RECT_F& rcEleInClient) noexcept
     {
-        if (!IsInPlace())
+        if (IsInPlace())
+            m_rcCompInClient = m_rcRealCompInClient = rcEleInClient;
+        else
         {
             CalculateCompositedRect(m_rcCompInClient, TRUE);
             m_rcRealCompInClient = m_rcCompInClient;

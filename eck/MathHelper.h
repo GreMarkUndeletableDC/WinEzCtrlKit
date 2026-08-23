@@ -136,7 +136,8 @@ EckInlineNd T CalculatePointToLineDistance(TPt pt, TPt pt1, TPt pt2) noexcept
 /// <param name="rc">矩形</param>
 /// <param name="pt">映射到的点，至少指向四个D2D1_POINT_2F，分别对应左上、右上、左下、右下</param>
 /// <returns>结果矩阵</returns>
-inline DirectX::XMMATRIX CalculateDistortMatrix(const D2D1_RECT_F& rc,
+inline DirectX::XMMATRIX CalculateDistortMatrix(
+    const D2D1_RECT_F& rc,
     _In_reads_(4) const D2D1_POINT_2F* pt) noexcept
 {
     /*
@@ -208,7 +209,8 @@ EckInline void CalculateDistortMatrix(
 /// <param name="rc">矩形</param>
 /// <param name="pt">映射到的点，至少指向四个D2D1_POINT_2F，分别对应左上、右上、左下、右下</param>
 /// <returns>结果矩阵</returns>
-inline DirectX::XMMATRIX CalculateInverseDistortMatrix(const D2D1_RECT_F& rc,
+inline DirectX::XMMATRIX CalculateInverseDistortMatrix(
+    const D2D1_RECT_F& rc,
     _In_reads_(4) const D2D1_POINT_2F* pt) noexcept
 {
     /*
@@ -217,7 +219,7 @@ inline DirectX::XMMATRIX CalculateInverseDistortMatrix(const D2D1_RECT_F& rc,
     * (x1, y1) -> (1, 0) -> (1, 0) -> (k1, l1)
     * (x2, y2) -> (0, 1) -> (0, 1) -> (k2, l2)
     * (x3, y3) -> (a, b) -> (1, 1) -> (k3, l3)
-    * 过程与CalcDistortMatrix相反
+    * 过程与CalculateDistortMatrix相反
     */
     // 求A变换
     const float fDen = (pt[0].x * pt[2].y

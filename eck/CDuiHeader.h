@@ -46,7 +46,7 @@ private:
         float xStart{}; // 拖动重排动画起始位置
         float xTarget{};// 拖动重排动画目标位置
         float cx{};
-        float fSavedXOrCx{};
+        float fSavedX{};
     };
 
     std::vector<ITEM> m_vItem{};
@@ -266,6 +266,8 @@ private:
         else if (idxPressedOld >= 0)
             InvalidateItem(idxPressedOld);
 
+        if (bWasDraggingDivider)
+            EvtWidthChanged(idxDragOld);
         if (bSendEndDrag)
             EvtEndDrag(idxDragOld);
         GetWindow().RdUnlockUpdate();
@@ -331,10 +333,10 @@ private:
         return bNeedAnimation;
     }
 
-    void DragSavePositionOrWidth(BOOL bPosOrWidth) noexcept
+    void DragSavePosition() noexcept
     {
         for (auto& e : m_vItem)
-            e.fSavedXOrCx = bPosOrWidth ? e.x : e.cx;
+            e.fSavedX = e.x;
     }
 
     void InternalGetItemRect(int idx, _Out_ Kw::Rect& rcItem) const noexcept
@@ -458,7 +460,7 @@ public:
                         m_bDragging = TRUE;
                         m_xDragOffset = ht.pt.x - m_vItem[idx].x;
                         m_ioInsertMark = ht.io;
-                        DragSavePositionOrWidth(TRUE);
+                        DragSavePosition();
                         DragReCalculateTargetPosition();
                     }
                     EvtBeginDrag(idx);
@@ -513,7 +515,6 @@ public:
             {
                 m_bDraggingDivider = TRUE;
                 m_xDragOffset = ht.pt.x - m_vItem[idx].x - m_vItem[idx].cx;
-                DragSavePositionOrWidth(FALSE);
             }
             InvalidateItem(idx);
         }
@@ -779,18 +780,10 @@ public:
 
     void GetItemRect(int idx, _Out_ Kw::Rect& rcItem) const noexcept
     {
-        if (m_bDraggingDivider && m_idxDrag == idx)
+        if (m_bDragging)
         {
             const auto& e = m_vItem[idx];
-            rcItem.left = e.x;
-            rcItem.top = 0;
-            rcItem.right = rcItem.left + e.fSavedXOrCx;
-            rcItem.bottom = GetHeight();
-        }
-        else if (m_bDragging)
-        {
-            const auto& e = m_vItem[idx];
-            rcItem.left = e.fSavedXOrCx;
+            rcItem.left = e.fSavedX;
             rcItem.top = 0;
             rcItem.right = rcItem.left + e.cx;
             rcItem.bottom = GetHeight();

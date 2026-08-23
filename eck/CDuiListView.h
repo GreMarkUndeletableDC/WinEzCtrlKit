@@ -349,7 +349,7 @@ protected:
         {
             m_pHeader->Create(
                 {},
-                DES_VISIBLE | DES_DBG_FRAME | DES_NOTIFY_PARENT | TmDarkStyle(),
+                DES_VISIBLE | DES_NOTIFY_PARENT | TmDarkStyle(),
                 0,
                 0, 0, 0, 0, this);
             HdrSetTextFormat();

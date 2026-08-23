@@ -15,7 +15,7 @@ ECK_NAMESPACE_BEGIN
 ECK_DUI_NAMESPACE_BEGIN
 /*
 * 实现了以下事件
-* 
+*
 * WM_STYLECHANGED   (DWORD 旧样式, 0)
 * WM_THEMECHANGED   (0          , 0)
 * WM_DWMCOLORIZATIONCOLORCHANGED (0, 0)
@@ -610,13 +610,13 @@ private:
                 if (m_bDbgDrawCompRect)
                 {
                     const auto pBr = CcGetBrush();
-                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Aqua));
+                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Aqua });
                     pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBr);
 
-                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Green));
+                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Green });
                     pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBr);
 
-                    pBr->SetColor(D2D1::ColorF(D2D1::ColorF::Orange));
+                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Orange });
                     pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBr);
                 }
 #endif
@@ -741,7 +741,7 @@ private:
             InflateRect(rcDirtyLogical, -1.f, -1.f);
             pDC->SetTransform(D2D1::Matrix3x2F::Identity());
             ARGB Cr = m_Pcg.Next() | 0xFF000000;
-            pDC->CreateSolidColorBrush(D2D1::ColorF(Cr), &pBr);
+            pDC->CreateSolidColorBrush(D2D1::ColorF{ Cr }, &pBr);
             pDC->DrawRectangle(MakeD2DRectF(rcDirtyLogical), pBr.Get(), 2.f);
         }
 #endif // _DEBUG
