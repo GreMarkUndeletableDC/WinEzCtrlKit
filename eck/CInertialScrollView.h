@@ -56,6 +56,8 @@ public:
     {
         if (d == 0.f)
             return;
+        if (!CanMove(d))
+            return;
         m_fStart = GetPosition();
         // 计算新的滚动距离；将原先的滚动距离减去已经滑动完的位移再加上滚动事件产生的位移
         m_fDistance = ((m_fDuration - m_fSustain) * m_fDistance / m_fDuration) + d;
