@@ -8,29 +8,51 @@
 ECK_NAMESPACE_BEGIN
 namespace Detail
 {
-    constexpr inline BYTE CharToDigitTable[]{ 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255,
-    255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-    255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-    31, 32, 33, 34, 35 };
+    constexpr inline BYTE CharToDigitTable[]
+    {
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+        255, 255, 255,   0,   1,   2,   3,   4,   5,   6,   7,   8,   9, 255, 255,
+        255, 255, 255, 255, 255,  10,  11,  12,  13,  14,  15,  16,  17,  18,  19,
+         20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,  33,  34,
+         35, 255, 255, 255, 255, 255, 255,  10,  11,  12,  13,  14,  15,  16,  17,
+         18,  19,  20,  21,  22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  32,
+         33,  34,  35
+    };
 
-    constexpr inline BYTE TableI32StringSize[]{ 0,32,32,21,16,14,13,12,11,11,10,10,9,9,9,9,8,8,8,8,8,8,8,8,7,7,7,7,7,7,7,7,7,7,7,7,7 };
-    constexpr inline BYTE TableI64StringSize[]{ 0,64,64,41,32,28,25,23,22,21,20,19,18,18,17,17,16,16,16,16,15,15,15,15,14,14,14,14,14,14,14,13,13,13,13,13,13 };
+    constexpr inline BYTE TableI32StringSize[]
+    {
+         0, 32, 32, 21, 16, 14, 13, 12, 11, 11, 10, 10,  9,  9,  9,
+         9,  8,  8,  8,  8,  8,  8,  8,  8,  7,  7,  7,  7,  7,  7,
+         7,  7,  7,  7,  7,  7,  7
+    };
+    constexpr inline BYTE TableI64StringSize[]
+    {
+         0, 64, 64, 41, 32, 28, 25, 23, 22, 21, 20, 19, 18, 18, 17,
+        17, 16, 16, 16, 16, 15, 15, 15, 15, 14, 14, 14, 14, 14, 14,
+        14, 13, 13, 13, 13, 13, 13
+    };
 }
 
 enum class TcvResult
 {
     Ok,
-    Overflow,		// 解析结果溢出
-    Nothing,		// 输入字符串为空
+    Overflow,       // 解析结果溢出
+    Nothing,        // 输入字符串为空
     ErrorFormat,
-    OnlySign,		// 解析符号完毕后已到结尾
+    OnlySign,       // 解析符号完毕后已到结尾
     OnlyRadixPrefix,// 解析进制前缀完毕后已到结尾
     BufferTooSmall,
     Unknown,
 };
 
+template<class TPointer>
+struct TcvReturn
+{
+    TcvResult eResult;  // 错误码
+    TPointer pEnd;      // 操作结束位置的尾后指针，一定大于等于输入缓冲区首地址
+};
 
 // 根据目标整数类型、进制和填充，计算转换所需的最小缓冲区大小（包含结束符和可能的负号）
 template<std::integral TInt>
@@ -49,22 +71,16 @@ EckInlineNdCe size_t TcvIntBufferSize(int iRadix = 10, int cchFillTo = 0) noexce
 /// <param name="cch">文本长度</param>
 /// <param name="i">接收转换结果</param>
 /// <param name="iRadix">进制，在2到36之间，若为0则根据前缀自动判断进制，支持0x和0b</param>
-/// <param name="ppEnd">接收指向扫描结束位置下一个字符的指针，若失败，返回p的值</param>
-/// <returns>错误代码</returns>
-template<CcpCharPointer TPtr, std::integral TInt>
-inline TcvResult TcvToInt(
-    _In_reads_(cch) TPtr p,
+template<CcpCharPointer TPointer, std::integral TInt>
+inline TcvReturn<TPointer> TcvToInt(
+    _In_reads_(cch) TPointer p,
     size_t cch,
     _Out_ TInt& i,
-    int iRadix = 0,
-    _Outptr_opt_ TPtr* ppEnd = nullptr) noexcept
+    int iRadix = 0) noexcept
 {
     i = 0;
     if (!cch)
-    {
-        if (ppEnd) *ppEnd = p;
-        return TcvResult::Nothing;
-    }
+        return { TcvResult::Nothing, p };
     const auto pEnd = p + cch;
     BOOL bNeg = FALSE;
     // 识别符号
@@ -73,10 +89,7 @@ inline TcvResult TcvToInt(
     else if (*p == '+')
         ++p;
     if (p == pEnd)
-    {
-        if (ppEnd) *ppEnd = p;
-        return TcvResult::OnlySign;
-    }
+        return { TcvResult::OnlySign, p };
     // 若未指定进制，则尝试识别进制
     if (iRadix == 0)
         if (p + 2 <= pEnd &&
@@ -94,10 +107,7 @@ inline TcvResult TcvToInt(
         else
             iRadix = 10;
     if (p == pEnd)
-    {
-        if (ppEnd) *ppEnd = p;
-        return TcvResult::OnlyRadixPrefix;
-    }
+        return { TcvResult::OnlyRadixPrefix, p };
 
     using TUnsigned = std::make_unsigned_t<TInt>;
     TUnsigned Max;
@@ -120,7 +130,6 @@ inline TcvResult TcvToInt(
             break;
         if (Result > (Max - Digit) / iRadix)
         {
-            if (ppEnd) *ppEnd = p;
             if constexpr (std::is_signed_v<TInt>)
                 if (bNeg)
                     i = std::numeric_limits<TInt>::min();
@@ -128,7 +137,7 @@ inline TcvResult TcvToInt(
                     i = std::numeric_limits<TInt>::max();
             else
                 i = std::numeric_limits<TInt>::max();
-            return TcvResult::Overflow;
+            return { TcvResult::Overflow, p };
         }
         else
             Result = Result * iRadix + Digit;
@@ -137,39 +146,35 @@ inline TcvResult TcvToInt(
         if (bNeg)
             Result = TUnsigned(TUnsigned{} - Result);
     i = TInt(Result);
-    if (ppEnd) *ppEnd = p;
-    return TcvResult::Ok;
+    return { TcvResult::Ok, p };
 }
 
 /// <summary>
 /// 整数到文本
 /// </summary>
-/// <param name="p">输出缓冲区，必须足够大以包括转换所需的工作空间，一般使用TcsCvtCalcBufferSize计算。若空间足够，则函数添加结尾NULL，否则，函数不执行截断操作且不报告错误</param>
+/// <param name="p">
+/// 输出缓冲区，必须足够大以包括转换所需的工作空间，一般使用TcvIntBufferSize计算。
+/// 若空间足够，则函数添加结尾NULL，否则，函数不执行截断操作且不报告错误
+/// </param>
 /// <param name="cch">缓冲区大小</param>
 /// <param name="i">要转换的整数值</param>
 /// <param name="iRadix">目标进制，在2到36之间</param>
 /// <param name="bUpperCase">是否使用大写字母表示大于9的数字字符</param>
-/// <param name="ppEnd">接收写入数字序列结束位置的指针，若失败，返回p的值</param>
 /// <param name="cchFillTo">最小数字宽度（不包括负号），当实际数字位数小于该值时执行填充</param>
 /// <param name="chFill">用作填充的字符</param>
-/// <returns>错误代码</returns>
-template<CcpNonConstCharPointer TPtr, std::integral TInt>
-inline TcvResult TcvFromInt(
-    _Out_writes_(cch) TPtr p,
+template<CcpNonConstCharPointer TPointer, std::integral TInt>
+inline TcvReturn<TPointer> TcvFromInt(
+    _Out_writes_(cch) TPointer p,
     size_t cch,
     TInt i,
     int iRadix = 10,
     BOOL bUpperCase = TRUE,
-    _Outptr_opt_ TPtr* ppEnd = nullptr,
     int cchFillTo = 0,
-    CharFromPointer_T<TPtr> chFill = '0') noexcept
+    CharFromPointer_T<TPointer> chFill = '0') noexcept
 {
     EckAssert(iRadix >= 2 && iRadix <= 36);
     if (cch < TcvIntBufferSize<TInt>(iRadix, cchFillTo) - 1)
-    {
-        if (ppEnd) *ppEnd = p;
-        return TcvResult::BufferTooSmall;
-    }
+        return { TcvResult::BufferTooSmall, p };
     const auto pEnd = p + cch;
     using TUnsigned = std::make_unsigned_t<TInt>;
     auto Val = (TUnsigned)i;
@@ -182,7 +187,7 @@ inline TcvResult TcvFromInt(
             Val = TUnsigned(0 - i);
         }
     }
-    using TChar = CharFromPointer_T<TPtr>;
+    using TChar = CharFromPointer_T<TPointer>;
 
     constexpr TChar DigU[]{ '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E',
     'F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z' };
@@ -202,10 +207,8 @@ inline TcvResult TcvFromInt(
         *p++ = '-';
     const auto pFillEnd = p + cchExtraFill;
     if (pFillEnd > pWrite)
-    {
-        if (ppEnd) *ppEnd = (bNeg ? p - 1 : p);
-        return TcvResult::BufferTooSmall;
-    }
+        return { TcvResult::BufferTooSmall, (bNeg ? p - 1 : p) };
+
     for (; p < pFillEnd; ++p)
         *p = chFill;
     if (p != pWrite)
@@ -214,13 +217,13 @@ inline TcvResult TcvFromInt(
         else
             wmemmove(p, pWrite, cchNum);
     p += cchNum;
-    if (p < pEnd) *p = 0;
-    if (ppEnd) *ppEnd = p;
-    return TcvResult::Ok;
+    if (p < pEnd)
+        *p = 0;
+    return { TcvResult::Ok, p };
 }
 
 
-enum class TcvFloatFmt
+enum class TcvFloatFormat
 {
     General = std::chars_format::general,
     Hex = std::chars_format::hex,
@@ -234,46 +237,40 @@ namespace Detail
     {
         switch (ec)
         {
-        case std::errc{}:
-            return TcvResult::Ok;
+        case std::errc{}:                    return TcvResult::Ok;
         case std::errc::result_out_of_range:
-        case std::errc::value_too_large:
-            return TcvResult::BufferTooSmall;
-        case std::errc::invalid_argument:
-            return TcvResult::ErrorFormat;
-        default:
-            return TcvResult::Unknown;
+        case std::errc::value_too_large:     return TcvResult::BufferTooSmall;
+        case std::errc::invalid_argument:    return TcvResult::ErrorFormat;
+        default:                             return TcvResult::Unknown;
         }
     }
-    EckInlineNdCe auto TcvFloatFormatToFastFloatFormat(TcvFloatFmt e) noexcept
+    EckInlineNdCe auto TcvFloatFormatToFastFloatFormat(TcvFloatFormat e) noexcept
     {
         switch (e)
         {
-        case TcvFloatFmt::General:      return fast_float::chars_format::general;
-        case TcvFloatFmt::Hex:          return fast_float::chars_format::hex;
-        case TcvFloatFmt::Fixed:        return fast_float::chars_format::fixed;
-        case TcvFloatFmt::Scientific:   return fast_float::chars_format::scientific;
-        default:                        return fast_float::chars_format::general;
+        case TcvFloatFormat::General:    return fast_float::chars_format::general;
+        case TcvFloatFormat::Hex:        return fast_float::chars_format::hex;
+        case TcvFloatFormat::Fixed:      return fast_float::chars_format::fixed;
+        case TcvFloatFormat::Scientific: return fast_float::chars_format::scientific;
+        default:                         return fast_float::chars_format::general;
         }
     }
 }
 
-template<CcpCharPointer TPtr, std::floating_point TFloat>
-inline TcvResult TcvToFloat(
-    _In_reads_(cch) TPtr p,
+template<CcpCharPointer TPointer, std::floating_point TFloat>
+inline TcvReturn<TPointer> TcvToFloat(
+    _In_reads_(cch) TPointer p,
     size_t cch,
     _Out_ TFloat& f,
-    _Outptr_opt_ TPtr* ppEnd = nullptr,
-    TcvFloatFmt eFmt = TcvFloatFmt::General,
+    TcvFloatFormat eFmt = TcvFloatFormat::General,
     int iRadix = 10) noexcept
 {
-    using TChar = CharFromPointer_T<TPtr>;
+    using TChar = CharFromPointer_T<TPointer>;
 
     if (!cch)
     {
         f = 0;
-        if (ppEnd) *ppEnd = p;
-        return TcvResult::Nothing;
+        return { TcvResult::Nothing, p };
     }
     if (*p == '+')
         ++p, --cch;
@@ -284,60 +281,48 @@ inline TcvResult TcvToFloat(
         iRadix
     };
     const auto r = fast_float::from_chars_float_advanced(p, p + cch, f, Opt);
-    if (ppEnd) *ppEnd = (TPtr)r.ptr;
-    return Detail::CharConvEcToTcvResult(r.ec);
+    return { Detail::CharConvEcToTcvResult(r.ec), (TPointer)r.ptr };
 }
 
-template<CcpNonConstCharPointer TPtr, std::floating_point TFloat>
-inline TcvResult TcvFromFloat(
-    _Out_writes_(cch) TPtr p,
+template<CcpNonConstCharPointer TPointer, std::floating_point TFloat>
+inline TcvReturn<TPointer> TcvFromFloat(
+    _Out_writes_(cch) TPointer p,
     size_t cch,
     TFloat f,
-    _Outptr_opt_ TPtr* ppEnd = nullptr,
-    TcvFloatFmt eFmt = TcvFloatFmt::General,
+    TcvFloatFormat eFmt = TcvFloatFormat::General,
     int iPrecision = 6) noexcept
 {
-    using TChar = CharFromPointer_T<TPtr>;
+    using TChar = CharFromPointer_T<TPointer>;
 
     const auto pBufA = (PCH)p;
     const auto cchBufA = cch * sizeof(TChar);
     const auto r = std::to_chars(pBufA, pBufA + cchBufA,
         f, (std::chars_format)eFmt, iPrecision);
     if constexpr (sizeof(TChar) != 1)
+    {
         if (r.ec == std::errc{})
         {
             auto pA = pBufA + (r.ptr - pBufA) - 1;
             auto pW = p + (r.ptr - pBufA) - 1;
             const auto pLastW = pW;
             if (pW >= p + cch)
-            {
-                if (ppEnd) *ppEnd = p;
-                return TcvResult::BufferTooSmall;
-            }
+                return { TcvResult::BufferTooSmall, p };
             while (pW >= p)
                 *pW-- = *pA--;
             if (pLastW + 1 < p + cch)
                 *(pLastW + 1) = 0;
-            if (ppEnd) *ppEnd = pLastW;
-            return TcvResult::Ok;
+            return { TcvResult::Ok, pLastW + 1 };
         }
-        else
-        {
-            if (ppEnd) *ppEnd = p;
-            return Detail::CharConvEcToTcvResult(r.ec);
-        }
+    }
     else
+    {
         if (r.ec == std::errc{})
         {
-            if ((TPtr)r.ptr < p + cch)
-                *(TPtr)r.ptr = 0;
-            if (ppEnd) *ppEnd = (TPtr)r.ptr;
-            return TcvResult::Ok;
+            if ((TPointer)r.ptr < p + cch)
+                *(TPointer)r.ptr = 0;
+            return { TcvResult::Ok, (TPointer)r.ptr };
         }
-        else
-        {
-            if (ppEnd) *ppEnd = p;
-            return Detail::CharConvEcToTcvResult(r.ec);
-        }
+    }
+    return { Detail::CharConvEcToTcvResult(r.ec), p };
 }
 ECK_NAMESPACE_END

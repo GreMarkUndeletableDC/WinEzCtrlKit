@@ -1127,7 +1127,7 @@ public:
     TcvResult PushBackNumber(
         T x,
         int iPrecision = 6,
-        TcvFloatFmt eFmt = TcvFloatFmt::General) noexcept
+        TcvFloatFormat eFmt = TcvFloatFormat::General) noexcept
     {
         const auto cchOld = Size();
         PWCH pEnd;
@@ -1415,7 +1415,7 @@ EckInlineNd CStringW ToString(T x,
 }
 template<std::floating_point T>
 EckInlineNd CStringW ToString(T x, int iPrecision = 6,
-    TcvFloatFmt eFmt = TcvFloatFmt::General) noexcept
+    TcvFloatFormat eFmt = TcvFloatFormat::General) noexcept
 {
     CStringW rs{};
     rs.PushBackNumber(x, iPrecision, eFmt);

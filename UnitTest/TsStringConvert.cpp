@@ -336,11 +336,11 @@ public:
     TEST_METHOD(TsTcsFromFloat_ScientificFormat)
     {
         char buffer[128];
-        auto err = TcvFromFloat(buffer, sizeof(buffer), 1234.5, (PCH*)nullptr, TcvFloatFmt::Scientific);
+        auto err = TcvFromFloat(buffer, sizeof(buffer), 1234.5, (PCH*)nullptr, TcvFloatFormat::Scientific);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(strstr(buffer, "e") != nullptr);
 
-        err = TcvFromFloat(buffer, sizeof(buffer), 0.00012, (PCH*)nullptr, TcvFloatFmt::Scientific);
+        err = TcvFromFloat(buffer, sizeof(buffer), 0.00012, (PCH*)nullptr, TcvFloatFormat::Scientific);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(strstr(buffer, "e") != nullptr);
     }
@@ -348,7 +348,7 @@ public:
     TEST_METHOD(TsTcsFromFloat_FixedFormat)
     {
         char buffer[128];
-        auto err = TcvFromFloat(buffer, sizeof(buffer), 123.456789, (PCH*)nullptr, TcvFloatFmt::Fixed, 2);
+        auto err = TcvFromFloat(buffer, sizeof(buffer), 123.456789, (PCH*)nullptr, TcvFloatFormat::Fixed, 2);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(strstr(buffer, "123.45") != nullptr || strstr(buffer, "123.46") != nullptr);
     }
@@ -728,7 +728,7 @@ public:
     {
         char buffer[128];
 
-        auto err = TcvFromFloat(buffer, sizeof(buffer), 1e-100, (PCH*)nullptr, TcvFloatFmt::Scientific);
+        auto err = TcvFromFloat(buffer, sizeof(buffer), 1e-100, (PCH*)nullptr, TcvFloatFormat::Scientific);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(strstr(buffer, "e-") != nullptr);
 
@@ -741,7 +741,7 @@ public:
     {
         char buffer[128];
 
-        auto err = TcvFromFloat(buffer, sizeof(buffer), 1e100, (PCH*)nullptr, TcvFloatFmt::Scientific);
+        auto err = TcvFromFloat(buffer, sizeof(buffer), 1e100, (PCH*)nullptr, TcvFloatFormat::Scientific);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(strstr(buffer, "e+") != nullptr || strstr(buffer, "e") != nullptr);
     }
@@ -771,7 +771,7 @@ public:
         // 不同精度
         for (int precision = 0; precision <= 15; ++precision)
         {
-            auto err = TcvFromFloat(buffer, sizeof(buffer), value, (PCH*)nullptr, TcvFloatFmt::Fixed, precision);
+            auto err = TcvFromFloat(buffer, sizeof(buffer), value, (PCH*)nullptr, TcvFloatFormat::Fixed, precision);
             Assert::AreEqual((int)TcvResult::Ok, (int)err);
             // 验证输出不为空
             Assert::IsTrue(strlen(buffer) > 0);
@@ -846,7 +846,7 @@ public:
     {
         wchar_t buffer[128];
 
-        auto err = TcvFromFloat(buffer, 128, 1234.5, (PWCH*)nullptr, TcvFloatFmt::Scientific);
+        auto err = TcvFromFloat(buffer, 128, 1234.5, (PWCH*)nullptr, TcvFloatFormat::Scientific);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(wcsstr(buffer, L"e") != nullptr);
     }
@@ -855,7 +855,7 @@ public:
     {
         wchar_t buffer[128];
 
-        auto err = TcvFromFloat(buffer, 128, 123.456789, (PWCH*)nullptr, TcvFloatFmt::Fixed, 2);
+        auto err = TcvFromFloat(buffer, 128, 123.456789, (PWCH*)nullptr, TcvFloatFormat::Fixed, 2);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(wcsstr(buffer, L"123.45") != nullptr || wcsstr(buffer, L"123.46") != nullptr);
     }
@@ -890,11 +890,11 @@ public:
     {
         wchar_t buffer[128];
 
-        auto err = TcvFromFloat(buffer, 128, 3.14159, (PWCH*)nullptr, TcvFloatFmt::Fixed, 2);
+        auto err = TcvFromFloat(buffer, 128, 3.14159, (PWCH*)nullptr, TcvFloatFormat::Fixed, 2);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(wcsstr(buffer, L"3.14") != nullptr);
 
-        err = TcvFromFloat(buffer, 128, 3.14159, (PWCH*)nullptr, TcvFloatFmt::Fixed, 4);
+        err = TcvFromFloat(buffer, 128, 3.14159, (PWCH*)nullptr, TcvFloatFormat::Fixed, 4);
         Assert::AreEqual((int)TcvResult::Ok, (int)err);
         Assert::IsTrue(wcsstr(buffer, L"3.1415") != nullptr || wcsstr(buffer, L"3.1416") != nullptr);
     }
