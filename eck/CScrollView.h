@@ -138,15 +138,19 @@ public:
         m_oxyThumbCursor = xy - GetThumbPosition();
     }
 
-    EckInlineCe void OnMouseMove(T xy) noexcept
+    EckInlineCe BOOL OnMouseMove(T xy) noexcept
     {
         EckAssert(m_bLBtnDown);
         if (!IsValid())
-            return;
-        SetPosition(GetMinimum() +
+            return FALSE;
+        const auto pos = GetMinimum() +
             (xy - m_oxyThumbCursor) *
             GetRangeDistance() /
-            (GetViewSize() - GetThumbSize()));
+            (GetViewSize() - GetThumbSize());
+        if (!CanMove(pos - GetPosition()))
+            return FALSE;
+        SetPosition(pos);
+        return TRUE;
     }
 
     EckInlineCe void OnLButtonUp() noexcept

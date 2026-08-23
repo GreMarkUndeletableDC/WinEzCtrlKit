@@ -195,11 +195,9 @@ public:
                 Kw::Rect rcThumbOld, rcThumb;
                 GetPartRect(rcThumbOld, Part::Thumb);
                 // 减去Cap
-                const auto d = m_bVertical ?
-                    pt.y - GetWidth() : pt.x - GetHeight();
-                if (m_sv.CanMove(d))
+                if (m_sv.OnMouseMove(m_bVertical ?
+                    pt.y - GetWidth() : pt.x - GetHeight()))
                 {
-                    m_sv.OnMouseMove(d);
                     GetWindow().RdLockUpdate();// 合批滚动条与被滚动内容
                     EvtScroll();
                     GetPartRect(rcThumb, Part::Thumb);
@@ -318,6 +316,9 @@ public:
                     nm.bAnimating = TRUE;
                     ((CScrollBar*)pUser)->EvtScroll(nm);
                 }, this);
+            [[fallthrough]];
+        case WM_THEMECHANGED:
+            m_sv.SetMinimumThumbSize(GetTheme()->GetMetric(IdMeMinimumScrollThumb));
             break;
 
         case WM_DESTROY:
