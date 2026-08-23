@@ -53,17 +53,22 @@ public:
         requires std::is_convertible_v<U*, TInterface*>
     constexpr ComPtr(ComPtr<U>&& x) noexcept
     {
-        std::swap(p, x.p);
+        p = x.p;
+        x.p = nullptr;
     }
 
-    ComPtr(REFCLSID clsid, HRESULT* phr = nullptr)
+    ComPtr(REFCLSID clsid, _Out_opt_ HRESULT* phr = nullptr) noexcept
     {
         const auto hr = CoCreateInstance(clsid, nullptr,
             CLSCTX_ALL, IID_PPV_ARGS(&p));
         if (phr) *phr = hr;
     }
 
-    ~ComPtr() noexcept { ReleaseIt(); }
+    ~ComPtr() noexcept
+    {
+        if (p)
+            p->Release();
+    }
 
     ComPtr& operator=(std::nullptr_t) noexcept
     {
@@ -96,6 +101,14 @@ public:
     ComPtr& operator=(const ComPtr<U>& x) noexcept
     {
         ComPtr{ x }.Swap(*this);
+        return *this;
+    }
+
+    template<CcpComInterface U>
+        requires std::is_convertible_v<U*, TInterface*>
+    ComPtr& operator=(ComPtr<U>&& x) noexcept
+    {
+        ComPtr{ std::move(x) }.Swap(*this);
         return *this;
     }
 
