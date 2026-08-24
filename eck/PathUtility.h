@@ -52,9 +52,12 @@ void PazLegalizeLength(_In_reads_(cchPath) TPointer pszPath, int cchPath,
 
 template<CcpCharPointer TPointer>
 HRESULT PazParseCommandLine(
-    _In_reads_(cchCmdLine) TPointer pszCmdLine, int cchCmdLine,
-    _Out_ TPointer& pszFile, _Out_ int& cchFile,
-    _Out_ TPointer& pszParam, _Out_ int& cchParam) noexcept
+    _In_reads_(cchCmdLine) TPointer pszCmdLine,
+    int cchCmdLine,
+    _Out_ TPointer& pszFile,
+    _Out_ int& cchFile,
+    _Out_ TPointer& pszParam,
+    _Out_ int& cchParam) noexcept
 {
     if (!pszCmdLine || !cchCmdLine)
     {
@@ -102,14 +105,47 @@ FileNameOk:;// 至此文件名处理完毕
     cchParam = int(pEnd - pszParam);
     return S_OK;
 }
-template<CcpCharPointer TPointer>
+template<CcpChar TChar>
+HRESULT PazParseCommandLine(
+    std::basic_string_view<TChar> svCmdLine,
+    Eck_Out_buffer_ std::basic_string_view<TChar>& svFile,
+    Eck_Out_buffer_ std::basic_string_view<TChar>& svParam) noexcept
+{
+    const TChar* pszFile, *pszParam;
+    int cchFile, cchParam;
+    const auto hr = PazParseCommandLine(
+        svCmdLine.data(), (int)svCmdLine.size(),
+        pszFile, cchFile, pszParam, cchParam);
+    if (FAILED(hr))
+    {
+        svFile = svParam = {};
+        return hr;
+    }
+
+    if (!pszFile)
+        svFile = {};
+    else
+        svFile = { pszFile, (size_t)cchFile };
+
+    if (!pszParam)
+        svParam = {};
+    else
+        svParam = { pszParam, (size_t)cchParam };
+    return S_OK;
+}
+
+template<CcpNonConstCharPointer TPointer>
 HRESULT PazParseCommandLineAndCut(
-    _In_reads_(cchCmdLine) TPointer pszCmdLine, int cchCmdLine,
-    _Out_ TPointer& pszFile, _Out_ int& cchFile,
-    _Out_ TPointer& pszParam, _Out_ int& cchParam) noexcept
+    _Inout_updates_(cchCmdLine + 1) TPointer pszCmdLine,
+    int cchCmdLine,
+    _Out_ TPointer& pszFile,
+    _Out_ int& cchFile,
+    _Out_ TPointer& pszParam,
+    _Out_ int& cchParam) noexcept
 {
     EckAssert(&pszFile != &pszParam && &cchFile != &cchParam);
-    const auto hr = PazParseCommandLine(pszCmdLine, cchCmdLine,
+    const auto hr = PazParseCommandLineAndCut(
+        pszCmdLine, cchCmdLine,
         pszFile, cchFile, pszParam, cchParam);
     if (SUCCEEDED(hr))
     {
@@ -119,6 +155,35 @@ HRESULT PazParseCommandLineAndCut(
             *(pszParam + cchParam) = '\0';
     }
     return hr;
+}
+template<CcpNonConstCharPointer TPointer, class TChar = CharFromPointer_T<TPointer>>
+HRESULT PazParseCommandLineAndCut(
+    _Inout_updates_(cchCmdLine + 1) TPointer pszCmdLine,
+    int cchCmdLine,
+    Eck_Out_buffer_ std::basic_string_view<TChar>& svFile,
+    Eck_Out_buffer_ std::basic_string_view<TChar>& svParam) noexcept
+{
+    TChar* pszFile, *pszParam;
+    int cchFile, cchParam;
+    const auto hr = PazParseCommandLineAndCut(
+        pszCmdLine, cchCmdLine,
+        pszFile, cchFile, pszParam, cchParam);
+    if (FAILED(hr))
+    {
+        svFile = svParam = {};
+        return hr;
+    }
+
+    if (!pszFile)
+        svFile = {};
+    else
+        svFile = { pszFile, (size_t)cchFile };
+
+    if (!pszParam)
+        svParam = {};
+    else
+        svParam = { pszParam, (size_t)cchParam };
+    return S_OK;
 }
 
 EckNfInlineNd BOOL PazIsDotFileName(_In_reads_z_(3) CcpCharPointer auto pszFileName) noexcept
