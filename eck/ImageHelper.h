@@ -350,7 +350,7 @@ inline HRESULT WicScaleBitmap(
     WICBitmapInterpolationMode eInterMode = WICBitmapInterpolationModeLinear) noexcept
 {
     HRESULT hr;
-    hr = eck::g_pWicFactory->CreateBitmapScaler(&pScaler);
+    hr = g_pWicFactory->CreateBitmapScaler(&pScaler);
     if (FAILED(hr))
         return hr;
 
