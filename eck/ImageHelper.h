@@ -341,6 +341,28 @@ inline HRESULT WicCreateIcon(
         DeleteObject(hbmMask);
     return hr;
 }
+
+inline HRESULT WicScaleBitmap(
+    _Out_ IWICBitmapScaler*& pScaler,
+    _In_ IWICBitmapSource* pBitmap,
+    UINT cxNew,
+    UINT cyNew,
+    WICBitmapInterpolationMode eInterMode = WICBitmapInterpolationModeLinear) noexcept
+{
+    HRESULT hr;
+    hr = g_pWicFactory->CreateBitmapScaler(&pScaler);
+    if (FAILED(hr))
+        return hr;
+
+    hr = pScaler->Initialize(pBitmap, cxNew, cyNew, eInterMode);
+    if (FAILED(hr))
+    {
+        pScaler->Release();
+        pScaler = nullptr;
+        return hr;
+    }
+    return S_OK;
+}
 #pragma endregion Wic
 
 #pragma region Gdiplus
