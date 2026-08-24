@@ -10,57 +10,57 @@ ECK_NAMESPACE_BEGIN
 enum class AppwizFlags : UINT
 {
     None = 0u,
-    NoRemove = 1u << 0,	// 未提供卸载选项
-    NoModify = 1u << 1,	// 未提供修改选项
-    NoRepair = 1u << 2,	// 未提供修复选项
-    WindowsInstaller = 1u << 3,	// 由MSI安装程序安装，且从注册表获取
-    SystemComponent = 1u << 4,	// 系统组件
-    RegCurrentUser = 1u << 5,	// 注册表在HKEY_CURRENT_USER下
-    RegLocalMachine = 1u << 6,	// 注册表在HKEY_LOCAL_MACHINE下
-    RegWow64 = 1u << 7,			// 仅_WIN64平台有效，表示该卸载项为Wow64程序
-    Patch = 1u << 8,			// 补丁
-    Msi = 1u << 9,				// MSI安装程序安装，且从MSIAPI获取
-    NoReg = 1u << 10,			// 仅用于MSI安装程序，指示查询注册表失败。调用方一般不使用此值
+    NoRemove = 1u << 0, // 未提供卸载选项
+    NoModify = 1u << 1, // 未提供修改选项
+    NoRepair = 1u << 2, // 未提供修复选项
+    WindowsInstaller = 1u << 3,     // 由MSI安装程序安装，且从注册表获取
+    SystemComponent = 1u << 4,      // 系统组件
+    RegistryCurrentUser = 1u << 5,  // 注册表在HKEY_CURRENT_USER下
+    RegistryLocalMachine = 1u << 6, // 注册表在HKEY_LOCAL_MACHINE下
+    RegistryWow64 = 1u << 7,        // 仅_WIN64平台有效，表示该卸载项为Wow64程序
+    Patch = 1u << 8,                // 补丁
+    Msi = 1u << 9,                  // MSI安装程序安装，且从MSIAPI获取
+    NoRegistry = 1u << 10,          // 仅用于MSI安装程序，指示查询注册表失败。调用方一般不使用此值
 };
 ECK_ENUM_BIT_FLAGS(AppwizFlags);
 
-enum class AppwizStr
+enum class AppwizString
 {
-    ProductID,	// 手动获取
-    RegKeyName,	// 手动获取
+    ProductId,      // 手动获取
+    RegistryKeyName,// 手动获取
 
-    MinImportant,
+    MinimumImportant,
 
-    DisplayName = MinImportant,
+    DisplayName = MinimumImportant,
     InstallLocation,
     UninstallString,
     Publisher,
-    KBNumber,
+    KbNumber,
 
-    MaxImportant,
+    MaximumImportant,
 
-    DisplayIcon = MaxImportant,
+    DisplayIcon = MaximumImportant,
     DisplayVersion,
     HelpLink,
     HelpTelephone,
     InstallDate,
     InstallSource,
-    URLInfoAbout,
-    URLUpdateInfo,
+    UrlInformationAbout,
+    UrlUpdateInformation,
     Contact,
     Readme,
-    RegOwner,
-    RegCompany,
-    Comments,
+    RegisterOwner,
+    RegisterCompany,
+    Comment,
     QuietUninstallString,
     ModifyPath,
 
-    Max
+    Maximum
 };
 
 namespace Detail
 {
-    constexpr inline PCWSTR AppwizStrs[size_t(AppwizStr::Max)]
+    constexpr inline PCWSTR AppwizStringList[size_t(AppwizString::Maximum)]
     {
         L"ProductID",
         L"RegKeyName",
@@ -88,7 +88,7 @@ namespace Detail
         L"ModifyPath",
     };
 
-    constexpr inline PCWSTR AppwizStrsMsi[size_t(AppwizStr::Max)]
+    constexpr inline PCWSTR AppwizStringListMsi[size_t(AppwizString::Maximum)]
     {
         L"ProductID",
         L"RegKeyName",// 与ProductID相同
@@ -122,7 +122,7 @@ namespace Detail
         PCWSTR pszSubKey;
         int cchSubKey;
     }
-    UninstallInfoSource[]
+    UninstallSource[]
     {
         { HKEY_LOCAL_MACHINE, EckArgString(REGSTR_PATH_UNINSTALL) },
         { HKEY_CURRENT_USER,  EckArgString(REGSTR_PATH_UNINSTALL) },
@@ -133,7 +133,7 @@ namespace Detail
     };
 }
 
-class CUninstallInfo
+class CUninstallEnumerator
 {
 private:
     CRegistryKey m_Reg{};
@@ -146,15 +146,15 @@ private:
 
     LSTATUS NextSource() noexcept
     {
-        if (m_idxCurrSource < ARRAYSIZE(Detail::UninstallInfoSource))
+        if (m_idxCurrSource < ARRAYSIZE(Detail::UninstallSource))
         {
-            auto& ui = Detail::UninstallInfoSource[m_idxCurrSource++];
-            auto ls = m_Reg.Open(ui.hRoot, ui.pszSubKey, KEY_READ);
+            auto& Source = Detail::UninstallSource[m_idxCurrSource++];
+            auto ls = m_Reg.Open(Source.hRoot, Source.pszSubKey, KEY_READ);
             if (ls == ERROR_SUCCESS)
             {
                 DWORD cchMaxSub;
-                if ((ls = m_Reg.QueryInfomation(nullptr,
-                    nullptr, nullptr, &cchMaxSub)) != ERROR_SUCCESS)
+                ls = m_Reg.QueryInfomation(nullptr, nullptr, nullptr, &cchMaxSub);
+                if (ls != ERROR_SUCCESS)
                     return ls;
                 m_rsBuffer.Reserve(cchMaxSub);
                 m_idxCurr = 0;
@@ -169,29 +169,20 @@ private:
     {
         switch (idxSrc)
         {
-        case 0:
-            return AppwizFlags::RegLocalMachine;
-            break;
-        case 1:
-            return AppwizFlags::RegCurrentUser;
-            break;
-        case 2:
-            return (AppwizFlags::RegWow64 | AppwizFlags::RegLocalMachine);
-            break;
-        case 3:
-            return (AppwizFlags::RegWow64 | AppwizFlags::RegCurrentUser);
-            break;
-        default:
-            ECK_UNREACHABLE;
+        case 0:  return AppwizFlags::RegistryLocalMachine;
+        case 1:  return AppwizFlags::RegistryCurrentUser;
+        case 2:  return AppwizFlags::RegistryWow64 | AppwizFlags::RegistryLocalMachine;
+        case 3:  return AppwizFlags::RegistryWow64 | AppwizFlags::RegistryCurrentUser;
+        default: return AppwizFlags::None;
         }
     }
 public:
-    struct CApp
+    struct Application
     {
-        friend class CUninstallInfo;
+        friend class CUninstallEnumerator;
 
-        CRegistryKey Reg{};
-        CStringW StrBuffer{};
+        CRegistryKey Key{};
+        CStringW StringBuffer{};
         DWORD EstimatedSize{};
         AppwizFlags Flags{};
         DWORD MajorVersion{};
@@ -200,13 +191,15 @@ public:
         {
             int idx;
             int cch;
-        } Str[size_t(AppwizStr::Max)]{};
+        } Str[size_t(AppwizString::Maximum)]{};
     private:
+        EckInlineNdCe StringSpan GetString(AppwizString e) const noexcept { return Str[size_t(e)]; }
+
         LSTATUS GetStringValueRegistry(PCWSTR pszValue, _Out_ StringSpan& spResult) noexcept
         {
             LSTATUS ls;
             DWORD cbBuf{};
-            if ((ls = Reg.QueryValue(pszValue, nullptr, &cbBuf)) != ERROR_SUCCESS)
+            if ((ls = Key.QueryValue(pszValue, nullptr, &cbBuf)) != ERROR_SUCCESS)
             {
                 spResult = {};
                 return ls;
@@ -214,16 +207,16 @@ public:
             if (cbBuf)
             {
                 const auto cchAdded = cbBuf / sizeof(WCHAR) + 1;
-                const auto psBuf = StrBuffer.PushBack((int)cchAdded);
-                if ((ls = Reg.QueryValue(pszValue, psBuf, &cbBuf)) != ERROR_SUCCESS ||
+                const auto psBuf = StringBuffer.PushBack((int)cchAdded);
+                if ((ls = Key.QueryValue(pszValue, psBuf, &cbBuf)) != ERROR_SUCCESS ||
                     !cbBuf)
                 {
-                    StrBuffer.PopBack((int)cchAdded);
+                    StringBuffer.PopBack((int)cchAdded);
                     spResult = {};
                     return ls;
                 }
                 *(psBuf + cchAdded - 1) = 0;
-                spResult = { int(psBuf - StrBuffer.Data()),int(cchAdded - 1) };
+                spResult = { int(psBuf - StringBuffer.Data()),int(cchAdded - 1) };
             }
             else
                 spResult = {};
@@ -234,7 +227,7 @@ public:
         {
             LSTATUS ls;
             DWORD cchBuf{};// 不含结尾NULL
-            ls = (LSTATUS)MsiGetProductInfoW(StrBuffer.Data()/*首部总为ProductID*/,
+            ls = (LSTATUS)MsiGetProductInfoW(StringBuffer.Data()/*首部总为ProductID*/,
                 pszValue, nullptr, &cchBuf);
             if (!cchBuf)
             {
@@ -242,17 +235,17 @@ public:
                 return ls;
             }
             ++cchBuf;
-            const auto pszBuf = StrBuffer.PushBack(cchBuf);
+            const auto pszBuf = StringBuffer.PushBack(cchBuf);
             const auto cchAdded = cchBuf;
-            ls = (LSTATUS)MsiGetProductInfoW(StrBuffer.Data()/*首部总为ProductID*/,
+            ls = (LSTATUS)MsiGetProductInfoW(StringBuffer.Data()/*首部总为ProductID*/,
                 pszValue, pszBuf, &cchBuf);
             if (ls != ERROR_SUCCESS || !cchBuf)
             {
-                StrBuffer.PopBack(cchAdded);
+                StringBuffer.PopBack(cchAdded);
                 spResult = {};
                 return ls;
             }
-            spResult = { int(pszBuf - StrBuffer.Data()),int(cchAdded - 1) };
+            spResult = { int(pszBuf - StringBuffer.Data()),int(cchAdded - 1) };
             return ERROR_SUCCESS;
         }
 
@@ -264,27 +257,27 @@ public:
             {
                 Flags = AppwizFlags::Msi;// Certainly...
                 // 测试位于注册表的哪个源
-                EckCounter(ARRAYSIZE(Detail::UninstallInfoSource), i)
+                EckCounter(ARRAYSIZE(Detail::UninstallSource), i)
                 {
-                    const auto& Src = Detail::UninstallInfoSource[i];
-                    StrBuffer.Assign(Src.pszSubKey, Src.cchSubKey);
-                    StrBuffer.PushBackChar(L'\\');
-                    StrBuffer.PushBack(pszKeyOrId, cchKeyOrId);
-                    if (Reg.Open(Src.hRoot, StrBuffer.Data(), KEY_READ) == ERROR_SUCCESS)
+                    const auto& Src = Detail::UninstallSource[i];
+                    StringBuffer.Assign(Src.pszSubKey, Src.cchSubKey);
+                    StringBuffer.PushBackChar(L'\\');
+                    StringBuffer.PushBack(pszKeyOrId, cchKeyOrId);
+                    if (Key.Open(Src.hRoot, StringBuffer.Data(), KEY_READ) == ERROR_SUCCESS)
                     {
                         Flags |= GetRegistryFlags(i);
                         break;
                     }
                 }
-                if (!Reg.GetHKey())
-                    Flags |= AppwizFlags::NoReg;
+                if (!Key.GetHKey())
+                    Flags |= AppwizFlags::NoRegistry;
 
-                StrBuffer.Assign(pszKeyOrId, cchKeyOrId + 1/* For null terminator */);
-                Str[size_t(AppwizStr::ProductID)] = { 0,38 };
+                StringBuffer.Assign(pszKeyOrId, cchKeyOrId + 1/* For null terminator */);
+                Str[size_t(AppwizString::ProductId)] = { 0,38 };
             }
             else
             {
-                Reg.QueryValue(L"WindowsInstaller", &dwBuf, &cbBuf);
+                Key.QueryValue(L"WindowsInstaller", &dwBuf, &cbBuf);
                 if (dwBuf)
                 {
                     // 若有需要，调用方使用此标志判断是否跳过Windows Installer应用
@@ -294,46 +287,46 @@ public:
                 }
                 dwBuf = 0;
             }
-            const auto posKey = StrBuffer.Size();
-            StrBuffer.PushBack(pszKeyOrId, cchKeyOrId + 1);
-            Str[size_t(AppwizStr::RegKeyName)] = { posKey,StrBuffer.Size() - posKey - 1 };
+            const auto posKey = StringBuffer.Size();
+            StringBuffer.PushBack(pszKeyOrId, cchKeyOrId + 1);
+            Str[size_t(AppwizString::RegistryKeyName)] = { posKey,StringBuffer.Size() - posKey - 1 };
 
-            Reg.QueryValue(L"NoRemove", &dwBuf, &cbBuf);
+            Key.QueryValue(L"NoRemove", &dwBuf, &cbBuf);
             if (dwBuf)
                 Flags |= AppwizFlags::NoRemove;
             dwBuf = 0;
-            Reg.QueryValue(L"NoModify", &dwBuf, &cbBuf);
+            Key.QueryValue(L"NoModify", &dwBuf, &cbBuf);
             if (dwBuf)
                 Flags |= AppwizFlags::NoModify;
             dwBuf = 0;
-            Reg.QueryValue(L"NoRepair", &dwBuf, &cbBuf);
+            Key.QueryValue(L"NoRepair", &dwBuf, &cbBuf);
             if (dwBuf)
                 Flags |= AppwizFlags::NoRepair;
             dwBuf = 0;
-            Reg.QueryValue(L"SystemComponent", &dwBuf, &cbBuf);
+            Key.QueryValue(L"SystemComponent", &dwBuf, &cbBuf);
             if (dwBuf)
                 Flags |= AppwizFlags::SystemComponent;
 
             if (bMsi)
             {
-                for (size_t i = size_t(AppwizStr::MinImportant);
-                    i < size_t(AppwizStr::MaxImportant); ++i)
+                for (size_t i = size_t(AppwizString::MinimumImportant);
+                    i < size_t(AppwizString::MaximumImportant); ++i)
                 {
-                    if (Detail::AppwizStrsMsi[i][0] == '/')
-                        GetStringValueRegistry(Detail::AppwizStrsMsi[i] + 1, Str[i]);
+                    if (Detail::AppwizStringListMsi[i][0] == '/')
+                        GetStringValueRegistry(Detail::AppwizStringListMsi[i] + 1, Str[i]);
                     else
-                        GetStringValueMsi(Detail::AppwizStrsMsi[i], Str[i]);
+                        GetStringValueMsi(Detail::AppwizStringListMsi[i], Str[i]);
                 }
             }
             else
             {
-                for (size_t i = size_t(AppwizStr::MinImportant);
-                    i < size_t(AppwizStr::MaxImportant); ++i)
+                for (size_t i = size_t(AppwizString::MinimumImportant);
+                    i < size_t(AppwizString::MaximumImportant); ++i)
                 {
-                    GetStringValueRegistry(Detail::AppwizStrs[i], Str[i]);
+                    GetStringValueRegistry(Detail::AppwizStringList[i], Str[i]);
                 }
 
-                if (GetString(AppwizStr::KBNumber).cch)
+                if (GetString(AppwizString::KbNumber).cch)
                     Flags |= AppwizFlags::Patch;
             }
             return FALSE;
@@ -348,30 +341,26 @@ public:
             return 0;
         }
 
-        W32ERR CreateProcessForCommand(StringSpan spCmd) noexcept
+        W32ERR CreateProcessForCommand(std::wstring_view svCmd) noexcept
         {
-            if (!spCmd.cch)
-            {
-                STARTUPINFO si{};
-                PROCESS_INFORMATION pi{};
-                si.cb = sizeof(si);
-                const auto pszBuf = (PWSTR)_malloca((spCmd.cch + 1) * sizeof(WCHAR));
-                CheckPointer(pszBuf);
-                TcsCopyLength(pszBuf, StrBuffer.Data() + spCmd.idx, spCmd.cch + 1);
-                const auto b = CreateProcessW(nullptr, pszBuf,
-                    nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
-                _freea(pszBuf);
-                if (b)
-                {
-                    NtClose(pi.hProcess);
-                    NtClose(pi.hThread);
-                    return ERROR_SUCCESS;
-                }
-                else
-                    return NaGetLastError();
-            }
-            else
+            if (svCmd.empty())
                 return ERROR_NOT_SUPPORTED;
+            STARTUPINFO si{};
+            PROCESS_INFORMATION pi{};
+            si.cb = sizeof(si);
+            const auto pszBuf = (PWSTR)_malloca((svCmd.size() + 1) * sizeof(WCHAR));
+            CheckPointer(pszBuf);
+            TcsCopyLength(pszBuf, svCmd.data(), svCmd.size() + 1);
+            const auto b = CreateProcessW(nullptr, pszBuf,
+                nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
+            _freea(pszBuf);
+            if (b)
+            {
+                NtClose(pi.hProcess);
+                NtClose(pi.hThread);
+                return ERROR_SUCCESS;
+            }
+            return NaGetLastError();
         }
     public:
         EckInlineNdCe BOOL TestFlag(AppwizFlags f) const noexcept
@@ -387,13 +376,13 @@ public:
         // 测试是否为一般意义上的可操作项
         EckInlineNdCe BOOL IsValid() const noexcept
         {
-            if (!Str[size_t(AppwizStr::DisplayName)].cch ||
-                Str[size_t(AppwizStr::KBNumber)].cch)
+            if (!Str[size_t(AppwizString::DisplayName)].cch ||
+                Str[size_t(AppwizString::KbNumber)].cch)
                 return FALSE;
             if (TestFlag(AppwizFlags::Msi))
-                return !TestFlag(AppwizFlags::NoReg);
+                return !TestFlag(AppwizFlags::NoRegistry);
             else
-                return !!Str[size_t(AppwizStr::UninstallString)].cch;
+                return !!Str[size_t(AppwizString::UninstallString)].cch;
         }
 
         // 提供与 控制面板/程序和功能 相似的过滤条件
@@ -403,24 +392,19 @@ public:
                 AppwizFlags::WindowsInstaller | AppwizFlags::SystemComponent);
         }
 
-        EckInlineNdCe StringSpan GetString(AppwizStr e) const noexcept
-        {
-            return Str[size_t(e)];
-        }
-
-        EckInlineNdCe std::wstring_view GetStringView(AppwizStr e) const noexcept
+        EckInlineNdCe std::wstring_view GetStringView(AppwizString e) const noexcept
         {
             const auto f = GetString(e);
             if (f.cch)
-                return { StrBuffer.Data() + f.idx,(size_t)f.cch };
+                return { StringBuffer.Data() + f.idx,(size_t)f.cch };
             else
                 return {};
         }
 
         void Clear() noexcept
         {
-            Reg.Close();
-            StrBuffer.Clear();
+            Key.Close();
+            StringBuffer.Clear();
             EstimatedSize = 0;
             Flags = AppwizFlags::None;
             MajorVersion = 0;
@@ -430,12 +414,13 @@ public:
 
         void AcquireAllInfomation() noexcept
         {
-            for (size_t i = size_t(AppwizStr::MaxImportant); i < size_t(AppwizStr::Max); ++i)
-                GetStringValueRegistry(Detail::AppwizStrs[i], Str[i]);
+            for (size_t i = size_t(AppwizString::MaximumImportant);
+                i < size_t(AppwizString::Maximum); ++i)
+                GetStringValueRegistry(Detail::AppwizStringList[i], Str[i]);
             // 补全非字符串信息
             EstimatedSize = 0;
             DWORD cbBuf{ sizeof(EstimatedSize) };
-            Reg.QueryValue(L"EstimatedSize", &EstimatedSize, &cbBuf);
+            Key.QueryValue(L"EstimatedSize", &EstimatedSize, &cbBuf);
 
             // MajorVersion、MinorVersion、VersionMajor、VersionMinor
             // 某些程序填写为字符串，因此使用字符串缓冲区接收
@@ -443,13 +428,13 @@ public:
             DWORD dwType;
             BOOL bMajorRead{}, bMinorRead{};
             cbBuf = sizeof(szBuf);
-            if (Reg.QueryValue(L"MajorVersion", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
+            if (Key.QueryValue(L"MajorVersion", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
             {
                 MajorVersion = VersionFromString(szBuf, dwType);
                 bMajorRead = !MajorVersion;
             }
             cbBuf = sizeof(szBuf);
-            if (Reg.QueryValue(L"MinorVersion", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
+            if (Key.QueryValue(L"MinorVersion", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
             {
                 MinorVersion = VersionFromString(szBuf, dwType);
                 bMinorRead = !MinorVersion;
@@ -457,13 +442,13 @@ public:
             if (!bMajorRead)
             {
                 cbBuf = sizeof(szBuf);
-                if (Reg.QueryValue(L"VersionMajor", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
+                if (Key.QueryValue(L"VersionMajor", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
                     MajorVersion = VersionFromString(szBuf, dwType);
             }
             if (!bMinorRead)
             {
                 cbBuf = sizeof(szBuf);
-                if (Reg.QueryValue(L"VersionMinor", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
+                if (Key.QueryValue(L"VersionMinor", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
                     MinorVersion = VersionFromString(szBuf, dwType);
             }
         }
@@ -474,7 +459,7 @@ public:
                 return ERROR_NOT_SUPPORTED;
             if (TestFlag(AppwizFlags::Msi))
             {
-                return MsiReinstallProductW(GetStringView(AppwizStr::ProductID).data(),
+                return MsiReinstallProductW(GetStringView(AppwizString::ProductId).data(),
                     REINSTALLMODE_USERDATA | REINSTALLMODE_MACHINEDATA |
                     REINSTALLMODE_SHORTCUT | REINSTALLMODE_FILEOLDERVERSION |
                     REINSTALLMODE_FILEVERIFY | REINSTALLMODE_PACKAGE);
@@ -487,10 +472,9 @@ public:
             if (TestFlag(AppwizFlags::NoRemove))
                 return ERROR_NOT_SUPPORTED;
             if (TestFlag(AppwizFlags::Msi))
-                return MsiConfigureProductW(GetStringView(AppwizStr::ProductID).data(),
+                return MsiConfigureProductW(GetStringView(AppwizString::ProductId).data(),
                     INSTALLSTATE_ABSENT, INSTALLSTATE_ABSENT);
-            else
-                return CreateProcessForCommand(GetString(AppwizStr::UninstallString));
+            return CreateProcessForCommand(GetStringView(AppwizString::UninstallString));
         }
 
         W32ERR Modify() noexcept
@@ -500,13 +484,13 @@ public:
             if (TestFlag(AppwizFlags::Msi))
             {
                 const auto uOld = MsiSetInternalUI(INSTALLUILEVEL_FULL, nullptr);
-                const auto r = MsiConfigureProductW(GetStringView(AppwizStr::ProductID).data(),
+                const auto r = MsiConfigureProductW(
+                    GetStringView(AppwizString::ProductId).data(),
                     INSTALLSTATE_DEFAULT, INSTALLSTATE_DEFAULT);
                 MsiSetInternalUI(uOld, nullptr);
                 return r;
             }
-            else
-                return CreateProcessForCommand(GetString(AppwizStr::ModifyPath));
+            return CreateProcessForCommand(GetStringView(AppwizString::ModifyPath));
         }
     };
 
@@ -516,10 +500,10 @@ public:
         return NextSource();
     }
 
-    LSTATUS Next(_Inout_ CApp& App) noexcept
+    LSTATUS Next(_Inout_ Application& App) noexcept
     {
         LSTATUS ls;
-        if (m_idxCurrSource < ARRAYSIZE(Detail::UninstallInfoSource))
+        if (m_idxCurrSource < ARRAYSIZE(Detail::UninstallSource))
         {
             DWORD cbBuf{ (DWORD)m_rsBuffer.ByteCapacity() };
             // 枚举注册表
@@ -529,7 +513,7 @@ public:
                 {
                     if ((ls = NextSource()) != ERROR_SUCCESS)
                     {
-                        if (m_idxCurrSource >= ARRAYSIZE(Detail::UninstallInfoSource))
+                        if (m_idxCurrSource >= ARRAYSIZE(Detail::UninstallSource))
                         {
                             m_idxCurr = 0;
                             m_rsBuffer.Reserve(40);
@@ -540,10 +524,10 @@ public:
                 }
                 return ls;
             }
-            if ((ls = App.Reg.Open(m_Reg.GetHKey(), m_rsBuffer.Data(), KEY_READ)) != ERROR_SUCCESS)
+            if ((ls = App.Key.Open(m_Reg.GetHKey(), m_rsBuffer.Data(), KEY_READ)) != ERROR_SUCCESS)
                 return ls;
-            App.StrBuffer.Clear();
-            App.StrBuffer.Reserve(MAX_PATH);
+            App.StringBuffer.Clear();
+            App.StringBuffer.Reserve(MAX_PATH);
             App.Flags = GetRegistryFlags(m_idxCurrSource);
             if (App.AcquireBasicInfomation(m_bSkipWindowsInstaller,
                 m_rsBuffer.Data(), cbBuf / sizeof(WCHAR), FALSE))
