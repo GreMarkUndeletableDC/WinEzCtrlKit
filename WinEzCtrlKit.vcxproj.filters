@@ -392,7 +392,7 @@
     <ClCompile Include="eck\CUiAccess.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\CUninstallInfo.h">
+    <ClCompile Include="eck\CUninstallEnumerator.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\CUnknown.h">

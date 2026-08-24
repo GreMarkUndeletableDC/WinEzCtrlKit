@@ -244,7 +244,7 @@
     <ClCompile Include="eck\CSelectionRange.h" />
     <ClCompile Include="eck\CStatusBar.h" />
     <ClCompile Include="eck\CTableLayout.h" />
-    <ClCompile Include="eck\CUninstallInfo.h" />
+    <ClCompile Include="eck\CUninstallEnumerator.h" />
     <ClCompile Include="eck\CUnknown.h" />
     <ClCompile Include="eck\CWaitableObject.h" />
     <ClCompile Include="eck\CWaitableTimer.h" />
