@@ -291,4 +291,52 @@ inline HRESULT SetAutoRun(PCWSTR pszId, BOOL bEnable,
     }
     return E_INVALIDARG;
 }
+
+// 函数保证加载的字符串是完整的
+inline HRESULT LoadShellIndirectString(
+    Eck_Append_buffer_ CStringW& rsOut,
+    _In_z_ PCWSTR pszIn,
+    int cchInitBuf = 32,
+    int cchMaxBuf = 32767) noexcept
+{
+    if (TcsCompare(pszIn, L"@{}") == 0)
+        return S_FALSE;
+    const auto cchOld = rsOut.Size();
+    PWCH pBuf;
+    if (rsOut.Capacity() - cchOld >= cchInitBuf)
+    {
+        rsOut.ExtendToCapacity();
+        pBuf = rsOut.Data() + cchOld;
+        cchInitBuf = rsOut.Capacity() - cchOld;
+    }
+    else
+        pBuf = rsOut.PushBackNoExtra(cchInitBuf);
+
+    HRESULT hr;
+    EckLoop()
+    {
+        hr = SHLoadIndirectString(pszIn, pBuf, cchInitBuf, nullptr);
+        if (SUCCEEDED(hr))
+        {
+            const auto cchOut = TcsLength(pBuf);
+            if (cchOut + 1 < cchInitBuf)
+            {
+                rsOut.ReSize(cchOld + cchOut);
+                return hr;
+            }
+        }
+        else if (
+            hr != E_FAIL &&
+            hr != HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) &&
+            cchInitBuf >= cchMaxBuf)
+        {
+            rsOut.ReSize(cchOld);
+            return hr;
+        }
+        // RC字符串最大4097字符，Win8 PRI最大32766字符，新PRI格式无限制（UINT32保存字节数）
+        cchInitBuf = std::min(cchInitBuf * 3 / 2, cchMaxBuf);
+        rsOut.ReSize(cchOld + cchInitBuf);
+        pBuf = rsOut.Data() + cchOld;
+    }
+}
 ECK_NAMESPACE_END
