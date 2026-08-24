@@ -1170,7 +1170,7 @@ public:
         return TRUE;
     }
 
-    BOOL PazRenameFileName(TConstPointer pszNewName, int cchNewName = -1) noexcept
+    BOOL PazRenameFileName(TConstPointer pszNewName, int cchNewName = -1)
     {
         const auto pos = PazFindFileName();
         if (pos < 0)
@@ -1180,6 +1180,10 @@ public:
         ReSize(pos + cchNewName);
         TcsCopyLength(Data() + pos, pszNewName, cchNewName);
         return TRUE;
+    }
+    BOOL PazRenameFileName(std::basic_string_view<TChar> svNewName)
+    {
+        return PazRenameFileName(svNewName.data(), (int)svNewName.size());
     }
 
     EckInlineNd int PazFindExtension() const noexcept
@@ -1196,7 +1200,7 @@ public:
         return TRUE;
     }
 
-    void PazRenameExtension(TConstPointer pszNewExt, int cchNewExt = -1) noexcept
+    void PazRenameExtension(TConstPointer pszNewExt, int cchNewExt = -1)
     {
         const auto pos = PazFindExtension();
         if (pos < 0)
@@ -1208,6 +1212,10 @@ public:
             ReSize(pos + cchNewExt);
             TcsCopyLength(Data() + pos, pszNewExt, cchNewExt);
         }
+    }
+    void PazRenameExtension(std::basic_string_view<TChar> svNewExt)
+    {
+        PazRenameExtension(svNewExt.data(), (int)svNewExt.size());
     }
 
     // 如果没有反斜杠，则在末尾添加。返回值指示操作前是否已有反斜杠
@@ -1247,19 +1255,41 @@ public:
                 ch = '/';
     }
 
-    HRESULT PazParseCommandLine(_Out_ TPointer& pszFile, _Out_ int& cchFile,
-        _Out_ TPointer& pszParam, _Out_ int& cchParam) noexcept
+    HRESULT PazParseCommandLine(
+        _Out_ TConstPointer& pszFile,
+        _Out_ int& cchFile,
+        _Out_ TConstPointer& pszParam,
+        _Out_ int& cchParam) const noexcept
     {
         return eck::PazParseCommandLine(Data(), Size(), pszFile, cchFile, pszParam, cchParam);
     }
+    HRESULT PazParseCommandLine(
+        Eck_Out_buffer_ std::basic_string_view<TChar>& svFile,
+        Eck_Out_buffer_ std::basic_string_view<TChar>& svParam) const noexcept
+    {
+        return eck::PazParseCommandLine(ToStringView(), svFile, svParam);
+    }
 
-    HRESULT PazParseCommandLineAndCut(_Out_ TPointer& pszFile, _Out_ int& cchFile,
-        _Out_ TPointer& pszParam, _Out_ int& cchParam) noexcept
+    HRESULT PazParseCommandLineAndCut(
+        _Out_ TPointer& pszFile,
+        _Out_ int& cchFile,
+        _Out_ TPointer& pszParam,
+        _Out_ int& cchParam) noexcept
     {
         return eck::PazParseCommandLineAndCut(Data(), Size(), pszFile, cchFile, pszParam, cchParam);
     }
+    HRESULT PazParseCommandLineAndCut(
+        _Out_ std::basic_string_view<TChar>& svFile,
+        _Out_ std::basic_string_view<TChar>& svParam) noexcept
+    {
+        return eck::PazParseCommandLineAndCut(Data(), Size(), svFile, svParam);
+    }
 
-    void PazFindFileName(BOOL bKeepExtension, _Out_ int& pos0, _Out_ int& pos1) const noexcept
+
+    void PazFindFileName(
+        BOOL bKeepExtension,
+        _Out_ int& pos0,
+        _Out_ int& pos1) const noexcept
     {
         pos0 = PazFindFileName();
         if (bKeepExtension)
@@ -1280,7 +1310,7 @@ public:
         ReSize(pos1 - pos0);
         return TRUE;
     }
-    BOOL PazTrimToFileName(CStringT& rsFileName, BOOL bKeepExtension = FALSE) const noexcept
+    BOOL PazTrimToFileName(CStringT& rsFileName, BOOL bKeepExtension = FALSE) const
     {
         int pos0, pos1;
         PazFindFileName(bKeepExtension, pos0, pos1);
