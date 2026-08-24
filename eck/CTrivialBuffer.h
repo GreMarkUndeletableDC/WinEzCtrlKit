@@ -322,6 +322,8 @@ public:
         m_cSize = m_cCapacity = 0u;
     }
 
+    void Zero() noexcept { RtlZeroMemory(Data(), ByteSize()); }
+
     EckInlineNdCe TIterator begin() noexcept { return Data(); }
     EckInlineNdCe TIterator end() noexcept { return begin() + Size(); }
     EckInlineNdCe TConstIterator begin() const noexcept { return Data(); }
