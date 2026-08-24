@@ -7,7 +7,10 @@ class CMenu
 private:
     HMENU m_hMenu{};
 
-    EckInlineNdCe static UINT PositionFlag(BOOL bPos) noexcept { return bPos ? MF_BYPOSITION : MF_BYCOMMAND; }
+    EckInlineNdCe static UINT PositionFlag(BOOL bPos) noexcept
+    {
+        return bPos ? MF_BYPOSITION : MF_BYCOMMAND;
+    }
 public:
     struct INITITEM
     {
@@ -36,7 +39,7 @@ public:
         return *this;
     }
 
-    ~CMenu() { Clear(); }
+    ~CMenu() noexcept { Clear(); }
 
     EckInline HMENU Attach(HMENU hMenu) noexcept
     {
@@ -45,7 +48,7 @@ public:
     }
     EckInlineNd HMENU Detach() noexcept { return Attach(nullptr); }
 
-    EckInlineNd HMENU GetHMenu() const noexcept { return m_hMenu; }
+    EckInlineNd HMENU GetHandle() const noexcept { return m_hMenu; }
 
     EckInline BOOL AppendString(PCWSTR pszText, UINT uId, UINT uFlags = 0u) const noexcept
     {
@@ -88,7 +91,7 @@ public:
         MENUITEMINFOW mii;
         mii.cbSize = sizeof(mii);
         mii.fMask = MIIM_STATE;
-        if (!GetItemInfomation(&mii, uPos, bPosition))
+        if (!GetItemInformation(&mii, uPos, bPosition))
             return FALSE;
         mii.fState &= (MF_CHECKED | MF_UNCHECKED);
         mii.fState |= (bCheck ? MF_CHECKED : MF_UNCHECKED);
@@ -146,13 +149,15 @@ public:
         return GetMenuItemID(m_hMenu, idx);
     }
 
-    EckInline BOOL GetItemInfomation(_Inout_ MENUITEMINFOW* pmii,
-        UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline BOOL GetItemInformation(
+        _Inout_ MENUITEMINFOW* pmii,
+        UINT uPos,
+        BOOL bPosition = FALSE) const noexcept
     {
         return GetMenuItemInfoW(m_hMenu, uPos, bPosition, pmii);
     }
 
-    EckInline BOOL GetItemRect(HWND hWnd, int idx, RECT* prc) const noexcept
+    EckInline BOOL GetItemRect(HWND hWnd, int idx, _Out_ RECT* prc) const noexcept
     {
         return GetMenuItemRect(hWnd, m_hMenu, idx, prc);
     }
@@ -162,33 +167,39 @@ public:
         return GetMenuState(m_hMenu, uPos, PositionFlag(bPosition));
     }
 
-    EckInlineNd BOOL GetItemString(CStringW& rs, UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInlineNd BOOL GetItemString(
+        Eck_Append_buffer_ CStringW& rs,
+        UINT uPos,
+        BOOL bPosition = FALSE) const noexcept
     {
         MENUITEMINFOW mii;
         mii.cbSize = sizeof(mii);
         mii.fMask = MIIM_TYPE;
         mii.cch = 0;
-        if (!GetItemInfomation(&mii, uPos, bPosition))
+        if (!GetItemInformation(&mii, uPos, bPosition))
             return FALSE;
         if (mii.cch)
         {
             ++mii.cch;
             mii.dwTypeData = rs.PushBackNoExtra(mii.cch);
             mii.fMask = MIIM_STRING;
-            return GetItemInfomation(&mii, uPos, bPosition);
+            return GetItemInformation(&mii, uPos, bPosition);
         }
         return TRUE;
     }
 
-    EckInline BOOL GetItemString(PWSTR pszBuf, int cchBuf,
-        UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline BOOL GetItemString(
+        _Out_writes_(cchBuf) PWSTR pszBuf,
+        int cchBuf,
+        UINT uPos,
+        BOOL bPosition = FALSE) const noexcept
     {
         MENUITEMINFOW mii;
         mii.cbSize = sizeof(mii);
         mii.fMask = MIIM_STRING;
         mii.cch = cchBuf;
         mii.dwTypeData = pszBuf;
-        return GetItemInfomation(&mii, uPos, bPosition);
+        return GetItemInformation(&mii, uPos, bPosition);
     }
 
     EckInlineNd HMENU GetSubMenu(int idx) const noexcept
@@ -196,8 +207,11 @@ public:
         return ::GetSubMenu(m_hMenu, idx);
     }
 
-    EckInline BOOL HilightItem(HWND hWnd, BOOL bHiLite,
-        UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline BOOL HighLightItem(
+        HWND hWnd,
+        BOOL bHiLite,
+        UINT uPos,
+        BOOL bPosition = FALSE) const noexcept
     {
         return HiliteMenuItem(hWnd, m_hMenu, uPos,
             PositionFlag(bPosition) | (bHiLite ? MF_HILITE : MF_UNHILITE));
@@ -305,14 +319,19 @@ public:
         return SetMenuInfo(m_hMenu, pmi);
     }
 
-    EckInline BOOL SetItemBitmaps(HBITMAP hbmUnchecked,
-        HBITMAP hbmChecked, UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline BOOL SetItemBitmaps(
+        HBITMAP hbmUnchecked,
+        HBITMAP hbmChecked,
+        UINT uPos,
+        BOOL bPosition = FALSE) const noexcept
     {
         return SetMenuItemBitmaps(m_hMenu, uPos, PositionFlag(bPosition), hbmUnchecked, hbmChecked);
     }
 
-    EckInline BOOL SetItemInfomation(const MENUITEMINFOW* pmii,
-        UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline BOOL SetItemInfomation(
+        _In_ const MENUITEMINFOW* pmii,
+        UINT uPos,
+        BOOL bPosition = FALSE) const noexcept
     {
         return SetMenuItemInfoW(m_hMenu, uPos, bPosition, pmii);
     }
@@ -321,8 +340,11 @@ public:
     {
         return ::TrackPopupMenu(m_hMenu, uFlags, x, y, 0, hWnd, nullptr);
     }
-    EckInline BOOL TrackPopupMenuEx(HWND hWnd, int x, int y,
-        UINT uFlags, const TPMPARAMS* ptpmp) const noexcept
+    EckInline BOOL TrackPopupMenuEx(
+        HWND hWnd,
+        int x, int y,
+        UINT uFlags,
+        _In_opt_ const TPMPARAMS* ptpmp) const noexcept
     {
         return ::TrackPopupMenuEx(m_hMenu, uFlags, x, y, hWnd, (TPMPARAMS*)ptpmp);
     }
