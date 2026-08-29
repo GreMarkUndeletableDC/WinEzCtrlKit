@@ -119,7 +119,7 @@ namespace Detail
 #define EckCheckWin32Error(x, ...) do {     \
     if (x)                                  \
         ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, BccWin32Error, ##__VA_ARGS__); } while (0)
-#define EckCheckHResult(x, ...)  do {       \
+#define EckCheckHResult(x, ...) do {        \
     if (FAILED(x))                          \
         ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, BccHResultFailed, ##__VA_ARGS__); } while (0)
 #define EckCheckBool(x, ...) do {           \

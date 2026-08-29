@@ -27,10 +27,10 @@ class CID3v2 final : public CTag
 public:
     enum class TagSizeRestriction : BYTE
     {
-        Max128Frames_1MB,
-        Max64Frames_128KB,
-        Max32Frames_40KB,
-        Max32Frames_4KB,
+        Frame128_1MB,
+        Frame64_128KB,
+        Frame32_40KB,
+        Frame32_4KB,
     };
     enum class TextEncodingRestriction : BYTE
     {
@@ -40,9 +40,9 @@ public:
     enum class TextFieldSizeRestriction : BYTE
     {
         No,
-        Max1024Char,
-        Max128Char,
-        Max30Char,
+        Char1024,
+        Char128,
+        Char30,
     };
     enum class ImageFormatRestriction : BYTE
     {
@@ -52,9 +52,9 @@ public:
     enum class ImageSizeRestriction : BYTE
     {
         No,
-        Max256x256,
-        Max64x64,
-        Only64x64
+        Size256x256,
+        Size64x64,
+        OnlySize64x64
     };
 
     struct EXTHDR_INFO

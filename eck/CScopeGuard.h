@@ -2,7 +2,7 @@
 #include "ECK.h"
 
 ECK_NAMESPACE_BEGIN
-template <class F>
+template<class F>
 class CScopeGuard
 {
 private:
@@ -38,6 +38,6 @@ public:
     EckInlineCe void Cancel() noexcept { m_bActive = false; }
 };
 
-template <typename F>
+template<class F>
 CScopeGuard(F) -> CScopeGuard<std::decay_t<F>>;
 ECK_NAMESPACE_END

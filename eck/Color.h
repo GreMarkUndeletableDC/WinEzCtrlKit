@@ -63,7 +63,7 @@ EckInlineNdCe ARGB ColorrefToArgb(COLORREF cr, BYTE byAlpha = 0xFF) noexcept
 {
     return ReverseColorref(cr) | (byAlpha << 24);
 }
-EckInlineNdCe COLORREF ArgbToColorref(ARGB argb, BYTE* pbyAlpha = nullptr) noexcept
+EckInlineNdCe COLORREF ArgbToColorref(ARGB argb, _Out_opt_ BYTE* pbyAlpha = nullptr) noexcept
 {
     if (pbyAlpha)
         *pbyAlpha = GetIntegerByte<3>(argb);
@@ -123,19 +123,19 @@ EckInlineNdCe D2D1_COLOR_F ColorrefToD2DColorF(COLORREF cr, float fAlpha = 1.f) 
 EckInlineNdCe COLORREF ColorrefAlphaBlend(COLORREF cr, COLORREF crBK, BYTE byAlpha) noexcept
 {
     return BytesToInteger<COLORREF>(
-        GetIntegerByte<0>(cr) * byAlpha / 0xFF + GetIntegerByte<0>(crBK) * (0xFF - byAlpha) / 0xFF,
-        GetIntegerByte<1>(cr) * byAlpha / 0xFF + GetIntegerByte<1>(crBK) * (0xFF - byAlpha) / 0xFF,
-        GetIntegerByte<2>(cr) * byAlpha / 0xFF + GetIntegerByte<2>(crBK) * (0xFF - byAlpha) / 0xFF,
+        (GetIntegerByte<0>(cr) * byAlpha + GetIntegerByte<0>(crBK) * (0xFF - byAlpha)) / 0xFF,
+        (GetIntegerByte<1>(cr) * byAlpha + GetIntegerByte<1>(crBK) * (0xFF - byAlpha)) / 0xFF,
+        (GetIntegerByte<2>(cr) * byAlpha + GetIntegerByte<2>(crBK) * (0xFF - byAlpha)) / 0xFF,
         0);
 }
 EckInlineNdCe ARGB ArgbAlphaBlend(ARGB cr, ARGB crBK) noexcept
 {
     const BYTE byAlpha = GetIntegerByte<3>(cr);
     return BytesToInteger<ARGB>(
-        GetIntegerByte<0>(cr) * byAlpha / 0xFF + GetIntegerByte<0>(crBK) * (0xFF - byAlpha) / 0xFF,
-        GetIntegerByte<1>(cr) * byAlpha / 0xFF + GetIntegerByte<1>(crBK) * (0xFF - byAlpha) / 0xFF,
-        GetIntegerByte<2>(cr) * byAlpha / 0xFF + GetIntegerByte<2>(crBK) * (0xFF - byAlpha) / 0xFF,
-        GetIntegerByte<3>(cr) * byAlpha / 0xFF + GetIntegerByte<3>(crBK) * (0xFF - byAlpha) / 0xFF);
+        (GetIntegerByte<0>(cr) * byAlpha + GetIntegerByte<0>(crBK) * (0xFF - byAlpha)) / 0xFF,
+        (GetIntegerByte<1>(cr) * byAlpha + GetIntegerByte<1>(crBK) * (0xFF - byAlpha)) / 0xFF,
+        (GetIntegerByte<2>(cr) * byAlpha + GetIntegerByte<2>(crBK) * (0xFF - byAlpha)) / 0xFF,
+        (GetIntegerByte<3>(cr) * byAlpha + GetIntegerByte<3>(crBK) * (0xFF - byAlpha)) / 0xFF);
 }
 
 EckInlineNdCe ARGB MakeArgb(BYTE a, BYTE r, BYTE g, BYTE b) noexcept
