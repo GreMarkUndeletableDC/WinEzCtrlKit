@@ -109,20 +109,20 @@ namespace Detail
 
 #define EckCheckPointer(x, ...) do {        \
     if (!(x))                               \
-        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, BccPointerNull, ##__VA_ARGS__); } while (0)
+        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, ::eck::BccPointerNull, ##__VA_ARGS__); } while (0)
 #define EckCheckNtHandle(x, ...) do {       \
     if (!::eck::Detail::CheckNtHandle(x))   \
-        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, BccNtHandleInvalid, ##__VA_ARGS__); } while (0)
+        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, ::eck::BccNtHandleInvalid, ##__VA_ARGS__); } while (0)
 #define EckCheckNtStatus(x, ...) do {       \
     if (!NT_SUCCESS(x))                     \
-        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, BccNtStatusFailed, ##__VA_ARGS__); } while (0)
+        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, ::eck::BccNtStatusFailed, ##__VA_ARGS__); } while (0)
 #define EckCheckWin32Error(x, ...) do {     \
     if (x)                                  \
-        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, BccWin32Error, ##__VA_ARGS__); } while (0)
+        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, ::eck::BccWin32Error, ##__VA_ARGS__); } while (0)
 #define EckCheckHResult(x, ...) do {        \
     if (FAILED(x))                          \
-        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, BccHResultFailed, ##__VA_ARGS__); } while (0)
+        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, ::eck::BccHResultFailed, ##__VA_ARGS__); } while (0)
 #define EckCheckBool(x, ...) do {           \
     if (!(x))                               \
-        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, BccBoolFalse, ##__VA_ARGS__); } while (0)
+        ::eck::BugCheck(ECK_PRIV_BUGCHECK_POS, ::eck::BccBoolFalse, ##__VA_ARGS__); } while (0)
 ECK_NAMESPACE_END
