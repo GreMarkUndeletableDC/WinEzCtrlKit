@@ -160,7 +160,7 @@ public:
         while (pNode)
         {
             if (pNode->cEnter)// 严禁在槽内析构信号
-                Terminate();
+                EckBugCheck(BccGeneric, L"Signal destructed while slot is entered");
             pNode->uFlags |= NF_DELETED;
             pNode = DeleteNode(pNode, nullptr);
         }

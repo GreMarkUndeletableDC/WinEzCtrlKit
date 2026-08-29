@@ -166,16 +166,12 @@ public:
 
     virtual HWND CreateModelessDialog(HWND hParent, void* pData = nullptr) noexcept
     {
-        EckDbgPrintWithLocation(L"** ERROR ** 未实现方法");
-        EckDbgBreak();
-        abort();
+        EckBugCheck(BccNotImplemented, L"CDialog::CreateModelessDialog not implemented");
     }
 
     virtual INT_PTR CreateModalDialog(HWND hParent, void* pData = nullptr) noexcept
     {
-        EckDbgPrintWithLocation(L"** ERROR ** 未实现方法");
-        EckDbgBreak();
-        abort();
+        EckBugCheck(BccNotImplemented, L"CDialog::CreateModalDialog not implemented");
     }
 
     virtual BOOL EndDialog(INT_PTR nResult) noexcept

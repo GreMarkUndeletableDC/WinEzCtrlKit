@@ -266,7 +266,7 @@ inline BOOL MakeBCryptRsaKeyBlob(PCVOID pKey, size_t cbKey, UCHAR*& pBlob, ULONG
     }
     cbBlob = ULONG(sizeof(BCRYPT_RSAKEY_BLOB) + rbExp.Size() + rbMod.Size());
     pKeyBlob = (BYTE*)malloc(cbBlob);
-    CheckPointer(pKeyBlob);
+    EckCheckPointer(pKeyBlob);
     auto phdr = (BCRYPT_RSAKEY_BLOB*)pKeyBlob;
     phdr->Magic = BCRYPT_RSAPUBLIC_MAGIC;
     phdr->BitLength = (ULONG)rbMod.Size() * 8;

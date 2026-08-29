@@ -55,39 +55,35 @@ enum class ScrollType
 #define ECK_W_DISABLE_ATTACH                                                    \
     void Attach(HWND hWnd) noexcept override                                    \
     {                                                                           \
-        EckDbgPrintWithLocation(L"** WARNING ** CWindow::Attach is disabled."); \
-        abort();                                                                \
+        EckBugCheck(BccNotImplemented, L"CWindow::Attach is disabled.");        \
     }                                                                           \
     HWND Detach() noexcept override                                             \
     {                                                                           \
-        EckDbgPrintWithLocation(L"** WARNING ** CWindow::Detach is disabled."); \
-        abort();                                                                \
+        EckBugCheck(BccNotImplemented, L"CWindow::Detach is disabled.");        \
         return nullptr;                                                         \
     }
 
-#define ECK_W_DISABLE_ATTACHNEW                                                    \
-    void AttachNew(HWND hWnd) noexcept override                                    \
-    {                                                                              \
-        EckDbgPrintWithLocation(L"** WARNING ** CWindow::AttachNew is disabled."); \
-        abort();                                                                   \
-    }                                                                              \
-    void DetachNew() noexcept override                                             \
-    {                                                                              \
-        EckDbgPrintWithLocation(L"** WARNING ** CWindow::DetachNew is disabled."); \
-        abort();                                                                   \
+#define ECK_W_DISABLE_ATTACHNEW                                                 \
+    void AttachNew(HWND hWnd) noexcept override                                 \
+    {                                                                           \
+        EckBugCheck(BccNotImplemented, L"CWindow::AttachNew is disabled.");     \
+    }                                                                           \
+    void DetachNew() noexcept override                                          \
+    {                                                                           \
+        EckBugCheck(BccNotImplemented, L"CWindow::DetachNew is disabled.");     \
     }
 
-#define ECK_W_NONATTACHABLE(Class)      \
-    Class() = default;                  \
-    ECK_W_DISABLE_ATTACH                \
+#define ECK_W_NONATTACHABLE(Class)          \
+    Class() = default;                      \
+    ECK_W_DISABLE_ATTACH                    \
     ECK_W_DISABLE_ATTACHNEW
 
-#define ECK_W_NONATTACHABLE_NO_CONS(Class) \
-    ECK_W_DISABLE_ATTACH                \
+#define ECK_W_NONATTACHABLE_NO_CONS(Class)  \
+    ECK_W_DISABLE_ATTACH                    \
     ECK_W_DISABLE_ATTACHNEW
 
-#define ECK_W_ATTACHABLE(Class)         \
-    Class() = default;                  \
+#define ECK_W_ATTACHABLE(Class)             \
+    Class() = default;                      \
     Class(HWND hWnd) { m_hWnd = hWnd; }
 
 // Style Get/Set =================================================
@@ -362,9 +358,8 @@ public:
     virtual HWND Create(PCWSTR pszText, DWORD dwStyle, DWORD dwExStyle,
         int x, int y, int cx, int cy, HWND hParent, HMENU hMenu, void* pParam = nullptr) noexcept
     {
-        EckDbgPrintWithLocation(L"** ERROR ** CWindow::Create未实现");
-        EckDbgBreak();
-        abort();
+        EckBugCheck(BccNotImplemented, L"CWindow::Create not implemented");
+        return nullptr;
     }
 
     virtual LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept

@@ -361,7 +361,7 @@ inline constexpr void HsvToRgb(
     case 3: r = TOut(p * 255.f); g = TOut(q * 255.f); b = TOut(v * 255.f); break;
     case 4: r = TOut(t * 255.f); g = TOut(p * 255.f); b = TOut(v * 255.f); break;
     case 5: r = TOut(v * 255.f); g = TOut(p * 255.f); b = TOut(q * 255.f); break;
-    default: __assume(0);
+    default: ECK_UNREACHABLE;
     }
 }
 

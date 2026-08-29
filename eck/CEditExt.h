@@ -249,7 +249,7 @@ public:
                 if (!cchText)
                     break;
                 pszText = (PWSTR)_malloca(CchToCbW(cchText));
-                CheckPointer(pszText);
+                EckCheckPointer(pszText);
                 GetText(pszText, cchText + 1);
                 lfValue = _wtof(pszText);
                 if (lfValue < -3.402823466e38)// 实际上正负值中间是有空隙的，不做判断了。。。
@@ -271,7 +271,7 @@ public:
                 if (!cchText)
                     break;
                 pszText = (PWSTR)_malloca(CchToCbW(cchText));
-                CheckPointer(pszText);
+                EckCheckPointer(pszText);
                 GetText(pszText, cchText);
                 lfValue = _wtof(pszText);
                 if (*(ULONGLONG*)&lfValue == 0xFFF0000000000000)

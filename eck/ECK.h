@@ -87,6 +87,10 @@ __pragma(warning(disable:5260))
 #  error "ECK Lib requires C++20 or later"
 #endif
 
+#ifndef ECK_APP_NAME
+#define ECK_APP_NAME L"EckApp"
+#endif // !defined(ECK_APP_NAME)
+
 #ifndef ECKDPIAPI
 #  if _WIN32_WINNT >= 0x0605
 #    define ECKDPIAPI 1
@@ -103,7 +107,7 @@ __pragma(warning(disable:5260))
 #  if _WIN32_WINNT < 0x0605
 #    error "Dpi api requires _WIN32_WINNT >= 0x0605."
 #  endif
-#endif
+#endif // !defined(ECKDPIAPI)
 
 // since NT 6.2
 #ifndef SPI_SETLOGICALDPIOVERRIDE

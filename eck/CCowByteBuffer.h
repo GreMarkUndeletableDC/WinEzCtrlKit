@@ -28,7 +28,7 @@ private:
         EckAssert(cbSize <= cbCapacity);
         cbCapacity = std::max(cbCapacity, (size_t)16);
         const auto p = m_Alloc.allocate(sizeof(ControlBlock) + cbCapacity);
-        CheckPointer(p);
+        EckCheckPointer(p);
         return new (p) ControlBlock(cbCapacity, cbSize);
     }
 

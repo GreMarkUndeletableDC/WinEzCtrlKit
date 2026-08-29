@@ -842,7 +842,7 @@ private:
             return;
 
         const auto piOrder = (int*)_malloca(sizeof(int) * cCol);
-        CheckPointer(piOrder);
+        EckCheckPointer(piOrder);
         if (m_bSplitCol0)
         {
             HDITEMW hdi;

@@ -509,7 +509,7 @@ private:
         if (!cLine && bWordTime)
         {
             const auto p = (PWCH)malloc(CchToCbW(TopItem.cchLrc));
-            CheckPointer(p);
+            EckCheckPointer(p);
             MgpCopyWordAsSentence(TopItem.vWordTime, p);
             *(p + TopItem.cchLrc) = L'\0';
             if (TopItem.bMAlloc)
@@ -541,7 +541,7 @@ private:
         const auto cbBuf = CchToCbW(cchText +
             TopItem.cchLrc + 1/*\0*/ + 1/*\n*/ + TopItem.cchTranslation + 1/*\0*/);
         PWCH pszText = (PWCH)malloc(cbBuf);
-        CheckPointer(pszText);
+        EckCheckPointer(pszText);
         PWCH p = pszText;
         if (TopItem.bMAlloc)
             free((void*)TopItem.pszLrc);
