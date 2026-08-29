@@ -601,7 +601,7 @@ public:
         else
         {
             const auto pszTemp = (PWSTR)_malloca((iEnd + 1) * sizeof(WCHAR));
-            CheckPointer(pszTemp);
+            EckCheckPointer(pszTemp);
             GetText(pszTemp, iEnd + 1);
             const int cch = std::min(cchMax - 1, Distance(iStart, iEnd));
             wmemcpy(pszBuf, pszTemp + iStart, cch + 1);

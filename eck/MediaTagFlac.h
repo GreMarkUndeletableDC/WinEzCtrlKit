@@ -652,7 +652,7 @@ public:
                     << GetIntegerByte<1>(cbPadding)
                     << GetIntegerByte<0>(cbPadding);
                 const auto p = VAllocate(cbPadding);
-                CheckPointer(p);
+                EckCheckPointer(p);
                 m_Stream.Write(p, cbPadding);
                 VFree(p);
             }

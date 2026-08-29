@@ -2,6 +2,7 @@
 #include "CSrwLock.h"
 #include "ThreadPool.h"
 #include "CEvent.h"
+#include "Check.h"
 
 #include <coroutine>
 
@@ -79,7 +80,7 @@ struct CoroPromiseBase
     }
 #else
     {
-        abort();
+        EckBugCheck(BccException);
     }
 #endif // __cpp_exceptions
 
@@ -343,7 +344,7 @@ struct CoroTaskFireAndForget
     {
         constexpr CoroTaskFireAndForget get_return_object() const noexcept { return {}; }
         constexpr void return_void() const noexcept {}
-        void unhandled_exception() const noexcept { std::abort(); }
+        void unhandled_exception() const noexcept { EckBugCheck(BccException); }
         constexpr auto initial_suspend() const noexcept { return std::suspend_never{}; }
         constexpr auto final_suspend() const noexcept { return std::suspend_never{}; }
     };

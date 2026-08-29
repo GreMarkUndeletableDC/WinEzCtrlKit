@@ -348,7 +348,7 @@ inline BOOL GetFileVersionInformation(
     if (!cbBuf)
         return FALSE;
     const UniquePtr<DelMA<void>> pBuf{ malloc(cbBuf) };
-    CheckPointer(pBuf.get());
+    EckCheckPointer(pBuf.get());
     if (!GetFileVersionInfoW(pszFile, 0, cbBuf, pBuf.get()))
         return FALSE;
 

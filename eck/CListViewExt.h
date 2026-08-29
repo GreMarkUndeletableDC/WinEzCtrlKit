@@ -380,7 +380,7 @@ private:
                 if (!pColMetrics)
                 {
                     pColMetrics = (int*)_malloca(cCol * 2 * sizeof(int));
-                    CheckPointer(pColMetrics);
+                    EckCheckPointer(pColMetrics);
                     GetColumnMetrics(pColMetrics, cCol, pnmlvcd->nmcd.rc.left);
                 }
             }

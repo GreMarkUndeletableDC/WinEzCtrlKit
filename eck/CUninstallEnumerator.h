@@ -349,7 +349,7 @@ public:
             PROCESS_INFORMATION pi{};
             si.cb = sizeof(si);
             const auto pszBuf = (PWSTR)_malloca((svCmd.size() + 1) * sizeof(WCHAR));
-            CheckPointer(pszBuf);
+            EckCheckPointer(pszBuf);
             TcsCopyLength(pszBuf, svCmd.data(), svCmd.size() + 1);
             const auto b = CreateProcessW(nullptr, pszBuf,
                 nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);

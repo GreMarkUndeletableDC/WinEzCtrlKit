@@ -135,7 +135,7 @@ public:
             m_Stream.Seek(m_posBegin);
             BYTE* pBuf = (BYTE*)VAllocate(4096);
             UniquePtr<DelVA<BYTE>> _(pBuf);
-            CheckPointer(pBuf);
+            EckCheckPointer(pBuf);
             constexpr size_t cbSegment = 1024;
             BYTE bySync[2]{};
             EckLoop()

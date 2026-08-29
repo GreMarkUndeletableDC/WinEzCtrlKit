@@ -921,7 +921,7 @@ public:
                         m_Stream.Seek(Loc.posV2 +
                             sizeof(ID3v2_HEADER) + cbPrependTotal);
                         void* p = VAllocate(cbPadding);
-                        CheckPointer(p);
+                        EckCheckPointer(p);
                         m_Stream.Write(p, (ULONG)cbPadding);
                         VFree(p);
                     }
