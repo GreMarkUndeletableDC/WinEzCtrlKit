@@ -13,6 +13,8 @@ enum : UINT
     BccBoolFalse,
     BccNotImplemented,
     BccException,
+
+    BccUserBegin = 0x10000,
 };
 
 [[noreturn]] inline void BugCheck(
