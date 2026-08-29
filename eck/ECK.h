@@ -88,7 +88,7 @@ __pragma(warning(disable:5260))
 #endif
 
 #ifndef ECK_APP_NAME
-#define ECK_APP_NAME L"EckApp"
+#define ECK_APP_NAME L"EckApplication"
 #endif // !defined(ECK_APP_NAME)
 
 #ifndef ECKDPIAPI
