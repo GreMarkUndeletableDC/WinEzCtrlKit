@@ -84,7 +84,7 @@ enum class ScrollType
 
 #define ECK_W_ATTACHABLE(Class)             \
     Class() = default;                      \
-    Class(HWND hWnd) noexcept { m_hWnd = hWnd; }
+    Class(HWND hWnd) { m_hWnd = hWnd; }
 
 // Style Get/Set =================================================
 
