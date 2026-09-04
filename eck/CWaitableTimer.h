@@ -54,7 +54,7 @@ public:
 
     NTSTATUS QueryState(_Out_ BOOLEAN& bState, _Out_ LONGLONG& llRemainingTime) noexcept
     {
-        TIMER_BASIC_INFORMATION	tbi;
+        TIMER_BASIC_INFORMATION tbi;
         ULONG cbRet;
         const auto nts = NtQueryTimer(m_hObject, TimerBasicInformation,
             &tbi, sizeof(tbi), &cbRet);

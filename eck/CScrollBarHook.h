@@ -314,15 +314,15 @@ private:
         UINT uCode;
         switch (ePart)
         {
-        case Part::ArrowUp:		uCode = SB_LINEUP;		goto GenV;
-        case Part::ArrowDown:	uCode = SB_LINEDOWN;	goto GenV;
-        case Part::PageUp:		uCode = SB_PAGEUP;		goto GenV;
-        case Part::PageDown:	uCode = SB_PAGEDOWN;	goto GenV;
-        case Part::ArrowLeft:	uCode = SB_LINELEFT;	goto GenH;
-        case Part::ArrowRight:	uCode = SB_LINERIGHT;	goto GenH;
-        case Part::PageLeft:	uCode = SB_PAGELEFT;	goto GenH;
-        case Part::PageRight:	uCode = SB_PAGERIGHT;	goto GenH;
-        default:				return;
+        case Part::ArrowUp:     uCode = SB_LINEUP;      goto GenV;
+        case Part::ArrowDown:   uCode = SB_LINEDOWN;    goto GenV;
+        case Part::PageUp:      uCode = SB_PAGEUP;      goto GenV;
+        case Part::PageDown:    uCode = SB_PAGEDOWN;    goto GenV;
+        case Part::ArrowLeft:   uCode = SB_LINELEFT;    goto GenH;
+        case Part::ArrowRight:  uCode = SB_LINERIGHT;   goto GenH;
+        case Part::PageLeft:    uCode = SB_PAGELEFT;    goto GenH;
+        case Part::PageRight:   uCode = SB_PAGERIGHT;   goto GenH;
+        default:                return;
         }
     GenH:;
         m_pWnd->SendMessageW(WM_HSCROLL, MAKEWPARAM(uCode, 0), 0);
@@ -701,11 +701,11 @@ public:
         if (m_bVisibleV && PointInRect(m_rcSBV, pt))
         {
             /*
-            * ---	m_rcSBV.top
+            * ---   m_rcSBV.top
             *  ↑
             * ---   ySpace1
             *
-            * ---	m_yThumb
+            * ---   m_yThumb
             *  T
             *  h
             *  u
@@ -713,9 +713,9 @@ public:
             *  b
             * ---   ySpace2
             *
-            * ---	yArrow2
+            * ---   yArrow2
             *  ↓
-            * ---	m_rcSBV.bottom
+            * ---   m_rcSBV.bottom
             */
 
             // ySpace1 = m_rcSBV.top + m_cySBArrow
@@ -735,9 +735,9 @@ public:
         }
         else if (m_bVisibleH && PointInRect(m_rcSBH, pt))
         {
-            // m_rcSBH.left    m_xThumb	           m_rcSBH.right
+            // m_rcSBH.left    m_xThumb            m_rcSBH.right
             // |←|            | Thumb |        |→|
-            //	  xSpace1			   xSpace2  xArrow2
+            //    xSpace1              xSpace2  xArrow2
 
             // xSpace1 = m_rcSBH.left + m_cxSBArrow
             // xSpace2 = m_xThumb + m_cxHThumb

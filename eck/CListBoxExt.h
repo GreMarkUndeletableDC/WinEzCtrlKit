@@ -12,15 +12,15 @@ ECK_NAMESPACE_BEGIN
 
 struct LBITEMCOMMINFO
 {
-    int idxImage;			   // 图像索引
-    int iReserved;			   // 未用
-    COLORREF crText;		   // 文本颜色
-    COLORREF crBK;			   // 背景颜色
-    COLORREF crSelText;		   // 选中文本颜色
-    COLORREF crSelBK;		   // 选中背景颜色
-    LPARAM lParam;			   // 表项数值
-    BITBOOL bChecked : 1;	   // 是否检查
-    BITBOOL bDisabled : 1;	   // 是否禁止
+    int idxImage;              // 图像索引
+    int iReserved;             // 未用
+    COLORREF crText;           // 文本颜色
+    COLORREF crBK;             // 背景颜色
+    COLORREF crSelText;        // 选中文本颜色
+    COLORREF crSelBK;          // 选中背景颜色
+    LPARAM lParam;             // 表项数值
+    BITBOOL bChecked : 1;      // 是否检查
+    BITBOOL bDisabled : 1;     // 是否禁止
 
     LBITEMCOMMINFO()
     {
@@ -34,10 +34,10 @@ struct LBITEMCOMMINFO
 // 只用于运行时保存信息
 struct LBITEMINFO
 {
-    CStringW rsCaption;	       // 标题
-    CStringW rsTip;		       // 提示文本
-    HBRUSH hbrBK;		       // 背景画刷
-    HBRUSH hbrSelBK;	       // 选中背景画刷
+    CStringW rsCaption;        // 标题
+    CStringW rsTip;            // 提示文本
+    HBRUSH hbrBK;              // 背景画刷
+    HBRUSH hbrSelBK;           // 选中背景画刷
     LBITEMCOMMINFO Info;       // 通用信息
 };
 #pragma warning (pop)
@@ -51,33 +51,33 @@ struct LBITEMINFO
 * 目录（不带结尾NULL）
 * 文件过滤器（不带结尾NULL）
 */
-#define DATA_VER_LISTBOX_1	1
+#define DATA_VER_LISTBOX_1  1
 struct EXELISTBOXDATA
 {
-    int iVer;				// 版本号
-    UINT uReserved;		// 保留
+    int iVer;               // 版本号
+    UINT uReserved;     // 保留
 
-    int idxCurrSel;			// 现行选中
-    int cyItem;				// 行高
-    COLORREF crText;		// 文本颜色
-    COLORREF crBK;			// 背景颜色
-    COLORREF crSelText;		// 选中文本颜色
-    COLORREF crSelBK;		// 选择背景颜色
-    int iAlignH;			// 横向对齐
-    int iAlignV;			// 纵向对齐
-    UINT uFileAttr;			// 文件过滤属性
-    FILETIME ftMinTime;		// 文件最小时间，基于协调世界时
-    FILETIME ftMaxTime;		// 文件最大时间，基于协调世界时
-    int iCheckBoxMode;		// 选择列表框模式
-    BITBOOL bToolTip : 1;			// 工具提示
-    BITBOOL bEllipsis : 1;			// 省略号
-    BITBOOL bBalloonToolTip : 1;	// 气球工具提示
-    BITBOOL bAutoSort : 1;			// 自动排序
-    BITBOOL bIgnoreDisableItem : 1;	// 忽略禁止的项目 
+    int idxCurrSel;         // 现行选中
+    int cyItem;             // 行高
+    COLORREF crText;        // 文本颜色
+    COLORREF crBK;          // 背景颜色
+    COLORREF crSelText;     // 选中文本颜色
+    COLORREF crSelBK;       // 选择背景颜色
+    int iAlignH;            // 横向对齐
+    int iAlignV;            // 纵向对齐
+    UINT uFileAttr;         // 文件过滤属性
+    FILETIME ftMinTime;     // 文件最小时间，基于协调世界时
+    FILETIME ftMaxTime;     // 文件最大时间，基于协调世界时
+    int iCheckBoxMode;      // 选择列表框模式
+    BITBOOL bToolTip : 1;           // 工具提示
+    BITBOOL bEllipsis : 1;          // 省略号
+    BITBOOL bBalloonToolTip : 1;    // 气球工具提示
+    BITBOOL bAutoSort : 1;          // 自动排序
+    BITBOOL bIgnoreDisableItem : 1; // 忽略禁止的项目 
 };
 
 constexpr int c_LBPadding = 3;
-#define TTID_LBITEM		20230526'01u
+#define TTID_LBITEM     20230526'01u
 
 class CListBoxExt : public CListBox
 {
@@ -98,7 +98,7 @@ public:
     int m_idxChecked = -1;     // 选中的项目，仅单选模式有效
     HTHEME m_hTheme = nullptr;   // 主题句柄，绘制选择框时用
     int m_cxCheckBox = 0;      // 选择框尺寸
-    std::vector<LBITEMINFO> m_ItemsInfo{};	// 所有项目
+    std::vector<LBITEMINFO> m_ItemsInfo{};  // 所有项目
     HWND m_hToolTip = nullptr;   // 工具提示窗口句柄
     TTTOOLINFOW m_ti
     {
@@ -106,7 +106,7 @@ public:
         TTF_ABSOLUTE | TTF_TRACK,
         nullptr,
         TTID_LBITEM
-    };										// 工具提示信息
+    };                                      // 工具提示信息
     HWND m_hParent = nullptr;
 private:
     void UpdateThemeInfomation() noexcept
@@ -557,13 +557,13 @@ public:
 
         dwStyle |= (LBS_OWNERDRAWFIXED | LBS_NODATA | LBS_NOTIFY);
         //if (m_Info.bMultiSel)
-        //	dwStyle |= LBS_MULTIPLESEL;
+        //  dwStyle |= LBS_MULTIPLESEL;
         //if (m_Info.bExtSel)
-        //	dwStyle |= LBS_EXTENDEDSEL;
+        //  dwStyle |= LBS_EXTENDEDSEL;
         ////if (!m_Info.bIntegralHeight)
         //dwStyle |= LBS_NOINTEGRALHEIGHT;
         //if (m_Info.bDisableNoScroll)
-        //	dwStyle |= LBS_DISABLENOSCROLL;
+        //  dwStyle |= LBS_DISABLENOSCROLL;
 
 
         m_hWnd = CreateWindowExW(dwExStyle, WC_LISTBOXW, nullptr, dwStyle,

@@ -30,14 +30,14 @@ enum : UINT
     // --
 
     MIM_NONE = 0u,
-    MIM_TITLE = 1u << 0,	// 标题
-    MIM_ARTIST = 1u << 1,	// 艺术家
-    MIM_ALBUM = 1u << 2,	// 专辑
-    MIM_COMMENT = 1u << 3,	// 备注
-    MIM_LYRICS = 1u << 4,		// 歌词
-    MIM_COVER = 1u << 5,	// 封面
-    MIM_GENRE = 1u << 6,	// 流派
-    MIM_TRACK = 1u << 7,	// 音轨号
+    MIM_TITLE = 1u << 0,    // 标题
+    MIM_ARTIST = 1u << 1,   // 艺术家
+    MIM_ALBUM = 1u << 2,    // 专辑
+    MIM_COMMENT = 1u << 3,  // 备注
+    MIM_LYRICS = 1u << 4,   // 歌词
+    MIM_COVER = 1u << 5,    // 封面
+    MIM_GENRE = 1u << 6,    // 流派
+    MIM_TRACK = 1u << 7,    // 音轨号
 
     MIM_ALL = 0xFFFFFFFF,
 
@@ -54,37 +54,37 @@ enum : UINT
     // -- 标签读写标志 --
     // --
 
-    //												| ID3v1	| ID3v2 | Flac	|  APE	|
+    //                                              | ID3v1 | ID3v2 | Flac  |  APE  |
     // 在Vorbis注释的TRACK或TRACKNUMBER中写入斜杠"/"加总音轨数
-    MIF_WRITE_TRACK_TOTAL = 1u << 0,			// 	|	 	|	 	|	T	|	 	|
+    MIF_WRITE_TRACK_TOTAL = 1u << 0,            //  |       |       |   T   |       |
     // 在Vorbis注释的DISCNUMBER中写入总碟片数
-    MIF_WRITE_DISC_TOTAL = 1u << 1,				// 	|	 	|	 	|	T	|	 	|
+    MIF_WRITE_DISC_TOTAL = 1u << 1,             //  |       |       |   T   |       |
     // 允许保留空白填充
-    MIF_ALLOW_PADDING = 1u << 2,				// 	|		|	T	|	T	|		|
+    MIF_ALLOW_PADDING = 1u << 2,                //  |       |   T   |   T   |       |
     // 写入APE时，若图片类型为无效，则假定为"封面"
-    MIF_APE_INVALID_COVER_AS_FRONT = 1u << 3,	// 	|		|		|	 	|	T	|
+    MIF_APE_INVALID_COVER_AS_FRONT = 1u << 3,   //  |       |       |       |   T   |
     // 用ID3v2.3规定的斜杠("/")分割艺术家列表
-    MIF_SPLIT_ARTIST_IN_ID3V2_3 = 1u << 4,		// 	|		|	T	|		|		|
+    MIF_SPLIT_ARTIST_IN_ID3V2_3 = 1u << 4,      //  |       |   T   |       |       |
     // 移除其他标记系统
-    MIF_REMOVE_OTHER_TAG = 1u << 5,				// 	|	T	|	T	|	T	|	T	|
+    MIF_REMOVE_OTHER_TAG = 1u << 5,             //  |   T   |   T   |   T   |   T   |
     // 在文件尾部追加标签
-    MIF_APPEND_TAG = 1u << 6,					// 	|		|	T	|		|	T	|
+    MIF_APPEND_TAG = 1u << 6,                   //  |       |   T   |       |   T   |
     // 当存在其他标签时同步其信息
-    MIF_SYNC_OTHER_TAG = 1u << 7,				// 	|	T	|	T	|	T	|	T	|
+    MIF_SYNC_OTHER_TAG = 1u << 7,               //  |   T   |   T   |   T   |   T   |
     // 创建ID3v1扩展信息
-    MIF_CREATE_ID3V1_EXT = 1u << 8,				// 	|	T	|		|		|		|
+    MIF_CREATE_ID3V1_EXT = 1u << 8,             //  |   T   |       |       |       |
     // 创建ID3v2.3标签
-    MIF_CREATE_ID3V2_3 = 1u << 9,				// 	|		|	T	|		|		|
+    MIF_CREATE_ID3V2_3 = 1u << 9,               //  |       |   T   |       |       |
     // 创建ID3v2.4标签
-    MIF_CREATE_ID3V2_4 = 1u << 10,				// 	|		|	T	|		|		|
+    MIF_CREATE_ID3V2_4 = 1u << 10,              //  |       |   T   |       |       |
     // 移除空白填充
-    MIF_REMOVE_PADDING = 1u << 11,				// 	|		|	T	|	T	|		|
+    MIF_REMOVE_PADDING = 1u << 11,              //  |       |   T   |   T   |       |
     // 写入图片到Vorbis注释而不是图片块
-    MIF_WRITE_METADATA_BLOCK_PICTURE = 1u << 12,//	|		|		|	T	|		|
+    MIF_WRITE_METADATA_BLOCK_PICTURE = 1u << 12,//  |       |       |   T   |       |
     // 创建ID3v2扩展头
-    MIF_CREATE_ID3V2_EXT_HEADER = 1u << 13,		// 	|		|	T	|		|		|
-    MIF_PREPEND_TAG = 1u << 14,					// 	|		|	T	|		|	T	|
-    MIM_DEFPOS_TAG = 1u << 15,					// 	|		|	T	|		|	T	|
+    MIF_CREATE_ID3V2_EXT_HEADER = 1u << 13,     //  |       |   T   |       |       |
+    MIF_PREPEND_TAG = 1u << 14,                 //  |       |   T   |       |   T   |
+    MIM_DEFPOS_TAG = 1u << 15,                  //  |       |   T   |       |   T   |
 };
 
 enum : BYTE
@@ -93,7 +93,7 @@ enum : BYTE
     // -- 标签单元写入选项 --
     // --
 
-    MIIF_ID3V2_4_APPEND = 1 << 0,		// 将该帧置于文件尾部的标签
+    MIIF_ID3V2_4_APPEND = 1 << 0,       // 将该帧置于文件尾部的标签
     // 将该图片写入为Vorbis注释中的METADATA_BLOCK_PICTURE
     MIIF_METADATA_BLOCK_PICTURE = 1 << 1,
 };
@@ -407,7 +407,7 @@ struct SimpleData
 enum : UINT
 {
     SMOF_NONE = 0,
-    SMOF_MOVE = 1 << 0,	// 允许使用移动操作避免复制
+    SMOF_MOVE = 1 << 0, // 允许使用移动操作避免复制
 };
 
 struct SIMPLE_OPT

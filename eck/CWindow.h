@@ -96,7 +96,7 @@ enum class ScrollType
         else                                              \
             return IsBitSet(GetStyle(), Style);           \
     }                                                     \
-    void StyleSet##Name(BOOL b)	const                     \
+    void StyleSet##Name(BOOL b) const                     \
     {                                                     \
         ModifyStyle((b ? Style : 0), Style, GWL_STYLE);   \
     }
@@ -109,7 +109,7 @@ enum class ScrollType
         else                                              \
             return IsBitSet(GetStyle(), Style);           \
     }                                                     \
-    void StyleSet##Name(BOOL b)	const                     \
+    void StyleSet##Name(BOOL b) const                     \
     {                                                     \
         SetStyle((GetStyle() & ~Mask) | (b ? Style : 0)); \
     }

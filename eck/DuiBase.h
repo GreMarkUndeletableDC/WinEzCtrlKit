@@ -399,8 +399,8 @@ private:
         struct
         {
             IDCompositionDevice* m_pDcDevice;
-            IDCompositionTarget* m_pDcTarget;	// DCompVisual不使用
-            IDCompositionVisual* m_pDcVisual;	// 根视觉对象
+            IDCompositionTarget* m_pDcTarget;   // DCompVisual不使用
+            IDCompositionVisual* m_pDcVisual;   // 根视觉对象
             // 根视觉对象的内容，DCompVisual下仅此字段是由自身创建的
             IDCompositionSurface* m_pDcSurface;
         };

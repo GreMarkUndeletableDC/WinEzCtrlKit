@@ -11,7 +11,7 @@ private:
     BOOL m_bLocked{};
 
     CByteBufferT<TAllocator>& m_rb;
-    size_t m_posSeek{};	// 相对于m_rb的起始位置
+    size_t m_posSeek{}; // 相对于m_rb的起始位置
     size_t m_posBegin{};// 若要强制追加数据，则此字段记录追加起始位置
 public:
     CByteBufferStreamT(CByteBufferT<TAllocator>& rb) :m_rb{ rb } {}

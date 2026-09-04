@@ -44,45 +44,45 @@ public:
         Transparent,
     };
 private:
-    CMemoryDC m_DC{};			// 兼容DC
-    HBITMAP m_hbmImg{};		// 图片，无需销毁
-    HBITMAP m_hbmBkImg{};	// 底图，无需销毁
+    CMemoryDC m_DC{};       // 兼容DC
+    HBITMAP m_hbmImg{};     // 图片，无需销毁
+    HBITMAP m_hbmBkImg{};   // 底图，无需销毁
     int m_cxBkImg{},
-        m_cyBkImg{};		// 底图大小
-    HFONT m_hFont{};		// 字体，无需销毁
+        m_cyBkImg{};        // 底图大小
+    HFONT m_hFont{};        // 字体，无需销毁
     CStringW m_rsText{};
 
-    ImageMode m_eBkImgMode{ ImageMode::TopLeft };		// 底图模式
-    GradientMode m_eGradientMode{ GradientMode::None };	// 渐变模式
-    Alignment m_eAlignH{};	// 横向对齐
-    Alignment m_eAlignV{};	// 纵向对齐
+    ImageMode m_eBkImgMode{ ImageMode::TopLeft };       // 底图模式
+    GradientMode m_eGradientMode{ GradientMode::None }; // 渐变模式
+    Alignment m_eAlignH{};  // 横向对齐
+    Alignment m_eAlignV{};  // 纵向对齐
 
-    Ellipsis m_eEllipsisMode{};		// 省略号模式
-    Prefix m_ePrefixMode{};			// 前缀模式
-    MouseOption m_eMouseOption{};		// 鼠标穿透
-    BITBOOL m_bAutoWrap : 1{};		// 自动换行
-    BITBOOL m_bTransparent : 1{};	// 透明标签
-    BITBOOL m_bImgAlpha : 1{};		// 图片需要Alpha混合
-    BITBOOL m_bBkImgAlpha : 1{};	// 底图需要Alpha混合
+    Ellipsis m_eEllipsisMode{};     // 省略号模式
+    Prefix m_ePrefixMode{};         // 前缀模式
+    MouseOption m_eMouseOption{};       // 鼠标穿透
+    BITBOOL m_bAutoWrap : 1{};      // 自动换行
+    BITBOOL m_bTransparent : 1{};   // 透明标签
+    BITBOOL m_bImgAlpha : 1{};      // 图片需要Alpha混合
+    BITBOOL m_bBkImgAlpha : 1{};    // 底图需要Alpha混合
 
     BITBOOL m_bPartMetricsDirty : 1{ TRUE };// 部件矩形需要重新计算
 
-    COLORREF m_crText{ CLR_DEFAULT };	// 文本颜色
-    COLORREF m_crTextBk{ CLR_DEFAULT };	// 文本背景颜色
-    COLORREF m_crBk{ CLR_DEFAULT };		// 背景颜色
+    COLORREF m_crText{ CLR_DEFAULT };   // 文本颜色
+    COLORREF m_crTextBk{ CLR_DEFAULT }; // 文本背景颜色
+    COLORREF m_crBk{ CLR_DEFAULT };     // 背景颜色
     std::array<COLORREF, 3> m_crGradient{ DefaultGradient };
 
     int m_cxClient{},
         m_cyClient{};
 
-    RECT m_rcPartImg{};	// 缓存的图片矩形
+    RECT m_rcPartImg{}; // 缓存的图片矩形
     RECT m_rcPartText{};// 缓存的文本矩形
 
     constexpr UINT DtEllipsis() const noexcept
     {
         switch (m_eEllipsisMode)
         {
-        case Ellipsis::End:	return DT_END_ELLIPSIS; break;
+        case Ellipsis::End: return DT_END_ELLIPSIS; break;
         case Ellipsis::Path:return DT_PATH_ELLIPSIS; break;
         case Ellipsis::Word:return DT_WORD_ELLIPSIS; break;
         }
@@ -93,7 +93,7 @@ private:
     {
         switch (m_ePrefixMode)
         {
-        case Prefix::NoPrefix:	return DT_NOPREFIX; break;
+        case Prefix::NoPrefix:  return DT_NOPREFIX; break;
         case Prefix::HidePrefix:return DT_HIDEPREFIX; break;
         case Prefix::PrefixOnly:return DT_PREFIXONLY; break;
         }
@@ -104,8 +104,8 @@ private:
     {
         switch (m_eAlignH)
         {
-        case Alignment::Center:	return DT_CENTER; break;
-        case Alignment::Far:	return DT_RIGHT; break;
+        case Alignment::Center: return DT_CENTER; break;
+        case Alignment::Far:    return DT_RIGHT; break;
         }
         return DT_LEFT;
     }

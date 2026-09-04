@@ -3,9 +3,9 @@
 #include "Check.h"
 
 #if 1
-#define EckLrcValidateHeap()		_CrtCheckMemory()
+#define EckLrcValidateHeap()        _CrtCheckMemory()
 #else
-#define EckLrcValidateHeap()		{}
+#define EckLrcValidateHeap()        {}
 #endif
 
 ECK_NAMESPACE_BEGIN
@@ -13,10 +13,10 @@ ECK_LYRIC_NAMESPACE_BEGIN
 enum class Result
 {
     Ok,
-    TlInvalidChar,		// 字段中含有非法字符
-    TlFieldEmpty,		// 字段为空
-    TlInvalidMsLength,	// 毫秒长度不正确
-    TlUnexpectedEnd,	// 意外结尾
+    TlInvalidChar,      // 字段中含有非法字符
+    TlFieldEmpty,       // 字段为空
+    TlInvalidMsLength,  // 毫秒长度不正确
+    TlUnexpectedEnd,    // 意外结尾
     InvalidChar,
 };
 
@@ -122,8 +122,8 @@ private:
     };
     enum class BracketType
     {
-        Square,		// []
-        Angle,		// <>
+        Square,     // []
+        Angle,      // <>
         Parenthesis,// ()
     };
     CStringW m_rsLyric{};
@@ -132,10 +132,10 @@ private:
 
     std::vector<DIV> m_vDiv{};
 
-    float m_fDuration{};				// 秒
-    BOOLEAN m_bDiscardEmptyLine{};		// 丢弃空白行
+    float m_fDuration{};                // 秒
+    BOOLEAN m_bDiscardEmptyLine{};      // 丢弃空白行
     BOOLEAN m_bDiscardEmptyWord{ TRUE };// 丢弃空白字
-    BOOLEAN m_bRawLine{};				// 不进行排序合并操作
+    BOOLEAN m_bRawLine{};               // 不进行排序合并操作
 
     WCHAR LBracketFromType(BracketType e) const noexcept
     {

@@ -26,8 +26,8 @@ struct DLGTMENU
     // ch == 0 - 无菜单，结构终止
     union
     {
-        WORD wID;		// ch == 0xFFFF - 菜单资源ID
-        WCHAR szMenu[n];// 否则			- 以NULL结尾的菜单名称
+        WORD wID;       // ch == 0xFFFF - 菜单资源ID
+        WCHAR szMenu[n];// else         - 以NULL结尾的菜单名称
     };
 };
 
@@ -37,8 +37,8 @@ struct DLGTWCLS
     // ch == 0 - 标准对话框类，结构终止
     union
     {
-        WORD atom;		// ch == 0xFFFF - 预定义类原子
-        WCHAR szCls[n];	// 否则			- 以NULL结尾的窗口类名
+        WORD atom;      // ch == 0xFFFF - 预定义类原子
+        WCHAR szCls[n]; // else         - 以NULL结尾的窗口类名
     };
 };
 
@@ -46,7 +46,7 @@ struct DLGTCAPTION
 {
     WCHAR ch;
     // ch == 0 - 无标题，结构终止
-    WCHAR szCap[n];		// 否则			- 以NULL结尾的标题
+    WCHAR szCap[n];     // else         - 以NULL结尾的标题
 };
 上述三个数组必须在WORD边界上对齐
 
@@ -82,8 +82,8 @@ struct DLGITEMTWCLS
     WCHAR ch;
     union
     {
-        WORD atom;		// ch == 0xFFFF - 预定义类原子
-        WCHAR szCls[n];	// 否则			- 以NULL结尾的窗口类名
+        WORD atom;      // ch == 0xFFFF - 预定义类原子
+        WCHAR szCls[n]; // else         - 以NULL结尾的窗口类名
     };
 };
 
@@ -92,8 +92,8 @@ struct DLGITEMTCAPTION
     WCHAR ch;
     union
     {
-        WORD atom;		// ch == 0xFFFF - 资源ID
-        WCHAR szCap[n];	// 否则			- 以NULL结尾的标题
+        WORD atom;      // ch == 0xFFFF - 资源ID
+        WCHAR szCap[n]; // else         - 以NULL结尾的标题
     };
 };
 

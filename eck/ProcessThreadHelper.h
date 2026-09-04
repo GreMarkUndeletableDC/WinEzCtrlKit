@@ -326,25 +326,25 @@ struct THREAD_INFO
 
 struct PROCESS_INFO
 {
-    CStringW rsImageName;	// 进程名
-    ULONG uPid;				// 进程ID
-    ULONG uParentPid;		// 父进程ID
-    ULONG cThreads;			// 线程数
-    ULONG uSessionID;		// 会话ID
-    ULONG cHandles;			// 句柄数
-    ULONG cPageFaults;		// 页面错误数
-    size_t cbPrivateWorkingSet;			// 专用工作集
-    size_t cbWorkingSet;				// 工作集
-    size_t cbPeakWorkingSet;			// 峰值工作集
-    size_t cbQuotaPagedPoolUsage;		// 页面缓冲池
-    size_t cbPeakQuotaPagedPoolUsage;	// 峰值页面缓冲池
-    size_t cbQuotaNonPagedPoolUsage;	// 非页面缓冲池
+    CStringW rsImageName;   // 进程名
+    ULONG uPid;             // 进程ID
+    ULONG uParentPid;       // 父进程ID
+    ULONG cThreads;         // 线程数
+    ULONG uSessionID;       // 会话ID
+    ULONG cHandles;         // 句柄数
+    ULONG cPageFaults;      // 页面错误数
+    size_t cbPrivateWorkingSet;         // 专用工作集
+    size_t cbWorkingSet;                // 工作集
+    size_t cbPeakWorkingSet;            // 峰值工作集
+    size_t cbQuotaPagedPoolUsage;       // 页面缓冲池
+    size_t cbPeakQuotaPagedPoolUsage;   // 峰值页面缓冲池
+    size_t cbQuotaNonPagedPoolUsage;    // 非页面缓冲池
     size_t cbPeakQuotaNonPagedPoolUsage;// 峰值非页面缓冲池
-    size_t cbPageFileUsage;				// 已提交
-    size_t cbPeakPageFileUsage;			// 峰值已提交
-    CStringW rsFilePath;	// 进程路径
-    std::vector<THREAD_INFO> vThreads;	// 线程信息
-    std::vector<MODULE_INFO> vModules;	// 模块信息
+    size_t cbPageFileUsage;             // 已提交
+    size_t cbPeakPageFileUsage;         // 峰值已提交
+    CStringW rsFilePath;    // 进程路径
+    std::vector<THREAD_INFO> vThreads;  // 线程信息
+    std::vector<MODULE_INFO> vModules;  // 模块信息
 };
 
 enum : UINT

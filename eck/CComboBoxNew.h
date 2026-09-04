@@ -17,7 +17,7 @@ public:
     };
 
 protected:
-    HWND m_hParent{};	// 接收通知的父窗口
+    HWND m_hParent{};   // 接收通知的父窗口
 
     CListBoxNew m_LB{};
     std::unique_ptr<CEditExt> m_pED{};
@@ -34,8 +34,8 @@ protected:
     BITBOOL m_bDisabled : 1{};
     BITBOOL m_bHasFocus : 1{};
 
-    BITBOOL m_bAutoDropSize : 1{ TRUE };	// 自动调整下拉框大小
-    BITBOOL m_bMatchEditToItem : 1{ TRUE };	// 当编辑框内容改变时，同步选中匹配的项
+    BITBOOL m_bAutoDropSize : 1{ TRUE };    // 自动调整下拉框大小
+    BITBOOL m_bMatchEditToItem : 1{ TRUE }; // 当编辑框内容改变时，同步选中匹配的项
 
     View m_eView{ View::DropDown };
     AnimateStyle m_eAnimate{ AnimateStyle::Blend };

@@ -33,21 +33,21 @@ private:
     BITBOOL m_bCheckBoxes : 1{};
     BITBOOL m_bFilterBar : 1{};
     // 选项
-    BITBOOL m_bSplitBtnHot : 1{};				// [内部标志]拆分按钮已点燃
-    BITBOOL m_bFilterBtnHot : 1{};				// [内部标志]筛选按钮已点燃
-    BITBOOL m_bAutoDarkMode : 1{ TRUE };		// 自动处理暗色
-    BITBOOL m_bUseExtText : 1{};				// 使用扩展文本
-    BITBOOL m_bRepairDbClick : 1{ TRUE };		// 连击修正
+    BITBOOL m_bSplitBtnHot : 1{};               // [内部标志]拆分按钮已点燃
+    BITBOOL m_bFilterBtnHot : 1{};              // [内部标志]筛选按钮已点燃
+    BITBOOL m_bAutoDarkMode : 1{ TRUE };        // 自动处理暗色
+    BITBOOL m_bUseExtText : 1{};                // 使用扩展文本
+    BITBOOL m_bRepairDbClick : 1{ TRUE };       // 连击修正
     BITBOOL m_bShowEmptyMainExtText : 1{ TRUE };// 即使主文本为空也不忽略其高度
-    BYTE m_byColorAlpha{ 100 };					// 背景色透明度
-    Alignment m_eExtAlignV{ Alignment::Center };		// 扩展文本垂直对齐
-    COLORREF m_crText{ CLR_DEFAULT };			// 文本颜色
-    COLORREF m_crBk{ CLR_DEFAULT };				// 背景色
-    COLORREF m_crTextBk{ CLR_DEFAULT };			// 文本背景色
-    COLORREF m_crTextSubText{ CLR_DEFAULT };	// [扩展文本]子文本颜色
-    COLORREF m_crTextBkSubText{ CLR_DEFAULT };	// [扩展文本]子文本背景色
-    COLORREF m_crTextFilter{ CLR_DEFAULT };		// 过滤器文本颜色
-    COLORREF m_crTextBkFilter{ CLR_DEFAULT };	// 过滤器文本背景色
+    BYTE m_byColorAlpha{ 100 };                 // 背景色透明度
+    Alignment m_eExtAlignV{ Alignment::Center };// 扩展文本垂直对齐
+    COLORREF m_crText{ CLR_DEFAULT };           // 文本颜色
+    COLORREF m_crBk{ CLR_DEFAULT };             // 背景色
+    COLORREF m_crTextBk{ CLR_DEFAULT };         // 文本背景色
+    COLORREF m_crTextSubText{ CLR_DEFAULT };    // [扩展文本]子文本颜色
+    COLORREF m_crTextBkSubText{ CLR_DEFAULT };  // [扩展文本]子文本背景色
+    COLORREF m_crTextFilter{ CLR_DEFAULT };     // 过滤器文本颜色
+    COLORREF m_crTextBkFilter{ CLR_DEFAULT };   // 过滤器文本背景色
     // 图形
     CMemoryDC m_DcAlpha{};
     HFONT m_hFontMainText{};
@@ -565,22 +565,6 @@ private:
         m_hFontMainText = nullptr;
     }
 public:
-    ECKPROP(HeGetBkColor, HeSetBkColor)						COLORREF BkColor;
-    ECKPROP(HeGetTextColor, HeSetTextColor)					COLORREF TextColor;
-    ECKPROP(HeGetTextBkColor, HeSetTextBkColor)				COLORREF TextBkColor;
-    ECKPROP(HeGetSubTextColor, HeSetSubTextColor)			COLORREF SubTextColor;
-    ECKPROP(HeGetSubTextBkColor, HeSetSubTextBkColor)		COLORREF SubTextBkColor;
-    ECKPROP(HeGetFilterTextColor, HeSetFilterTextColor)		COLORREF FilterTextColor;
-    ECKPROP(HeGetFilterTextBkColor, HeSetFilterTextBkColor) COLORREF FilterTextBkColor;
-    ECKPROP(HeGetMainTextFont, HeSetMainTextFont)			HFONT MainTextFont;
-    ECKPROP(HeGetExtTextAlignV, HeSetExtTextAlignV)			Alignment ExtTextAlignV;
-    ECKPROP(HeGetAutoDarkMode, HeSetAutoDarkMode)			BOOL AutoDarkMode;
-    ECKPROP(HeGetUseExtText, HeSetUseExtText)				BOOL UseExtText;
-    ECKPROP(HeGetRepairDoubleClick, HeSetRepairDoubleClick) BOOL RepairDbClick;
-    ECKPROP(HeGetShowEmptyMainExtText, HeSetShowEmptyMainExtText) BOOL ShowEmptyMainExtText;
-    ECKPROP(HeGetBkColorAlpha, HeSetBkColorAlpha)			BYTE BkColorAlpha;
-    ECKPROP_R(HeGetCurrEditingItem)		int CurrEditingItem;
-    ECKPROP_R(HeGetFilterEdit)			CEditExt* FilterEdit;
 
     void AttachNew(HWND hWnd) noexcept override
     {

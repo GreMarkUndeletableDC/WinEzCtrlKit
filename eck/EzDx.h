@@ -3,8 +3,8 @@
 
 #include <d3dcompiler.h>
 
-#define ECK_EZDX_NAMESPACE_BEGIN	namespace EzDx {
-#define ECK_EZDX_NAMESPACE_END		}
+#define ECK_EZDX_NAMESPACE_BEGIN    namespace EzDx {
+#define ECK_EZDX_NAMESPACE_END      }
 
 ECK_NAMESPACE_BEGIN
 ECK_EZDX_NAMESPACE_BEGIN

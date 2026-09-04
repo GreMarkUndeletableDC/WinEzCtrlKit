@@ -10,8 +10,8 @@
 #undef realloc
 #include "../ThirdPartyLib/YyJson/yyjson.h"
 
-#define ECK_JSON_NAMESPACE_BEGIN	namespace Json {
-#define ECK_JSON_NAMESPACE_END		}
+#define ECK_JSON_NAMESPACE_BEGIN    namespace Json {
+#define ECK_JSON_NAMESPACE_END      }
 
 ECK_NAMESPACE_BEGIN
 ECK_JSON_NAMESPACE_BEGIN

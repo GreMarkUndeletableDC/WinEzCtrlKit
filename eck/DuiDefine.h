@@ -13,7 +13,7 @@ class CElement;
 // 元素样式
 enum
 {
-    DES_BLUR_BACK = (1u << 31),	// 模糊背景
+    DES_BLUR_BACK = (1u << 31), // 模糊背景
     // 元素的内容受周边其他内容影响，若无效区域与元素相交，
     // 则必须更新整个元素，设置时DES_BLURBKG强制设置此样式
     DES_CONTENT_EXPAND = (1u << 30),
@@ -65,9 +65,9 @@ enum class PresentMode : BYTE
 {
     DCompositionSurface,
     DCompositionVisual,
-    BitBltSwapChain,	// 支持透明混合，必须无WS_EX_NRB
-    FlipSwapChain,		// 不支持透明混合
-    WindowRenderTarget,	// 支持透明混合，必须无WS_EX_NRB
+    BitBltSwapChain,    // 支持透明混合，必须无WS_EX_NRB
+    FlipSwapChain,      // 不支持透明混合
+    WindowRenderTarget, // 支持透明混合，必须无WS_EX_NRB
     UpdateLayeredWindow,
 };
 

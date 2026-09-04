@@ -9,15 +9,15 @@
 
 ECK_NAMESPACE_BEGIN
 // 实现IGraphicsEffectD2D1Interop::GetEffectId
-#define ECK_WRDIFX_IMPL_CLSID(Clsid)		\
+#define ECK_WRDIFX_IMPL_CLSID(Clsid)        \
     STDMETHODIMP GetEffectId(CLSID* pclsid) \
-    {										\
-        if (pclsid)							\
-        {									\
-            *pclsid = Clsid;				\
-            return S_OK;					\
-        }									\
-        return E_POINTER;					\
+    {                                       \
+        if (pclsid)                         \
+        {                                   \
+            *pclsid = Clsid;                \
+            return S_OK;                    \
+        }                                   \
+        return E_POINTER;                   \
     }
 
 using GePropMapping = ABI::Windows::Graphics::Effects::GRAPHICS_EFFECT_PROPERTY_MAPPING;
@@ -31,38 +31,38 @@ struct WRDI_FX_PROPERTY_MAPPING
 
 // 实现IGraphicsEffectD2D1Interop::GetNamedPropertyMapping
 // 必须为将进行动画处理的属性设置映射关系
-#define ECK_WRDIFX_IMPL_PROPMAPPING(MappingArray)	\
-    STDMETHODIMP GetNamedPropertyMapping(PCWSTR pszName, UINT* pidx, GePropMapping* peMapping)	\
-    {												\
-        for (const auto& e : MappingArray)			\
-        {											\
-            if (_wcsicmp(pszName, e.pszName) == 0)	\
-            {										\
-                if (pidx)							\
-                    *pidx = e.idx;					\
-                if (peMapping)						\
-                    *peMapping = e.eMapping;		\
-                return S_OK;						\
-            }										\
-        }											\
-        return E_FAIL;								\
+#define ECK_WRDIFX_IMPL_PROPMAPPING(MappingArray)   \
+    STDMETHODIMP GetNamedPropertyMapping(PCWSTR pszName, UINT* pidx, GePropMapping* peMapping)  \
+    {                                               \
+        for (const auto& e : MappingArray)          \
+        {                                           \
+            if (_wcsicmp(pszName, e.pszName) == 0)  \
+            {                                       \
+                if (pidx)                           \
+                    *pidx = e.idx;                  \
+                if (peMapping)                      \
+                    *peMapping = e.eMapping;        \
+                return S_OK;                        \
+            }                                       \
+        }                                           \
+        return E_FAIL;                              \
     }
 
 // 实现IGraphicsEffectD2D1Interop::GetEffectProperties为E_NOTIMPL
-#define ECK_WRDIFX_IMPL_NO_PROPMAPPING()			\
-    STDMETHODIMP GetNamedPropertyMapping(PCWSTR, UINT* pu, GePropMapping* pe)	\
-    {												\
-        if (pu) *pu = (UINT)-1;						\
-        if (pe) *pe = GePropMapping::GRAPHICS_EFFECT_PROPERTY_MAPPING_UNKNOWN;	\
-        return E_NOTIMPL;							\
+#define ECK_WRDIFX_IMPL_NO_PROPMAPPING()            \
+    STDMETHODIMP GetNamedPropertyMapping(PCWSTR, UINT* pu, GePropMapping* pe)   \
+    {                                               \
+        if (pu) *pu = (UINT)-1;                     \
+        if (pe) *pe = GePropMapping::GRAPHICS_EFFECT_PROPERTY_MAPPING_UNKNOWN;  \
+        return E_NOTIMPL;                           \
     }
 
-#define ECK_WRDIFX_IMPL(Clsid)						\
-    ECK_WRDIFX_IMPL_CLSID(Clsid)					\
+#define ECK_WRDIFX_IMPL(Clsid)                      \
+    ECK_WRDIFX_IMPL_CLSID(Clsid)                    \
     ECK_WRDIFX_IMPL_NO_PROPMAPPING()
 
-#define ECK_WRDIFX_IMPL2(Clsid, MappingArray)		\
-    ECK_WRDIFX_IMPL_CLSID(Clsid)					\
+#define ECK_WRDIFX_IMPL2(Clsid, MappingArray)       \
+    ECK_WRDIFX_IMPL_CLSID(Clsid)                    \
     ECK_WRDIFX_IMPL_PROPMAPPING(MappingArray)
 
 class CWinRtD2DInteropFx : public winrt::implements<CWinRtD2DInteropFx,

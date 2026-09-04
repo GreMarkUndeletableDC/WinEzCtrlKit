@@ -288,10 +288,10 @@ private:
     {
         switch (ch)
         {
-        case 'n':   ch = '\n';	break;
-        case 'r':   ch = '\r';	break;
-        case 't':   ch = '\t';	break;
-        case '0':   ch = '\0';	break;
+        case 'n':   ch = '\n';  break;
+        case 'r':   ch = '\r';  break;
+        case 't':   ch = '\t';  break;
+        case '0':   ch = '\0';  break;
         case '\\':  break;
         case ';':   break;
         case '[':   break;
@@ -492,16 +492,16 @@ private:
         {
             switch (ch)
             {
-            case '\n':	rsOut.PushBackChar('\\').PushBackChar('n');	break;
-            case '\r':	rsOut.PushBackChar('\\').PushBackChar('r');	break;
-            case '\t':	rsOut.PushBackChar('\\').PushBackChar('t');	break;
-            case '\0':	rsOut.PushBackChar('\\').PushBackChar('0');	break;
-            case '\\':	rsOut.PushBackChar('\\').PushBackChar('\\');	break;
-            case ';':	rsOut.PushBackChar('\\').PushBackChar(';');	break;
-            case '[':	rsOut.PushBackChar('\\').PushBackChar('[');	break;
-            case ']':	rsOut.PushBackChar('\\').PushBackChar(']');	break;
-            case '=':	rsOut.PushBackChar('\\').PushBackChar('=');	break;
-            default:	rsOut.PushBackChar(ch);	break;
+            case '\n': rsOut.PushBackChar('\\').PushBackChar('n');  break;
+            case '\r': rsOut.PushBackChar('\\').PushBackChar('r');  break;
+            case '\t': rsOut.PushBackChar('\\').PushBackChar('t');  break;
+            case '\0': rsOut.PushBackChar('\\').PushBackChar('0');  break;
+            case '\\': rsOut.PushBackChar('\\').PushBackChar('\\'); break;
+            case ';':  rsOut.PushBackChar('\\').PushBackChar(';');  break;
+            case '[':  rsOut.PushBackChar('\\').PushBackChar('[');  break;
+            case ']':  rsOut.PushBackChar('\\').PushBackChar(']');  break;
+            case '=':  rsOut.PushBackChar('\\').PushBackChar('=');  break;
+            default:   rsOut.PushBackChar(ch);                      break;
             }
         }
     }
