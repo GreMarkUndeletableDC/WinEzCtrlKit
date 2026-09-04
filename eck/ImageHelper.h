@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Utility.h"
 #include "CStreamView.h"
+#include "CByteBufferStream.h"
 #include "ComPtr.h"
 #include "NativeWrapper.h"
 #if !ECK_OPT_NO_GDIPLUS
@@ -558,7 +559,8 @@ inline GpStatus GpSaveImage(
     _In_ Gdiplus::GpImage* pImage,
     ImageType eType = ImageType::Png) noexcept
 {
-    CStreamView Stream{ rb };
+    CByteBufferStream Stream{ rb };
+    Stream.SetBeginPosition();
     const auto gps = GpSaveImage(&Stream, pImage, eType);
     Stream.AssertReference(1);
     return gps;
@@ -600,7 +602,7 @@ inline HRESULT D2DLoadBitmap(
 namespace Detail
 {
     inline BYTE* GdiSaveDibHeader(
-        CByteBuffer& rb,
+        Eck_Append_buffer_ CByteBuffer& rb,
         size_t cbStride,
         int cx, int cy,
         WORD cBitPerPixel = 32,
@@ -638,8 +640,8 @@ namespace Detail
 }
 
 inline BOOL GdiSaveDib(
-    CByteBuffer& rb,
-    void* pBits,
+    Eck_Append_buffer_ CByteBuffer& rb,
+    _In_reads_bytes_(cbStride * cy) void* pBits,
     size_t cbStride,
     int cx, int cy,
     WORD cBitPerPixel = 32,
@@ -663,7 +665,9 @@ inline BOOL GdiSaveDib(
     return TRUE;
 }
 
-inline BOOL GdiSaveDib(CByteBuffer& rb, HBITMAP hDib) noexcept
+inline BOOL GdiSaveDib(
+    Eck_Append_buffer_ CByteBuffer& rb,
+    _In_ HBITMAP hDib) noexcept
 {
     DIBSECTION ds;
     if (!GetObjectW(hDib, sizeof(ds), &ds))
@@ -702,9 +706,9 @@ inline BOOL GdiSaveDib(CByteBuffer& rb, HBITMAP hDib) noexcept
 /// <param name="bUnpremul">是否反预乘</param>
 /// <returns>成功返回TRUE，失败返回FALSE，已设置LastError</returns>
 inline BOOL GdiSaveDdbAs32bppDib(
-    CByteBuffer& rb,
-    HBITMAP hDdb,
-    HDC hDC = nullptr,
+    Eck_Append_buffer_ CByteBuffer& rb,
+    _In_ HBITMAP hDdb,
+    _In_opt_ HDC hDC = nullptr,
     BOOL bUnpremul = FALSE) noexcept
 {
     BITMAP bm;
@@ -754,12 +758,60 @@ inline HBITMAP GdiCreate32bppDibSection(
 {
     BITMAPINFO bmi{};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = (LONG)cx;
-    bmi.bmiHeader.biHeight = -(LONG)cy;
+    bmi.bmiHeader.biWidth = cx;
+    bmi.bmiHeader.biHeight = -cy;
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 32;
     void* Dummy{};
-    return CreateDIBSection(nullptr, &bmi,
-        DIB_RGB_COLORS, pBits ? pBits : &Dummy, nullptr, 0);
+    return CreateDIBSection(
+        nullptr,
+        &bmi,
+        DIB_RGB_COLORS,
+        pBits ? pBits : &Dummy,
+        nullptr,
+        0);
+}
+
+/// <summary>
+/// 从32bpp像素数据创建DDB
+/// </summary>
+/// <param name="hDC">设备上下文，nullptr表示使用屏幕上下文</param>
+/// <param name="cx">DDB宽度</param>
+/// <param name="cy">DDB高度，如果使用自上而下数据则必须设为负值</param>
+/// <param name="pBits">像素数据，跨步必须为cx * 4</param>
+/// <returns>DDB句柄</returns>
+inline HBITMAP GdiCreateDdbFrom32bppDibPixel(
+    _In_opt_ HDC hDC,
+    int cx, int cy,
+    _In_reads_bytes_(4 * cx * cy) PCVOID pBits) noexcept
+{
+    BITMAPINFO bmi{};
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = cx;
+    bmi.bmiHeader.biHeight = cy;
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    BOOL bReleaseDC{};
+    if (!hDC)
+    {
+        hDC = GetDC(nullptr);
+        if (!hDC)
+            return nullptr;
+        bReleaseDC = TRUE;
+    }
+
+    const auto hBitmap = CreateDIBitmap(
+        hDC,
+        &bmi.bmiHeader,
+        CBM_INIT,
+        pBits,
+        &bmi,
+        DIB_RGB_COLORS);
+
+    if (bReleaseDC)
+        ReleaseDC(nullptr, hDC);
+    return hBitmap;
 }
 ECK_NAMESPACE_END
