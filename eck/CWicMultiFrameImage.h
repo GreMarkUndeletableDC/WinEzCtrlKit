@@ -16,13 +16,13 @@ enum class PngColorType : BYTE
 
 struct PngIHDR
 {
-    BYTE Width[4];		// 宽度
-    BYTE Height[4];		// 高度
-    BYTE BitDepth;		// 位深度
-    PngColorType ColorType;	// 颜色类型
-    BYTE CompressionMethod;	// 压缩方法，仅定义0
-    BYTE FilterMethod;		// 过滤方法，仅定义0
-    BYTE InterlaceMethod;	// 隔行扫描，0 = 不隔行扫描，1 = Adm7隔行扫描
+    BYTE Width[4];      // 宽度
+    BYTE Height[4];     // 高度
+    BYTE BitDepth;      // 位深度
+    PngColorType ColorType; // 颜色类型
+    BYTE CompressionMethod; // 压缩方法，仅定义0
+    BYTE FilterMethod;      // 过滤方法，仅定义0
+    BYTE InterlaceMethod;   // 隔行扫描，0 = 不隔行扫描，1 = Adm7隔行扫描
 };
 
 enum class PngBlendOp : BYTE

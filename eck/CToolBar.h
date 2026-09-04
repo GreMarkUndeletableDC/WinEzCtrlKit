@@ -3,21 +3,21 @@
 
 ECK_NAMESPACE_BEGIN
 #define ECK_W_TLBE_STYLE(Name, Style)                      \
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;     \
-	BOOL StyleGet##Name() const noexcept                   \
-	{                                                      \
-		if constexpr (Style == 0)                          \
-			return !GetTBExtendStyle();                    \
-		else                                               \
-			return IsBitSet(GetTBExtendStyle(), Style);    \
-	}                                                      \
-	void StyleSet##Name(BOOL b) const noexcept             \
-	{                                                      \
-		if (b)                                             \
-			SetTBExtendStyle(GetTBExtendStyle() | Style);  \
-		else                                               \
-			SetTBExtendStyle(GetTBExtendStyle() & ~Style); \
-	}
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;     \
+    BOOL StyleGet##Name() const noexcept                   \
+    {                                                      \
+        if constexpr (Style == 0)                          \
+            return !GetTBExtendStyle();                    \
+        else                                               \
+            return IsBitSet(GetTBExtendStyle(), Style);    \
+    }                                                      \
+    void StyleSet##Name(BOOL b) const noexcept             \
+    {                                                      \
+        if (b)                                             \
+            SetTBExtendStyle(GetTBExtendStyle() | Style);  \
+        else                                               \
+            SetTBExtendStyle(GetTBExtendStyle() & ~Style); \
+    }
 
 constexpr inline DWORD ToolBarPrettyStyle = TBSTYLE_LIST | TBSTYLE_TRANSPARENT |
 CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER;

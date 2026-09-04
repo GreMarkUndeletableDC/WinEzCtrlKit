@@ -10,9 +10,9 @@ enum class Result
 {
     Ok,
     InvalidChar,// 非法字符
-    AdjacentOp,	// 相邻运算符
+    AdjacentOp, // 相邻运算符
     UnmatchedParentheses,// 括号不匹配
-    OpError,	// 运算符错误
+    OpError,    // 运算符错误
 };
 
 namespace Detail

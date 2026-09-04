@@ -143,7 +143,7 @@ struct FRAME
         BOOLEAN bFrameHdr;
     };
 
-    CHAR Id[4]{};		// 帧标识
+    CHAR Id[4]{};       // 帧标识
     BYTE byGroupId{};   // 组标识，对应GRID
     BYTE byCryption{};  // 加密方式，对应ENCR
 
@@ -1108,7 +1108,7 @@ struct EQU2 final : public FRAME
 {
     struct POINT
     {
-        USHORT uFreq{};	// 单位1/2Hz
+        USHORT uFreq{}; // 单位1/2Hz
         short shVol{};
     };
 

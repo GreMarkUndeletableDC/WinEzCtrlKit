@@ -11,14 +11,14 @@ ECK_DISABLE_ARITHMETIC_OVERFLOW_WARNING
 ECK_NAMESPACE_BEGIN
 struct LVE_COLOR_PACK
 {
-    COLORREF crDefText = CLR_DEFAULT;		// 默认文本颜色
-    COLORREF crOddLineText = CLR_DEFAULT;	// 奇数行文本颜色
-    COLORREF crEvenLineText = CLR_DEFAULT;	// 偶数行文本颜色
-    COLORREF crOddLineBk = CLR_DEFAULT;		// 奇数行背景颜色
-    COLORREF crEvenLineBk = CLR_DEFAULT;	// 偶数行背景颜色
-    COLORREF crGridLineH = CLR_DEFAULT;		// 表格线水平颜色
-    COLORREF crGridLineV = CLR_DEFAULT;		// 表格线垂直颜色
-    COLORREF crHeaderText = CLR_DEFAULT;	// 表头文本颜色
+    COLORREF crDefText = CLR_DEFAULT;       // 默认文本颜色
+    COLORREF crOddLineText = CLR_DEFAULT;   // 奇数行文本颜色
+    COLORREF crEvenLineText = CLR_DEFAULT;  // 偶数行文本颜色
+    COLORREF crOddLineBk = CLR_DEFAULT;     // 奇数行背景颜色
+    COLORREF crEvenLineBk = CLR_DEFAULT;    // 偶数行背景颜色
+    COLORREF crGridLineH = CLR_DEFAULT;     // 表格线水平颜色
+    COLORREF crGridLineV = CLR_DEFAULT;     // 表格线垂直颜色
+    COLORREF crHeaderText = CLR_DEFAULT;    // 表头文本颜色
 
     constexpr static LVE_COLOR_PACK Default() { return LVE_COLOR_PACK{}; }
     constexpr static LVE_COLOR_PACK Invalid()
@@ -108,11 +108,11 @@ enum class LveOd
 
 struct LVE_EDIT_INFO
 {
-    RCWH rcIdeal;	// 编辑控件的理想位置和大小
-    SIZE sizeExtra;	// 为了美观而添加到sizeIdeal的额外大小
-    PCWSTR pszText;	// 当前文本
-    int cchText;	// 当前文本长度
-    Alignment eAlign;	// 横向对齐方式
+    RCWH rcIdeal;   // 编辑控件的理想位置和大小
+    SIZE sizeExtra; // 为了美观而添加到sizeIdeal的额外大小
+    PCWSTR pszText; // 当前文本
+    int cchText;    // 当前文本长度
+    Alignment eAlign;   // 横向对齐方式
 };
 
 /*
@@ -156,62 +156,62 @@ private:
     };
 
     // ListView信息
-    CHeaderExt m_Header{};	// 表头
-    HIMAGELIST m_hIL[4]{};	// 图像列表
-    SIZE m_sizeIL[4]{};		// 图像列表大小
-    int m_iViewType{};		// 视图类型
-    int m_cMaxTileCol{};	// 平铺视图下的最大列数
-    RECT m_rcTileMargin{};	// 平铺视图下的边距
-    int m_cyFont{};			// 字体高度
+    CHeaderExt m_Header{};  // 表头
+    HIMAGELIST m_hIL[4]{};  // 图像列表
+    SIZE m_sizeIL[4]{};     // 图像列表大小
+    int m_iViewType{};      // 视图类型
+    int m_cMaxTileCol{};    // 平铺视图下的最大列数
+    RECT m_rcTileMargin{};  // 平铺视图下的边距
+    int m_cyFont{};         // 字体高度
     int m_idxEditing{ -1 };
     int m_idxEditSubItem{ -1 };
-    BITBOOL m_bOwnerData : 1 = FALSE;	// 所有者数据
-    BITBOOL m_bSubItemImg : 1 = FALSE;	// 显示子项图像
-    BITBOOL m_bFullRowSel : 1 = FALSE;	// 整行选择
-    BITBOOL m_bShowSelAlways : 1 = FALSE;	// 始终显示选择
+    BITBOOL m_bOwnerData : 1 = FALSE;   // 所有者数据
+    BITBOOL m_bSubItemImg : 1 = FALSE;  // 显示子项图像
+    BITBOOL m_bFullRowSel : 1 = FALSE;  // 整行选择
+    BITBOOL m_bShowSelAlways : 1 = FALSE;   // 始终显示选择
     BITBOOL m_bBorderSelect : 1 = FALSE;// 边框选择
-    BITBOOL m_bCheckBoxes : 1 = FALSE;	// 显示复选框
-    BITBOOL m_bGridLines : 1 = FALSE;	// 显示表格线
-    BITBOOL m_bHideLabels : 1 = FALSE;	// 隐藏标签
-    BITBOOL m_bSingleSel : 1 = FALSE;	// 单选模式
-    BITBOOL m_bHasFocus : 1 = FALSE;	// 是否有焦点
-    BITBOOL m_bEditLabel : 1 = FALSE;	// 允许编辑
+    BITBOOL m_bCheckBoxes : 1 = FALSE;  // 显示复选框
+    BITBOOL m_bGridLines : 1 = FALSE;   // 显示表格线
+    BITBOOL m_bHideLabels : 1 = FALSE;  // 隐藏标签
+    BITBOOL m_bSingleSel : 1 = FALSE;   // 单选模式
+    BITBOOL m_bHasFocus : 1 = FALSE;    // 是否有焦点
+    BITBOOL m_bEditLabel : 1 = FALSE;   // 允许编辑
 
     // 图形
-    HTHEME m_hTheme{};		// 主题句柄
-    int m_iDpi{ USER_DEFAULT_SCREEN_DPI };	// DPI
-    CMemoryDC m_DcAlpha{};		// DC，用作暗色下的颜色Alpha混合
+    HTHEME m_hTheme{};      // 主题句柄
+    int m_iDpi{ USER_DEFAULT_SCREEN_DPI };  // DPI
+    CMemoryDC m_DcAlpha{};      // DC，用作暗色下的颜色Alpha混合
 
     // 选项
-    COLORREF m_crDefText = CLR_DEFAULT;		// 默认文本颜色
-    COLORREF m_crOddLineText = CLR_DEFAULT;	// 奇数行文本颜色
+    COLORREF m_crDefText = CLR_DEFAULT;     // 默认文本颜色
+    COLORREF m_crOddLineText = CLR_DEFAULT; // 奇数行文本颜色
     COLORREF m_crEvenLineText = CLR_DEFAULT;// 偶数行文本颜色
-    COLORREF m_crOddLineBk = CLR_DEFAULT;	// 奇数行背景颜色
-    COLORREF m_crEvenLineBk = CLR_DEFAULT;	// 偶数行背景颜色
-    COLORREF m_crGridLineH = CLR_DEFAULT;	// 表格线水平颜色
-    COLORREF m_crGridLineV = CLR_DEFAULT;	// 表格线垂直颜色
-    COLORREF m_crHeaderText = CLR_DEFAULT;	// 表头文本颜色
+    COLORREF m_crOddLineBk = CLR_DEFAULT;   // 奇数行背景颜色
+    COLORREF m_crEvenLineBk = CLR_DEFAULT;  // 偶数行背景颜色
+    COLORREF m_crGridLineH = CLR_DEFAULT;   // 表格线水平颜色
+    COLORREF m_crGridLineV = CLR_DEFAULT;   // 表格线垂直颜色
+    COLORREF m_crHeaderText = CLR_DEFAULT;  // 表头文本颜色
 
-    BITBOOL m_bCustomDraw : 1 = TRUE;		// 是否由控件自动绘制，保留此选项以供特殊情况使用
-    BITBOOL m_bAutoDarkMode : 1 = TRUE;		// 自动处理深浅色切换
-    BITBOOL m_bAlphaClrInDark : 1 = TRUE;	// 在暗色模式下将颜色移至主题背景之上
-    BITBOOL m_bAutoColorPack : 1 = TRUE;	// 自动处理配色
+    BITBOOL m_bCustomDraw : 1 = TRUE;       // 是否由控件自动绘制，保留此选项以供特殊情况使用
+    BITBOOL m_bAutoDarkMode : 1 = TRUE;     // 自动处理深浅色切换
+    BITBOOL m_bAlphaClrInDark : 1 = TRUE;   // 在暗色模式下将颜色移至主题背景之上
+    BITBOOL m_bAutoColorPack : 1 = TRUE;    // 自动处理配色
     BITBOOL m_bAddSplitterForClr : 1 = TRUE;// 若某项填充了颜色，则补全列分隔符
-    BITBOOL m_bCtrlASelectAll : 1 = TRUE;	// Ctrl+A全选
-    BITBOOL m_bImplLvOdNotify : 1 = TRUE;	// 指示控件应根据m_pfnOwnerData实现ListView标准通知
-    BITBOOL m_bInstalledHeaderHook : 1 = FALSE;	// [内部标志]是否已钩住表头消息
-    BITBOOL m_bDoNotWrapInTile : 1 = FALSE;	// 平铺视图下禁止第一行换行
-    BITBOOL m_bEnableExtEdit : 1 = TRUE;	// 启用扩展编辑
-    BITBOOL m_bOwnerEdit : 1 = FALSE;		// 由父窗口处理编辑
-    BITBOOL m_bPrepareEditingInfo : 1 = TRUE;	// 在父窗口处理编辑时，是否准备编辑信息
-    BITBOOL m_bWaitEditDelay : 1 = FALSE;	// [内部标志]有挂起的编辑操作
+    BITBOOL m_bCtrlASelectAll : 1 = TRUE;   // Ctrl+A全选
+    BITBOOL m_bImplLvOdNotify : 1 = TRUE;   // 指示控件应根据m_pfnOwnerData实现ListView标准通知
+    BITBOOL m_bInstalledHeaderHook : 1 = FALSE; // [内部标志]是否已钩住表头消息
+    BITBOOL m_bDoNotWrapInTile : 1 = FALSE; // 平铺视图下禁止第一行换行
+    BITBOOL m_bEnableExtEdit : 1 = TRUE;    // 启用扩展编辑
+    BITBOOL m_bOwnerEdit : 1 = FALSE;       // 由父窗口处理编辑
+    BITBOOL m_bPrepareEditingInfo : 1 = TRUE;   // 在父窗口处理编辑时，是否准备编辑信息
+    BITBOOL m_bWaitEditDelay : 1 = FALSE;   // [内部标志]有挂起的编辑操作
 
-    BYTE m_byColorAlpha{ 70 };	// 透明度
-    int m_cyHeader{};			// 表头高度，0 = 默认
+    BYTE m_byColorAlpha{ 70 };  // 透明度
+    int m_cyHeader{};           // 表头高度，0 = 默认
     // 项目
-    std::vector<LVE_ITEM_DATA*> m_vRecycleData{};	// [NOD]回收数据
-    FOwnerData m_pfnOwnerData{};	// [OD]所有者数据回调函数
-    void* m_pOdProcData{};			// [OD]所有者数据回调函数参数
+    std::vector<LVE_ITEM_DATA*> m_vRecycleData{};   // [NOD]回收数据
+    FOwnerData m_pfnOwnerData{};    // [OD]所有者数据回调函数
+    void* m_pOdProcData{};          // [OD]所有者数据回调函数参数
     // 
     const ThreadContext* m_ptc{};// 线程上下文
     CStringW m_rsTextBuf{ MAX_PATH };

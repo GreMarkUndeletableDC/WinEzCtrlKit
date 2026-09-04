@@ -104,17 +104,17 @@ public:
             DWRITE_PARAGRAPH_ALIGNMENT e1;
             switch (eAlignPara)
             {
-            default:			e1 = DWRITE_PARAGRAPH_ALIGNMENT_NEAR; break;
-            case Alignment::Far:	e1 = DWRITE_PARAGRAPH_ALIGNMENT_FAR; break;
+            case Alignment::Far:    e1 = DWRITE_PARAGRAPH_ALIGNMENT_FAR;    break;
             case Alignment::Center: e1 = DWRITE_PARAGRAPH_ALIGNMENT_CENTER; break;
+            default:                e1 = DWRITE_PARAGRAPH_ALIGNMENT_NEAR;   break;
             }
             pTf->SetParagraphAlignment(e1);
             DWRITE_TEXT_ALIGNMENT e2;
             switch (eAlignText)
             {
-            default:			e2 = DWRITE_TEXT_ALIGNMENT_LEADING; break;
-            case Alignment::Far:	e2 = DWRITE_TEXT_ALIGNMENT_TRAILING; break;
-            case Alignment::Center: e2 = DWRITE_TEXT_ALIGNMENT_CENTER; break;
+            case Alignment::Far:    e2 = DWRITE_TEXT_ALIGNMENT_TRAILING;    break;
+            case Alignment::Center: e2 = DWRITE_TEXT_ALIGNMENT_CENTER;      break;
+            default:                e2 = DWRITE_TEXT_ALIGNMENT_LEADING;     break;
             }
             pTf->SetTextAlignment(e2);
             if (bEllipsis)

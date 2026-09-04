@@ -6,29 +6,29 @@
 
 // For Private API
 
-FSetWindowCompositionAttribute	pfnSetWindowCompositionAttribute{};
-FGetWindowCompositionAttribute	pfnGetWindowCompositionAttribute{};
+FSetWindowCompositionAttribute  pfnSetWindowCompositionAttribute{};
+FGetWindowCompositionAttribute  pfnGetWindowCompositionAttribute{};
 
 #if !ECK_OPT_NO_DARKMODE
-FAllowDarkModeForWindow			pfnAllowDarkModeForWindow{};
-FAllowDarkModeForApp			pfnAllowDarkModeForApp{};
-FIsDarkModeAllowedForWindow		pfnIsDarkModeAllowedForWindow{};
-FShouldAppsUseDarkMode			pfnShouldAppsUseDarkMode{};
-FFlushMenuThemes				pfnFlushMenuThemes{};
-FRefreshImmersiveColorPolicyState		pfnRefreshImmersiveColorPolicyState{};
-FGetIsImmersiveColorUsingHighContrast	pfnGetIsImmersiveColorUsingHighContrast{};
+FAllowDarkModeForWindow         pfnAllowDarkModeForWindow{};
+FAllowDarkModeForApp            pfnAllowDarkModeForApp{};
+FIsDarkModeAllowedForWindow     pfnIsDarkModeAllowedForWindow{};
+FShouldAppsUseDarkMode          pfnShouldAppsUseDarkMode{};
+FFlushMenuThemes                pfnFlushMenuThemes{};
+FRefreshImmersiveColorPolicyState       pfnRefreshImmersiveColorPolicyState{};
+FGetIsImmersiveColorUsingHighContrast   pfnGetIsImmersiveColorUsingHighContrast{};
 
-FShouldSystemUseDarkMode		pfnShouldSystemUseDarkMode{};
-FSetPreferredAppMode			pfnSetPreferredAppMode{};
-FIsDarkModeAllowedForApp		pfnIsDarkModeAllowedForApp{};
+FShouldSystemUseDarkMode        pfnShouldSystemUseDarkMode{};
+FSetPreferredAppMode            pfnSetPreferredAppMode{};
+FIsDarkModeAllowedForApp        pfnIsDarkModeAllowedForApp{};
 #endif// !ECK_OPT_NO_DARKMODE
 
-FOpenNcThemeData				pfnOpenNcThemeData{};
+FOpenNcThemeData                pfnOpenNcThemeData{};
 
 #ifndef _WIN64
-FNtWow64WriteVirtualMemory64	pfnNtWow64WriteVirtualMemory64{};
-FNtWow64ReadVirtualMemory64		pfnNtWow64ReadVirtualMemory64{};
-FNtWow64QueryVirtualMemory64	pfnNtWow64QueryVirtualMemory64{};
+FNtWow64WriteVirtualMemory64    pfnNtWow64WriteVirtualMemory64{};
+FNtWow64ReadVirtualMemory64     pfnNtWow64ReadVirtualMemory64{};
+FNtWow64QueryVirtualMemory64    pfnNtWow64QueryVirtualMemory64{};
 FNtWow64QueryInformationProcess64 pfnNtWow64QueryInformationProcess64{};
 #endif
 
@@ -97,16 +97,16 @@ void InitializePrivateApi() noexcept
 
 // For program
 
-HINSTANCE	g_hInstance{};
-CStringW	g_rsRunningDir{};
-DWORD		g_dwTlsSlot{};
-NTVER		g_NtVersion{};
+HINSTANCE   g_hInstance{};
+CStringW    g_rsRunningDir{};
+DWORD       g_dwTlsSlot{};
+NTVER       g_NtVersion{};
 
-HMODULE		g_hModCommonControl{ (HMODULE)MaxSizeT };
+HMODULE     g_hModCommonControl{ (HMODULE)MaxSizeT };
 
 #if !ECK_OPT_NO_GDIPLUS
 // For GdiPlus
-ULONG_PTR	g_uGpToken{};
+ULONG_PTR   g_uGpToken{};
 #endif // !ECK_OPT_NO_GDIPLUS
 
 // For DirectX
@@ -282,39 +282,39 @@ using FDrawThemeParentBackground = HRESULT(WINAPI*)(HWND, HDC, const RECT*);
 using FGetThemePartSize = HRESULT(WINAPI*)(HTHEME, HDC, int, int, const RECT*, THEMESIZE, SIZE*);
 using FSoftModalMessageBox = int(WINAPI*)(void*/* _MSGBOXDATA* */);
 
-static FOpenNcThemeData			s_pfnOpenNcThemeData{};// 以序号导出
-static FOpenThemeData			s_pfnOpenThemeData{ OpenThemeData };
-static FDrawThemeText			s_pfnDrawThemeText{ DrawThemeText };
-static FDrawThemeTextEx			s_pfnDrawThemeTextEx{ DrawThemeTextEx };
-static FOpenThemeDataForDpi		s_pfnOpenThemeDataForDpi{};// DPI API引入较晚，动态加载之
-static FDrawThemeBackgroundEx	s_pfnDrawThemeBackgroundEx{ DrawThemeBackgroundEx };
-static FDrawThemeBackground		s_pfnDrawThemeBackground{ DrawThemeBackground };
-static FGetThemeColor			s_pfnGetThemeColor{ GetThemeColor };
-static FCloseThemeData			s_pfnCloseThemeData{ CloseThemeData };
-static FDrawThemeParentBackground	s_pfnDrawThemeParentBackground{ DrawThemeParentBackground };
-static FGetThemePartSize		s_pfnGetThemePartSize{ GetThemePartSize };
+static FOpenNcThemeData         s_pfnOpenNcThemeData{};// 以序号导出
+static FOpenThemeData           s_pfnOpenThemeData{ OpenThemeData };
+static FDrawThemeText           s_pfnDrawThemeText{ DrawThemeText };
+static FDrawThemeTextEx         s_pfnDrawThemeTextEx{ DrawThemeTextEx };
+static FOpenThemeDataForDpi     s_pfnOpenThemeDataForDpi{};// DPI API引入较晚，动态加载之
+static FDrawThemeBackgroundEx   s_pfnDrawThemeBackgroundEx{ DrawThemeBackgroundEx };
+static FDrawThemeBackground     s_pfnDrawThemeBackground{ DrawThemeBackground };
+static FGetThemeColor           s_pfnGetThemeColor{ GetThemeColor };
+static FCloseThemeData          s_pfnCloseThemeData{ CloseThemeData };
+static FDrawThemeParentBackground   s_pfnDrawThemeParentBackground{ DrawThemeParentBackground };
+static FGetThemePartSize        s_pfnGetThemePartSize{ GetThemePartSize };
 // Not Ux, but necessary.
-static FSoftModalMessageBox		s_pfnSoftModalMessageBox{};
+static FSoftModalMessageBox     s_pfnSoftModalMessageBox{};
 
 enum class ThemeType
 {
     Invalid,
     Button,
-    TaskDialog,		// +TaskDialogStyle
+    TaskDialog,     // +TaskDialogStyle
     Tab,
     // 附带一个ItemsView::ListView主题，用于绘制背景
     // 不使用DarkMode::ToolBar，因为它的某些部件不正确
     ToolBar,
-    AeroWizard,		// +AeroWizardStyle
-    DateTimePicker,	// 附带一个DarkMode_CFD::ComboBox主题，用于绘制背景和下拉按钮
-    ListView,		// +ItemsView
+    AeroWizard,     // +AeroWizardStyle
+    DateTimePicker, // 附带一个DarkMode_CFD::ComboBox主题，用于绘制背景和下拉按钮
+    ListView,       // +ItemsView
     Link,
-    Header,			// 附带亮色版主题，弥补暗色没有过滤器按钮和溢出按钮的不足
+    Header,         // 附带亮色版主题，弥补暗色没有过滤器按钮和溢出按钮的不足
     TextStyle,
-    Progress,		// +Indeterminate::Progress
-    ControlPanel,	// +ControlPanelStyle
+    Progress,       // +Indeterminate::Progress
+    ControlPanel,   // +ControlPanelStyle
     MonthCalendar,
-    StatusBar,		// +StatusBarStyle
+    StatusBar,      // +StatusBarStyle
     Menu,
 };
 
@@ -1078,12 +1078,12 @@ static HRESULT UxfpDrawThemeBackground(const THEME_INFO& ti, const ThreadContext
             float f;
             switch (iStateId)
             {
-            case TIS_NORMAL:	f = -0.75f; break;
-            case TIS_HOT:		f = -0.8f;	break;
+            case TIS_NORMAL:    f = -0.75f; break;
+            case TIS_HOT:       f = -0.8f;  break;
             case TIS_FOCUSED:
-            case TIS_SELECTED:	f = -0.86f;	break;
-            case TIS_DISABLED:	f = -0.6f;	break;
-            default:			return E_INVALIDARG;
+            case TIS_SELECTED:  f = -0.86f; break;
+            case TIS_DISABLED:  f = -0.6f;  break;
+            default:            return E_INVALIDARG;
             }
 
             if (iStateId == TIS_SELECTED)
@@ -2113,8 +2113,8 @@ void ThreadContext::TwmBroadcastThemeChanged() noexcept
         // 伪代码：
         // static WPARAM s_wParam{};
         // if (wParam == -1 || wParam == s_wParam) {
-        //	s_wParam = wParam;
-        //	无效化缓存();
+        //  s_wParam = wParam;
+        //  无效化缓存();
         // }
         // 
         // lParam - 一组位标志

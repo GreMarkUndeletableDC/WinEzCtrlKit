@@ -34,11 +34,11 @@ enum : UINT
 // 部件
 enum
 {
-    TLIP_NONE,		// 空白
-    TLIP_EXPANDBTN,	// 展开按钮
-    TLIP_ICON,		// 图标
-    TLIP_TEXT,		// 文本
-    TLIP_CHECKBOX,	// 检查框
+    TLIP_NONE,      // 空白
+    TLIP_EXPANDBTN, // 展开按钮
+    TLIP_ICON,      // 图标
+    TLIP_TEXT,      // 文本
+    TLIP_CHECKBOX,  // 检查框
 };
 
 // 命中测试标志
@@ -53,10 +53,10 @@ enum : UINT
 // 节点
 struct TLNODE
 {
-    USHORT uFlags = 0u;	// TLIF_标志
-    short iLevel = 0;	// 层次，根节点为1，此后逐层+1
-    int idxParent = -1;	// 父节点索引，-1 = 根节点
-    int idxImg = -1;	// 图像列表索引，-1 = 无效
+    USHORT uFlags = 0u; // TLIF_标志
+    short iLevel = 0;   // 层次，根节点为1，此后逐层+1
+    int idxParent = -1; // 父节点索引，-1 = 根节点
+    int idxImg = -1;    // 图像列表索引，-1 = 无效
     int idxLastEnd = -1;// 插入列表时用，上一个最后插入的子项索引
 };
 
@@ -82,17 +82,17 @@ struct TLHITTEST
 struct NMTLFILLCHILDREN
 {
     NMHDR nmhdr;
-    BOOL bQueryRoot;	// 是否请求根节点
-    TLNODE* pParent;	// 正在请求其子项目的父项
-    int cChildren;		// 根节点的数量
-    TLNODE** pChildren;	// 所有子项的数组
+    BOOL bQueryRoot;    // 是否请求根节点
+    TLNODE* pParent;    // 正在请求其子项目的父项
+    int cChildren;      // 根节点的数量
+    TLNODE** pChildren; // 所有子项的数组
 };
 
 struct NMTLFILLALLFLATITEM
 {
     NMHDR nmhdr;
-    int cItem;			// 项目数
-    TLNODE** pItems;	// 所有项目的数组
+    int cItem;          // 项目数
+    TLNODE** pItems;    // 所有项目的数组
 };
 
 struct NMTLGETDISPINFO
@@ -234,119 +234,119 @@ public:
         // 工具ID
         TLI_MAIN = 10,
         // 控件ID
-        IDC_HEADER = 101,	// 第一列表头
-        IDC_HEADERFIXED,	// 后续列的表头
-        IDC_EDIT,	// 编辑框
-        IDC_SBV,	// 滚动条
-        IDC_SBH,	// 滚动条
+        IDC_HEADER = 101,   // 第一列表头
+        IDC_HEADERFIXED,    // 后续列的表头
+        IDC_EDIT,   // 编辑框
+        IDC_SBV,    // 滚动条
+        IDC_SBH,    // 滚动条
         // 定时器ID
         IDT_EDITDELAY = 10
     };
 private:
     struct COL
     {
-        int iLeft;		// 左边界，相对于第一列的偏移量
-        int iRight;		// 右边界，相对于第一列的偏移量
-        int idxActual;	// 此项对应的实际项目索引
+        int iLeft;      // 左边界，相对于第一列的偏移量
+        int iRight;     // 右边界，相对于第一列的偏移量
+        int idxActual;  // 此项对应的实际项目索引
     };
-    HWND m_hParent{};					// 接收通知的窗口
+    HWND m_hParent{};                   // 接收通知的窗口
     //--------控件
-    CTLHeader m_Header{ *this };		// 表头
-    CTLHeader m_HeaderFixed{ *this };	// 表头
-    CToolTip m_ToolTip{};				// 工具提示
-    CTLEditExt m_Edit{ *this };			// 编辑框
-    CScrollBar m_SBV{};					// 滚动条
-    CScrollBar m_SBH{};					// 滚动条
+    CTLHeader m_Header{ *this };        // 表头
+    CTLHeader m_HeaderFixed{ *this };   // 表头
+    CToolTip m_ToolTip{};               // 工具提示
+    CTLEditExt m_Edit{ *this };         // 编辑框
+    CScrollBar m_SBV{};                 // 滚动条
+    CScrollBar m_SBH{};                 // 滚动条
     //--------图形
-    HTHEME m_hThemeTV{};				// TreeView主题
-    HTHEME m_hThemeLV{};				// ItemsView主题
-    HTHEME m_hThemeBT{};				// Button主题
-    HFONT m_hFont{};					// 字体
-    CMemoryDC m_DC{};						// 兼容DC
-    COLORREF m_crBranchLine = CLR_DEFAULT;	// 分支线颜色
-    COLORREF m_crBkg = CLR_DEFAULT;		// 背景颜色
-    COLORREF m_crText = CLR_DEFAULT;	// 文本颜色
+    HTHEME m_hThemeTV{};                // TreeView主题
+    HTHEME m_hThemeLV{};                // ItemsView主题
+    HTHEME m_hThemeBT{};                // Button主题
+    HFONT m_hFont{};                    // 字体
+    CMemoryDC m_DC{};                       // 兼容DC
+    COLORREF m_crBranchLine = CLR_DEFAULT;  // 分支线颜色
+    COLORREF m_crBkg = CLR_DEFAULT;     // 背景颜色
+    COLORREF m_crText = CLR_DEFAULT;    // 文本颜色
     //--------项目相关
-    std::vector<TLNODE*> m_vItem{};		// 项目列表
-    std::vector<COL> m_vCol{};			// 按显示顺序排列的列信息
+    std::vector<TLNODE*> m_vItem{};     // 项目列表
+    std::vector<COL> m_vCol{};          // 按显示顺序排列的列信息
 
-    int m_idxTopItem = 0;				// 第一可见项
-    int m_idxHot = -1;					// 热点项
-    int m_idxFocus = -1;				// 焦点项
-    int m_idxMark = -1;					// mark，范围选择用
-    int m_idxSel = -1;					// 选中的项，仅用于单选模式
+    int m_idxTopItem = 0;               // 第一可见项
+    int m_idxHot = -1;                  // 热点项
+    int m_idxFocus = -1;                // 焦点项
+    int m_idxMark = -1;                 // mark，范围选择用
+    int m_idxSel = -1;                  // 选中的项，仅用于单选模式
 
-    int m_idxToolTip = -1;				// 工具提示项
+    int m_idxToolTip = -1;              // 工具提示项
     int m_idxToolTipSubItemDisplay = -1;// 工具提示子项
 
-    int m_idxEditing = -1;				// 正在编辑的项
+    int m_idxEditing = -1;              // 正在编辑的项
     int m_idxEditingSubItemDisplay = -1;// 正在编辑的子项
 
-    int m_idxCheckBoxLBtnDown = -1;		// 左键在选择框内按下的项目
+    int m_idxCheckBoxLBtnDown = -1;     // 左键在选择框内按下的项目
     //--------尺寸
-    int m_cxItem = 0,					// 项目宽度
-        m_cyItem = 0;					// 项目高度
-    int m_cxClient = 0,					// 客户区宽度
-        m_cyClient = 0;					// 客户区高度
+    int m_cxItem = 0,                   // 项目宽度
+        m_cyItem = 0;                   // 项目高度
+    int m_cxClient = 0,                 // 客户区宽度
+        m_cyClient = 0;                 // 客户区高度
 
-    int m_dxContent = 0;				// 水平偏移量，总小于等于0
-    int m_cyHeader = 0;					// 表头高度
+    int m_dxContent = 0;                // 水平偏移量，总小于等于0
+    int m_cyHeader = 0;                 // 表头高度
 
-    SIZE m_sizeTVGlyph{};				// 展开按钮大小
-    SIZE m_sizeCheckBox{};				// 检查框大小
+    SIZE m_sizeTVGlyph{};               // 展开按钮大小
+    SIZE m_sizeCheckBox{};              // 检查框大小
     //--------拖动选择
-    POINT m_ptDraggingSelStart{};		// 拖动选择起点，以相对于第一项的偏移量表示
-    RECT m_rcDraggingSel{};				// 拖动选择矩形，以相对于第一项的偏移量表示
+    POINT m_ptDraggingSelStart{};       // 拖动选择起点，以相对于第一项的偏移量表示
+    RECT m_rcDraggingSel{};             // 拖动选择矩形，以相对于第一项的偏移量表示
     //--------图像列表
-    HIMAGELIST m_hImgList = nullptr;		// 图像列表
-    int m_cxImg = 0,					// 图像宽度
-        m_cyImg = 0;					// 图像高度
+    HIMAGELIST m_hImgList = nullptr;        // 图像列表
+    int m_cxImg = 0,                    // 图像宽度
+        m_cyImg = 0;                    // 图像高度
     //--------滚动
-    int m_cScrollLine = 3;				// 一次滚动行数
-    int m_cCharPreScrollH = 3;			// 一次滚动的字符数
-    int m_cxCharAve = 0;				// 当前字体的平均字符宽度
-    int m_msDraggingSelScrollGap = 30;	// 拖动选择时自动滚动最小间隔
-    int m_cyHSB = 0;					// 水平滚动条高度，用于底部悬浮滚动条
+    int m_cScrollLine = 3;              // 一次滚动行数
+    int m_cCharPreScrollH = 3;          // 一次滚动的字符数
+    int m_cxCharAve = 0;                // 当前字体的平均字符宽度
+    int m_msDraggingSelScrollGap = 30;  // 拖动选择时自动滚动最小间隔
+    int m_cyHSB = 0;                    // 水平滚动条高度，用于底部悬浮滚动条
     //--------
-    CStringW m_rsWatermark{};			// 水印文本
-    CStringW m_rsTextBuf{};				// 文本缓冲区
+    CStringW m_rsWatermark{};           // 水印文本
+    CStringW m_rsTextBuf{};             // 文本缓冲区
     //--------内部标志
 #ifdef _DEBUG
-    BITBOOL m_bDbgDrawIndex : 1 = 0;			// 【调试】绘制项目索引
-    BITBOOL m_bDbgDrawMarkItem : 1 = 0;			// 【调试】绘制mark项
-    BITBOOL m_bDbgDrawPartRect : 1 = 0;			// 【调试】绘制部件矩形	
+    BITBOOL m_bDbgDrawIndex : 1 = 0;            // 【调试】绘制项目索引
+    BITBOOL m_bDbgDrawMarkItem : 1 = 0;         // 【调试】绘制mark项
+    BITBOOL m_bDbgDrawPartRect : 1 = 0;         // 【调试】绘制部件矩形 
 #endif
-    BITBOOL m_bExpandBtnHot : 1 = FALSE;		// 展开按钮是否点燃
-    BITBOOL m_bDraggingSel : 1 = FALSE;			// 是否处于拖动选择状态
-    BITBOOL m_bFocusIndicatorVisible : 1 = Debug;	// 焦点指示器是否可见
-    BITBOOL m_bHasFocus : 1 = FALSE;			// 是否有焦点
-    BITBOOL m_bWaitEditDelay : 1 = FALSE;		// 是否等待编辑
-    BITBOOL m_bBuildInEditChanged : 1 = FALSE;	// 内置编辑框内容是否已改变
-    BITBOOL m_bDraggingItem : 1 = FALSE;		// 正在拖动项目
-    BITBOOL m_bRDragging : 1 = FALSE;			// 正在右键拖动
+    BITBOOL m_bExpandBtnHot : 1 = FALSE;        // 展开按钮是否点燃
+    BITBOOL m_bDraggingSel : 1 = FALSE;         // 是否处于拖动选择状态
+    BITBOOL m_bFocusIndicatorVisible : 1 = Debug;   // 焦点指示器是否可见
+    BITBOOL m_bHasFocus : 1 = FALSE;            // 是否有焦点
+    BITBOOL m_bWaitEditDelay : 1 = FALSE;       // 是否等待编辑
+    BITBOOL m_bBuildInEditChanged : 1 = FALSE;  // 内置编辑框内容是否已改变
+    BITBOOL m_bDraggingItem : 1 = FALSE;        // 正在拖动项目
+    BITBOOL m_bRDragging : 1 = FALSE;           // 正在右键拖动
     //--------风格
-    BITBOOL m_bFlatMode : 1 = FALSE;					// 平面列表模式
-    BITBOOL m_bFlatListFilter : 1 = FALSE;				// 平面列表模式下是否有不可见项目
-    BITBOOL m_bSingleSel : 1 = FALSE;					// 单选
+    BITBOOL m_bFlatMode : 1 = FALSE;                    // 平面列表模式
+    BITBOOL m_bFlatListFilter : 1 = FALSE;              // 平面列表模式下是否有不可见项目
+    BITBOOL m_bSingleSel : 1 = FALSE;                   // 单选
     BITBOOL m_bDisallowBeginDragInItemSpace : 1 = FALSE;// 禁止在项目内的空白区启动拖动选择
-    BITBOOL m_bBackgroundNotSolid : 1 = FALSE;			// 背景不为纯色
-    BITBOOL m_bHasLines : 1 = FALSE;					// 分支线
-    BITBOOL m_bDisableAutoToolTip : 1 = FALSE;			// 禁止自动显示工具提示
-    BITBOOL m_bCheckBox : 1 = FALSE;					// 复选框
-    BITBOOL m_bDisableHScrollWithShift : 1 = FALSE;		// 禁止Shift+滚轮水平滚动
-    BITBOOL m_bDisableSelectAllWithCtrlA : 1 = FALSE;	// 禁止Ctrl+A全选
-    BITBOOL m_bEditLabel : 1 = FALSE;					// 编辑标签
-    BITBOOL m_b3StateCheckBox : 1 = FALSE;				// 三态复选框
-    BITBOOL m_bCascadeCheck : 1 = FALSE;				// 级联选中状态
-    BITBOOL m_bSplitCol0 : 1 = FALSE;					// 分离第一列
-    BITBOOL m_bStickyScroll : 1 = FALSE;				// 粘滞滚动
+    BITBOOL m_bBackgroundNotSolid : 1 = FALSE;          // 背景不为纯色
+    BITBOOL m_bHasLines : 1 = FALSE;                    // 分支线
+    BITBOOL m_bDisableAutoToolTip : 1 = FALSE;          // 禁止自动显示工具提示
+    BITBOOL m_bCheckBox : 1 = FALSE;                    // 复选框
+    BITBOOL m_bDisableHScrollWithShift : 1 = FALSE;     // 禁止Shift+滚轮水平滚动
+    BITBOOL m_bDisableSelectAllWithCtrlA : 1 = FALSE;   // 禁止Ctrl+A全选
+    BITBOOL m_bEditLabel : 1 = FALSE;                   // 编辑标签
+    BITBOOL m_b3StateCheckBox : 1 = FALSE;              // 三态复选框
+    BITBOOL m_bCascadeCheck : 1 = FALSE;                // 级联选中状态
+    BITBOOL m_bSplitCol0 : 1 = FALSE;                   // 分离第一列
+    BITBOOL m_bStickyScroll : 1 = FALSE;                // 粘滞滚动
     //--------DPI相关
-    int m_iDpi = USER_DEFAULT_SCREEN_DPI;	// DPI
+    int m_iDpi = USER_DEFAULT_SCREEN_DPI;   // DPI
     ECK_DS_BEGIN(DPIS)
-        ECK_DS_ENTRY(cyHeaderDef, 26)		// 默认表头高度
-        ECK_DS_ENTRY(cyItemDef, 24)			// 默认项目高度
-        ECK_DS_ENTRY(cxTextMargin, 4)		// 文本水平边距
-        ECK_DS_ENTRY(cxCBPadding, 2)		// 复选框水平边距
+        ECK_DS_ENTRY(cyHeaderDef, 26)       // 默认表头高度
+        ECK_DS_ENTRY(cyItemDef, 24)         // 默认项目高度
+        ECK_DS_ENTRY(cxTextMargin, 4)       // 文本水平边距
+        ECK_DS_ENTRY(cxCBPadding, 2)        // 复选框水平边距
         ;
     ECK_DS_END_VAR(m_Ds);
     //--------
@@ -1657,32 +1657,6 @@ private:
         }
     }
 public:
-    ECKPROP(GetImageList, SetImageList)			HIMAGELIST ImageList;
-    ECKPROP(GetDraggingSelectScrollGap,
-        SetDraggingSelectScrollGap)				int DragSelScrollGap;
-    ECKPROP(GetSingleSelect, SetSingleSelect)	BOOL SingleSel;
-    ECKPROP(GetHasCheckBox, SetHasCheckBox)		BOOL CheckBox;
-    ECKPROP(GetFlatMode, SetFlatMode)			BOOL FlatMode;
-    ECKPROP(GetEditLabel, SetEditLabel)			BOOL EditLabel;
-    ECKPROP(GetDisableAutoToolTip,
-        SetDisableAutoToolTip)					BOOL DisableAutoToolTip;
-    ECKPROP(GetBackgroundNotSolid,
-        SetBackgroundNotSolid)					BOOL BkgndNotSolid;
-    ECKPROP(GetHasLines, SetHasLines)			BOOL HasLines;
-    ECKPROP(GetLineColor, SetLineColor)			COLORREF LineColor;
-    ECKPROP(GetUseFilterInFlatMode,
-        SetUseFilterInFlatMode)					BOOL UseFilterInFlatMode;
-    ECKPROP(GetDisallowBeginDragInItemSpace,
-        SetDisallowBeginDragInItemSpace)		BOOL DisallowBeginDragInItemSpace;
-    ECKPROP(GetFocusItem, SetFocusItem)			int FocusItem;
-    ECKPROP(GetMarkItem, SetMarkItem)			int MarkItem;
-    ECKPROP(GetCurrentSelection, SetCurrentSelection)				int CurrSelItem;
-    ECKPROP(GetItemHeight, SetItemHeight)		int ItemHeight;
-    ECKPROP(GetHeaderHeight, SetHeaderHeight)	int HeaderHeight;
-    ECKPROP(GetDisableHScrollWithShift,
-        SetDisableHScrollWithShift)				BOOL DisableHScrollWithShift;
-    ECKPROP(GetDisableSelectAllWithCtrlA,
-        SetDisableSelectAllWithCtrlA)			BOOL DisableSelectAllWithCtrlA;
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {
@@ -2207,7 +2181,7 @@ public:
                 WS_CHILD | WS_VISIBLE | HDS_FULLDRAG | HDS_BUTTONS | HDS_DRAGDROP, 0,
                 0, 0, GetClientWidth(), m_Ds.cyHeaderDef, Handle, IDC_HEADER);
             //m_HeaderFixed.Create(NULL, WS_CHILD | WS_VISIBLE | HDS_FULLDRAG | HDS_BUTTONS | HDS_DRAGDROP, 0,
-            //	0, 0, GetClientWidth(), m_Ds.cyHeaderDef, Handle, IDC_HEADERFIXED);
+            //  0, 0, GetClientWidth(), m_Ds.cyHeaderDef, Handle, IDC_HEADERFIXED);
             SetExplorerTheme();
             m_hThemeTV = OpenThemeData(Handle, L"TreeView");
             m_hThemeLV = OpenThemeData(nullptr, L"ItemsView::ListView");

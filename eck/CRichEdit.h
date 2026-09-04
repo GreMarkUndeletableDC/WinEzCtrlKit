@@ -6,32 +6,32 @@
 
 ECK_NAMESPACE_BEGIN
 #define ECK_W_REE_STYLE(Name, Style)                    \
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-	BOOL StyleGet##Name() const noexcept                \
-	{                                                   \
-		if constexpr (Style == 0)                       \
-			return !GetEditStyle();                     \
-		else                                            \
-			return IsBitSet(GetEditStyle(), Style);     \
-	}                                                   \
-	void StyleSet##Name(BOOL b) const noexcept          \
-	{                                                   \
-		SetEditStyle(b ? Style : 0, Style);             \
-	}
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+    BOOL StyleGet##Name() const noexcept                \
+    {                                                   \
+        if constexpr (Style == 0)                       \
+            return !GetEditStyle();                     \
+        else                                            \
+            return IsBitSet(GetEditStyle(), Style);     \
+    }                                                   \
+    void StyleSet##Name(BOOL b) const noexcept          \
+    {                                                   \
+        SetEditStyle(b ? Style : 0, Style);             \
+    }
 
 #define ECK_W_REEEX_STYLE(Name, Style)                  \
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-	BOOL StyleGet##Name() const noexcept                \
-	{                                                   \
-		if constexpr (Style == 0)                       \
-			return !GetEditStyleEx();                   \
-		else                                            \
-			return IsBitSet(GetEditStyleEx(), Style);   \
-	}                                                   \
-	void StyleSet##Name(BOOL b) const noexcept          \
-	{                                                   \
-		SetEditStyleEx(b ? Style : 0, Style);           \
-	}
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+    BOOL StyleGet##Name() const noexcept                \
+    {                                                   \
+        if constexpr (Style == 0)                       \
+            return !GetEditStyleEx();                   \
+        else                                            \
+            return IsBitSet(GetEditStyleEx(), Style);   \
+    }                                                   \
+    void StyleSet##Name(BOOL b) const noexcept          \
+    {                                                   \
+        SetEditStyleEx(b ? Style : 0, Style);           \
+    }
 
 class CRichEdit : public CWindow
 {

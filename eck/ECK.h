@@ -221,16 +221,16 @@ ECK_NAMESPACE_END
 #pragma endregion Template
 
 #pragma region MacroTools
-#define ECKPRIV_ECKWIDE2___(x)	L##x
-#define ECKWIDE(x)				ECKPRIV_ECKWIDE2___(x)
+#define ECKPRIV_ECKWIDE2___(x)  L##x
+#define ECKWIDE(x)              ECKPRIV_ECKWIDE2___(x)
 
-#define ECKPRIV_ECKTOSTR2___(x)	#x
-#define ECKTOSTR(x)				ECKPRIV_ECKTOSTR2___(x)
-#define ECKTOSTRW(x)			ECKWIDE(ECKPRIV_ECKTOSTR2___(x))
+#define ECKPRIV_ECKTOSTR2___(x) #x
+#define ECKTOSTR(x)             ECKPRIV_ECKTOSTR2___(x)
+#define ECKTOSTRW(x)            ECKWIDE(ECKPRIV_ECKTOSTR2___(x))
 
-#define ECK_FUNCTIONW			ECKWIDE(__FUNCTION__)
-#define ECK_LINEW				ECKTOSTRW(__LINE__)
-#define ECK_FILEW				__FILEW__
+#define ECK_FUNCTIONW           ECKWIDE(__FUNCTION__)
+#define ECK_LINEW               ECKTOSTRW(__LINE__)
+#define ECK_FILEW               __FILEW__
 #pragma endregion MacroTools
 
 #pragma region Generator
@@ -323,7 +323,7 @@ ECK_NAMESPACE_END
                 return Type((std::underlying_type_t<Type>)a &   \
                     (std::underlying_type_t<Type>)b);           \
             } \
-            EckInlineNdCe Type operator|(Type a, Type b)	\
+            EckInlineNdCe Type operator|(Type a, Type b)    \
             { \
                 return Type((std::underlying_type_t<Type>)a |   \
                     (std::underlying_type_t<Type>)b);           \
@@ -695,45 +695,45 @@ constexpr inline UINT NM_FIRST_ECK = (0u - 0x514Bu * 0x514Bu);
 enum : UINT// 控件通知代码
 {
     ECKPRIV_NM_FIRST_PLACEHOLDER = NM_FIRST_ECK,
-    NM_CLP_CLRCHANGED,		// NMCLPCLRCHANGED
-    NM_SPB_DRAGGED,			// NMSPBDRAGGED
-    NM_TGL_TASKCLICKED,		// NMTGLCLICKED
+    NM_CLP_CLRCHANGED,      // NMCLPCLRCHANGED
+    NM_SPB_DRAGGED,         // NMSPBDRAGGED
+    NM_TGL_TASKCLICKED,     // NMTGLCLICKED
 
-    NM_TL_FILLCHILDREN,		// NMTLFILLCHILDREN
-    NM_TL_GETDISPINFO,		// NMTLGETDISPINFO
-    NM_TL_ITEMEXPANDING,	// NMTLCOMMITEM
-    NM_TL_ITEMEXPANDED,		// NMTLCOMMITEM
-    NM_TL_HD_CLICK,			// NMHEADER
-    NM_TL_FILLALLFLATITEM,	// NMTLFILLALLFLATITEM
-    NM_TL_TTGETDISPINFO,	// NMTLTTGETDISPINFO
-    NM_TL_TTPRESHOW,		// NMTLTTPRESHOW
-    NM_TL_PREEDIT,			// NMTLEDIT
-    NM_TL_POSTEDIT,			// NMTLEDIT
-    NM_TL_MOUSECLICK,		// NMTLMOUSECLICK
-    NM_TL_ITEMCHECKING,		// NMTLCOMMITEM
-    NM_TL_ITEMCHECKED,		// NMTLCOMMITEM
-    NM_TL_BEGINDRAG,		// NMTLDRAG
-    NM_TL_ENDDRAG,			// NMTLDRAG
+    NM_TL_FILLCHILDREN,     // NMTLFILLCHILDREN
+    NM_TL_GETDISPINFO,      // NMTLGETDISPINFO
+    NM_TL_ITEMEXPANDING,    // NMTLCOMMITEM
+    NM_TL_ITEMEXPANDED,     // NMTLCOMMITEM
+    NM_TL_HD_CLICK,         // NMHEADER
+    NM_TL_FILLALLFLATITEM,  // NMTLFILLALLFLATITEM
+    NM_TL_TTGETDISPINFO,    // NMTLTTGETDISPINFO
+    NM_TL_TTPRESHOW,        // NMTLTTPRESHOW
+    NM_TL_PREEDIT,          // NMTLEDIT
+    NM_TL_POSTEDIT,         // NMTLEDIT
+    NM_TL_MOUSECLICK,       // NMTLMOUSECLICK
+    NM_TL_ITEMCHECKING,     // NMTLCOMMITEM
+    NM_TL_ITEMCHECKED,      // NMTLCOMMITEM
+    NM_TL_BEGINDRAG,        // NMTLDRAG
+    NM_TL_ENDDRAG,          // NMTLDRAG
 
-    NM_LBN_GETDISPINFO,		// NMLBNGETDISPINFO
-    NM_LBN_BEGINDRAG,		// NMLBNDRAG
-    NM_LBN_ENDDRAG,			// NMLBNDRAG
-    NM_LBN_DISMISS,			// NMHDR
-    NM_LBN_ITEMCHANGED,		// NMLBNITEMCHANGED
-    NM_LBN_ITEMSTANDBY,		// NMHDR
-    NM_LBN_SEARCH,			// NMLBNSEARCH
+    NM_LBN_GETDISPINFO,     // NMLBNGETDISPINFO
+    NM_LBN_BEGINDRAG,       // NMLBNDRAG
+    NM_LBN_ENDDRAG,         // NMLBNDRAG
+    NM_LBN_DISMISS,         // NMHDR
+    NM_LBN_ITEMCHANGED,     // NMLBNITEMCHANGED
+    NM_LBN_ITEMSTANDBY,     // NMHDR
+    NM_LBN_SEARCH,          // NMLBNSEARCH
 
-    NM_PKB_OWNERDRAW,		// NMPKBOWNERDRAW
-    NM_HTT_SEL,				// NMHTTSEL
+    NM_PKB_OWNERDRAW,       // NMPKBOWNERDRAW
+    NM_HTT_SEL,             // NMHTTSEL
 
-    NM_CBN_LBCUSTOMDRAW,	// NMCBLBCUSTOMDRAW
+    NM_CBN_LBCUSTOMDRAW,    // NMCBLBCUSTOMDRAW
 };
 /*
 * 对于ECK控件，部分标准通知对应的结构如下（可能有特定控件会扩展这些结构）
-* NM_SETFOCUS			NMFOUCS
-* NM_KILLFOCUS			NMFOCUS
-* NM_RCLICK				NMMOUSENOTIFY
-* NM_CUSTOMDRAW			NMCUSTOMDRAWEXT
+* NM_SETFOCUS           NMFOUCS
+* NM_KILLFOCUS          NMFOCUS
+* NM_RCLICK             NMMOUSENOTIFY
+* NM_CUSTOMDRAW         NMCUSTOMDRAWEXT
 */
 
 // 消息钩子ID保留范围[1, 511]，此范围仅供内部使用
@@ -940,7 +940,7 @@ namespace Detail
 {
     struct QueuedCallback
     {
-        UINT nPriority;	// 值越小优先级越高
+        UINT nPriority; // 值越小优先级越高
         std::variant<std::function<void()>, void*> Callback;
         ULONGLONG Tag;
 
@@ -1007,23 +1007,23 @@ struct ThreadContext
     // 因此也不钩取GetSysColor，以免两个应得到相同结果函数的行为不同
     // 所有绘图操作显式使用下面的颜色字段，若某标准控件使用GetSysColor(Brush)，
     // 则通过子类化或其他方式修改
-    HHOOK hhkCbtDarkMode{};		// 启用暗色支持CBT钩子句柄
-    COLORREF crDefText{};		// 默认前景色
-    COLORREF crDefBkg{};		// 默认背景色
-    COLORREF crDefBtnFace{};	// 默认BtnFace颜色
-    COLORREF crBlue1{};			// 蓝色
-    COLORREF crGray1{};			// 灰色
-    COLORREF crTip1{};			// 提示颜色
-    COLORREF crHiLightText{};	// 高亮文本颜色，用于适配高对比度主题
+    HHOOK hhkCbtDarkMode{};     // 启用暗色支持CBT钩子句柄
+    COLORREF crDefText{};       // 默认前景色
+    COLORREF crDefBkg{};        // 默认背景色
+    COLORREF crDefBtnFace{};    // 默认BtnFace颜色
+    COLORREF crBlue1{};         // 蓝色
+    COLORREF crGray1{};         // 灰色
+    COLORREF crTip1{};          // 提示颜色
+    COLORREF crHiLightText{};   // 高亮文本颜色，用于适配高对比度主题
 
     // 是否允许暗色CBT钩子设置窗口，设为FALSE可暂停Hook。
     // 注意：务必在打开文件对话框前暂停Hook
     BOOLEAN bEnableDarkModeHook{ TRUE };
     BOOLEAN bAutoNcDark{ TRUE };// 自动调整非客户区暗色
-    BOOLEAN bEnterCallback{};	// 当前是否在回调中
-    BOOLEAN bAppDarkMode{};		// 当前是否处于暗色模式
+    BOOLEAN bEnterCallback{};   // 当前是否在回调中
+    BOOLEAN bAppDarkMode{};     // 当前是否处于暗色模式
     //-------回调队列
-    HHOOK hhkMsgFilter{};		// 在菜单、模态对话框、拖动选择等的消息循环中保持处理UI线程的回调
+    HHOOK hhkMsgFilter{};       // 在菜单、模态对话框、拖动选择等的消息循环中保持处理UI线程的回调
     Detail::QueuedCallbackQueue Callback{};
     //
     HWND hGhost{};

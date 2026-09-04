@@ -10,24 +10,24 @@ ECK_NAMESPACE_BEGIN
 enum class ShmSource : BYTE
 {
     // 以下来源均有Shell和ShellEx
-    AllFiles,				// HKCR\*						所有文件
-    Folder,					// HKCR\Folder					文件夹和驱动器
-    Directory,				// HKCR\Directory				文件夹
-    Drive,					// HKCR\Drive					驱动器
-    AllFileSystemObjects,	// HKCR\AllFileSystemObjects	所有对象
-    DirectoryBackground,	// HKCR\Directory\Background	文件夹背景
-    DesktopBackground,		// HKCR\DesktopBackground		桌面背景
-    MyComputer,				// HKCR\CLSID\...				我的电脑
-    RecycleBin,				// HKCR\CLSID\...				回收站
+    AllFiles,               // HKCR\*                       所有文件
+    Folder,                 // HKCR\Folder                  文件夹和驱动器
+    Directory,              // HKCR\Directory               文件夹
+    Drive,                  // HKCR\Drive                   驱动器
+    AllFileSystemObjects,   // HKCR\AllFileSystemObjects    所有对象
+    DirectoryBackground,    // HKCR\Directory\Background    文件夹背景
+    DesktopBackground,      // HKCR\DesktopBackground       桌面背景
+    MyComputer,             // HKCR\CLSID\...               我的电脑
+    RecycleBin,             // HKCR\CLSID\...               回收站
     CustomType,
 
-    SendTo,					// %APPDATA%\Microsoft\Windows\SendTo
+    SendTo,                 // %APPDATA%\Microsoft\Windows\SendTo
     // 新建类型：HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\
-	// Explorer\Discardable\PostSetup\ShellNew
+    // Explorer\Discardable\PostSetup\ShellNew
     // 此项的Classes值（REG_MULTI_SZ）定义新建文件类型
     // 每个类中ShellNew项定义新建文件命令
     New,
-    StartMenu,				// %LocalAppData%\Microsoft\Windows\WinX
+    StartMenu,              // %LocalAppData%\Microsoft\Windows\WinX
 
     MaxSource,
     Invalid,
@@ -39,19 +39,19 @@ enum class ShmSource : BYTE
 enum class ShmFlags : UINT
 {
     None = 0u,
-    ShellAndShellEx = 1u << 0,	// 该项含Shell和ShellEx
-    Com = 1u << 1,				// 该项为COM处理程序
-    Uwp = 1u << 2,				// 该项为UWP应用
-    FileType = 1u << 3,			// 该项由文件类型定义
-    Hidden = 1u << 4,			// 隐藏
-    NeverDefault = 1u << 5,		// 绝不用作默认项
-    HasSubMenu = 1u << 6,		// 含子菜单
-    OnlyInBrowserWindow = 1u << 7,		// 只在资源管理器窗口显示
-    HasLuaShield = 1u << 8,				// 显示盾牌图标
-    ShowAsDisabledIfHidden = 1u << 8,	// 隐藏时显示为禁用
-    NoWorkingDirectory = 1u << 9,		// 不设置工作目录
-    Extended = 1u << 10,		// 扩展菜单项（按Shift显示）
-    File = 1u << 11,			// 该项为文件而非注册表项
+    ShellAndShellEx = 1u << 0,  // 该项含Shell和ShellEx
+    Com = 1u << 1,              // 该项为COM处理程序
+    Uwp = 1u << 2,              // 该项为UWP应用
+    FileType = 1u << 3,         // 该项由文件类型定义
+    Hidden = 1u << 4,           // 隐藏
+    NeverDefault = 1u << 5,     // 绝不用作默认项
+    HasSubMenu = 1u << 6,       // 含子菜单
+    OnlyInBrowserWindow = 1u << 7,      // 只在资源管理器窗口显示
+    HasLuaShield = 1u << 8,             // 显示盾牌图标
+    ShowAsDisabledIfHidden = 1u << 8,   // 隐藏时显示为禁用
+    NoWorkingDirectory = 1u << 9,       // 不设置工作目录
+    Extended = 1u << 10,        // 扩展菜单项（按Shift显示）
+    File = 1u << 11,            // 该项为文件而非注册表项
 };
 ECK_ENUM_BIT_FLAGS(ShmFlags);
 
@@ -111,12 +111,12 @@ namespace Detail
 struct ShmItem
 {
     ShmFlags uFlags{};
-    RegistryRoot eRegRoot{};			// 注册表根
-    CStringW rsRegPath{};		// 注册表全路径
-    CStringW rsDisplayName{};	// 显示名称
-    CStringW rsClsidOrCmd{};	// 若有ShmFlags::Com，则为CLSID，否则为命令行
-    CStringW rsFile{};			// 关联的文件
-    CStringW rsIcon{};			// 图标，若未显式指定则为空
+    RegistryRoot eRegRoot{};            // 注册表根
+    CStringW rsRegPath{};       // 注册表全路径
+    CStringW rsDisplayName{};   // 显示名称
+    CStringW rsClsidOrCmd{};    // 若有ShmFlags::Com，则为CLSID，否则为命令行
+    CStringW rsFile{};          // 关联的文件
+    CStringW rsIcon{};          // 图标，若未显式指定则为空
 };
 
 // 含有shell和shellex的来源

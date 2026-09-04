@@ -32,23 +32,23 @@ struct CTRLDATA_HEXEDIT
 
 struct HEHITTEST
 {
-    POINT pt;			// 测试点
+    POINT pt;           // 测试点
     union
     {
         struct
         {
-            BITBOOL bHitData : 1;		// 命中数据区
-            BITBOOL bHitAddress : 1;	// 命中地址
-            BITBOOL bHitHeader : 1;		// 命中表头
-            BITBOOL bHitChar : 1;		// 命中字符区
-            BITBOOL bFirstNumber : 1;	// 是否命中左边一位数字，仅命中数据区时有效
-            BITBOOL bHitContent : 1;	// 命中了内容而不是空白
+            BITBOOL bHitData : 1;       // 命中数据区
+            BITBOOL bHitAddress : 1;    // 命中地址
+            BITBOOL bHitHeader : 1;     // 命中表头
+            BITBOOL bHitChar : 1;       // 命中字符区
+            BITBOOL bFirstNumber : 1;   // 是否命中左边一位数字，仅命中数据区时有效
+            BITBOOL bHitContent : 1;    // 命中了内容而不是空白
         };
         UINT uFlags;
     };
-    int idxCol;			// 命中的列索引，仅命中数据区或字符区时有效
-    int idxRowInView;	// 命中的行索引，相对显示的第一行
-    int idxCharCol;		// 命中的字符区栏索引，仅命中字符区时有效
+    int idxCol;         // 命中的列索引，仅命中数据区或字符区时有效
+    int idxRowInView;   // 命中的行索引，相对显示的第一行
+    int idxCharCol;     // 命中的字符区栏索引，仅命中字符区时有效
 };
 
 class CHexEdit : public CWindow

@@ -46,13 +46,13 @@ inline HRESULT RegisterInProcessComServer(REFCLSID clsid,
     if (ls)
         return HRESULT_FROM_WIN32(ls);
     // CLSID\{GUID}\
-	// - (Default)			名称
-    // - InfoTip			提示信息
+    // - (Default)          名称
+    // - InfoTip            提示信息
     // + InprocServer32
-    //   - (Default)		模块文件路径
-    //   - ThreadingModel	套间类型
+    //   - (Default)        模块文件路径
+    //   - ThreadingModel   套间类型
     // + DefaultIcon
-    //   - (Default)		图标路径
+    //   - (Default)        图标路径
     Key.SetValue(nullptr, nullptr, Params.svName.data(),
         UINT(Params.svName.size() * sizeof(WCHAR)), REG_SZ);
     if (!Params.svInfoTip.empty())
