@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+﻿/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -229,7 +229,7 @@ void nsCJKDetector::ComputeConfidence(void)
      * We should probably compute statistics of hanzi / (hanzi + kana)
      * characters and use this as a weight modifier.
      */
-    confJa = (kana_chars + hanzi_chars / 2.0) / all_chars;
+    confJa = (kana_chars + hanzi_chars / 2.0f) / all_chars;
     if (confJa > confidence)
     {
       language = "ja";

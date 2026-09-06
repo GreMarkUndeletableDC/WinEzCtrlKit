@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+﻿/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -339,7 +339,7 @@ nsProbingState nsMBCSGroupProber::HandleData(const char* aBuf, PRUint32 aLen,
 
             for (PRUint32 j = 0; j < NUM_OF_LANGUAGES; j++)
             {
-              float langConf = langDetectors[i][j] ? langDetectors[i][j]->GetConfidence() : 1.0;
+              float langConf = langDetectors[i][j] ? langDetectors[i][j]->GetConfidence() : 1.0f;
 
               if (cf * langConf > CANDIDATE_THRESHOLD)
               {
@@ -398,7 +398,7 @@ nsProbingState nsMBCSGroupProber::HandleData(const char* aBuf, PRUint32 aLen,
 
         for (PRUint32 j = 0; j < NUM_OF_LANGUAGES; j++)
         {
-          float langConf = langDetectors[i][j] ? langDetectors[i][j]->GetConfidence() : 1.0;
+          float langConf = langDetectors[i][j] ? langDetectors[i][j]->GetConfidence() : 1.0f;
 
           if (cf * langConf > CANDIDATE_THRESHOLD)
           {

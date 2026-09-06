@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+﻿/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -149,7 +149,7 @@ float nsBig5Prober::GetConfidence(int candidate)
   PRUint32 letterCount = asciiLetterCount + freqCharCount + rareCharCount;
   PRUint32 charCount   = letterCount + symbolCount + graphCharCount + reservedCount;
 
-  confidence = (freqCharCount + 0.5 * rareCharCount - asciiLetterCount - 2.0 * reservedCount) / (float) charCount;
+  confidence = (freqCharCount + 0.5f * rareCharCount - asciiLetterCount - 2.0f * reservedCount) / (float) charCount;
 
   return confidence;
 }

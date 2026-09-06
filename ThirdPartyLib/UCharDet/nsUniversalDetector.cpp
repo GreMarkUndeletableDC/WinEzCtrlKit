@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+﻿/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -61,7 +61,7 @@ nsUniversalDetector::nsUniversalDetector(PRUint32 aLanguageFilter)
 
   shortcutCharset = nullptr;
   shortcutLanguage = nullptr;
-  shortcutConfidence = 0.01;
+  shortcutConfidence = 0.01f;
 
   PRUint32 i;
   for (i = 0; i < NUM_OF_CHARSET_PROBERS; i++)
@@ -91,7 +91,7 @@ nsUniversalDetector::Reset()
 
   shortcutCharset = nullptr;
   shortcutLanguage = nullptr;
-  shortcutConfidence = 0.01;
+  shortcutConfidence = 0.01f;
 
   if (mEscCharSetProber)
     mEscCharSetProber->Reset();
@@ -127,7 +127,7 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
           {
             /* EF BB BF: UTF-8 encoded BOM. */
             shortcutCharset = "UTF-8";
-            shortcutConfidence = 0.99;
+            shortcutConfidence = 0.99f;
           }
         break;
         case '\xFE':
@@ -135,7 +135,7 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
           {
             /* FE FF: UTF-16, big endian BOM. */
             shortcutCharset = "UTF-16";
-            shortcutConfidence = 0.99;
+            shortcutConfidence = 0.99f;
           }
         break;
         case '\xFF':
@@ -147,13 +147,13 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
             {
                 /* FF FE 00 00: UTF-32 (LE). */
                 shortcutCharset = "UTF-32";
-                shortcutConfidence = 0.99;
+                shortcutConfidence = 0.99f;
             }
             else
             {
                 /* FF FE: UTF-16, little endian BOM. */
                 shortcutCharset = "UTF-16";
-                shortcutConfidence = 0.99;
+                shortcutConfidence = 0.99f;
             }
           }
           break;
@@ -165,7 +165,7 @@ nsresult nsUniversalDetector::HandleData(const char* aBuf, PRUint32 aLen)
           {
               /* 00 00 FE FF: UTF-32 (BE). */
               shortcutCharset = "UTF-32";
-              shortcutConfidence = 0.99;
+              shortcutConfidence = 0.99f;
           }
           break;
         }
@@ -317,7 +317,7 @@ void nsUniversalDetector::DataEnd()
            * ASCII until proven otherwise. */
           shortcutCharset = "ASCII";
       }
-      shortcutConfidence = 0.99;
+      shortcutConfidence = 0.99f;
     default:
       break;
     }

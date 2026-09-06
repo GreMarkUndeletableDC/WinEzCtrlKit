@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+﻿/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -130,9 +130,9 @@ float nsSingleByteCharSetProber::GetConfidence(int candidate)
   float r;
 
   if (mTotalSeqs > 0) {
-    float positiveSeqs = mSeqCounters[POSITIVE_CAT];
-    float probableSeqs = mSeqCounters[PROBABLE_CAT];
-    float negativeSeqs = mSeqCounters[NEGATIVE_CAT];
+    float positiveSeqs = (float)mSeqCounters[POSITIVE_CAT];
+    float probableSeqs = (float)mSeqCounters[PROBABLE_CAT];
+    float negativeSeqs = (float)mSeqCounters[NEGATIVE_CAT];
 
     r = (positiveSeqs + probableSeqs / 4 - negativeSeqs * 4) / mTotalSeqs / mModel->mTypicalPositiveRatio;
     r = r * (mTotalChar - mOutChar - mCtrlChar) / mTotalChar;

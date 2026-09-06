@@ -1,4 +1,4 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+﻿/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -215,10 +215,10 @@ float nsLanguageDetector::GetConfidence(void)
      * confidence.
      * Negative sequences will negatively impact the confidence.
      */
-    float positiveSeqs = mSeqCounters[LANG_POSITIVE_CAT];
-    float probableSeqs = mSeqCounters[LANG_PROBABLE_CAT];
+    float positiveSeqs = (float)mSeqCounters[LANG_POSITIVE_CAT];
+    float probableSeqs = (float)mSeqCounters[LANG_PROBABLE_CAT];
     //float neutralSeqs  = mSeqCounters[LANG_NEUTRAL_CAT];
-    float negativeSeqs = mSeqCounters[LANG_NEGATIVE_CAT];
+    float negativeSeqs = (float)mSeqCounters[LANG_NEGATIVE_CAT];
 
     r = (positiveSeqs + probableSeqs / 4 - negativeSeqs * 4) / mTotalSeqs;
     /* The more characters outside the expected characters
@@ -231,9 +231,9 @@ float nsLanguageDetector::GetConfidence(void)
     r = r * mFreqChar / (mFreqChar + mOutChar);
 
     /* How similar are the very frequent character ratio. */
-    r = r * (1.0 - fabs((float) mVeryFreqChar / mFreqChar - mModel->veryFreqRatio) / 4.0);
+    r = r * (1.0f - fabsf((float) mVeryFreqChar / mFreqChar - mModel->veryFreqRatio) / 4.0f);
     /* How similar are the very rare character ratio. */
-    r = r * (1.0 - fabs((float) mLowFreqChar / mFreqChar - mModel->lowFreqRatio) / 4.0);
+    r = r * (1.0f - fabsf((float) mLowFreqChar / mFreqChar - mModel->lowFreqRatio) / 4.0f);
 
     return r;
   }

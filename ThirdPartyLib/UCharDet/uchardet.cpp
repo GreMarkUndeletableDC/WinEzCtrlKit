@@ -1,4 +1,4 @@
-/* ***** BEGIN LICENSE BLOCK *****
+﻿/* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -141,8 +141,8 @@ public:
     float GetConfidence(size_t i)
     {
         if (weights.size() > 0)
-            return (weighed_candidates.size() > i) ? weighed_candidates[i].confidence : 0.0;
-        return (candidates.size() > i) ? candidates[i].confidence : 0.0;
+            return (weighed_candidates.size() > i) ? weighed_candidates[i].confidence : 0.0f;
+        return (candidates.size() > i) ? candidates[i].confidence : 0.0f;
     }
 
     const char* GetLanguage(size_t i)
