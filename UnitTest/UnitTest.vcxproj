@@ -210,6 +210,7 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(ECK_INCLUDE)\ThirdPartyLib\ThirdParty.props" />
+  <Import Project="$(ECK_INCLUDE)\ThirdPartyLib\ThirdParty_UCharDet.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

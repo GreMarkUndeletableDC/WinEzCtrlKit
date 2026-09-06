@@ -6,10 +6,6 @@
         <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
     之前加入一行
         <Import Project="$(ECK_INCLUDE)\ThirdPartyLib\ThirdParty.props" />
-
-    注意：
-    - 禁用预编译头，避免产生C1010
-    - c文件必须显式CompileAs=CompileAsC
     -->
 
     <ItemGroup>
@@ -18,16 +14,6 @@
                        Exclude="$(MSBuildThisFileDirectory)Detours\disol*.cpp;
                                 $(MSBuildThisFileDirectory)Detours\uimports.cpp">
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
-        </_EckTPCompile>
-
-
-        <_EckTPCompile Include="$(MSBuildThisFileDirectory)UCharDet\*.cpp">
-            <PrecompiledHeader>NotUsing</PrecompiledHeader>
-            <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-        </_EckTPCompile>
-        <_EckTPCompile Include="$(MSBuildThisFileDirectory)UCharDet\LangModels\*.cpp">
-            <PrecompiledHeader>NotUsing</PrecompiledHeader>
-            <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
         </_EckTPCompile>
 
 
@@ -41,11 +27,6 @@
             <CompileAs>CompileAsC</CompileAs>
         </_EckTPCompile>
 
-
-        <_EckTPCompile Include="$(MSBuildThisFileDirectory)PugiXml\pugixml.cpp">
-            <PrecompiledHeader>NotUsing</PrecompiledHeader>
-        </_EckTPCompile>
-    
 
         <_EckTPCompile Include="$(MSBuildThisFileDirectory)SkiaTessellator\*.cpp">
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
