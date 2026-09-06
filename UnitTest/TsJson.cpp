@@ -1230,11 +1230,12 @@ public:
         for (int i = 0; i < 4; ++i)
             doc.GetRoot().ArrPushBack(doc.NewInt(i));
         MutableArrayIterator it(doc.GetRoot());
-        while (it.HasNext())
+        while (it.GetCurrent().IsValid())
         {
-            CMutableValue v = it.Next();
+            CMutableValue v = it.GetCurrent();
             if (v.GetInt() % 2 == 0)
                 it.Remove();
+            it.Next();
         }
         // 仅剩奇数 1,3
         Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
