@@ -5,9 +5,9 @@
 #define ECK_OPT_NO_RTTI 1
 #endif
 
-#if ECK_OPT_DISABLE_5260
+#if ECK_OPT_MYDBG
 __pragma(warning(disable:5260))
-#endif
+#endif// ECK_OPT_MYDBG
 
 #if ECK_OPT_NO_DX
 #undef ECK_OPT_NO_D2D
