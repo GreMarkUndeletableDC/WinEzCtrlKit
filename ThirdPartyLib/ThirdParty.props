@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <!--
+    目标工程的.vcxproj中，紧邻
+        <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+    之前加入一行
+        <Import Project="$(ECK_INCLUDE)\ThirdPartyLib\ThirdParty.props" />
+
+    注意：
+    - 禁用预编译头，避免产生C1010
+    - c文件必须显式CompileAs=CompileAsC
+    -->
+
+    <ItemGroup>
+        <!-- uimports.cpp由creatwth.cpp内部包含一次，disol*.cpp仅简单#include "disasm.cpp" -->
+        <_EckTPCompile Include="$(MSBuildThisFileDirectory)Detours\*.cpp"
+                       Exclude="$(MSBuildThisFileDirectory)Detours\disol*.cpp;
+                                $(MSBuildThisFileDirectory)Detours\uimports.cpp">
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+        </_EckTPCompile>
+
+
+        <_EckTPCompile Include="$(MSBuildThisFileDirectory)UCharDet\*.cpp">
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        </_EckTPCompile>
+        <_EckTPCompile Include="$(MSBuildThisFileDirectory)UCharDet\LangModels\*.cpp">
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        </_EckTPCompile>
+
+
+		<_EckTPCompile Include="$(MSBuildThisFileDirectory)ZLib\*.c">
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <CompileAs>CompileAsC</CompileAs>
+        <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        </_EckTPCompile>
+        <_EckTPCompile Include="$(MSBuildThisFileDirectory)YyJson\*.c">
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <CompileAs>CompileAsC</CompileAs>
+        </_EckTPCompile>
+
+
+        <_EckTPCompile Include="$(MSBuildThisFileDirectory)PugiXml\pugixml.cpp">
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+        </_EckTPCompile>
+    
+
+        <_EckTPCompile Include="$(MSBuildThisFileDirectory)SkiaTessellator\*.cpp">
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+        </_EckTPCompile>
+    </ItemGroup>
+    
+    <Target Name="EckAddThirdPartyCompile"
+            AfterTargets="BuildGenerateSources">
+        <ItemGroup>
+            <ClCompile Include="@(_EckTPCompile)" />
+        </ItemGroup>
+    </Target>
+
+</Project>

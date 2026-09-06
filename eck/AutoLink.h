@@ -41,46 +41,4 @@
 #  endif
 #endif
 
-#if ECK_OPT_CRT_DLL
-#  ifdef _M_ARM64
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_arm64d_Md.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_arm64_Md.lib")
-#    endif
-#  elif defined(_M_X64)
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x64d_Md.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x64_Md.lib")
-#    endif
-#  else
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x86d_Md.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x86_Md.lib")
-#    endif
-#  endif
-#else
-#  ifdef _M_ARM64
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_arm64d.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_arm64.lib")
-#    endif
-#  elif defined(_M_X64)
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x64d.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x64.lib")
-#    endif
-#  else
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x86d.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x86.lib")
-#    endif
-#  endif
-#endif// ECK_OPT_CRT_DLL
-
 #endif// !ECK_OPT_NO_AUTO_ADD_LIB
