@@ -366,7 +366,7 @@ public:
         }
     };
 private:
-    constexpr static int TickInterval = 14;
+    constexpr static int TickInterval = 16;
 
     struct EXPAND_ITEM
     {
@@ -1072,15 +1072,14 @@ private:
     }
 
     // 若仍存在活动的时间线，返回TRUE
-    BOOL KctClockTick(int ms) noexcept
+    BOOL KctClockTick() noexcept
     {
         RdLockUpdate();
         BOOL bActiveTimeLine{};
-        constexpr int iDeltaTime = TickInterval;
         for (const auto e : m_vTimeLine)
         {
             if (e->TlIsValid())
-                e->TlTick(iDeltaTime);
+                e->TlTick(TickInterval);
             if (!bActiveTimeLine && e->TlIsValid())
                 bActiveTimeLine = TRUE;
         }
@@ -1095,7 +1094,7 @@ private:
     {
         m_MsgTimer.SetTargetWindow(Handle);
         m_MsgTimer.SetMessageValue(WM_TICK);
-        m_MsgTimer.SetInterval(14);
+        m_MsgTimer.SetInterval(TickInterval);
     }
 
     void KctShutdown() noexcept
@@ -1127,7 +1126,7 @@ public:
         case WM_TICK:
             if (m_bWaitSwapChain)
                 NtWaitForSingleObject(m_hEvtSwapChain, FALSE, nullptr);
-            KctClockTick(TickInterval);
+            KctClockTick();
             return 0;
 
         case WM_PAINT:
