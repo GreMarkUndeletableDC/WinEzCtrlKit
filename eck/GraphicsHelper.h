@@ -4,15 +4,15 @@
 ECK_NAMESPACE_BEGIN
 enum class GradientMode :BYTE
 {
-    None,	// 无效
-    T2B,	// 从上到下
-    B2T,	// 从下到上
-    L2R,	// 从左到右
-    R2L,	// 从右到左
-    TL2BR,	// 从左上到右下↘
-    BR2TL,	// 从右下到左上↖
-    BL2TR,	// 从左下到右上↗
-    TR2BL	// 从右上到左下↙
+    None,   // 无效
+    T2B,    // 从上到下
+    B2T,    // 从下到上
+    L2R,    // 从左到右
+    R2L,    // 从右到左
+    TL2BR,  // 从左上到右下↘
+    BR2TL,  // 从右下到左上↖
+    BL2TR,  // 从左下到右上↗
+    TR2BL   // 从右上到左下↙
 };
 
 inline BOOL FillGradientRect(

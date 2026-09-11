@@ -38,14 +38,14 @@ protected:
     WCHAR m_chMask{};
     InputMode m_iInputMode{ InputMode::Normal };
 
-    BITBOOL m_bAutoWrap : 1 = TRUE;				// [多行][延迟标志]自动换行，不加入ES_AUTOHSCROLL
-    BITBOOL m_bMultiLineCueBanner : 1 = TRUE;	// [多行]显示提示
-    BITBOOL m_bMultiLine : 1 = FALSE;			// [延迟标志]多行
-    BITBOOL m_bChangeCreateStyle : 1 = TRUE;	// [延迟标志]指示样式是否受上面两个延迟标志影响
-    BITBOOL m_bDisableColorOptions : 1 = FALSE;	// 禁用颜色选项，启用后不处理着色通知
-    BITBOOL m_bCtrlASelectAll : 1 = TRUE;		// Ctrl+A全选
+    BITBOOL m_bAutoWrap : 1 = TRUE;             // [多行][延迟标志]自动换行，不加入ES_AUTOHSCROLL
+    BITBOOL m_bMultiLineCueBanner : 1 = TRUE;   // [多行]显示提示
+    BITBOOL m_bMultiLine : 1 = FALSE;           // [延迟标志]多行
+    BITBOOL m_bChangeCreateStyle : 1 = TRUE;    // [延迟标志]指示样式是否受上面两个延迟标志影响
+    BITBOOL m_bDisableColorOptions : 1 = FALSE; // 禁用颜色选项，启用后不处理着色通知
+    BITBOOL m_bCtrlASelectAll : 1 = TRUE;       // Ctrl+A全选
 
-    BITBOOL m_bEmpty : 1 = FALSE;				// 空编辑框标志
+    BITBOOL m_bEmpty : 1 = FALSE;               // 空编辑框标志
 
     void UpdateTextInfomation()
     {

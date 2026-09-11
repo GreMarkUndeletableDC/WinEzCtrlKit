@@ -6,18 +6,18 @@ using FLvItemCompare = int(CALLBACK*)(LPARAM lParam1, LPARAM lParam2, LPARAM lPa
 using FLvItemCompareEx = int(CALLBACK*)(int idx1, int idx2, LPARAM lParamSort);
 
 #define ECK_W_LVE_STYLE(Name, Style)                    \
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-	BOOL StyleGet##Name() const                         \
-	{                                                   \
-		if constexpr (Style == 0)                       \
-			return !GetLVExtendStyle();                 \
-		else                                            \
-			return IsBitSet(GetLVExtendStyle(), Style); \
-	}                                                   \
-	void StyleSet##Name(BOOL b) const                   \
-	{                                                   \
-		SetLVExtendStyle(b ? Style : 0, Style);         \
-	}
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+    BOOL StyleGet##Name() const                         \
+    {                                                   \
+        if constexpr (Style == 0)                       \
+            return !GetLVExtendStyle();                 \
+        else                                            \
+            return IsBitSet(GetLVExtendStyle(), Style); \
+    }                                                   \
+    void StyleSet##Name(BOOL b) const                   \
+    {                                                   \
+        SetLVExtendStyle(b ? Style : 0, Style);         \
+    }
 
 class CListView : public CWindow
 {

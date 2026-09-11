@@ -58,10 +58,10 @@ public:
         BFITEM byAddtFlags{};
     };
 private:
-    std::vector<ITEM> m_vItem{};	// 所有Vorbis注释
-    std::vector<PICTURE> m_vPicture{};	    // 所有图片
-    STREAMINFO m_si{};				// 流信息
-    std::vector<BLOCK> m_vBlock{};	// 其他块
+    std::vector<ITEM> m_vItem{};    // 所有Vorbis注释
+    std::vector<PICTURE> m_vPicture{};      // 所有图片
+    STREAMINFO m_si{};              // 流信息
+    std::vector<BLOCK> m_vBlock{};  // 其他块
 
     CStringW m_rsVendor{};
 
@@ -168,7 +168,7 @@ public:
 #undef ECKTEMP_GET_VAL
 #define ECKTEMP_GET_VAL(MiField) \
             if (bMove)           \
-                MiField = std::move(e.rsValue);	\
+                MiField = std::move(e.rsValue); \
             else                 \
                 MiField = e.rsValue;
 

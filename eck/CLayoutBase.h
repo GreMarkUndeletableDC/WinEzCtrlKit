@@ -13,13 +13,13 @@ enum : UINT
 
     // 九向对齐，低4位
     LF_ALIGN_LT,// 左上
-    LF_ALIGN_T,	// 上
+    LF_ALIGN_T, // 上
     LF_ALIGN_RT,// 右上
-    LF_ALIGN_L,	// 左
-    LF_ALIGN_C,	// 中
-    LF_ALIGN_R,	// 右
+    LF_ALIGN_L, // 左
+    LF_ALIGN_C, // 中
+    LF_ALIGN_R, // 右
     LF_ALIGN_LB,// 左下
-    LF_ALIGN_B,	// 下
+    LF_ALIGN_B, // 下
     LF_ALIGN_RB,// 右下
 
     // 单行对齐

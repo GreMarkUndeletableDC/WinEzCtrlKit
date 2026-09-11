@@ -324,45 +324,45 @@ enum class PreferredAppMode
 enum WINDOWCOMPOSITIONATTRIB
 {
     WCA_UNDEFINED,
-    WCA_NCRENDERING_ENABLED,			// [g;s]DWMWA_NCRENDERING_ENABLED
-    WCA_NCRENDERING_POLICY,				// [g;s]DWMWA_NCRENDERING_POLICY
-    WCA_TRANSITIONS_FORCEDISABLED,		// [g;s]DWMWA_TRANSITIONS_FORCEDISABLED
-    WCA_ALLOW_NCPAINT,					// [g;s]DWMWA_ALLOW_NCPAINT
-    WCA_CAPTION_BUTTON_BOUNDS,			// [g;s]DWMWA_CAPTION_BUTTON_BOUNDS
-    WCA_NONCLIENT_RTL_LAYOUT,			// [g;s]DWMWA_NONCLIENT_RTL_LAYOUT
-    WCA_FORCE_ICONIC_REPRESENTATION,	// [g;s]DWMWA_FORCE_ICONIC_REPRESENTATION
-    WCA_EXTENDED_FRAME_BOUNDS,			// [g;s]DWMWA_EXTENDED_FRAME_BOUNDS
+    WCA_NCRENDERING_ENABLED,            // [g;s]DWMWA_NCRENDERING_ENABLED
+    WCA_NCRENDERING_POLICY,             // [g;s]DWMWA_NCRENDERING_POLICY
+    WCA_TRANSITIONS_FORCEDISABLED,      // [g;s]DWMWA_TRANSITIONS_FORCEDISABLED
+    WCA_ALLOW_NCPAINT,                  // [g;s]DWMWA_ALLOW_NCPAINT
+    WCA_CAPTION_BUTTON_BOUNDS,          // [g;s]DWMWA_CAPTION_BUTTON_BOUNDS
+    WCA_NONCLIENT_RTL_LAYOUT,           // [g;s]DWMWA_NONCLIENT_RTL_LAYOUT
+    WCA_FORCE_ICONIC_REPRESENTATION,    // [g;s]DWMWA_FORCE_ICONIC_REPRESENTATION
+    WCA_EXTENDED_FRAME_BOUNDS,          // [g;s]DWMWA_EXTENDED_FRAME_BOUNDS
     // Win7+
-    WCA_HAS_ICONIC_BITMAP,				// [g;s]DWMWA_HAS_ICONIC_BITMAP
-    WCA_THEME_ATTRIBUTES,				// 
-    WCA_NCRENDERING_EXILED,				// 
-    WCA_NCADORNMENTINFO,				// 
-    WCA_EXCLUDED_FROM_LIVEPREVIEW,		// [g;s]DWMWA_EXCLUDED_FROM_PEEK
-    WCA_VIDEO_OVERLAY_ACTIVE,			// 
-    WCA_FORCE_ACTIVEWINDOW_APPEARANCE,	// 
-    WCA_DISALLOW_PEEK,					// [g]DWMWA_DISALLOW_PEEK
+    WCA_HAS_ICONIC_BITMAP,              // [g;s]DWMWA_HAS_ICONIC_BITMAP
+    WCA_THEME_ATTRIBUTES,               // 
+    WCA_NCRENDERING_EXILED,             // 
+    WCA_NCADORNMENTINFO,                // 
+    WCA_EXCLUDED_FROM_LIVEPREVIEW,      // [g;s]DWMWA_EXCLUDED_FROM_PEEK
+    WCA_VIDEO_OVERLAY_ACTIVE,           // 
+    WCA_FORCE_ACTIVEWINDOW_APPEARANCE,  // 
+    WCA_DISALLOW_PEEK,                  // [g]DWMWA_DISALLOW_PEEK
     // Win8+
-    WCA_CLOAK,							// [g;s]DWMWA_CLOAK
-    WCA_CLOAKED,						// [g;s]DWMWA_CLOAKED
-    WCA_ACCENT_POLICY,					// 修改窗口强调模式，pvData指向ACCENT_POLICY结构
-    WCA_FREEZE_REPRESENTATION,			// [g;s]DWMWA_FREEZE_REPRESENTATION
-    WCA_EVER_UNCLOAKED,					// 
-    WCA_VISUAL_OWNER,					// 
+    WCA_CLOAK,                          // [g;s]DWMWA_CLOAK
+    WCA_CLOAKED,                        // [g;s]DWMWA_CLOAKED
+    WCA_ACCENT_POLICY,                  // 修改窗口强调模式，pvData指向ACCENT_POLICY结构
+    WCA_FREEZE_REPRESENTATION,          // [g;s]DWMWA_FREEZE_REPRESENTATION
+    WCA_EVER_UNCLOAKED,                 // 
+    WCA_VISUAL_OWNER,                   // 
     // Win10+
-    WCA_HOLOGRAPHIC,					// 
+    WCA_HOLOGRAPHIC,                    // 
     // 1709+
-    WCA_EXCLUDED_FROM_DDA,				// [g;s][已文档化]防止桌面复制API捕捉窗口，pvData指向BOOL类型的值
-    WCA_PASSIVEUPDATEMODE,				// [g;s]DWMWA_PASSIVE_UPDATE_MODE
+    WCA_EXCLUDED_FROM_DDA,              // [g;s][已文档化]防止桌面复制API捕捉窗口，pvData指向BOOL类型的值
+    WCA_PASSIVEUPDATEMODE,              // [g;s]DWMWA_PASSIVE_UPDATE_MODE
     // 1809+（？）
-    WCA_USEDARKMODECOLORS,				// [g;s]DWMWA_USE_IMMERSIVE_DARK_MODE
+    WCA_USEDARKMODECOLORS,              // [g;s]DWMWA_USE_IMMERSIVE_DARK_MODE
     // Win11+
-    WCA_MINIMIZE_ANIMATION,				// [g;s]DWMWA_WINDOW_CORNER_PREFERENCE
-    WCA_MAXIMIZE_ANIMATION,				// [g;s]见下
-    WCA_DISABLE_MOVESIZE_FEEDBACK,		// 
+    WCA_MINIMIZE_ANIMATION,             // [g;s]DWMWA_WINDOW_CORNER_PREFERENCE
+    WCA_MAXIMIZE_ANIMATION,             // [g;s]见下
+    WCA_DISABLE_MOVESIZE_FEEDBACK,      // 
     // 22621+
-    WCA_SYSTEM_BACKDROP_TYPE,			// [g;s]DWMWA_SYSTEM_BACKDROP_TYPE
-    WCA_SET_TAGGED_WINDOW_RECT,			// 
-    WCA_CLEAR_TAGGED_WINDOW_RECT,		// 
+    WCA_SYSTEM_BACKDROP_TYPE,           // [g;s]DWMWA_SYSTEM_BACKDROP_TYPE
+    WCA_SET_TAGGED_WINDOW_RECT,         // 
+    WCA_CLEAR_TAGGED_WINDOW_RECT,       // 
     WCA_LAST,
     // 以下常量与SystemInformer的定义兼容
 
@@ -384,10 +384,10 @@ DWMWA_TEXT_COLOR
 以上三个常量对应WCA_MAXIMIZE_ANIMATION = 28
 结构定义：
 struct DUMMY {
-    int iType;	//  0 - DWMWA_BORDER_COLOR;
+    int iType;  //  0 - DWMWA_BORDER_COLOR;
                     1 - DWMWA_CAPTION_COLOR;
                     2 - DWMWA_TEXT_COLOR
-    DWORD cr;	// 非常奇怪，为带透明度的COLORREF，DwmSWA总将透明度设为0xFF
+    DWORD cr;   // 非常奇怪，为带透明度的COLORREF，DwmSWA总将透明度设为0xFF
 };
 -----------
 [g]DWMWA_VISIBLE_FRAME_BORDER_THICKNESS
@@ -422,9 +422,9 @@ enum AccentState
 struct ACCENT_POLICY
 {
     AccentState AccentState;
-    DWORD AccentFlags;	// Unknown
+    DWORD AccentFlags;  // Unknown
     DWORD GradientColor;// ARGB
-    int AnimationId;	// Unknown
+    int AnimationId;    // Unknown
 };
 
 using FSetWindowCompositionAttribute = BOOL(WINAPI*)(HWND, const WINDOWCOMPOSITIONATTRIBDATA*);
@@ -470,17 +470,17 @@ using FSetPreferredAppMode = PreferredAppMode(WINAPI*)(PreferredAppMode);
 using FIsDarkModeAllowedForApp = bool(WINAPI*)();
 
 
-extern FAllowDarkModeForWindow			pfnAllowDarkModeForWindow;
-extern FAllowDarkModeForApp				pfnAllowDarkModeForApp;
-extern FIsDarkModeAllowedForWindow		pfnIsDarkModeAllowedForWindow;
-extern FShouldAppsUseDarkMode			pfnShouldAppsUseDarkMode;
-extern FFlushMenuThemes					pfnFlushMenuThemes;
-extern FRefreshImmersiveColorPolicyState		pfnRefreshImmersiveColorPolicyState;
-extern FGetIsImmersiveColorUsingHighContrast	pfnGetIsImmersiveColorUsingHighContrast;
+extern FAllowDarkModeForWindow          pfnAllowDarkModeForWindow;
+extern FAllowDarkModeForApp             pfnAllowDarkModeForApp;
+extern FIsDarkModeAllowedForWindow      pfnIsDarkModeAllowedForWindow;
+extern FShouldAppsUseDarkMode           pfnShouldAppsUseDarkMode;
+extern FFlushMenuThemes                 pfnFlushMenuThemes;
+extern FRefreshImmersiveColorPolicyState        pfnRefreshImmersiveColorPolicyState;
+extern FGetIsImmersiveColorUsingHighContrast    pfnGetIsImmersiveColorUsingHighContrast;
 
-extern FShouldSystemUseDarkMode			pfnShouldSystemUseDarkMode;
-extern FSetPreferredAppMode				pfnSetPreferredAppMode;
-extern FIsDarkModeAllowedForApp			pfnIsDarkModeAllowedForApp;
+extern FShouldSystemUseDarkMode         pfnShouldSystemUseDarkMode;
+extern FSetPreferredAppMode             pfnSetPreferredAppMode;
+extern FIsDarkModeAllowedForApp         pfnIsDarkModeAllowedForApp;
 #endif// !ECK_OPT_NO_DARKMODE
 
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5 && !ECK_OPT_NO_DARKMODE
@@ -650,82 +650,82 @@ FORCEINLINE NTSTATUS NtWow64QueryInformationProcess64(
 #endif// !defined(_WIN64)
 
 #ifndef LVSR_SELECTION
-#define LVSR_SELECTION			0
+#define LVSR_SELECTION          0
 #endif
 
 #ifndef LVSR_CUT
-#define LVSR_CUT				1
+#define LVSR_CUT                1
 #endif
 
 #ifndef LVM_SETLVRANGEOBJECT
 // (LVSR_*, ILVRange*)
-#define LVM_SETLVRANGEOBJECT	(LVM_FIRST + 82)
+#define LVM_SETLVRANGEOBJECT    (LVM_FIRST + 82)
 #endif
 
 #ifndef LVM_QUERYINTERFACE
 // (IID*, void**)
-#define LVM_QUERYINTERFACE		(LVM_FIRST + 189)
+#define LVM_QUERYINTERFACE      (LVM_FIRST + 189)
 #endif
 
 #ifndef LVM_RESETEMPTYTEXT
 // (0, 0)
-#define LVM_RESETEMPTYTEXT		(LVM_FIRST + 84)
+#define LVM_RESETEMPTYTEXT      (LVM_FIRST + 84)
 #endif
 
 #ifndef LVM_SETFROZENITEM
 // (bFreezeOrUnfreeze, idxItem)
-#define LVM_SETFROZENITEM		(LVM_FIRST + 85)
+#define LVM_SETFROZENITEM       (LVM_FIRST + 85)
 #endif
 
 #ifndef LVM_GETFROZENITEM
 // (0, 0)
-#define LVM_GETFROZENITEM		(LVM_FIRST + 86)
+#define LVM_GETFROZENITEM       (LVM_FIRST + 86)
 #endif
 
 #ifndef LVM_SETFROZENSLOT
 // (bFreezeOrUnfreeze, ppt)
-#define LVM_SETFROZENSLOT		(LVM_FIRST + 88)
+#define LVM_SETFROZENSLOT       (LVM_FIRST + 88)
 #endif
 
 #ifndef LVM_GETFROZENSLOT
 // (0, prc)
-#define LVM_GETFROZENSLOT		(LVM_FIRST + 89)
+#define LVM_GETFROZENSLOT       (LVM_FIRST + 89)
 #endif
 
 #ifndef LVM_SETVIEWMARGINS
 // (0, prc)
-#define LVM_SETVIEWMARGINS		(LVM_FIRST + 90)
+#define LVM_SETVIEWMARGINS      (LVM_FIRST + 90)
 #endif
 
 #ifndef LVM_GETVIEWMARGINS
 // (0, prc)
-#define LVM_GETVIEWMARGINS		(LVM_FIRST + 91)
+#define LVM_GETVIEWMARGINS      (LVM_FIRST + 91)
 #endif
 
 #ifndef LVN_ENDDRAG
-#define LVN_ENDDRAG				(LVN_FIRST-10)
+#define LVN_ENDDRAG             (LVN_FIRST-10)
 #endif
 
 #ifndef LVN_ENDRDRAG
-#define LVN_ENDRDRAG			(LVN_FIRST-12)
+#define LVN_ENDRDRAG            (LVN_FIRST-12)
 #endif
 
 #ifndef LVN_GETEMPTYTEXTA
 // (NMLVDISPINFO*)
-#define LVN_GETEMPTYTEXTA		(LVN_FIRST-60)
+#define LVN_GETEMPTYTEXTA       (LVN_FIRST-60)
 #endif
 
 #ifndef LVN_GETEMPTYTEXTW
 // (NMLVDISPINFO*)
-#define LVN_GETEMPTYTEXTW		(LVN_FIRST-61)
+#define LVN_GETEMPTYTEXTW       (LVN_FIRST-61)
 #endif
 
 #ifndef TO_DEFAULTCOLOREMOJI
-#define TO_DEFAULTCOLOREMOJI	0x1000 
+#define TO_DEFAULTCOLOREMOJI    0x1000 
 #endif
 
 #ifndef TO_DISPLAYFONTCOLOR
-#define TO_DISPLAYFONTCOLOR		0x2000
+#define TO_DISPLAYFONTCOLOR     0x2000
 #endif
 
 constexpr inline IID IID_ILVRange{ 0x96a23e16L, 0xa1bc, 0x11d1, { 0xb0, 0x84, 0x00, 0xc0, 0x4f, 0xc3, 0x3a, 0xa5 } };
@@ -1360,12 +1360,12 @@ public:
 // ==================================
 
 // window messages related to menu bar drawing
-#define WM_UAHDESTROYWINDOW    0x0090	// handled by DefWindowProc
-#define WM_UAHDRAWMENU         0x0091	// lParam is UAHMENU
-#define WM_UAHDRAWMENUITEM     0x0092	// lParam is UAHDRAWMENUITEM
-#define WM_UAHINITMENU         0x0093	// handled by DefWindowProc
-#define WM_UAHMEASUREMENUITEM  0x0094	// lParam is UAHMEASUREMENUITEM
-#define WM_UAHNCPAINTMENUPOPUP 0x0095	// handled by DefWindowProc
+#define WM_UAHDESTROYWINDOW    0x0090   // handled by DefWindowProc
+#define WM_UAHDRAWMENU         0x0091   // lParam is UAHMENU
+#define WM_UAHDRAWMENUITEM     0x0092   // lParam is UAHDRAWMENUITEM
+#define WM_UAHINITMENU         0x0093   // handled by DefWindowProc
+#define WM_UAHMEASUREMENUITEM  0x0094   // lParam is UAHMEASUREMENUITEM
+#define WM_UAHNCPAINTMENUPOPUP 0x0095   // handled by DefWindowProc
 
 // describes the sizes of the menu bar or menu item
 typedef union tagUAHMENUITEMMETRICS
@@ -1394,7 +1394,7 @@ typedef struct tagUAHMENU
 {
     HMENU hmenu;
     HDC hdc;
-    DWORD dwFlags;	// no idea what these mean, in my testing 
+    DWORD dwFlags;  // no idea what these mean, in my testing 
     // it's either 0x00000a00 or sometimes 0x00000a10
 } UAHMENU;
 

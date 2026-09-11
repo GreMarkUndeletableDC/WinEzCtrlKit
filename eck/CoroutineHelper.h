@@ -16,10 +16,10 @@ struct CoroPromiseBase
 
     enum class State : LONG
     {
-        Initial,	// 无
-        HasNext,	// 同步任务，需要恢复到等待方
-        Completed,	// 异步任务，已完成
-        Cancelled,	// 提供可设置为取消标志的能力
+        Initial,    // 无
+        HasNext,    // 同步任务，需要恢复到等待方
+        Completed,  // 异步任务，已完成
+        Cancelled,  // 提供可设置为取消标志的能力
     };
 
     LONG m_cRef{ 2 };// 协程引用计数，Task对象与协程帧各持有一份引用

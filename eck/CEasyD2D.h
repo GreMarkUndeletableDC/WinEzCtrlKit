@@ -167,7 +167,7 @@ struct CEasyD2D
         return S_OK;
     }
 
-    HRESULT	CreateComposition(const EZD2D_PARAM& Param) noexcept
+    HRESULT CreateComposition(const EZD2D_PARAM& Param) noexcept
     {
         const DXGI_SWAP_CHAIN_DESC1 DxgiSwapChainDesc
         {

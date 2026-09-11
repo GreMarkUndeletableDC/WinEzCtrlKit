@@ -1,26 +1,4 @@
 ﻿#pragma once
-/*
-* 关于DPI感知：
-*   仅使用'系统DPI感知'和'每显示器DPI感知V2'，
-*   不使用'每显示器DPI感知V1'，代码也未进行适配。
-*
-* 关于CommCtrl6.0：
-*   已弃用在本头文件中添加链接器注释的做法，须改用
-*   清单文件。
-*
-* 通用清单文件位于eck\Others\Common.manifest。
-*/
-
-//#ifndef ECK_OPT_NO_COMCTL60
-//#pragma comment(linker,"\"/manifestdependency:						\
-//		type='win32'								\
-//		name='Microsoft.Windows.Common-Controls'	\
-//		version='6.0.0.0'							\
-//		processorArchitecture='*'					\
-//		publicKeyToken='6595b64144ccf1df'			\
-//		language='*'								\
-//	\"")
-//#endif
 
 #if !ECK_OPT_NO_AUTO_ADD_LIB
 #pragma comment(lib, "Gdiplus.lib")
@@ -62,47 +40,5 @@
 #    define ECK_OPT_CRT_DLL 0
 #  endif
 #endif
-
-#if ECK_OPT_CRT_DLL
-#  ifdef _M_ARM64
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_arm64d_Md.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_arm64_Md.lib")
-#    endif
-#  elif defined(_M_X64)
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x64d_Md.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x64_Md.lib")
-#    endif
-#  else
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x86d_Md.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x86_Md.lib")
-#    endif
-#  endif
-#else
-#  ifdef _M_ARM64
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_arm64d.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_arm64.lib")
-#    endif
-#  elif defined(_M_X64)
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x64d.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x64.lib")
-#    endif
-#  else
-#    ifdef _DEBUG
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x86d.lib")
-#    else
-#      pragma comment(lib,"eck\\ThirdPartyLib\\ThirdPartyLib_x86.lib")
-#    endif
-#  endif
-#endif// ECK_OPT_CRT_DLL
 
 #endif// !ECK_OPT_NO_AUTO_ADD_LIB

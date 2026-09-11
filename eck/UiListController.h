@@ -343,7 +343,7 @@ private:
 
     // 拖动选择起始点，相对绝对空间
     TCoord m_xDragSelStart{}, m_yDragSelStart{};
-    TRect m_rcDragSel{};		// 当前选择矩形，相对绝对空间
+    TRect m_rcDragSel{};        // 当前选择矩形，相对绝对空间
     TCoord m_dCursorToItemMax{};// 鼠标指针到项目的最大距离
 
     View m_eView{ View::List };

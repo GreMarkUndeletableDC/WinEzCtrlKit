@@ -8,18 +8,18 @@ TVS_EX_FADEINOUTEXPANDOS | TVS_EX_PARTIALCHECKBOXES | TVS_EX_EXCLUSIONCHECKBOXES
 TVS_EX_DIMMEDCHECKBOXES | TVS_EX_DRAWIMAGEASYNC;
 
 #define ECK_W_TVE_STYLE(Name, Style)                    \
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-	BOOL StyleGet##Name() const noexcept                \
-	{                                                   \
-		if constexpr (Style == 0)                       \
-			return !GetTVExtendStyle();                 \
-		else                                            \
-			return IsBitSet(GetTVExtendStyle(), Style); \
-	}                                                   \
-	void StyleSet##Name(BOOL b) const noexcept          \
-	{                                                   \
-		SetTVExtendStyle(b ? Style : 0, Style);         \
-	}
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+    BOOL StyleGet##Name() const noexcept                \
+    {                                                   \
+        if constexpr (Style == 0)                       \
+            return !GetTVExtendStyle();                 \
+        else                                            \
+            return IsBitSet(GetTVExtendStyle(), Style); \
+    }                                                   \
+    void StyleSet##Name(BOOL b) const noexcept          \
+    {                                                   \
+        SetTVExtendStyle(b ? Style : 0, Style);         \
+    }
 
 class CTreeView : public CWindow
 {

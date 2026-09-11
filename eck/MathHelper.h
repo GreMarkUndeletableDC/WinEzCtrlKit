@@ -141,7 +141,7 @@ inline DirectX::XMMATRIX CalculateDistortMatrix(
     _In_reads_(4) const D2D1_POINT_2F* pt) noexcept
 {
     /*
-    *			N		  B			A
+    *           N         B         A
     * (k0, l0) -> (0, 0) -> (0, 0) -> (x0, y0)
     * (k1, l1) -> (1, 0) -> (1, 0) -> (x1, y1)
     * (k2, l2) -> (0, 1) -> (0, 1) -> (x2, y2)
@@ -214,7 +214,7 @@ inline DirectX::XMMATRIX CalculateInverseDistortMatrix(
     _In_reads_(4) const D2D1_POINT_2F* pt) noexcept
 {
     /*
-    *			A		  B			N
+    *           A         B         N
     * (x0, y0) -> (0, 0) -> (0, 0) -> (k0, l0)
     * (x1, y1) -> (1, 0) -> (1, 0) -> (k1, l1)
     * (x2, y2) -> (0, 1) -> (0, 1) -> (k2, l2)

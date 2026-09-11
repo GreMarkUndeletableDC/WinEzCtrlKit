@@ -10,11 +10,11 @@ ECK_NAMESPACE_BEGIN
 enum : UINT
 {
     // 项目标志
-    LBN_IF_SEL = 1u << 0,		// 选中
+    LBN_IF_SEL = 1u << 0,       // 选中
 
     // 搜索
-    LBN_SF_CASEINSENSITIVE = 1u << 0,	// 不区分大小写
-    LBN_SF_WHOLE = 1u << 1,		// 完全匹配
+    LBN_SF_CASEINSENSITIVE = 1u << 0,   // 不区分大小写
+    LBN_SF_WHOLE = 1u << 1,     // 完全匹配
 };
 
 struct LBNITEM
@@ -56,12 +56,12 @@ struct NMLBNSEARCH
 /*
 * LBN产生的通知
 * 特定通知：
-* NM_LBN_GETDISPINFO	请求项目显示信息，若处理该通知，返回TRUE
-* NM_LBN_BEGINDRAG		开始拖动项目
-* NM_LBN_ENDDRAG		结束拖动项目
-* NM_LBN_DISMISS		组合框应隐藏列表
-* NM_LBN_ITEMCHANGED	项目状态改变
-* NM_LBN_ITEMSTANDBY	调用SetItemCount时发送
+* NM_LBN_GETDISPINFO    请求项目显示信息，若处理该通知，返回TRUE
+* NM_LBN_BEGINDRAG      开始拖动项目
+* NM_LBN_ENDDRAG        结束拖动项目
+* NM_LBN_DISMISS        组合框应隐藏列表
+* NM_LBN_ITEMCHANGED    项目状态改变
+* NM_LBN_ITEMSTANDBY    调用SetItemCount时发送
 * 标准通知：
 * NM_SETFOCUS
 * NM_KILLFOCUS
@@ -80,8 +80,8 @@ private:
 
     CStringW m_rsTextBuf{};
 
-    HWND m_hComboBox{};	// 关联的组合框，可以是除自身外的任何窗口
-    HWND m_hParent{};	// 接收通知的父窗口
+    HWND m_hComboBox{}; // 关联的组合框，可以是除自身外的任何窗口
+    HWND m_hParent{};   // 接收通知的父窗口
 
     CMemoryDC m_DC{};
     HFONT m_hFont{};
@@ -102,22 +102,22 @@ private:
     int m_cyItem{ 24 };
     int m_cyFont{};
 
-    BITBOOL m_bMultiSel : 1 = FALSE;	// 多选
-    BITBOOL m_bExtendSel : 1 = FALSE;	// 扩展多选
-    BITBOOL m_bAllowDrag : 1 = FALSE;	// 允许拖放项目
-    BITBOOL m_bAutoItemHeight : 1 = TRUE;		// 自动计算项目高度
+    BITBOOL m_bMultiSel : 1 = FALSE;    // 多选
+    BITBOOL m_bExtendSel : 1 = FALSE;   // 扩展多选
+    BITBOOL m_bAllowDrag : 1 = FALSE;   // 允许拖放项目
+    BITBOOL m_bAutoItemHeight : 1 = TRUE;       // 自动计算项目高度
 
 #ifdef _DEBUG
-    BITBOOL m_bDbgDrawMarkItem : 1 = 0;	// [调试]绘制标记项目
+    BITBOOL m_bDbgDrawMarkItem : 1 = 0; // [调试]绘制标记项目
 #endif
-    BITBOOL m_bHasFocus : 1 = FALSE;	// 是否有焦点
-    BITBOOL m_bLBtnDown : 1 = FALSE;	// 鼠标左键已按下
-    BITBOOL m_bRBtnDown : 1 = FALSE;	// 鼠标右键已按下
-    BITBOOL m_bFocusIndicatorVisible : 1 = Debug;	// 焦点指示器是否可见
-    BITBOOL m_bNmDragging : 1 = FALSE;			// 正在拖放项目，产生NM_LBN_BEGINDRAG时设置为TRUE
-    BITBOOL m_bTrackComboBoxList : 1 = FALSE;	// 正在作为组合框的下拉列表显示
-    BITBOOL m_bProtectCapture : 1 = FALSE;		// 允许其他窗口占用鼠标捕获，通常用于弹出下拉列表时显示菜单等
-    BITBOOL m_bGenItemNotify : 1 = FALSE;		// 是否生成项目通知
+    BITBOOL m_bHasFocus : 1 = FALSE;    // 是否有焦点
+    BITBOOL m_bLBtnDown : 1 = FALSE;    // 鼠标左键已按下
+    BITBOOL m_bRBtnDown : 1 = FALSE;    // 鼠标右键已按下
+    BITBOOL m_bFocusIndicatorVisible : 1 = Debug;   // 焦点指示器是否可见
+    BITBOOL m_bNmDragging : 1 = FALSE;          // 正在拖放项目，产生NM_LBN_BEGINDRAG时设置为TRUE
+    BITBOOL m_bTrackComboBoxList : 1 = FALSE;   // 正在作为组合框的下拉列表显示
+    BITBOOL m_bProtectCapture : 1 = FALSE;      // 允许其他窗口占用鼠标捕获，通常用于弹出下拉列表时显示菜单等
+    BITBOOL m_bGenItemNotify : 1 = FALSE;       // 是否生成项目通知
 
     int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
 
@@ -608,11 +608,11 @@ private:
         SelectItemForClick(idx);
         /*
         * 拖动动作：
-        * 模式		禁止拖放时	允许拖放时
+        * 模式      禁止拖放时  允许拖放时
         * ------------------------------
-        * 单选		跟随选中		无
-        * 多选		无			无
-        * 扩展多选	范围选择		无
+        * 单选      跟随选中    无
+        * 多选      无         无
+        * 扩展多选   范围选择    无
         */
         if (IsMouseMovedBeforeDragging(hWnd, ptScr.x, ptScr.y, 0))// YEILD, ReleaseCapture
         {

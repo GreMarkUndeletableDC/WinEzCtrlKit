@@ -28,14 +28,6 @@ private:
     BITBOOL m_bMoveAnywhere : 1 = FALSE;
     BITBOOL m_bClrDisableEdit : 1 = FALSE;
 public:
-    ECKPROP(GetBackgroundImage, SetBackgroundImage) HBITMAP		BkImage;		// 背景图片
-    ECKPROP(GetBackgroundMode, SetBackgroundMode)   ImageMode	BkImageMode;	// 背景图片模式
-    ECKPROP(GetBackgroundFillWindow, SetBackgroundFillWindow)   BOOL		FillWndImage;   // 全窗口绘制背景图片
-    ECKPROP(GetMoveable, SetMoveable)               BOOL		Moveable;		// 可否移动
-    ECKPROP(GetEscClose, SetEscClose)               BOOL		EscClose;		// ESC关闭
-    ECKPROP(GetDragMoveAnywhere, SetDragMoveAnywhere)           BOOL		MoveAnywhere;   // 随意移动
-    ECKPROP(GetBackgroundColor, SetBackgroundColor) COLORREF	BkColor;		// 背景颜色
-    ECKPROP_R(GetBackgroundImageSize)               SIZE		BkImageSize;	// 背景图片大小
 
     BOOL PreTranslateMessage(const MSG& Msg) noexcept override
     {

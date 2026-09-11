@@ -177,23 +177,23 @@ struct CHttpRequestAsync
         {
             // 下列字段仅供回调访问
 
-            CHttpRequestAsync* pThis;	// 指向CHttpRequestAsync实例
-            decltype(Token)& Token;		// 协程控制
-            HWhRequest hRequest;		// 请求句柄
+            CHttpRequestAsync* pThis;   // 指向CHttpRequestAsync实例
+            decltype(Token)& Token;     // 协程控制
+            HWhRequest hRequest;        // 请求句柄
             union
-            {							// 当接收为流时，此联合无效
-                DWORD cbData;			// 当接收为字节集时，存储WinHttpQueryDataAvailable的结果
-                HANDLE hFile;			// 当接收为文件时，存储文件句柄
+            {                           // 当接收为流时，此联合无效
+                DWORD cbData;           // 当接收为字节集时，存储WinHttpQueryDataAvailable的结果
+                HANDLE hFile;           // 当接收为文件时，存储文件句柄
             };
             UniquePtr<DelVA<void>> pBuf;// 8K缓冲区
-            UINT cbTotal;				// Content-Length
-            UINT cbRead;				// 已读取的字节数，用于报告进度
-            BITBOOL bRequestClosed : 1;	// 请求句柄是否已关闭
+            UINT cbTotal;               // Content-Length
+            UINT cbRead;                // 已读取的字节数，用于报告进度
+            BITBOOL bRequestClosed : 1; // 请求句柄是否已关闭
 
             // 下列字段由回调和调用方共享
 
-            HRESULT hr;					// 因失败而取消
-            CEvent EvtSafeExit{ {}, FALSE, FALSE };	// 安全退出事件
+            HRESULT hr;                 // 因失败而取消
+            CEvent EvtSafeExit{ {}, FALSE, FALSE }; // 安全退出事件
 
             void Cancel(HRESULT hr)
             {

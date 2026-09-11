@@ -6,18 +6,18 @@
 ECK_NAMESPACE_BEGIN
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5// 1809+
 #define ECK_W_EDE_STYLE(Name, Style)                    \
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-	BOOL StyleGet##Name() const                         \
-	{                                                   \
-		if constexpr (Style == 0)                       \
-			return !GetEDExtendStyle();                 \
-		else                                            \
-			return IsBitSet(GetEDExtendStyle(), Style); \
-	}                                                   \
-	void StyleSet##Name(BOOL b) const                   \
-	{                                                   \
-		SetEDExtendStyle(b ? Style : 0, Style);         \
-	}
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
+    BOOL StyleGet##Name() const                         \
+    {                                                   \
+        if constexpr (Style == 0)                       \
+            return !GetEDExtendStyle();                 \
+        else                                            \
+            return IsBitSet(GetEDExtendStyle(), Style); \
+    }                                                   \
+    void StyleSet##Name(BOOL b) const                   \
+    {                                                   \
+        SetEDExtendStyle(b ? Style : 0, Style);         \
+    }
 #endif// NTDDI_VERSION >= NTDDI_WIN10_RS5
 
 class CEdit : public CWindow

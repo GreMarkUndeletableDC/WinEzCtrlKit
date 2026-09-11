@@ -4,18 +4,18 @@
 
 ECK_NAMESPACE_BEGIN
 #define ECK_W_TABE_STYLE(Name, Style)                    \
-	ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;   \
-	BOOL StyleGet##Name() const noexcept                 \
-	{                                                    \
-		if constexpr (Style == 0)                        \
-			return !GetTABExtendStyle();                 \
-		else                                             \
-			return IsBitSet(GetTABExtendStyle(), Style); \
-	}                                                    \
-	void StyleSet##Name(BOOL b) const noexcept           \
-	{                                                    \
-		SetTABExtendStyle(b ? Style : 0, Style);         \
-	}
+    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;   \
+    BOOL StyleGet##Name() const noexcept                 \
+    {                                                    \
+        if constexpr (Style == 0)                        \
+            return !GetTABExtendStyle();                 \
+        else                                             \
+            return IsBitSet(GetTABExtendStyle(), Style); \
+    }                                                    \
+    void StyleSet##Name(BOOL b) const noexcept           \
+    {                                                    \
+        SetTABExtendStyle(b ? Style : 0, Style);         \
+    }
 
 class CTab : public CWindow
 {

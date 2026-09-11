@@ -12,9 +12,9 @@ protected:
     COLORREF m_crBkg{ CLR_DEFAULT };
 
     BITBOOL m_bUseDefBkClr : 1{ TRUE };
-#	ifdef _DEBUG
+#   ifdef _DEBUG
     BITBOOL m_bDlgProcInit : 1{};
-#	endif
+#   endif
     BITBOOL m_bModal : 1{};
     BITBOOL m_bClrDisableEdit : 1{};
 

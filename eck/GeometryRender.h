@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "MathHelper.h"
 
 ECK_NAMESPACE_BEGIN
@@ -27,13 +27,13 @@ inline HRESULT MakePloyLinePath(const D2D1_POINT_2F* pPt, int cPt,
 }
 
 /// <summary>
-/// ¼ÆËã·±»¨ÇúÏß¸÷µã
+/// è®¡ç®—ç¹èŠ±æ›²çº¿å„ç‚¹
 /// </summary>
-/// <param name="vPt">µã¼¯ºÏ</param>
-/// <param name="rOut">ÍâÔ²°ë¾¶</param>
-/// <param name="rInt">ÄÚÔ²°ë¾¶</param>
-/// <param name="iOffsetPtPen">Ãè»æµã¾àÄÚÔ²Ô²ĞÄµÄÆ«ÒÆ</param>
-/// <param name="fStep">²½³¤</param>
+/// <param name="vPt">ç‚¹é›†åˆ</param>
+/// <param name="rOut">å¤–åœ†åŠå¾„</param>
+/// <param name="rInt">å†…åœ†åŠå¾„</param>
+/// <param name="iOffsetPtPen">æç»˜ç‚¹è·å†…åœ†åœ†å¿ƒçš„åç§»</param>
+/// <param name="fStep">æ­¥é•¿</param>
 template<class TVal = int, class TPt>
 inline void FlattenSpirograph(std::vector<TPt>& vPt,
     TVal rOut, TVal rInt, TVal iOffsetPtPen, float fStep = 0.1f) noexcept
@@ -56,16 +56,16 @@ inline void FlattenSpirograph(std::vector<TPt>& vPt,
 }
 
 /// <summary>
-/// »­·±»¨ÇúÏß
+/// ç”»ç¹èŠ±æ›²çº¿
 /// </summary>
-/// <param name="hDC">Éè±¸³¡¾°</param>
-/// <param name="xCenter">ÖĞĞÄµãX</param>
-/// <param name="yCenter">ÖĞĞÄµãY</param>
-/// <param name="rOut">ÍâÔ²°ë¾¶</param>
-/// <param name="rInt">ÄÚÔ²°ë¾¶</param>
-/// <param name="iOffsetPtPen">Ãè»æµã¾àÄÚÔ²Ô²ĞÄµÄÆ«ÒÆ</param>
-/// <param name="fStep">²½³¤</param>
-/// <returns>Polyline·µ»ØÖµ</returns>
+/// <param name="hDC">è®¾å¤‡åœºæ™¯</param>
+/// <param name="xCenter">ä¸­å¿ƒç‚¹X</param>
+/// <param name="yCenter">ä¸­å¿ƒç‚¹Y</param>
+/// <param name="rOut">å¤–åœ†åŠå¾„</param>
+/// <param name="rInt">å†…åœ†åŠå¾„</param>
+/// <param name="iOffsetPtPen">æç»˜ç‚¹è·å†…åœ†åœ†å¿ƒçš„åç§»</param>
+/// <param name="fStep">æ­¥é•¿</param>
+/// <returns>Polylineè¿”å›å€¼</returns>
 EckInline BOOL DrawSpirograph(HDC hDC, int xCenter, int yCenter,
     int rOut, int rInt, int iOffsetPtPen, float fStep = 0.1f) noexcept
 {
@@ -79,17 +79,17 @@ EckInline BOOL DrawSpirograph(HDC hDC, int xCenter, int yCenter,
 }
 
 /// <summary>
-/// »­·±»¨ÇúÏß
+/// ç”»ç¹èŠ±æ›²çº¿
 /// </summary>
-/// <param name="pGraphics">Í¼ĞÎ¶ÔÏó</param>
-/// <param name="pPen">»­±Ê¶ÔÏó</param>
-/// <param name="xCenter">ÖĞĞÄµãX</param>
-/// <param name="yCenter">ÖĞĞÄµãY</param>
-/// <param name="rOut">ÍâÔ²°ë¾¶</param>
-/// <param name="rInt">ÄÚÔ²°ë¾¶</param>
-/// <param name="iOffsetPtPen">Ãè»æµã¾àÄÚÔ²Ô²ĞÄµÄÆ«ÒÆ</param>
-/// <param name="fStep">²½³¤</param>
-/// <returns>GdipDrawLines·µ»ØÖµ</returns>
+/// <param name="pGraphics">å›¾å½¢å¯¹è±¡</param>
+/// <param name="pPen">ç”»ç¬”å¯¹è±¡</param>
+/// <param name="xCenter">ä¸­å¿ƒç‚¹X</param>
+/// <param name="yCenter">ä¸­å¿ƒç‚¹Y</param>
+/// <param name="rOut">å¤–åœ†åŠå¾„</param>
+/// <param name="rInt">å†…åœ†åŠå¾„</param>
+/// <param name="iOffsetPtPen">æç»˜ç‚¹è·å†…åœ†åœ†å¿ƒçš„åç§»</param>
+/// <param name="fStep">æ­¥é•¿</param>
+/// <returns>GdipDrawLinesè¿”å›å€¼</returns>
 EckInline Gdiplus::GpStatus DrawSpirograph(GpGraphics* pGraphics, GpPen* pPen,
     float xCenter, float yCenter, float rOut, float rInt,
     float fOffsetPtPen, float fStep = 0.1f) noexcept
@@ -105,25 +105,25 @@ EckInline Gdiplus::GpStatus DrawSpirograph(GpGraphics* pGraphics, GpPen* pPen,
 
 struct DRAW_SPIROGRAPH_D2D_PARAM
 {
-    ID2D1Factory* pFactory = nullptr;// D2D¹¤³§
-    ID2D1RenderTarget* pRT = nullptr;// D2DäÖÈ¾Ä¿±ê
-    ID2D1Brush* pBrush = nullptr;// D2D»­Ë¢
-    float cxStroke = 1.f;// ±Ê»­¿í¶È
-    ID2D1StrokeStyle* pStrokeStyle = nullptr;// ±Ê»­ÑùÊ½
-    float xCenter = 0.f;// ÖĞĞÄµãX
-    float yCenter = 0.f;// ÖĞĞÄµãY
-    float rOut = 0.f;// ÍâÔ²°ë¾¶
-    float rInt = 0.f;// ÄÚÔ²°ë¾¶
-    float fOffsetPtPen = 0.f;// Ãè»æµã¾àÄÚÔ²Ô²ĞÄµÄÆ«ÒÆ
-    float fStep = 0.1f;// ²½³¤
+    ID2D1Factory* pFactory = nullptr;// D2Då·¥å‚
+    ID2D1RenderTarget* pRT = nullptr;// D2Dæ¸²æŸ“ç›®æ ‡
+    ID2D1Brush* pBrush = nullptr;// D2Dç”»åˆ·
+    float cxStroke = 1.f;// ç¬”ç”»å®½åº¦
+    ID2D1StrokeStyle* pStrokeStyle = nullptr;// ç¬”ç”»æ ·å¼
+    float xCenter = 0.f;// ä¸­å¿ƒç‚¹X
+    float yCenter = 0.f;// ä¸­å¿ƒç‚¹Y
+    float rOut = 0.f;// å¤–åœ†åŠå¾„
+    float rInt = 0.f;// å†…åœ†åŠå¾„
+    float fOffsetPtPen = 0.f;// æç»˜ç‚¹è·å†…åœ†åœ†å¿ƒçš„åç§»
+    float fStep = 0.1f;// æ­¥é•¿
 };
 
 /// <summary>
-/// »­·±»¨ÇúÏß
+/// ç”»ç¹èŠ±æ›²çº¿
 /// </summary>
-/// <param name="Info">²ÎÊı</param>
-/// <param name="ppPathGeometry">½ÓÊÕÂ·¾¶¼¸ºÎĞÎ±äÁ¿µÄÖ¸Õë</param>
-/// <returns>¹¹½¨Â·¾¶¼¸ºÎĞÎÊ±µÄÊ§°ÜĞÅÏ¢£¬ÎŞ·¨ÅĞ¶Ï»æÖÆ²Ù×÷³É¹¦Óë·ñ£¬µ÷ÓÃ·½Ó¦¼ì²éEndDraw·µ»ØÖµ</returns>
+/// <param name="Info">å‚æ•°</param>
+/// <param name="ppPathGeometry">æ¥æ”¶è·¯å¾„å‡ ä½•å½¢å˜é‡çš„æŒ‡é’ˆ</param>
+/// <returns>æ„å»ºè·¯å¾„å‡ ä½•å½¢æ—¶çš„å¤±è´¥ä¿¡æ¯ï¼Œæ— æ³•åˆ¤æ–­ç»˜åˆ¶æ“ä½œæˆåŠŸä¸å¦ï¼Œè°ƒç”¨æ–¹åº”æ£€æŸ¥EndDrawè¿”å›å€¼</returns>
 inline HRESULT DrawSpirograph(const DRAW_SPIROGRAPH_D2D_PARAM& Info,
     ID2D1PathGeometry** ppPathGeometry = nullptr) noexcept
 {
@@ -148,13 +148,13 @@ inline HRESULT DrawSpirograph(const DRAW_SPIROGRAPH_D2D_PARAM& Info,
 }
 
 /// <summary>
-/// ¼ÆËãºûµûÇúÏß¸÷µã
+/// è®¡ç®—è´è¶æ›²çº¿å„ç‚¹
 /// </summary>
-/// <param name="vPt">µã¼¯ºÏ</param>
-/// <param name="fDeformationCoefficient">±äĞÎÏµÊı</param>
-/// <param name="fScaleX">X·½ÏòËõ·Å</param>
-/// <param name="fScaleY">Y·½ÏòËõ·Å</param>
-/// <param name="fStep">²½³¤</param>
+/// <param name="vPt">ç‚¹é›†åˆ</param>
+/// <param name="fDeformationCoefficient">å˜å½¢ç³»æ•°</param>
+/// <param name="fScaleX">Xæ–¹å‘ç¼©æ”¾</param>
+/// <param name="fScaleY">Yæ–¹å‘ç¼©æ”¾</param>
+/// <param name="fStep">æ­¥é•¿</param>
 template<class TVal = int, class TPt>
 EckInline void FlattenButterflyCurve(std::vector<TPt>& vPt,
     float fDeformationCoefficient = 4.f,
@@ -172,15 +172,15 @@ EckInline void FlattenButterflyCurve(std::vector<TPt>& vPt,
 }
 
 /// <summary>
-/// »­ºûµûÇúÏß
+/// ç”»è´è¶æ›²çº¿
 /// </summary>
-/// <param name="hDC">Éè±¸³¡¾°</param>
-/// <param name="xCenter">ÖĞĞÄµãX</param>
-/// <param name="yCenter">ÖĞĞÄµãY</param>
-/// <param name="fDeformationCoefficient">±äĞÎÏµÊı</param>
-/// <param name="fScaleX">X·½ÏòËõ·Å</param>
-/// <param name="fScaleY">Y·½ÏòËõ·Å</param>
-/// <param name="fStep">²½³¤</param>
+/// <param name="hDC">è®¾å¤‡åœºæ™¯</param>
+/// <param name="xCenter">ä¸­å¿ƒç‚¹X</param>
+/// <param name="yCenter">ä¸­å¿ƒç‚¹Y</param>
+/// <param name="fDeformationCoefficient">å˜å½¢ç³»æ•°</param>
+/// <param name="fScaleX">Xæ–¹å‘ç¼©æ”¾</param>
+/// <param name="fScaleY">Yæ–¹å‘ç¼©æ”¾</param>
+/// <param name="fStep">æ­¥é•¿</param>
 EckInline BOOL DrawButterflyCurve(HDC hDC, int xCenter, int yCenter,
     float fDeformationCoefficient = 4.f,
     float fScaleX = 100.f, float fScaleY = 100.f, float fStep = 0.01f) noexcept
@@ -195,17 +195,17 @@ EckInline BOOL DrawButterflyCurve(HDC hDC, int xCenter, int yCenter,
 }
 
 /// <summary>
-/// »­ºûµûÇúÏß
+/// ç”»è´è¶æ›²çº¿
 /// </summary>
-/// <param name="pGraphics">Í¼ĞÎ¶ÔÏó</param>
-/// <param name="pPen">»­±Ê</param>
-/// <param name="xCenter">ÖĞĞÄµãX</param>
-/// <param name="yCenter">ÖĞĞÄµãY</param>
-/// <param name="fDeformationCoefficient">±äĞÎÏµÊı</param>
-/// <param name="fScaleX">X·½ÏòËõ·Å</param>
-/// <param name="fScaleY">Y·½ÏòËõ·Å</param>
-/// <param name="fStep">²½³¤</param>
-/// <returns>GdipDrawLines·µ»ØÖµ</returns>
+/// <param name="pGraphics">å›¾å½¢å¯¹è±¡</param>
+/// <param name="pPen">ç”»ç¬”</param>
+/// <param name="xCenter">ä¸­å¿ƒç‚¹X</param>
+/// <param name="yCenter">ä¸­å¿ƒç‚¹Y</param>
+/// <param name="fDeformationCoefficient">å˜å½¢ç³»æ•°</param>
+/// <param name="fScaleX">Xæ–¹å‘ç¼©æ”¾</param>
+/// <param name="fScaleY">Yæ–¹å‘ç¼©æ”¾</param>
+/// <param name="fStep">æ­¥é•¿</param>
+/// <returns>GdipDrawLinesè¿”å›å€¼</returns>
 EckInline Gdiplus::GpStatus DrawButterflyCurve(GpGraphics* pGraphics, GpPen* pPen,
     int xCenter, int yCenter, float fDeformationCoefficient = 4.f,
     float fScaleX = 100.f, float fScaleY = 100.f, float fStep = 0.01f) noexcept
@@ -221,25 +221,25 @@ EckInline Gdiplus::GpStatus DrawButterflyCurve(GpGraphics* pGraphics, GpPen* pPe
 
 struct DRAW_BUTTERFLYCURVE_D2D_PARAM
 {
-    ID2D1Factory* pFactory = nullptr;// D2D¹¤³§
-    ID2D1RenderTarget* pRT = nullptr;// D2DäÖÈ¾Ä¿±ê
-    ID2D1Brush* pBrush = nullptr;// D2D»­Ë¢
-    float cxStroke = 1.f;// ±Ê»­¿í¶È
-    ID2D1StrokeStyle* pStrokeStyle = nullptr;// ±Ê»­ÑùÊ½
-    float xCenter = 0.f;// ÖĞĞÄµãX
-    float yCenter = 0.f;// ÖĞĞÄµãY
-    float fDeformationCoefficient = 4.f;// ±äĞÎÏµÊı
-    float fScaleX = 100.f;// X·½ÏòËõ·Å
-    float fScaleY = 100.f;// Y·½ÏòËõ·Å
-    float fStep = 0.01f;// ²½³¤
+    ID2D1Factory* pFactory = nullptr;// D2Då·¥å‚
+    ID2D1RenderTarget* pRT = nullptr;// D2Dæ¸²æŸ“ç›®æ ‡
+    ID2D1Brush* pBrush = nullptr;// D2Dç”»åˆ·
+    float cxStroke = 1.f;// ç¬”ç”»å®½åº¦
+    ID2D1StrokeStyle* pStrokeStyle = nullptr;// ç¬”ç”»æ ·å¼
+    float xCenter = 0.f;// ä¸­å¿ƒç‚¹X
+    float yCenter = 0.f;// ä¸­å¿ƒç‚¹Y
+    float fDeformationCoefficient = 4.f;// å˜å½¢ç³»æ•°
+    float fScaleX = 100.f;// Xæ–¹å‘ç¼©æ”¾
+    float fScaleY = 100.f;// Yæ–¹å‘ç¼©æ”¾
+    float fStep = 0.01f;// æ­¥é•¿
 };
 
 /// <summary>
-/// »­ºûµûÇúÏß
+/// ç”»è´è¶æ›²çº¿
 /// </summary>
-/// <param name="Info">²ÎÊı</param>
-/// <param name="ppPathGeometry">½ÓÊÕÂ·¾¶¼¸ºÎĞÎ±äÁ¿µÄÖ¸Õë</param>
-/// <returns>¹¹½¨Â·¾¶¼¸ºÎĞÎÊ±µÄÊ§°ÜĞÅÏ¢£¬ÎŞ·¨ÅĞ¶Ï»æÖÆ²Ù×÷³É¹¦Óë·ñ£¬µ÷ÓÃ·½Ó¦¼ì²éEndDraw·µ»ØÖµ</returns>
+/// <param name="Info">å‚æ•°</param>
+/// <param name="ppPathGeometry">æ¥æ”¶è·¯å¾„å‡ ä½•å½¢å˜é‡çš„æŒ‡é’ˆ</param>
+/// <returns>æ„å»ºè·¯å¾„å‡ ä½•å½¢æ—¶çš„å¤±è´¥ä¿¡æ¯ï¼Œæ— æ³•åˆ¤æ–­ç»˜åˆ¶æ“ä½œæˆåŠŸä¸å¦ï¼Œè°ƒç”¨æ–¹åº”æ£€æŸ¥EndDrawè¿”å›å€¼</returns>
 inline HRESULT DrawButterflyCurve(const DRAW_BUTTERFLYCURVE_D2D_PARAM& Info,
     ID2D1PathGeometry** ppPathGeometry = nullptr) noexcept
 {
@@ -265,12 +265,12 @@ inline HRESULT DrawButterflyCurve(const DRAW_BUTTERFLYCURVE_D2D_PARAM& Info,
 }
 
 /// <summary>
-/// ¼ÆËãÃµ¹åÇúÏß¸÷µã
+/// è®¡ç®—ç«ç‘°æ›²çº¿å„ç‚¹
 /// </summary>
-/// <param name="vPt">µã¼¯ºÏ</param>
-/// <param name="a">»¨°ê³¤¶È</param>
-/// <param name="n">»¨°êÊıÁ¿²ÎÊı</param>
-/// <param name="fStep">²½³¤</param>
+/// <param name="vPt">ç‚¹é›†åˆ</param>
+/// <param name="a">èŠ±ç“£é•¿åº¦</param>
+/// <param name="n">èŠ±ç“£æ•°é‡å‚æ•°</param>
+/// <param name="fStep">æ­¥é•¿</param>
 template<class TVal = int, class TPt>
 EckInline void FlattenRoseCurve(std::vector<TPt>& vPt,
     float a = 10.f, float n = 1.f, float fStep = 0.01f) noexcept
@@ -288,15 +288,15 @@ EckInline void FlattenRoseCurve(std::vector<TPt>& vPt,
 }
 
 /// <summary>
-/// »­Ãµ¹åÇúÏß
+/// ç”»ç«ç‘°æ›²çº¿
 /// </summary>
-/// <param name="hDC">Éè±¸³¡¾°</param>
-/// <param name="xCenter">ÖĞĞÄµãX</param>
-/// <param name="yCenter">ÖĞĞÄµãY</param>
-/// <param name="a">»¨°ê³¤¶È</param>
-/// <param name="n">»¨°êÊıÁ¿²ÎÊı</param>
-/// <param name="fStep">²½³¤</param>
-/// <returns>Polyline·µ»ØÖµ</returns>
+/// <param name="hDC">è®¾å¤‡åœºæ™¯</param>
+/// <param name="xCenter">ä¸­å¿ƒç‚¹X</param>
+/// <param name="yCenter">ä¸­å¿ƒç‚¹Y</param>
+/// <param name="a">èŠ±ç“£é•¿åº¦</param>
+/// <param name="n">èŠ±ç“£æ•°é‡å‚æ•°</param>
+/// <param name="fStep">æ­¥é•¿</param>
+/// <returns>Polylineè¿”å›å€¼</returns>
 EckInline BOOL DrawRoseCurve(HDC hDC, int xCenter, int yCenter,
     float a = 300.f, float n = 10.f, float fStep = 0.01f) noexcept
 {
@@ -310,16 +310,16 @@ EckInline BOOL DrawRoseCurve(HDC hDC, int xCenter, int yCenter,
 }
 
 /// <summary>
-/// »­Ãµ¹åÇúÏß
+/// ç”»ç«ç‘°æ›²çº¿
 /// </summary>
-/// <param name="pGraphics">Í¼ĞÎ¶ÔÏó</param>
-/// <param name="pPen">»­±Ê¶ÔÏó</param>
-/// <param name="xCenter">ÖĞĞÄµãX</param>
-/// <param name="yCenter">ÖĞĞÄµãY</param>
-/// <param name="a">»¨°ê³¤¶È</param>
-/// <param name="n">»¨°êÊıÁ¿²ÎÊı</param>
-/// <param name="fStep">²½³¤</param>
-/// <returns>GdipDrawLines·µ»ØÖµ</returns>
+/// <param name="pGraphics">å›¾å½¢å¯¹è±¡</param>
+/// <param name="pPen">ç”»ç¬”å¯¹è±¡</param>
+/// <param name="xCenter">ä¸­å¿ƒç‚¹X</param>
+/// <param name="yCenter">ä¸­å¿ƒç‚¹Y</param>
+/// <param name="a">èŠ±ç“£é•¿åº¦</param>
+/// <param name="n">èŠ±ç“£æ•°é‡å‚æ•°</param>
+/// <param name="fStep">æ­¥é•¿</param>
+/// <returns>GdipDrawLinesè¿”å›å€¼</returns>
 EckInline Gdiplus::GpStatus DrawRoseCurve(GpGraphics* pGraphics, GpPen* pPen,
     float xCenter, float yCenter,
     float a = 300.f, float n = 10.f, float fStep = 0.01f) noexcept
@@ -335,25 +335,25 @@ EckInline Gdiplus::GpStatus DrawRoseCurve(GpGraphics* pGraphics, GpPen* pPen,
 
 struct DRAW_ROSECURVE_D2D_PARAM
 {
-    ID2D1Factory* pFactory = nullptr;// D2D¹¤³§
-    ID2D1RenderTarget* pRT = nullptr;// D2DäÖÈ¾Ä¿±ê
-    ID2D1Brush* pBrush = nullptr;// D2D»­Ë¢
-    float cxStroke = 1.f;// ±Ê»­¿í¶È
-    ID2D1StrokeStyle* pStrokeStyle = nullptr;// ±Ê»­ÑùÊ½
-    float xCenter = 0.f;// ÖĞĞÄµãX
-    float yCenter = 0.f;// ÖĞĞÄµãY
-    float fDeformationCoefficient = 4.f;// ±äĞÎÏµÊı
-    float a = 300.f;// »¨°ê³¤¶È
-    float n = 10.f;// »¨°êÊıÁ¿²ÎÊı
-    float fStep = 0.01f;// ²½³¤
+    ID2D1Factory* pFactory = nullptr;// D2Då·¥å‚
+    ID2D1RenderTarget* pRT = nullptr;// D2Dæ¸²æŸ“ç›®æ ‡
+    ID2D1Brush* pBrush = nullptr;// D2Dç”»åˆ·
+    float cxStroke = 1.f;// ç¬”ç”»å®½åº¦
+    ID2D1StrokeStyle* pStrokeStyle = nullptr;// ç¬”ç”»æ ·å¼
+    float xCenter = 0.f;// ä¸­å¿ƒç‚¹X
+    float yCenter = 0.f;// ä¸­å¿ƒç‚¹Y
+    float fDeformationCoefficient = 4.f;// å˜å½¢ç³»æ•°
+    float a = 300.f;// èŠ±ç“£é•¿åº¦
+    float n = 10.f;// èŠ±ç“£æ•°é‡å‚æ•°
+    float fStep = 0.01f;// æ­¥é•¿
 };
 
 /// <summary>
-/// »­Ãµ¹åÇúÏß
+/// ç”»ç«ç‘°æ›²çº¿
 /// </summary>
-/// <param name="Info">²ÎÊı</param>
-/// <param name="ppPathGeometry">½ÓÊÕÂ·¾¶¼¸ºÎĞÎ±äÁ¿µÄÖ¸Õë</param>
-/// <returns>¹¹½¨Â·¾¶¼¸ºÎĞÎÊ±µÄÊ§°ÜĞÅÏ¢£¬ÎŞ·¨ÅĞ¶Ï»æÖÆ²Ù×÷³É¹¦Óë·ñ£¬µ÷ÓÃ·½Ó¦¼ì²éEndDraw·µ»ØÖµ</returns>
+/// <param name="Info">å‚æ•°</param>
+/// <param name="ppPathGeometry">æ¥æ”¶è·¯å¾„å‡ ä½•å½¢å˜é‡çš„æŒ‡é’ˆ</param>
+/// <returns>æ„å»ºè·¯å¾„å‡ ä½•å½¢æ—¶çš„å¤±è´¥ä¿¡æ¯ï¼Œæ— æ³•åˆ¤æ–­ç»˜åˆ¶æ“ä½œæˆåŠŸä¸å¦ï¼Œè°ƒç”¨æ–¹åº”æ£€æŸ¥EndDrawè¿”å›å€¼</returns>
 inline HRESULT DrawRoseCurve(const DRAW_ROSECURVE_D2D_PARAM& Info,
     ID2D1PathGeometry** ppPathGeometry = nullptr) noexcept
 {
@@ -378,13 +378,13 @@ inline HRESULT DrawRoseCurve(const DRAW_ROSECURVE_D2D_PARAM& Info,
 }
 
 /// <summary>
-/// ¼ÆËãÕıĞÇĞÎ/Õı¶à±ßĞÎ¸÷µã
+/// è®¡ç®—æ­£æ˜Ÿå½¢/æ­£å¤šè¾¹å½¢å„ç‚¹
 /// </summary>
-/// <param name="vPt">µã¼¯ºÏ</param>
-/// <param name="r">Íâ½ÓÔ²°ë¾¶</param>
-/// <param name="n">±ßÊı»ò½ÇÊı</param>
-/// <param name="fAngle">ÆğÊ¼µãÏà¶ÔXÖáÕı·½ÏòµÄĞı×ª½Ç¶È</param>
-/// <param name="bLinkStar">ÊÇ·ñÁ¬½ÓÎªĞÇĞÎ</param>
+/// <param name="vPt">ç‚¹é›†åˆ</param>
+/// <param name="r">å¤–æ¥åœ†åŠå¾„</param>
+/// <param name="n">è¾¹æ•°æˆ–è§’æ•°</param>
+/// <param name="fAngle">èµ·å§‹ç‚¹ç›¸å¯¹Xè½´æ­£æ–¹å‘çš„æ—‹è½¬è§’åº¦</param>
+/// <param name="bLinkStar">æ˜¯å¦è¿æ¥ä¸ºæ˜Ÿå½¢</param>
 template<class TVal = int, class TPt>
 inline void CalculateRegularStar(std::vector<TPt>& vPt, TVal r,
     int n, float fAngle = DegreeToRadian(90.f), BOOL bLinkStar = TRUE) noexcept
@@ -434,16 +434,16 @@ inline void CalculateRegularStar(std::vector<TPt>& vPt, TVal r,
 }
 
 /// <summary>
-/// »­ÕıĞÇĞÎ/Õı¶à±ßĞÎ
+/// ç”»æ­£æ˜Ÿå½¢/æ­£å¤šè¾¹å½¢
 /// </summary>
-/// <param name="hDC">Éè±¸³¡¾°</param>
-/// <param name="xCenter">ÖĞĞÄµãX</param>
-/// <param name="yCenter">ÖĞĞÄµãY</param>
-/// <param name="r">Íâ½ÓÔ²°ë¾¶</param>
-/// <param name="n">±ßÊı»ò½ÇÊı</param>
-/// <param name="fAngle">ÆğÊ¼µãÏà¶ÔXÖáÕı·½ÏòµÄĞı×ª½Ç¶È</param>
-/// <param name="bLinkStar">ÊÇ·ñÁ¬½ÓÎªĞÇĞÎ</param>
-/// <returns>Polyline·µ»ØÖµ</returns>
+/// <param name="hDC">è®¾å¤‡åœºæ™¯</param>
+/// <param name="xCenter">ä¸­å¿ƒç‚¹X</param>
+/// <param name="yCenter">ä¸­å¿ƒç‚¹Y</param>
+/// <param name="r">å¤–æ¥åœ†åŠå¾„</param>
+/// <param name="n">è¾¹æ•°æˆ–è§’æ•°</param>
+/// <param name="fAngle">èµ·å§‹ç‚¹ç›¸å¯¹Xè½´æ­£æ–¹å‘çš„æ—‹è½¬è§’åº¦</param>
+/// <param name="bLinkStar">æ˜¯å¦è¿æ¥ä¸ºæ˜Ÿå½¢</param>
+/// <returns>Polylineè¿”å›å€¼</returns>
 inline BOOL DrawRegularStar(HDC hDC, int xCenter, int yCenter,
     int r, int n, float fAngle = DegreeToRadian(90.f), BOOL bLinkStar = TRUE) noexcept
 {
@@ -462,17 +462,17 @@ inline BOOL DrawRegularStar(HDC hDC, int xCenter, int yCenter,
 }
 
 /// <summary>
-/// »­ÕıĞÇĞÎ/Õı¶à±ßĞÎ
+/// ç”»æ­£æ˜Ÿå½¢/æ­£å¤šè¾¹å½¢
 /// </summary>
-/// <param name="pGraphics">Í¼ĞÎ¶ÔÏó</param>
-/// <param name="pPen">»­±Ê¾ä±ú</param>
-/// <param name="xCenter">ÖĞĞÄµãX</param>
-/// <param name="yCenter">ÖĞĞÄµãY</param>
-/// <param name="r">Íâ½ÓÔ²°ë¾¶</param>
-/// <param name="n">±ßÊı»ò½ÇÊı</param>
-/// <param name="fAngle">ÆğÊ¼µãÏà¶ÔXÖáÕı·½ÏòµÄĞı×ª½Ç¶È</param>
-/// <param name="bLinkStar">ÊÇ·ñÁ¬½ÓÎªĞÇĞÎ</param>
-/// <returns>GdipDrawLines·µ»ØÖµ</returns>
+/// <param name="pGraphics">å›¾å½¢å¯¹è±¡</param>
+/// <param name="pPen">ç”»ç¬”å¥æŸ„</param>
+/// <param name="xCenter">ä¸­å¿ƒç‚¹X</param>
+/// <param name="yCenter">ä¸­å¿ƒç‚¹Y</param>
+/// <param name="r">å¤–æ¥åœ†åŠå¾„</param>
+/// <param name="n">è¾¹æ•°æˆ–è§’æ•°</param>
+/// <param name="fAngle">èµ·å§‹ç‚¹ç›¸å¯¹Xè½´æ­£æ–¹å‘çš„æ—‹è½¬è§’åº¦</param>
+/// <param name="bLinkStar">æ˜¯å¦è¿æ¥ä¸ºæ˜Ÿå½¢</param>
+/// <returns>GdipDrawLinesè¿”å›å€¼</returns>
 inline Gdiplus::GpStatus DrawRegularStar(GpGraphics* pGraphics, GpPen* pPen,
     float xCenter, float yCenter,
     float r, int n, float fAngle = DegreeToRadian(90.f), BOOL bLinkStar = TRUE) noexcept
@@ -495,25 +495,25 @@ inline Gdiplus::GpStatus DrawRegularStar(GpGraphics* pGraphics, GpPen* pPen,
 
 struct DRAW_REGULARSTAR_D2D_PARAM
 {
-    ID2D1Factory* pFactory = nullptr;// D2D¹¤³§
-    ID2D1RenderTarget* pRT = nullptr;// D2DäÖÈ¾Ä¿±ê
-    ID2D1Brush* pBrush = nullptr;// D2D»­Ë¢
-    float cxStroke = 1.f;// ±Ê»­¿í¶È
-    ID2D1StrokeStyle* pStrokeStyle = nullptr;// ±Ê»­ÑùÊ½
-    float xCenter = 0.f;// ÖĞĞÄµãX
-    float yCenter = 0.f;// ÖĞĞÄµãY
-    float r = 300;// Íâ½ÓÔ²°ë¾¶
-    int n = 5;// ±ßÊı»ò½ÇÊı
-    float fAngle = DegreeToRadian(90.f);// ÆğÊ¼µãÏà¶ÔXÖáÕı·½ÏòµÄĞı×ª½Ç¶È
-    BOOL bLinkStar = TRUE;// ÊÇ·ñÁ¬½ÓÎªĞÇĞÎ
+    ID2D1Factory* pFactory = nullptr;// D2Då·¥å‚
+    ID2D1RenderTarget* pRT = nullptr;// D2Dæ¸²æŸ“ç›®æ ‡
+    ID2D1Brush* pBrush = nullptr;// D2Dç”»åˆ·
+    float cxStroke = 1.f;// ç¬”ç”»å®½åº¦
+    ID2D1StrokeStyle* pStrokeStyle = nullptr;// ç¬”ç”»æ ·å¼
+    float xCenter = 0.f;// ä¸­å¿ƒç‚¹X
+    float yCenter = 0.f;// ä¸­å¿ƒç‚¹Y
+    float r = 300;// å¤–æ¥åœ†åŠå¾„
+    int n = 5;// è¾¹æ•°æˆ–è§’æ•°
+    float fAngle = DegreeToRadian(90.f);// èµ·å§‹ç‚¹ç›¸å¯¹Xè½´æ­£æ–¹å‘çš„æ—‹è½¬è§’åº¦
+    BOOL bLinkStar = TRUE;// æ˜¯å¦è¿æ¥ä¸ºæ˜Ÿå½¢
 };
 
 /// <summary>
-/// »­ÕıĞÇĞÎ/Õı¶à±ßĞÎ
+/// ç”»æ­£æ˜Ÿå½¢/æ­£å¤šè¾¹å½¢
 /// </summary>
-/// <param name="Info">²ÎÊı</param>
-/// <param name="ppPathGeometry">½ÓÊÕÂ·¾¶¼¸ºÎĞÎ±äÁ¿µÄÖ¸Õë</param>
-/// <returns>¹¹½¨Â·¾¶¼¸ºÎĞÎÊ±µÄÊ§°ÜĞÅÏ¢£¬ÎŞ·¨ÅĞ¶Ï»æÖÆ²Ù×÷³É¹¦Óë·ñ£¬µ÷ÓÃ·½Ó¦¼ì²éEndDraw·µ»ØÖµ</returns>
+/// <param name="Info">å‚æ•°</param>
+/// <param name="ppPathGeometry">æ¥æ”¶è·¯å¾„å‡ ä½•å½¢å˜é‡çš„æŒ‡é’ˆ</param>
+/// <returns>æ„å»ºè·¯å¾„å‡ ä½•å½¢æ—¶çš„å¤±è´¥ä¿¡æ¯ï¼Œæ— æ³•åˆ¤æ–­ç»˜åˆ¶æ“ä½œæˆåŠŸä¸å¦ï¼Œè°ƒç”¨æ–¹åº”æ£€æŸ¥EndDrawè¿”å›å€¼</returns>
 inline HRESULT DrawRegularStar(const DRAW_REGULARSTAR_D2D_PARAM& Info,
     ID2D1PathGeometry** ppPathGeometry = nullptr) noexcept
 {

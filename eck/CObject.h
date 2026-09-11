@@ -13,7 +13,7 @@ ECK_NAMESPACE_BEGIN
         RttiDefaultNewObject<Cls>   \
     };                              \
     constexpr ::eck::ClassInfo* RttiGetClass() const noexcept override \
-    { return &s_ClassInfo_##Cls; }	\
+    { return &s_ClassInfo_##Cls; }  \
     static constexpr ::eck::ClassInfo* RttiThisClass() \
     { return &s_ClassInfo_##Cls; }  \
     inline static ::eck::Detail::ClassRegister s_ClassRegister_##Cls{ &Cls::s_ClassInfo_##Cls };
