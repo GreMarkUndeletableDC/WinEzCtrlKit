@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#if !ECK_OPT_NO_AUTO_ADD_LIB
 #pragma comment(lib, "Gdiplus.lib")
 #pragma comment(lib, "ComCtl32.lib")
 #pragma comment(lib, "Shlwapi.lib")
@@ -32,13 +31,3 @@
 #pragma comment(lib, "Mf.lib")
 #pragma comment(lib, "Mfplat.lib")
 #pragma comment(lib, "Strmiids.lib")
-
-#ifndef ECK_OPT_CRT_DLL
-#  ifdef _DEBUG
-#    define ECK_OPT_CRT_DLL 1
-#  else
-#    define ECK_OPT_CRT_DLL 0
-#  endif
-#endif
-
-#endif// !ECK_OPT_NO_AUTO_ADD_LIB
