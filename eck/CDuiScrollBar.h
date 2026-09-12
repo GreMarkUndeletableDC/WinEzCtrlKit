@@ -336,7 +336,7 @@ public:
         Invalidate(FALSE);
     }
     BOOL TlIsValid() noexcept override { return m_bAnActive; }
-    int TlGetCurrentInterval() noexcept override { return (int)m_msLastDuration; }
+    int TlGetCurrentInterval() const noexcept override { return (int)m_msLastDuration; }
 
     // 外部不得对视图调用SetCallback，滚动条统一管理动画和非动画滚动事件，
     // 若已设置Scc回调，则事件仅发送到回调，否则发送通知

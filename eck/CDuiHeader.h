@@ -595,7 +595,7 @@ public:
         }
     }
     BOOL TlIsValid() noexcept override { return m_bAnimating; }
-    int TlGetCurrentInterval() noexcept override { return (int)m_msLastDuration; }
+    int TlGetCurrentInterval() const noexcept override { return (int)m_msLastDuration; }
 
     void EvtWidthChanged(int idx) noexcept
     {

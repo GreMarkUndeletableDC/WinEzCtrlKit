@@ -387,7 +387,7 @@ public:
         }
     }
     BOOL TlIsValid() noexcept override { return m_bAnActive; }
-    int TlGetCurrentInterval() noexcept override { return (int)m_msLastDuration; }
+    int TlGetCurrentInterval() const noexcept override { return (int)m_msLastDuration; }
 
     constexpr void SetRange(float fMin, float fMax) noexcept
     {
