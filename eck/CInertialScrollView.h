@@ -41,7 +41,7 @@ public:
             InterruptAnimation();
     }
     EckInline BOOL TlIsValid() noexcept override { return m_bValid; }
-    EckInline int TlGetCurrentInterval() noexcept override { return m_msCurrInterval; }
+    EckInline int TlGetCurrentInterval() const noexcept override { return m_msCurrInterval; }
     // 
     EckInline void OnMouseWheel2(float dWheel) noexcept { SmoothScrollDelta(m_fDelta * dWheel); }
 

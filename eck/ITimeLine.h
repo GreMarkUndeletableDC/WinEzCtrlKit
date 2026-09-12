@@ -9,6 +9,6 @@ struct ITimeLine
     // 时间线是否有效
     virtual BOOL TlIsValid() noexcept = 0;
     // 取当前滴答间隔
-    virtual int TlGetCurrentInterval() noexcept = 0;
+    virtual int TlGetCurrentInterval() const noexcept = 0;
 };
 ECK_NAMESPACE_END
