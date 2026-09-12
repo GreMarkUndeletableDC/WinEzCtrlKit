@@ -529,25 +529,25 @@ public:
     EckInlineNd CMutableValue ArrayAt(size_t idx) const noexcept { return yyjson_mut_arr_get(GetPointer(), idx); }
     EckInlineNd CMutableValue ArrayFront() const noexcept { return yyjson_mut_arr_get_first(GetPointer()); }
     EckInlineNd CMutableValue ArrayBack() const noexcept { return yyjson_mut_arr_get_last(GetPointer()); }
-    EckInline BOOL ArrInsert(size_t idx, CMutableValue Val) const noexcept
+    EckInline BOOL ArrayInsert(size_t idx, CMutableValue Val) const noexcept
     {
         return yyjson_mut_arr_insert(GetPointer(), Val.GetPointer(), idx);
     }
-    EckInline BOOL ArrPushBack(CMutableValue Val) const noexcept { return yyjson_mut_arr_append(GetPointer(), Val.GetPointer()); }
-    EckInline BOOL ArrPushFront(CMutableValue Val) const noexcept { return yyjson_mut_arr_prepend(GetPointer(), Val.GetPointer()); }
-    EckInline CMutableValue ArrReplace(size_t idx, CMutableValue Val) const noexcept
+    EckInline BOOL ArrayPushBack(CMutableValue Val) const noexcept { return yyjson_mut_arr_append(GetPointer(), Val.GetPointer()); }
+    EckInline BOOL ArrayPushFront(CMutableValue Val) const noexcept { return yyjson_mut_arr_prepend(GetPointer(), Val.GetPointer()); }
+    EckInline CMutableValue ArrayReplace(size_t idx, CMutableValue Val) const noexcept
     {
         return yyjson_mut_arr_replace(GetPointer(), idx, Val.GetPointer());
     }
-    EckInline CMutableValue ArrRemove(size_t idx) const noexcept { return yyjson_mut_arr_remove(GetPointer(), idx); }
-    EckInline BOOL ArrRemove(size_t idx, size_t c) const noexcept
+    EckInline CMutableValue ArrayRemove(size_t idx) const noexcept { return yyjson_mut_arr_remove(GetPointer(), idx); }
+    EckInline BOOL ArrayRemove(size_t idx, size_t c) const noexcept
     {
         return yyjson_mut_arr_remove_range(GetPointer(), idx, c);
     }
-    EckInline CMutableValue ArrPopBack() const noexcept { return yyjson_mut_arr_remove_last(GetPointer()); }
-    EckInline CMutableValue ArrPopFront() const noexcept { return yyjson_mut_arr_remove_first(GetPointer()); }
-    EckInline BOOL ArrClear() const noexcept { return yyjson_mut_arr_clear(GetPointer()); }
-    EckInline BOOL ArrRotate(size_t idx) const noexcept { return yyjson_mut_arr_rotate(GetPointer(), idx); }
+    EckInline CMutableValue ArrayPopBack() const noexcept { return yyjson_mut_arr_remove_last(GetPointer()); }
+    EckInline CMutableValue ArrayPopFront() const noexcept { return yyjson_mut_arr_remove_first(GetPointer()); }
+    EckInline BOOL ArrayClear() const noexcept { return yyjson_mut_arr_clear(GetPointer()); }
+    EckInline BOOL ArrayRotate(size_t idx) const noexcept { return yyjson_mut_arr_rotate(GetPointer(), idx); }
 
     EckInlineNd size_t ObjectSize() const noexcept { return yyjson_mut_obj_size(GetPointer()); }
     EckInlineNd CMutableValue ObjectAt(_In_z_ PCSTR pszKey) const noexcept { return yyjson_mut_obj_get(GetPointer(), pszKey); }
@@ -557,24 +557,24 @@ public:
     {
         return yyjson_mut_obj_getn(GetPointer(), pszKey, cchKey);
     }
-    EckInline BOOL ObjInsert(size_t idx, CMutableValue Key, CMutableValue Val) const noexcept
+    EckInline BOOL ObjectInsert(size_t idx, CMutableValue Key, CMutableValue Val) const noexcept
     {
         return yyjson_mut_obj_insert(GetPointer(), Key.GetPointer(), Val.GetPointer(), idx);
     }
-    EckInline CMutableValue ObjRemove(CMutableValue Key) const noexcept
+    EckInline CMutableValue ObjectRemove(CMutableValue Key) const noexcept
     {
         return yyjson_mut_obj_remove(GetPointer(), Key.GetPointer());
     }
-    EckInline CMutableValue ObjRemove(_In_z_ PCSTR pszKey) const noexcept
+    EckInline CMutableValue ObjectRemove(_In_z_ PCSTR pszKey) const noexcept
     {
         return yyjson_mut_obj_remove_key(GetPointer(), pszKey);
     }
-    EckInline BOOL ObjClear() const noexcept { return yyjson_mut_obj_clear(GetPointer()); }
-    EckInline BOOL ObjReplace(CMutableValue Key, CMutableValue Val) const noexcept
+    EckInline BOOL ObjectClear() const noexcept { return yyjson_mut_obj_clear(GetPointer()); }
+    EckInline BOOL ObjectReplace(CMutableValue Key, CMutableValue Val) const noexcept
     {
         return yyjson_mut_obj_replace(GetPointer(), Key.GetPointer(), Val.GetPointer());
     }
-    EckInline BOOL ObjRotate(size_t idx) const noexcept { return yyjson_mut_obj_rotate(GetPointer(), idx); }
+    EckInline BOOL ObjectRotate(size_t idx) const noexcept { return yyjson_mut_obj_rotate(GetPointer(), idx); }
 
     EckInlineNd PSTR Write(
         _Out_opt_ size_t* pcchOut,
@@ -958,7 +958,7 @@ namespace Detail
             const auto& v = Get<Type::JsonProxy>();
             EckAssert(v.begin()->GetType() == Type::ArrayMark);
             for (auto it = v.begin() + 1; it != v.end(); ++it)
-                Arr.ArrPushBack(it->ToMutableValue(Doc, bCopyString));
+                Arr.ArrayPushBack(it->ToMutableValue(Doc, bCopyString));
         }
         void AppendObject(
             const CMutableDocument& Doc,
@@ -973,7 +973,7 @@ namespace Detail
             {
                 Key = it->ToMutableValue(Doc, bCopyString);
                 ++it;
-                Obj.ObjInsert(i, Key, it->ToMutableValue(Doc, bCopyString));
+                Obj.ObjectInsert(i, Key, it->ToMutableValue(Doc, bCopyString));
                 ++i;
             }
         }
