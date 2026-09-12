@@ -415,7 +415,7 @@ inline NTSTATUS EnumerateProcess(
                 pspi->SessionId,
                 pspi->HandleCount,
                 pspi->PageFaultCount,
-                (size_t)pspi->WorkingSetPrivateSize.QuadPart,
+                (size_t)pspi->WorkingSetPrivateSize,
                 pspi->WorkingSetSize,
                 pspi->PeakWorkingSetSize,
                 pspi->QuotaPagedPoolUsage,
