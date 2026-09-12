@@ -979,10 +979,10 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
-        doc.GetRoot().ArrPushBack(doc.NewInt(1));
-        doc.GetRoot().ArrPushBack(doc.NewInt(2));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(1));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(2));
         Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
-        CMutableValue popped = doc.GetRoot().ArrPopBack();
+        CMutableValue popped = doc.GetRoot().ArrayPopBack();
         Assert::AreEqual(2, popped.GetInt());
         Assert::AreEqual((size_t)1, doc.GetRoot().ArraySize());
     }
@@ -991,10 +991,10 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
-        doc.GetRoot().ArrPushBack(doc.NewInt(10));
-        doc.GetRoot().ArrPushFront(doc.NewInt(5));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(10));
+        doc.GetRoot().ArrayPushFront(doc.NewInt(5));
         Assert::AreEqual(5, doc.GetRoot().ArrayFront().GetInt());
-        CMutableValue p = doc.GetRoot().ArrPopFront();
+        CMutableValue p = doc.GetRoot().ArrayPopFront();
         Assert::AreEqual(5, p.GetInt());
     }
 
@@ -1002,9 +1002,9 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
-        doc.GetRoot().ArrPushBack(doc.NewInt(1));
-        doc.GetRoot().ArrPushBack(doc.NewInt(3));
-        doc.GetRoot().ArrInsert(1, doc.NewInt(2));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(1));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(3));
+        doc.GetRoot().ArrayInsert(1, doc.NewInt(2));
         Assert::AreEqual(3u, (unsigned)doc.GetRoot().ArraySize());
         Assert::AreEqual(2, doc.GetRoot().ArrayAt(1).GetInt());
     }
@@ -1013,8 +1013,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
-        doc.GetRoot().ArrPushBack(doc.NewInt(1));
-        doc.GetRoot().ArrReplace(0, doc.NewInt(99));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(1));
+        doc.GetRoot().ArrayReplace(0, doc.NewInt(99));
         Assert::AreEqual(99, doc.GetRoot().ArrayAt(0).GetInt());
     }
 
@@ -1022,9 +1022,9 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
-        doc.GetRoot().ArrPushBack(doc.NewInt(1));
-        doc.GetRoot().ArrPushBack(doc.NewInt(2));
-        doc.GetRoot().ArrRemove(size_t(0));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(1));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(2));
+        doc.GetRoot().ArrayRemove(size_t(0));
         Assert::AreEqual((size_t)1, doc.GetRoot().ArraySize());
         Assert::AreEqual(2, doc.GetRoot().ArrayAt(0).GetInt());
     }
@@ -1034,8 +1034,8 @@ public:
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
         for (int i = 0; i < 5; ++i)
-            doc.GetRoot().ArrPushBack(doc.NewInt(i));
-        doc.GetRoot().ArrRemove(size_t(1), size_t(3)); // 删除索引 1-3
+            doc.GetRoot().ArrayPushBack(doc.NewInt(i));
+        doc.GetRoot().ArrayRemove(size_t(1), size_t(3)); // 删除索引 1-3
         Assert::AreEqual((size_t)2, doc.GetRoot().ArraySize());
     }
 
@@ -1043,8 +1043,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
-        doc.GetRoot().ArrPushBack(doc.NewInt(1));
-        doc.GetRoot().ArrClear();
+        doc.GetRoot().ArrayPushBack(doc.NewInt(1));
+        doc.GetRoot().ArrayClear();
         Assert::AreEqual((size_t)0, doc.GetRoot().ArraySize());
     }
 
@@ -1053,8 +1053,8 @@ public:
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
         for (int i = 0; i < 3; ++i)
-            doc.GetRoot().ArrPushBack(doc.NewInt(i));
-        doc.GetRoot().ArrRotate(1); // [0,1,2] -> [1,2,0]
+            doc.GetRoot().ArrayPushBack(doc.NewInt(i));
+        doc.GetRoot().ArrayRotate(1); // [0,1,2] -> [1,2,0]
         Assert::AreEqual(1, doc.GetRoot().ArrayAt(0).GetInt());
         Assert::AreEqual(0, doc.GetRoot().ArrayAt(2).GetInt());
     }
@@ -1064,7 +1064,7 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("k"), doc.NewInt(1));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("k"), doc.NewInt(1));
         Assert::AreEqual((size_t)1, doc.GetRoot().ObjectSize());
     }
 
@@ -1072,8 +1072,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("x"), doc.NewInt(7));
-        doc.GetRoot().ObjRemove(doc.NewString("x"));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("x"), doc.NewInt(7));
+        doc.GetRoot().ObjectRemove(doc.NewString("x"));
         Assert::AreEqual((size_t)0, doc.GetRoot().ObjectSize());
     }
 
@@ -1081,8 +1081,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("y"), doc.NewInt(8));
-        doc.GetRoot().ObjRemove("y");
+        doc.GetRoot().ObjectInsert(0, doc.NewString("y"), doc.NewInt(8));
+        doc.GetRoot().ObjectRemove("y");
         Assert::AreEqual((size_t)0, doc.GetRoot().ObjectSize());
     }
 
@@ -1090,8 +1090,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("n"), doc.NewInt(1));
-        doc.GetRoot().ObjReplace(doc.NewString("n"), doc.NewInt(42));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("n"), doc.NewInt(1));
+        doc.GetRoot().ObjectReplace(doc.NewString("n"), doc.NewInt(42));
         Assert::AreEqual(42, doc.GetRoot().ObjectAt("n").GetInt());
     }
 
@@ -1099,8 +1099,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("a"), doc.NewInt(1));
-        doc.GetRoot().ObjClear();
+        doc.GetRoot().ObjectInsert(0, doc.NewString("a"), doc.NewInt(1));
+        doc.GetRoot().ObjectClear();
         Assert::AreEqual((size_t)0, doc.GetRoot().ObjectSize());
     }
 
@@ -1108,10 +1108,10 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("a"), doc.NewInt(1));
-        doc.GetRoot().ObjInsert(1, doc.NewString("b"), doc.NewInt(2));
-        doc.GetRoot().ObjInsert(2, doc.NewString("c"), doc.NewInt(3));
-        doc.GetRoot().ObjRotate(1); // {"a":1,"b":2,"c":3} -> {"b":2,"c":3,"a":1}
+        doc.GetRoot().ObjectInsert(0, doc.NewString("a"), doc.NewInt(1));
+        doc.GetRoot().ObjectInsert(1, doc.NewString("b"), doc.NewInt(2));
+        doc.GetRoot().ObjectInsert(2, doc.NewString("c"), doc.NewInt(3));
+        doc.GetRoot().ObjectRotate(1); // {"a":1,"b":2,"c":3} -> {"b":2,"c":3,"a":1}
         Assert::IsTrue(doc.GetRoot().ObjectAt("a").IsValid());
     }
 
@@ -1121,7 +1121,7 @@ public:
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
         for (int i = 0; i < 3; ++i)
-            doc.GetRoot().ArrPushBack(doc.NewInt(i * 10));
+            doc.GetRoot().ArrayPushBack(doc.NewInt(i * 10));
         int sum = 0;
         for (CMutableValue v : doc.GetRoot().AsArray())
             sum += v.GetInt();
@@ -1132,7 +1132,7 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("x"), doc.NewInt(5));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("x"), doc.NewInt(5));
         int cnt = 0;
         for (CMutableValue k : doc.GetRoot().AsObject())
         {
@@ -1192,9 +1192,9 @@ public:
         CMutableDocument doc;
         const auto arr = doc.NewArray();
         doc.SetRoot(arr);
-        arr.ArrPushBack(doc.NewInt(10));
-        arr.ArrPushBack(doc.NewInt(20));
-        arr.ArrPushBack(doc.NewInt(30));
+        arr.ArrayPushBack(doc.NewInt(10));
+        arr.ArrayPushBack(doc.NewInt(20));
+        arr.ArrayPushBack(doc.NewInt(30));
 
         MutableArrayIterator it(doc.GetRoot());
         MutableArrayIterator itEnd{};
@@ -1215,7 +1215,7 @@ public:
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
         for (int i = 1; i <= 5; ++i)
-            doc.GetRoot().ArrPushBack(doc.NewInt(i));
+            doc.GetRoot().ArrayPushBack(doc.NewInt(i));
         int sum = 0;
         for (CMutableValue v : doc.GetRoot().AsArray())
             sum += v.GetInt();
@@ -1228,7 +1228,7 @@ public:
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
         for (int i = 0; i < 4; ++i)
-            doc.GetRoot().ArrPushBack(doc.NewInt(i));
+            doc.GetRoot().ArrayPushBack(doc.NewInt(i));
         MutableArrayIterator it(doc.GetRoot());
         while (it.GetCurrent().IsValid())
         {
@@ -1246,8 +1246,8 @@ public:
         CMutableDocument doc;
         const auto arr = doc.NewArray();
         doc.SetRoot(arr);
-        arr.ArrPushBack(doc.NewInt(7));
-        arr.ArrPushBack(doc.NewInt(8));
+        arr.ArrayPushBack(doc.NewInt(7));
+        arr.ArrayPushBack(doc.NewInt(8));
         MutableArrayIterator it(doc.GetRoot());
         Assert::AreEqual(7, (*it).GetInt());
         ++it;
@@ -1258,7 +1258,7 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewArray());
-        doc.GetRoot().ArrPushBack(doc.NewInt(1));
+        doc.GetRoot().ArrayPushBack(doc.NewInt(1));
         MutableArrayIterator it;
         it.FromValue(doc.GetRoot());
         Assert::IsFalse(it.HasNext());
@@ -1279,8 +1279,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("k1"), doc.NewInt(1));
-        doc.GetRoot().ObjInsert(1, doc.NewString("k2"), doc.NewInt(2));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("k1"), doc.NewInt(1));
+        doc.GetRoot().ObjectInsert(1, doc.NewString("k2"), doc.NewInt(2));
 
         MutableObjectIterator it(doc.GetRoot());
         std::vector<std::string> keys;
@@ -1299,8 +1299,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("a"), doc.NewInt(1));
-        doc.GetRoot().ObjInsert(1, doc.NewString("b"), doc.NewInt(2));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("a"), doc.NewInt(1));
+        doc.GetRoot().ObjectInsert(1, doc.NewString("b"), doc.NewInt(2));
         int cnt = 0;
         for (CMutableValue key : doc.GetRoot().AsObject())
         {
@@ -1314,7 +1314,7 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("mykey"), doc.NewInt(42));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("mykey"), doc.NewInt(42));
         MutableObjectIterator it(doc.GetRoot());
         CMutableValue val = it.Get("mykey");
         Assert::IsTrue(val.IsValid());
@@ -1325,7 +1325,7 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("abc"), doc.NewInt(9));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("abc"), doc.NewInt(9));
         MutableObjectIterator it(doc.GetRoot());
         CMutableValue val = it.Get("abc", 3);
         Assert::IsTrue(val.IsValid());
@@ -1335,8 +1335,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("del"), doc.NewInt(0));
-        doc.GetRoot().ObjInsert(1, doc.NewString("keep"), doc.NewInt(1));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("del"), doc.NewInt(0));
+        doc.GetRoot().ObjectInsert(1, doc.NewString("keep"), doc.NewInt(1));
 
         MutableObjectIterator it(doc.GetRoot());
         while (it != MutableObjectIterator{})
@@ -1354,8 +1354,8 @@ public:
     {
         CMutableDocument doc;
         doc.SetRoot(doc.NewObject());
-        doc.GetRoot().ObjInsert(0, doc.NewString("p"), doc.NewInt(1));
-        doc.GetRoot().ObjInsert(1, doc.NewString("q"), doc.NewInt(2));
+        doc.GetRoot().ObjectInsert(0, doc.NewString("p"), doc.NewInt(1));
+        doc.GetRoot().ObjectInsert(1, doc.NewString("q"), doc.NewInt(2));
         MutableObjectIterator it(doc.GetRoot());
         CMutableValue k1 = *it;
         ++it;
