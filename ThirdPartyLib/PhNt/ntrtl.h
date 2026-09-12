@@ -7278,8 +7278,7 @@ NTSYSAPI
 HANDLE
 NTAPI
 RtlGetCurrentTransaction(
-    _In_opt_ PCWSTR ExistingFileName,
-    _In_opt_ PCWSTR NewFileName
+    VOID
     );
 
 // private
