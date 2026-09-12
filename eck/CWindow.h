@@ -17,10 +17,10 @@ enum class FrameType
 
 enum class ScrollType
 {
-    None,   // 无
-    Horizontal,   // 水平滚动条
+    None,       // 无
+    Horizontal, // 水平滚动条
     Vertical,   // 垂直滚动条
-    Both,   // 水平和垂直滚动条
+    Both,       // 水平和垂直滚动条
 };
 
 // Create =======================================================
@@ -52,25 +52,25 @@ enum class ScrollType
 
 // Attach / Detach ==============================================
 
-#define ECK_W_DISABLE_ATTACH                                                    \
-    void Attach(HWND hWnd) noexcept override                                    \
-    {                                                                           \
-        EckBugCheck(BccNotImplemented, L"CWindow::Attach is disabled.");        \
-    }                                                                           \
-    HWND Detach() noexcept override                                             \
-    {                                                                           \
-        EckBugCheck(BccNotImplemented, L"CWindow::Detach is disabled.");        \
-        return nullptr;                                                         \
+#define ECK_W_DISABLE_ATTACH                                                       \
+    void Attach(HWND hWnd) noexcept override                                       \
+    {                                                                              \
+        EckBugCheck(::eck::BccNotImplemented, L"CWindow::Attach is disabled.");    \
+    }                                                                              \
+    HWND Detach() noexcept override                                                \
+    {                                                                              \
+        EckBugCheck(::eck::BccNotImplemented, L"CWindow::Detach is disabled.");    \
+        return nullptr;                                                            \
     }
 
-#define ECK_W_DISABLE_ATTACHNEW                                                 \
-    void AttachNew(HWND hWnd) noexcept override                                 \
-    {                                                                           \
-        EckBugCheck(BccNotImplemented, L"CWindow::AttachNew is disabled.");     \
-    }                                                                           \
-    void DetachNew() noexcept override                                          \
-    {                                                                           \
-        EckBugCheck(BccNotImplemented, L"CWindow::DetachNew is disabled.");     \
+#define ECK_W_DISABLE_ATTACHNEW                                                    \
+    void AttachNew(HWND hWnd) noexcept override                                    \
+    {                                                                              \
+        EckBugCheck(::eck::BccNotImplemented, L"CWindow::AttachNew is disabled."); \
+    }                                                                              \
+    void DetachNew() noexcept override                                             \
+    {                                                                              \
+        EckBugCheck(::eck::BccNotImplemented, L"CWindow::DetachNew is disabled."); \
     }
 
 #define ECK_W_NONATTACHABLE(Class)          \
