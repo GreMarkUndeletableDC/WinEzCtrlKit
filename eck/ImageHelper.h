@@ -783,7 +783,7 @@ inline HBITMAP GdiCreate32bppDibSection(
 inline HBITMAP GdiCreateDdbFrom32bppDibPixel(
     _In_opt_ HDC hDC,
     int cx, int cy,
-    _In_reads_bytes_(4 * cx * cy) PCVOID pBits) noexcept
+    _In_reads_bytes_(4 * cx * (cy < 0 ? -cy : cy)) PCVOID pBits) noexcept
 {
     BITMAPINFO bmi{};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
