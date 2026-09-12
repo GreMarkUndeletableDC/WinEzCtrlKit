@@ -48,7 +48,7 @@
     <ClCompile Include="TsTrivialBuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="TsCRefStr.cpp">
+    <ClCompile Include="TsCString.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TsCRectPackSkyline.cpp">
@@ -66,7 +66,7 @@
     <ClCompile Include="TsRefPtr.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="TsCSelRange.cpp">
+    <ClCompile Include="TsCSelectionRange.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TsCEventChain.cpp">
