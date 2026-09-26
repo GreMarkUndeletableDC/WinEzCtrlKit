@@ -10839,15 +10839,15 @@ RtlGetNativeSystemInformation(
     );
 
 // rev
-NTSYSAPI
-NTSTATUS
-NTAPI
-NtWow64GetNativeSystemInformation(
-    _In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,
-    _In_ PVOID NativeSystemInformation,
-    _In_ ULONG InformationLength,
-    _Out_opt_ PULONG ReturnLength
-    );
+// NTSYSAPI
+// NTSTATUS
+// NTAPI
+// NtWow64GetNativeSystemInformation(
+//     _In_ SYSTEM_INFORMATION_CLASS SystemInformationClass,
+//     _In_ PVOID NativeSystemInformation,
+//     _In_ ULONG InformationLength,
+//     _Out_opt_ PULONG ReturnLength
+//     );
 
 NTSYSAPI
 NTSTATUS

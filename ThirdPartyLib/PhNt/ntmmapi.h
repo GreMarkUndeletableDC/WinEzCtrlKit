@@ -777,16 +777,16 @@ NtReadVirtualMemory(
  * \param NumberOfBytesRead A pointer to a variable that receives the number of bytes transferred into the specified buffer.
  * \return NTSTATUS Successful or errant status.
  */
-NTSYSAPI
-NTSTATUS
-NTAPI
-NtWow64ReadVirtualMemory64(
-    _In_ HANDLE ProcessHandle,
-    _In_opt_ ULONGLONG BaseAddress,
-    _Out_writes_bytes_to_(NumberOfBytesToRead, *NumberOfBytesRead) PVOID Buffer,
-    _In_ ULONGLONG NumberOfBytesToRead,
-    _Out_opt_ PULONGLONG NumberOfBytesRead
-    );
+// NTSYSAPI
+// NTSTATUS
+// NTAPI
+// NtWow64ReadVirtualMemory64(
+//     _In_ HANDLE ProcessHandle,
+//     _In_opt_ ULONGLONG BaseAddress,
+//     _Out_writes_bytes_to_(NumberOfBytesToRead, *NumberOfBytesRead) PVOID Buffer,
+//     _In_ ULONGLONG NumberOfBytesToRead,
+//     _Out_opt_ PULONGLONG NumberOfBytesRead
+//     );
 
 #if (PHNT_VERSION >= PHNT_WINDOWS_11)
 /**
@@ -845,16 +845,16 @@ NtWriteVirtualMemory(
  * \param NumberOfBytesWritten A pointer to a variable that receives the number of bytes transferred into the specified buffer.
  * \return NTSTATUS Successful or errant status.
  */
-NTSYSAPI
-NTSTATUS
-NTAPI
-NtWow64WriteVirtualMemory64(
-    _In_ HANDLE ProcessHandle,
-    _In_opt_ ULONGLONG BaseAddress,
-    _In_reads_bytes_(NumberOfBytesToWrite) PVOID Buffer,
-    _In_ ULONGLONG NumberOfBytesToWrite,
-    _Out_opt_ PULONGLONG NumberOfBytesWritten
-    );
+// NTSYSAPI
+// NTSTATUS
+// NTAPI
+// NtWow64WriteVirtualMemory64(
+//     _In_ HANDLE ProcessHandle,
+//     _In_opt_ ULONGLONG BaseAddress,
+//     _In_reads_bytes_(NumberOfBytesToWrite) PVOID Buffer,
+//     _In_ ULONGLONG NumberOfBytesToWrite,
+//     _Out_opt_ PULONGLONG NumberOfBytesWritten
+//     );
 
 /**
  * The NtProtectVirtualMemory routine changes the protection on a region of virtual memory.
@@ -912,17 +912,17 @@ NtQueryVirtualMemory(
  * \param ReturnLength A pointer to a variable that receives the number of bytes returned in the MemoryInformation buffer.
  * \return NTSTATUS Successful or errant status.
  */
-NTSYSAPI
-NTSTATUS
-NTAPI
-NtWow64QueryVirtualMemory64(
-    _In_ HANDLE ProcessHandle,
-    _In_opt_ ULONGLONG BaseAddress,
-    _In_ MEMORY_INFORMATION_CLASS MemoryInformationClass,
-    _Out_writes_bytes_(MemoryInformationLength) PVOID MemoryInformation,
-    _In_ ULONGLONG MemoryInformationLength,
-    _Out_opt_ PULONGLONG ReturnLength
-    );
+// NTSYSAPI
+// NTSTATUS
+// NTAPI
+// NtWow64QueryVirtualMemory64(
+//     _In_ HANDLE ProcessHandle,
+//     _In_opt_ ULONGLONG BaseAddress,
+//     _In_ MEMORY_INFORMATION_CLASS MemoryInformationClass,
+//     _Out_writes_bytes_(MemoryInformationLength) PVOID MemoryInformation,
+//     _In_ ULONGLONG MemoryInformationLength,
+//     _Out_opt_ PULONGLONG ReturnLength
+//     );
 
 /**
  * The NtFlushVirtualMemory routine flushes the instruction cache for a specified process.
