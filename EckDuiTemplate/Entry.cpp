@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 
 #include "CApp.h"
-#include "CWndMain.h"
+#include "CWindowMain.h"
 
 #include "eck\AutoLink.h"
 

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#define _CRTDBG_MAP_ALLOC	1
+#define _CRTDBG_MAP_ALLOC   1
 
 #include "eck\PchInclude.h"
 #include "eck\SystemHelper.h"

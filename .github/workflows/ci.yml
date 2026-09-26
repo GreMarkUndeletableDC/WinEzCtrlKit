@@ -1,0 +1,143 @@
+﻿name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  whitespace:
+    name: Check Whitespace
+    runs-on: windows-2022
+    timeout-minutes: 10
+    env:
+      PYTHONUTF8: '1'
+      WHITESPACE_SKIP: |
+        eck/LunarDateTable.h
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Get check_whitespace.py
+        shell: pwsh
+        run: |
+          $script = Join-Path $env:RUNNER_TEMP 'check_whitespace.py'
+          Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/GreMarkUndeletableDC/Tools/master/check_whitespace.py' -OutFile $script
+          Write-Host "脚本文件：$script"
+
+      - name: Check Whitespace
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+          $files = @(git -c core.quotepath=false ls-files '*.h' '*.cpp' |
+            Where-Object { $_ -notmatch '^ThirdPartyLib/' })
+
+          $skip = @($env:WHITESPACE_SKIP -split "`r?`n" |
+            Where-Object { $_.Trim() } | ForEach-Object { $_.Trim() })
+          if ($skip.Count -gt 0) {
+            $files = @($files | Where-Object { $skip -notcontains $_ })
+            Write-Host ('跳过文件{0}个: {1}' -f $skip.Count, ($skip -join '; '))
+          }
+
+          Write-Host "待检查文件: $($files.Count) 个"
+          $script = Join-Path $env:RUNNER_TEMP 'check_whitespace.py'
+          python $script $files --no-color
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+  build-test:
+    name: Build ${{ matrix.platform }} ${{ matrix.configuration }}
+    runs-on: windows-2022
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x86, x64]
+        configuration: [Debug, Release]
+    env:
+      ECK_INCLUDE: ${{ github.workspace }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Build
+        shell: pwsh
+        run: |
+          $log = "build-${{ matrix.platform }}-${{ matrix.configuration }}.log"
+          msbuild WinEzCtrlKit.sln /m /nologo /verbosity:minimal `
+            /p:Configuration=${{ matrix.configuration }} `
+            /p:Platform=${{ matrix.platform }} `
+            /fl "/flp:logfile=$log;verbosity=normal"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Unit Test
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $platformDir = if ('${{ matrix.platform }}' -eq 'x86') { '' } else { 'x64' }
+          $dll = if ($platformDir) {
+              Join-Path $env:GITHUB_WORKSPACE "$platformDir\${{ matrix.configuration }}\UnitTest.dll"
+          }
+          else {
+              Join-Path $env:GITHUB_WORKSPACE "${{ matrix.configuration }}\UnitTest.dll"
+          }
+          if (-not (Test-Path $dll)) { throw "未找到测试DLL: $dll" }
+
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vstest = & $vswhere -latest -products * -find '**\TestPlatform\vstest.console.exe' |
+            Select-Object -First 1
+          if (-not $vstest) { throw '未找到vstest.console.exe' }
+          Write-Host "vstest: $vstest"
+
+          $resultsDir = Join-Path $env:GITHUB_WORKSPACE 'TestResults\${{ matrix.platform }}-${{ matrix.configuration }}'
+          & $vstest $dll '--logger:trx;LogFileName=UnitTest.trx' `
+            "--Platform:${{ matrix.platform }}" `
+            "--ResultsDirectory:$resultsDir"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: TestResults-${{ matrix.platform }}-${{ matrix.configuration }}
+          path: TestResults/**
+          if-no-files-found: ignore
+
+      - name: Upload Build Log
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: BuildLog-${{ matrix.platform }}-${{ matrix.configuration }}
+          path: build-${{ matrix.platform }}-${{ matrix.configuration }}.log
+          if-no-files-found: ignore
+  ci-required:
+    name: CI Required
+    if: ${{ always() }}
+    needs:
+      - whitespace
+      - build-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check CI results
+        if: ${{ needs.whitespace.result != 'success' || needs.build-test.result != 'success' }}
+        run: |
+          echo "CI failed."
+          echo "whitespace: ${{ needs.whitespace.result }}"
+          echo "build-test: ${{ needs.build-test.result }}"
+          exit 1
+
+      - name: CI passed
+        run: echo "All CI checks passed."
