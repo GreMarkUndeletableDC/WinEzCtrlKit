@@ -209,7 +209,9 @@ private:
             }
             else
             {
+#ifdef _DEBUG
                 EckAssert(pAfter->pThis == this && !(pAfter->uFlags & NF_DELETED));
+#endif
                 pNew->pNext = pAfter->pNext;
                 pAfter->pNext = pNew;
             }
@@ -284,7 +286,9 @@ public:
 
     void Disconnect(HSlot hSlot) noexcept
     {
+#ifdef _DEBUG
         EckAssert(hSlot && hSlot->pThis == this && !(hSlot->uFlags & NF_DELETED));
+#endif
         ((NODE*)hSlot)->uFlags |= NF_DELETED;
     }
 
@@ -332,7 +336,9 @@ public:
     // 此方法将重置上下文状态，若要保留状态，则应在此方法返回后重新设置状态或复制上下文
     TReturn CallNext(Slot& Ctx, TArguments ...Args) noexcept
     {
+#ifdef _DEBUG
         EckAssert(Ctx.m_pCurrNode && ((NODE*)Ctx.m_pCurrNode)->pThis == this);
+#endif
         const auto pNext = ((NODE*)Ctx.m_pCurrNode)->pNext;
         if (pNext)
             return EmitStartWith(pNext, (NODE*)Ctx.m_pCurrNode, Ctx, Args...);
@@ -343,13 +349,17 @@ public:
     template<class T>
     const T* GetFunctionTarget(HSlot hSlot) const noexcept
     {
+#ifdef _DEBUG
         EckAssert(hSlot && hSlot->pThis == this && !(hSlot->uFlags & NF_DELETED));
+#endif
         return hSlot->Fn.template target<T>();
     }
     template<class T>
     T* GetFunctionTarget(HSlot hSlot) noexcept
     {
+#ifdef _DEBUG
         EckAssert(hSlot && hSlot->pThis == this && !(hSlot->uFlags & NF_DELETED));
+#endif
         return ((NODE*)hSlot)->Fn.template target<T>();
     }
 };
