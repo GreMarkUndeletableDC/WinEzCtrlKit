@@ -362,13 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-/CWindowTest.cpp
-/CWindowTest.h
-
 *.lib
 *.idb
-
-MtDebug/
-MdDebug/
-MtRelease/
-MdRelease/
