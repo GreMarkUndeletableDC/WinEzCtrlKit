@@ -86,8 +86,13 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $outPlatform = if ('${{ matrix.platform }}' -eq 'x86') { 'Win32' } else { 'x64' }
-          $dll = Join-Path $env:GITHUB_WORKSPACE "$outPlatform\${{ matrix.configuration }}\UnitTest.dll"
+          $platformDir = if ('${{ matrix.platform }}' -eq 'x86') { '' } else { 'x64' }
+          $dll = if ($platformDir) {
+              Join-Path $env:GITHUB_WORKSPACE "$platformDir\${{ matrix.configuration }}\UnitTest.dll"
+          }
+          else {
+              Join-Path $env:GITHUB_WORKSPACE "${{ matrix.configuration }}\UnitTest.dll"
+          }
           if (-not (Test-Path $dll)) { throw "未找到测试DLL: $dll" }
 
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
