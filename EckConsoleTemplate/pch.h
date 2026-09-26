@@ -1,5 +1,5 @@
 ﻿#pragma once
-#define _CRTDBG_MAP_ALLOC	1
+#define _CRTDBG_MAP_ALLOC   1
 
 #define ECK_OPT_NO_DARKMODE 1
 #define ECK_OPT_NO_DX       1

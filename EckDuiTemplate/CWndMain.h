@@ -4,16 +4,16 @@
 class CWindowMain final : public Dui::CDuiWindow
 {
 private:
-	Dui::CButton m_BT{};
-	Dui::CEdit m_EDUserName{};
-	Dui::CEdit m_EDPassword{};
-	eck::CLinearLayoutV m_Layout{};
+    Dui::CButton m_BT{};
+    Dui::CEdit m_EDUserName{};
+    Dui::CEdit m_EDPassword{};
+    eck::CLinearLayoutV m_Layout{};
 
-	void OnDestory();
-	LRESULT OnCreate();
+    void OnDestory();
+    LRESULT OnCreate();
 public:
-	ECK_W_NONATTACHABLE(CWindowMain);
-	ECK_W_CREATE_CLASS_INST(eck::WCN_DUMMY, eck::g_hInstance);
+    ECK_W_NONATTACHABLE(CWindowMain);
+    ECK_W_CREATE_CLASS_INST(eck::WCN_DUMMY, eck::g_hInstance);
 
-	LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override;
+    LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override;
 };
