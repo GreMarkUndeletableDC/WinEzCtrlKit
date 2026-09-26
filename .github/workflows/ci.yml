@@ -117,3 +117,22 @@ jobs:
           name: BuildLog-${{ matrix.platform }}-${{ matrix.configuration }}
           path: build-${{ matrix.platform }}-${{ matrix.configuration }}.log
           if-no-files-found: ignore
+  ci-required:
+    name: CI Required
+    if: ${{ always() }}
+    needs:
+      - whitespace
+      - build-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check CI results
+        if: ${{ needs.whitespace.result != 'success' || needs.build-test.result != 'success' }}
+        run: |
+          echo "CI failed."
+          echo "whitespace: ${{ needs.whitespace.result }}"
+          echo "build-test: ${{ needs.build-test.result }}"
+          exit 1
+
+      - name: CI passed
+        run: echo "All CI checks passed."
