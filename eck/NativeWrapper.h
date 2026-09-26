@@ -5,7 +5,7 @@ ECK_NAMESPACE_BEGIN
 EckInline void* VAllocate(size_t cb, ULONG ulProtect = PAGE_READWRITE) noexcept
 {
     void* p{};
-    (void)NtAllocateVirtualMemory(NtCurrentProcess(), &p, 0, &cb, MEM_COMMIT, ulProtect);
+    (void)NtAllocateVirtualMemory(NtCurrentProcess(), &p, 0, (SIZE_T*)&cb, MEM_COMMIT, ulProtect);
     return p;
 }
 EckInline NTSTATUS VFree(void* p) noexcept
