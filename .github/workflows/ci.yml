@@ -55,7 +55,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
   build-test:
-    name: ${{ matrix.platform }} ${{ matrix.configuration }}
+    name: Build ${{ matrix.platform }} ${{ matrix.configuration }}
     runs-on: windows-2022
     timeout-minutes: 60
     strategy:
