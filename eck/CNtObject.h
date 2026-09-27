@@ -28,7 +28,7 @@ public:
             NtClose(m_hObject);
     }
 
-    EckInlineNdCe void Attach(HANDLE h) noexcept
+    EckInlineCe void Attach(HANDLE h) noexcept
     {
         if (h != m_hObject)
         {

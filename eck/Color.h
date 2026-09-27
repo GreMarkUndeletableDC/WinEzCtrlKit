@@ -390,7 +390,7 @@ namespace Detail
     https://github.com/res2k/Windows10Colors
     */
 
-    EckInlineNdCe void AccentColorLighter(
+    EckInlineCe void AccentColorLighter(
         float vBase,
         float sPrev, float vPrev,
         _Out_ float& s, _Out_ float& v) noexcept
@@ -398,7 +398,7 @@ namespace Detail
         v = std::min(vPrev + vBase / 4.f, 1.f);
         s = (v >= 0.7f) ? (sPrev * 0.75f) : sPrev;
     }
-    EckInlineNdCe void AccentColorDarker(
+    EckInlineCe void AccentColorDarker(
         float vBase,
         float vPrev,
         _Out_ float& v) noexcept
