@@ -1164,7 +1164,7 @@ public:
             {
                 RdLockUpdate();
                 TmSwitchTheme(ShouldAppsUseDarkMode());
-                Redraw();
+                RdInvalidate(FALSE);
                 RdUnlockUpdate();
             }
             break;
@@ -1174,7 +1174,7 @@ public:
             {
                 RdLockUpdate();
                 TmUpdateDwmColorizationColor();
-                Redraw();
+                RdInvalidate(FALSE);
                 RdUnlockUpdate();
             }
             break;
@@ -1236,12 +1236,6 @@ public:
         const auto it = std::find(m_vTimeLine.begin(), m_vTimeLine.end(), pTl);
         if (it != m_vTimeLine.end())
             m_vTimeLine.erase(it);
-    }
-
-    EckInline void Redraw(BOOL bWake = TRUE) noexcept
-    {
-        m_bFullUpdate = TRUE;
-        m_rcInvalid = { 0, 0, GetClientWidthLogical(), GetClientHeightLogical() };
     }
 
     // 必须在创建窗口之前调用

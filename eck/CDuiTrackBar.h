@@ -433,6 +433,9 @@ public:
     EckInlineCe void SetLargeDelta(float f) noexcept { m_fLargeDelta = f; }
     EckInlineNdCe float GetLargeDelta() const noexcept { return m_fLargeDelta; }
 
+    EckInlineCe void SetThumbSize(float cxy) noexcept { m_cxyThumb = cxy; }
+    EckInlineNdCe float GetThumbSize() const noexcept { return m_cxyThumb; }
+
     constexpr float HitTest(Kw::Vec2 pt) noexcept
     {
         Kw::Rect rcTrack;
