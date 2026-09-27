@@ -492,7 +492,7 @@ EckInlineNdCe UINT TagSynchronizationSafeIntToUInt(_In_reads_bytes_(4) PCBYTE p)
         ((p[2] & 0x7F) << 7) | (p[3] & 0x7F);
 }
 // 将32位小端整数dw转为同步安全整数，并写入p处
-EckInlineNdCe void TagUIntToSynchronizationSafeInt(_Out_writes_bytes_(4) BYTE* p, UINT dw) noexcept
+EckInlineCe void TagUIntToSynchronizationSafeInt(_Out_writes_bytes_(4) BYTE* p, UINT dw) noexcept
 {
     p[3] = (dw) & 0b0111'1111;
     p[2] = (dw >> 7) & 0b0111'1111;

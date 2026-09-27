@@ -143,6 +143,74 @@ EckInlineNdCe ARGB MakeArgb(BYTE a, BYTE r, BYTE g, BYTE b) noexcept
     return BytesToInteger<ARGB>(b, g, r, a);
 }
 
+EckInlineNdCe ARGB PremultiplyArgb(ARGB argb) noexcept
+{
+    const auto byAlpha = GetIntegerByte<3>(argb);
+    return BytesToInteger<ARGB>(
+        (GetIntegerByte<0>(argb) * byAlpha + 0x7F) / 0xFF,
+        (GetIntegerByte<1>(argb) * byAlpha + 0x7F) / 0xFF,
+        (GetIntegerByte<2>(argb) * byAlpha + 0x7F) / 0xFF,
+        byAlpha);
+}
+EckInlineNdCe ARGB PremultiplyArgb(BYTE byAlpha, BYTE byR, BYTE byG, BYTE byB) noexcept
+{
+    return BytesToInteger<ARGB>(
+        (byB * byAlpha + 0x7F) / 0xFF,
+        (byG * byAlpha + 0x7F) / 0xFF,
+        (byR * byAlpha + 0x7F) / 0xFF,
+        byAlpha);
+}
+EckInlineNdCe ARGB UnpremultiplyArgb(ARGB argb) noexcept
+{
+    const auto byAlpha = GetIntegerByte<3>(argb);
+    if (!byAlpha)
+        return 0;
+    const auto byHalf = byAlpha / 2;
+    return BytesToInteger<ARGB>(
+        (GetIntegerByte<0>(argb) * 0xFF + byHalf) / byAlpha,
+        (GetIntegerByte<1>(argb) * 0xFF + byHalf) / byAlpha,
+        (GetIntegerByte<2>(argb) * 0xFF + byHalf) / byAlpha,
+        byAlpha);
+}
+EckInlineNdCe ARGB UnpremultiplyArgb(BYTE byAlpha, BYTE byR, BYTE byG, BYTE byB) noexcept
+{
+    if (!byAlpha)
+        return 0;
+    const auto byHalf = byAlpha / 2;
+    return BytesToInteger<ARGB>(
+        (byB * 0xFF + byHalf) / byAlpha,
+        (byG * 0xFF + byHalf) / byAlpha,
+        (byR * 0xFF + byHalf) / byAlpha,
+        byAlpha);
+}
+
+// 返回ARGB
+EckInlineNdCe std::array<BYTE, 4> DecomposeArgb(ARGB argb) noexcept
+{
+    return
+    {
+        GetIntegerByte<3>(argb),
+        GetIntegerByte<2>(argb),
+        GetIntegerByte<1>(argb),
+        GetIntegerByte<0>(argb)
+    };
+}
+// 返回RGB
+EckInlineNdCe std::array<BYTE, 3> DecomposeColorref(COLORREF cr) noexcept
+{
+    return
+    {
+        GetIntegerByte<0>(cr),
+        GetIntegerByte<1>(cr),
+        GetIntegerByte<2>(cr)
+    };
+}
+
+EckInlineNdCe BYTE GetArgbA(ARGB argb) noexcept { return GetIntegerByte<3>(argb); }
+EckInlineNdCe BYTE GetArgbR(ARGB argb) noexcept { return GetIntegerByte<2>(argb); }
+EckInlineNdCe BYTE GetArgbG(ARGB argb) noexcept { return GetIntegerByte<1>(argb); }
+EckInlineNdCe BYTE GetArgbB(ARGB argb) noexcept { return GetIntegerByte<0>(argb); }
+
 template<CcpNumber TOut, CcpNumber TIn>
 EckInlineNdCe TOut CalculateGray(TIn r, TIn g, TIn b) noexcept
 {
@@ -151,11 +219,6 @@ EckInlineNdCe TOut CalculateGray(TIn r, TIn g, TIn b) noexcept
         0.7151691357059038 * g +
         0.07218152157344333 * b);
 }
-
-EckInlineNdCe BYTE GetArgbR(ARGB argb) noexcept { return GetIntegerByte<2>(argb); }
-EckInlineNdCe BYTE GetArgbG(ARGB argb) noexcept { return GetIntegerByte<1>(argb); }
-EckInlineNdCe BYTE GetArgbB(ARGB argb) noexcept { return GetIntegerByte<0>(argb); }
-EckInlineNdCe BYTE GetArgbA(ARGB argb) noexcept { return GetIntegerByte<3>(argb); }
 
 EckInlineNdCe BOOL IsColorLight(BYTE r, BYTE g, BYTE b) noexcept
 {
@@ -390,7 +453,7 @@ namespace Detail
     https://github.com/res2k/Windows10Colors
     */
 
-    EckInlineNdCe void AccentColorLighter(
+    EckInlineCe void AccentColorLighter(
         float vBase,
         float sPrev, float vPrev,
         _Out_ float& s, _Out_ float& v) noexcept
@@ -398,7 +461,7 @@ namespace Detail
         v = std::min(vPrev + vBase / 4.f, 1.f);
         s = (v >= 0.7f) ? (sPrev * 0.75f) : sPrev;
     }
-    EckInlineNdCe void AccentColorDarker(
+    EckInlineCe void AccentColorDarker(
         float vBase,
         float vPrev,
         _Out_ float& v) noexcept

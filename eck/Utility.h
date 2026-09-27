@@ -1187,7 +1187,7 @@ EckInlineNdCe BOOL EqualGuid(REFGUID x1, REFGUID x2) noexcept
 }
 
 template<class T, size_t N>
-EckInlineNdCe void AssignArray(T(&x1)[N], const T(&x2)[N]) noexcept
+EckInlineCe void AssignArray(T(&x1)[N], const T(&x2)[N]) noexcept
 {
     EckCounter(N, i)
         x1[i] = x2[i];
