@@ -15,7 +15,7 @@ using HWhSession = HINTERNET;
 using HWhConnect = HINTERNET;
 using HWhRequest = HINTERNET;
 
-inline std::wstring_view HeaderGetParam(
+inline std::wstring_view HeaderQueryKeyValue(
     std::wstring_view svHeader,
     std::wstring_view svName) noexcept
 {
@@ -25,12 +25,12 @@ inline std::wstring_view HeaderGetParam(
     if (pos < 0)
         return {};
     const auto posEnd = FindStringLength(
-        svHeader.data(), (int)svHeader.size(),
+        svHeader.data() + pos, (int)svHeader.size() - pos,
         EckArgString(L"\r\n"));
     if (posEnd < 0)
         return {};
     const auto pszValue = TrimStringLeft(svHeader.data() + pos + svName.size() + 1/*冒号*/);
-    return { pszValue, size_t(posEnd - (pszValue - svHeader.data())) };
+    return { pszValue, size_t(posEnd + pos - (pszValue - svHeader.data())) };
 }
 
 inline BOOL HeaderComplete(
@@ -236,7 +236,7 @@ struct CHttpRequestAsync
                             WINHTTP_HEADER_NAME_BY_INDEX,
                             rs.Data(), &cbHeaders, WINHTTP_NO_HEADER_INDEX);
                         const auto svContentLength =
-                            HeaderGetParam(rs.ToStringView(), L"Content-Length"sv);
+                            HeaderQueryKeyValue(rs.ToStringView(), L"Content-Length"sv);
                         if (!svContentLength.empty())
                         {
                             const auto cbContent = (UINT)_wcstoui64(
