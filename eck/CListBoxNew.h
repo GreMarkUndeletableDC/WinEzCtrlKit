@@ -215,7 +215,7 @@ private:
             if (idxTop >= 0 && idxBottom >= 0)
             {
                 GetItemRect(idxTop, ne.rc);
-                for (ne.dwItemSpec = idxTop; ne.dwItemSpec <= idxBottom;
+                for (ne.dwItemSpec = idxTop; (int)ne.dwItemSpec <= idxBottom;
                     ++ne.dwItemSpec)
                 {
                     PaintItem(ne, lRet & CDRF_NOTIFYITEMDRAW);
