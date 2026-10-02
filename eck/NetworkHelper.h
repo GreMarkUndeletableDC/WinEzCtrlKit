@@ -25,12 +25,12 @@ inline std::wstring_view HeaderGetParam(
     if (pos < 0)
         return {};
     const auto posEnd = FindStringLength(
-        svHeader.data(), (int)svHeader.size(),
+        svHeader.data() + pos, (int)svHeader.size() - pos,
         EckArgString(L"\r\n"));
     if (posEnd < 0)
         return {};
     const auto pszValue = TrimStringLeft(svHeader.data() + pos + svName.size() + 1/*冒号*/);
-    return { pszValue, size_t(posEnd - (pszValue - svHeader.data())) };
+    return { pszValue, size_t(posEnd + pos - (pszValue - svHeader.data())) };
 }
 
 inline BOOL HeaderComplete(
