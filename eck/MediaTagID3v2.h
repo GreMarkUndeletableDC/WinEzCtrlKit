@@ -773,7 +773,7 @@ public:
         const ID3v2::FRAME::SERIAL_CONTEXT SerialCtx
         {
             .rbWork = m_rbWork,
-            .pTagHdr = &m_Header,
+            .pTagHdr = &Hdr,
             .bFrameHdr = TRUE,
         };
 
@@ -896,7 +896,7 @@ public:
             EXTHDR_SERIAL_BUF ExtHdrBuf{};
             size_t cbExtHdr{};
             UINT* pcbPaddingExtHdrV23{};
-            if (m_Header.Flags & ID3V2HF_EXTENDED_HEADER)
+            if (Hdr.Flags & ID3V2HF_EXTENDED_HEADER)
             {
                 // PENDING 扩展头填充大小
                 TagpSerializeExtendedHeader(ExtHdrBuf, cbExtHdr,
