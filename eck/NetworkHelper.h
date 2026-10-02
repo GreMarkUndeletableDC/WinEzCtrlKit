@@ -15,7 +15,7 @@ using HWhSession = HINTERNET;
 using HWhConnect = HINTERNET;
 using HWhRequest = HINTERNET;
 
-inline std::wstring_view HeaderGetParam(
+inline std::wstring_view HeaderQueryKeyValue(
     std::wstring_view svHeader,
     std::wstring_view svName) noexcept
 {
@@ -236,7 +236,7 @@ struct CHttpRequestAsync
                             WINHTTP_HEADER_NAME_BY_INDEX,
                             rs.Data(), &cbHeaders, WINHTTP_NO_HEADER_INDEX);
                         const auto svContentLength =
-                            HeaderGetParam(rs.ToStringView(), L"Content-Length"sv);
+                            HeaderQueryKeyValue(rs.ToStringView(), L"Content-Length"sv);
                         if (!svContentLength.empty())
                         {
                             const auto cbContent = (UINT)_wcstoui64(
