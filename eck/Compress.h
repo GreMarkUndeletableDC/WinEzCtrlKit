@@ -2,7 +2,7 @@
 #include "CByteBuffer.h"
 #include "AutoPointer.h"
 
-#include "../ThirdPartyLib/ZLib/zlib.h"
+#include "../ThirdPartyLibrary/ZLib/zlib.h"
 
 ECK_NAMESPACE_BEGIN
 EckInlineNdCe BOOL ZLibSuccess(int iRet) noexcept { return iRet >= 0; }

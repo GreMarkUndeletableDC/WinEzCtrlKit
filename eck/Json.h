@@ -8,7 +8,7 @@
 #undef free
 #undef malloc
 #undef realloc
-#include "../ThirdPartyLib/YyJson/yyjson.h"
+#include "../ThirdPartyLibrary/YyJson/yyjson.h"
 
 #define ECK_JSON_NAMESPACE_BEGIN    namespace Json {
 #define ECK_JSON_NAMESPACE_END      }

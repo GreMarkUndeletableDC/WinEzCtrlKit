@@ -81,7 +81,7 @@ __pragma(warning(disable:5260))
 #include <numeric>
 #include <any>
 
-#include "../ThirdPartyLib/Detours/detours.h"
+#include "../ThirdPartyLibrary/Detours/detours.h"
 
 #if _MSVC_LANG < 202002L
 #  error "ECK Lib requires C++20 or later"

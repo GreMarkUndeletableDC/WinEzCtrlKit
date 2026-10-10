@@ -40,7 +40,7 @@ jobs:
           [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
           $files = @(git -c core.quotepath=false ls-files '*.h' '*.cpp' |
-            Where-Object { $_ -notmatch '^ThirdPartyLib/' })
+            Where-Object { $_ -notmatch '^ThirdPartyLibrary/' })
 
           $skip = @($env:WHITESPACE_SKIP -split "`r?`n" |
             Where-Object { $_.Trim() } | ForEach-Object { $_.Trim() })

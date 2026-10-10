@@ -5,8 +5,8 @@
 #include "KwFlatten.h"
 #include "IGeometrySinkTransformer.h"
 
-#include "../ThirdPartyLib/SkiaTessellator/GrAATriangulator.h"
-#include "../ThirdPartyLib/SkiaTessellator/ISkiaTessellationHost.h"
+#include "../ThirdPartyLibrary/SkiaTessellator/GrAATriangulator.h"
+#include "../ThirdPartyLibrary/SkiaTessellator/ISkiaTessellationHost.h"
 
 ECK_NAMESPACE_BEGIN
 enum class PathType : BYTE
