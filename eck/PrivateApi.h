@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "../ThirdPartyLib/PhNt/phnt_windows.h"
-#include "../ThirdPartyLib/PhNt/phnt.h"
+#include "../ThirdPartyLibrary/PhNt/phnt_windows.h"
+#include "../ThirdPartyLibrary/PhNt/phnt.h"
 
 #include <Uxtheme.h>
 

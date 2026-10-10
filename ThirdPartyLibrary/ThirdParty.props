@@ -5,7 +5,7 @@
     目标工程的.vcxproj中，紧邻
         <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
     之前加入一行
-        <Import Project="$(ECK_INCLUDE)\ThirdPartyLib\ThirdParty.props" />
+        <Import Project="$(ECK_INCLUDE)\ThirdPartyLibrary\ThirdParty.props" />
     -->
 
     <ItemGroup>

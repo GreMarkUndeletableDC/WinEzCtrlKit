@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "FileHelper.h"
 #include "LocaleStringUtility.h"
-#include "../ThirdPartyLib/UCharDet/uchardet.h"
+#include "../ThirdPartyLibrary/UCharDet/uchardet.h"
 
 ECK_NAMESPACE_BEGIN
 namespace Detail

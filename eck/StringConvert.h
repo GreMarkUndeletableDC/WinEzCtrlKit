@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "ECK.h"
 
-#include "..\ThirdPartyLib\FastFloat\fast_float.h"
+#include "..\ThirdPartyLibrary\FastFloat\fast_float.h"
 
 #include <charconv>
 
