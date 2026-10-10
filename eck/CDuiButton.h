@@ -190,7 +190,7 @@ public:
             {
                 GetContainer()->EleReleaseCapture();
                 GetWindow().RdLockUpdate();
-                if (PointInRect(GetViewRect(), EagPoint(lParam)))
+                if (PointInRect(GetViewRect(), LpPoint(lParam)))
                     EvtClick();
                 Invalidate();
                 GetWindow().RdUnlockUpdate();

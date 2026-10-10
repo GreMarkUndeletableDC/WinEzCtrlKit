@@ -243,42 +243,6 @@ private:
         return SsNormal;
     }
 
-    void ScbCreateElement(BOOL bVert, BOOL bHorz) noexcept
-    {
-        if (!m_bUseBuiltInScrollBar)
-            return;
-        SccDisconnectEvent();
-        if (bVert)
-        {
-            if (!m_pSBVert)
-                m_pSBVert = std::make_unique<CScrollBar>();
-            m_pSccV = m_pSBVert.get();
-            if (!m_pSBVert->IsValid())
-            {
-                m_pSBVert->Create(
-                    {},
-                    DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
-                    0,
-                    0, 0, 0, 0, this);
-                m_pSBVert->SetVertical(TRUE);
-            }
-        }
-        if (bHorz)
-        {
-            if (!m_pSBHorz)
-                m_pSBHorz = std::make_unique<CScrollBar>();
-            m_pSccH = m_pSBHorz.get();
-            if (!m_pSBHorz->IsValid())
-            {
-                m_pSBHorz->Create(
-                    {},
-                    DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
-                    0, 0, 0, 0, 0, this);
-            }
-        }
-        SccConnectEvent();
-    }
-
     void ScbOnSize() noexcept
     {
         if ((!m_pSBHorz && !m_pSBVert) || !m_bUseBuiltInScrollBar)
@@ -296,7 +260,7 @@ private:
                 cy - CyBottomBar });
     }
 
-    void SccUpdatePage() noexcept
+    void ScbUpdatePage() noexcept
     {
         if (m_pSccV)
             m_pSccV->SccSetPage(GetHeight() - m_mgTextAera.top - m_mgTextAera.bottom);
@@ -304,14 +268,14 @@ private:
             m_pSccH->SccSetPage(GetWidth() - m_mgTextAera.left - m_mgTextAera.right);
     }
 
-    EckInline void SccpScrollCallback(BOOL bHorz, float fPos) noexcept
+    EckInline void ScbpScrollCallback(BOOL bHorz, float fPos) noexcept
     {
         GetWindow().RdLockUpdate();
         Scroll(bHorz, fPos);
         GetWindow().RdUnlockUpdate();
     }
 
-    void SccConnectEvent() noexcept
+    void ScbConnectEvent() noexcept
     {
         if (m_pSccV)
             m_pSccV->SccSetCallback(
@@ -319,7 +283,7 @@ private:
                 {
                     if ((int)Data.fPos == (int)Data.fPrevPos)
                         return;
-                    ((CEdit*)Data.pUser)->SccpScrollCallback(FALSE, Data.fPos);
+                    ((CEdit*)Data.pUser)->ScbpScrollCallback(FALSE, Data.fPos);
                 }, this);
         if (m_pSccH)
             m_pSccH->SccSetCallback(
@@ -327,10 +291,10 @@ private:
                 {
                     if ((int)Data.fPos == (int)Data.fPrevPos)
                         return;
-                    ((CEdit*)Data.pUser)->SccpScrollCallback(TRUE, Data.fPos);
+                    ((CEdit*)Data.pUser)->ScbpScrollCallback(TRUE, Data.fPos);
                 }, this);
     }
-    void SccDisconnectEvent() noexcept
+    void ScbDisconnectEvent() noexcept
     {
         if (m_pSccV)
             m_pSccV->SccSetCallback(nullptr, nullptr);
@@ -426,7 +390,7 @@ public:
         case WM_SIZE:
         {
             ScbOnSize();
-            SccUpdatePage();
+            ScbUpdatePage();
             UpdateInsetRect();
             constexpr auto uBits = TXTBIT_CLIENTRECTCHANGE | TXTBIT_EXTENTCHANGE;
             TxPropertyChanged(uBits, uBits);
@@ -510,7 +474,6 @@ public:
         case WM_CREATE:
         {
             GetWindow().RdLockUpdate();
-            ScbCreateElement(TRUE, TRUE);
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
 
             if (!TsiIsAvailable())
@@ -536,8 +499,7 @@ public:
         case WM_DESTROY:
         {
             m_pSrv->OnTxInPlaceDeactivate();
-            TsiShutdownTextServices(m_pSrv.Get());
-            m_pSrv.Clear();
+            TsiShutdownTextServices(m_pSrv.Detach());
             m_pHost->SetEdit(nullptr);
             m_pHost.Clear();
         }
@@ -566,7 +528,7 @@ public:
         TxSend:
             if (uMsg == WM_LBUTTONDOWN || uMsg == WM_RBUTTONDOWN)
                 SetFocus();
-            auto pt = *(Kw::Vec2*)lParam;
+            auto pt = LpPoint(lParam);
             ElementToClient(pt);
             LogicalToPixel(pt);
             LRESULT lResult;
@@ -592,26 +554,58 @@ public:
         return __super::OnEvent(uMsg, wParam, lParam);
     }
 
-    void SccSetController(IScrollController* pSccV, IScrollController* pSccH)
+    void ScbSetController(IScrollController* pSccV, IScrollController* pSccH)
     {
-        SccDisconnectEvent();
+        ScbDisconnectEvent();
         m_bUseBuiltInScrollBar = (!pSccH && !pSccV);
         m_pSccV = pSccV;
         m_pSccH = pSccH;
-        SccConnectEvent();
+        ScbConnectEvent();
+    }
+    void ScbCreateElement(BOOL bVert, BOOL bHorz) noexcept
+    {
+        if (!m_bUseBuiltInScrollBar)
+            return;
+        ScbDisconnectEvent();
+        if (bVert)
+        {
+            if (!m_pSBVert)
+                m_pSBVert = std::make_unique<CScrollBar>();
+            m_pSccV = m_pSBVert.get();
+            if (!m_pSBVert->IsValid())
+            {
+                m_pSBVert->Create(
+                    {},
+                    DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
+                    0,
+                    0, 0, 0, 0, this);
+                m_pSBVert->SetVertical(TRUE);
+            }
+        }
+        if (bHorz)
+        {
+            if (!m_pSBHorz)
+                m_pSBHorz = std::make_unique<CScrollBar>();
+            m_pSccH = m_pSBHorz.get();
+            if (!m_pSBHorz->IsValid())
+            {
+                m_pSBHorz->Create(
+                    {},
+                    DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
+                    0, 0, 0, 0, 0, this);
+            }
+        }
+        ScbConnectEvent();
     }
 
     void ShowScrollBar(int nBar, BOOL bShow)
     {
-        if (nBar == SB_BOTH)
-        {
-            m_pSccV->SccSetVisible(bShow);
-            m_pSccH->SccSetVisible(bShow);
-        }
-        else if (nBar == SB_HORZ)
-            m_pSccH->SccSetVisible(bShow);
-        else if (nBar == SB_VERT)
-            m_pSccV->SccSetVisible(bShow);
+        if (nBar == SB_HORZ || nBar == SB_BOTH)
+            if (m_pSccH)
+                m_pSccH->SccSetVisible(bShow);
+        if (nBar == SB_VERT || nBar == SB_BOTH)
+            if (m_pSccV)
+                m_pSccV->SccSetVisible(bShow);
     }
 
     void Scroll(BOOL bHorz, float fPos, BOOL bRedraw = TRUE)
@@ -1232,15 +1226,23 @@ inline BOOL CEditTextHost::TxSetScrollRange(INT fnBar, LONG nMinPos, INT nMaxPos
     const auto fMax = m_pEdit->PixelToLogical((float)nMaxPos);
     if (fnBar == SB_VERT || fnBar == SB_BOTH)
     {
-        m_pEdit->m_pSccV->SccSetRange(fMin, fMax);
-        if (fRedraw)
-            m_pEdit->m_pSccV->SccRedraw();
+        const auto pScc = m_pEdit->m_pSccV;
+        if (pScc)
+        {
+            pScc->SccSetRange(fMin, fMax);
+            if (fRedraw)
+                pScc->SccRedraw();
+        }
     }
     if (fnBar == SB_HORZ || fnBar == SB_BOTH)
     {
-        m_pEdit->m_pSccH->SccSetRange(fMin, fMax);
-        if (fRedraw)
-            m_pEdit->m_pSccH->SccRedraw();
+        const auto pScc = m_pEdit->m_pSccH;
+        if (pScc)
+        {
+            pScc->SccSetRange(fMin, fMax);
+            if (fRedraw)
+                pScc->SccRedraw();
+        }
     }
     return TRUE;
 }
@@ -1250,15 +1252,23 @@ inline BOOL CEditTextHost::TxSetScrollPos(INT fnBar, INT nPos, BOOL fRedraw)
     const auto fPos = m_pEdit->PixelToLogical((float)nPos);
     if (fnBar == SB_VERT || fnBar == SB_BOTH)
     {
-        m_pEdit->m_pSccV->SccSetPosition(fPos);
-        if (fRedraw)
-            m_pEdit->m_pSccV->SccRedraw();
+        const auto pScc = m_pEdit->m_pSccV;
+        if (pScc)
+        {
+            pScc->SccSetPosition(fPos);
+            if (fRedraw)
+                pScc->SccRedraw();
+        }
     }
     if (fnBar == SB_HORZ || fnBar == SB_BOTH)
     {
-        m_pEdit->m_pSccH->SccSetPosition(fPos);
-        if (fRedraw)
-            m_pEdit->m_pSccH->SccRedraw();
+        const auto pScc = m_pEdit->m_pSccH;
+        if (pScc)
+        {
+            pScc->SccSetPosition(fPos);
+            if (fRedraw)
+                pScc->SccRedraw();
+        }
     }
     return TRUE;
 }

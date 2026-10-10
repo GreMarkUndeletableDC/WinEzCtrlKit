@@ -85,7 +85,7 @@ public:
         {
             if (!m_pElem->GetCapture())
             {
-                auto pt = *(Kw::Vec2*)lParam;
+                auto pt = LpPoint(lParam);
                 m_pElem->ClientToElement(pt);
                 const int ht = HitTestBorder(pt);
                 if (ht != HTNOWHERE)
@@ -108,7 +108,7 @@ public:
         {
             if (m_htTracking == HTNOWHERE)
                 break;
-            auto pt = *(Kw::Vec2*)lParam;
+            auto pt = LpPoint(lParam);
             m_pElem->ElementToClient(pt);
             const auto dx = pt.x - m_ptStart.x;
             const auto dy = pt.y - m_ptStart.y;
@@ -170,7 +170,7 @@ public:
         break;
         case WM_LBUTTONDOWN:
         {
-            const auto& pt = *(Kw::Vec2*)lParam;
+            const auto& pt = LpPoint(lParam);
             m_htTracking = HitTestBorder(pt);
             if (m_htTracking != HTNOWHERE)
             {

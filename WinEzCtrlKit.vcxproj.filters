@@ -707,7 +707,7 @@
     <ClCompile Include="eck\DuiSizeBox.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\DuiBuiltinCompositor.h">
+    <ClCompile Include="eck\DuiCompositor2DAffineTransform.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\DuiTheme.h">
@@ -747,6 +747,24 @@
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\CTaskDialog.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\DuiFilter.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\D2DEffectDefine.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\D2DEffectGradientBlur.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\DuiCompositorCornerMapping.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\DuiFilterBlur.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\DuiFilterGradientBlur.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
   </ItemGroup>

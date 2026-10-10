@@ -405,7 +405,7 @@ public:
 
         case WM_MOUSEMOVE:
         {
-            HITTEST ht{ EagPoint(lParam) };
+            HITTEST ht{ LpPoint(lParam) };
             auto idx = HitTest(ht);
             if (m_bDraggingDivider)
             {
@@ -499,7 +499,7 @@ public:
         case WM_LBUTTONDOWN:
         case WM_LBUTTONDBLCLK:
         {
-            HITTEST ht{ EagPoint(lParam) };
+            HITTEST ht{ LpPoint(lParam) };
             const auto idx = HitTest(ht);
             if (idx < 0)
                 return 0;

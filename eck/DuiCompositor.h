@@ -51,7 +51,7 @@ public:
 
     EckInlineNdCe auto GetElement() const noexcept { return m_pEle; }
 
-    virtual void Attach(CElement* pEle) noexcept
+    virtual void Attach(_In_opt_ CElement* pEle) noexcept
     {
         m_pEle = pEle;
         if (!pEle)
@@ -89,7 +89,7 @@ public:
     // 仅当需要创建元素的混合重定向表面时，DUI才调用此方法。
     // 若混合器对特定效果（或其他情况）实现图集缓存，则可在此分配并返回缓存图集。
     // NOTE 不能使两个设置了混合器且互为父子关系的元素共享同一幅D2D位图
-    virtual HRESULT CreateCacheBitmap(int cxPhy, int cyPhy, CBitmap& Bitmap) noexcept
+    virtual HRESULT CreateCacheBitmap(int cxPixel, int cyPixel, CBitmap& Bitmap) noexcept
     {
         return E_NOTIMPL;
     }
