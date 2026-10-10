@@ -7,14 +7,6 @@ ECK_DUI_NAMESPACE_BEGIN
 class CScrollBar : public CElement, public ITimeLine, public IScrollController
 {
 public:
-    struct EVT_SCROLL : ELENMHDR
-    {
-        float fPos;
-        float fPrevPos;
-        BOOLEAN bAnimating;
-        BOOLEAN bVertical;
-    };
-
     const static inline UINT IdPtTrackH = TmNextResourceId();
     const static inline UINT IdPtTrackV = TmNextResourceId();
     const static inline UINT IdPtThumbH = TmNextResourceId();
@@ -72,78 +64,71 @@ private:
         { IdTmInvalid, IdCrBorderDisabled, IdTmInvalid },
     };
 
-    void OnPaint(WPARAM wParam, LPARAM lParam) noexcept
+    void OnPaint(const PAINTINFO& ps) noexcept
     {
-        PAINTINFO ps;
-        BeginPaint(ps, wParam, lParam);
-
-        if (m_sv.IsVisible())
+        if (!m_sv.IsVisible())
+            return;
+        Kw::Rect rcThumb;
+        GetPartRect(rcThumb, Part::Thumb);
+        float cxyLeave, cxyMin;
+        if (m_bVertical)
         {
-            Kw::Rect rcThumb;
-            GetPartRect(rcThumb, Part::Thumb);
-            float cxyLeave, cxyMin;
+            cxyLeave = (rcThumb.right - rcThumb.left) / 3 * 2;
+            cxyMin = (rcThumb.right - rcThumb.left) - cxyLeave;
+        }
+        else
+        {
+            cxyLeave = (rcThumb.bottom - rcThumb.top) / 3 * 2;
+            cxyMin = (rcThumb.bottom - rcThumb.top) - cxyLeave;
+        }
+
+        if (m_bAnActive)
+        {
+            const auto Style = TmSsLerp(
+                GetTheme().Get(),
+                m_Style[SsTrack],
+                m_Style[SsTrackHot],
+                m_ec.K);
+
+            GetTheme()->Draw(
+                this,
+                &Style,
+                m_bVertical ? IdPtTrackV : IdPtTrackH,
+                GetRectInClientD2D(),
+                &ps.rcClip);
+
             if (m_bVertical)
-            {
-                cxyLeave = (rcThumb.right - rcThumb.left) / 3 * 2;
-                cxyMin = (rcThumb.right - rcThumb.left) - cxyLeave;
-            }
+                rcThumb.left = rcThumb.right - cxyMin - cxyLeave * m_ec.K;
             else
+                rcThumb.top = rcThumb.bottom - cxyMin - cxyLeave * m_ec.K;
+        }
+        else
+        {
+            if (TmGetState() & SaHot)
             {
-                cxyLeave = (rcThumb.bottom - rcThumb.top) / 3 * 2;
-                cxyMin = (rcThumb.bottom - rcThumb.top) - cxyLeave;
-            }
-
-            if (m_bAnActive)
-            {
-                const auto Style = TmSsLerp(
-                    GetTheme().Get(),
-                    m_Style[SsTrack],
-                    m_Style[SsTrackHot],
-                    m_ec.K);
-
                 GetTheme()->Draw(
                     this,
-                    &Style,
+                    &m_Style[SsTrackHot],
                     m_bVertical ? IdPtTrackV : IdPtTrackH,
                     GetRectInClientD2D(),
                     &ps.rcClip);
-
-                if (m_bVertical)
-                    rcThumb.left = rcThumb.right - cxyMin - cxyLeave * m_ec.K;
-                else
-                    rcThumb.top = rcThumb.bottom - cxyMin - cxyLeave * m_ec.K;
             }
             else
             {
-                if (TmGetState() & SaHot)
-                {
-                    GetTheme()->Draw(
-                        this,
-                        &m_Style[SsTrackHot],
-                        m_bVertical ? IdPtTrackV : IdPtTrackH,
-                        GetRectInClientD2D(),
-                        &ps.rcClip);
-                }
+                if (m_bVertical)
+                    rcThumb.left += cxyLeave;
                 else
-                {
-                    if (m_bVertical)
-                        rcThumb.left += cxyLeave;
-                    else
-                        rcThumb.top += cxyLeave;
-                }
+                    rcThumb.top += cxyLeave;
             }
-
-            ElementToClient(rcThumb);
-            GetTheme()->Draw(
-                this,
-                &m_Style[m_bThumbHot ? SsThumbHot : SsThumb],
-                m_bVertical ? IdPtThumbV : IdPtThumbH,
-                Kw::MakeD2DRectF(rcThumb),
-                &ps.rcClip);
         }
 
-        DbgDrawFrame();
-        EndPaint(ps);
+        ElementToClient(rcThumb);
+        GetTheme()->Draw(
+            this,
+            &m_Style[m_bThumbHot ? SsThumbHot : SsThumb],
+            m_bVertical ? IdPtThumbV : IdPtThumbH,
+            Kw::MakeD2DRectF(rcThumb),
+            &ps.rcClip);
     }
 public:
     static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
@@ -161,16 +146,24 @@ public:
         switch (uMsg)
         {
         case WM_PAINT:
-            OnPaint(wParam, lParam);
-            return 0;
+        {
+            PAINTINFO ps;
+            BeginPaint(ps, wParam, lParam);
+            OnPaint(ps);
+            DbgDrawFrame();
+            EndPaint(ps);
+        }
+        return 0;
 
         case WM_NCHITTEST:
         {
+            if (!m_sv.IsVisible())
+                return HTTRANSPARENT;
             if (m_bTransparentSpace && !(TmGetState() & SaHot))
             {
                 if (!m_sv.IsVisible())
                     return HTTRANSPARENT;
-                auto pt = *(Kw::Vec2*)lParam;
+                auto pt = LpPoint(lParam);
                 ClientToElement(pt);
                 Kw::Rect rc;
                 GetPartRect(rc, Part::Thumb);
@@ -191,7 +184,7 @@ public:
             }
             if (m_bDragThumb)
             {
-                const auto pt = *(Kw::Vec2*)lParam;
+                const auto pt = LpPoint(lParam);
                 Kw::Rect rcThumbOld, rcThumb;
                 GetPartRect(rcThumbOld, Part::Thumb);
                 // 减去Cap
@@ -226,7 +219,7 @@ public:
         {
             SetCapture();
             TmState() |= SapLButtonDown;
-            const auto pt = *(Kw::Vec2*)lParam;
+            const auto pt = LpPoint(lParam);
             Kw::Rect rc;
             GetPartRect(rc, Part::Thumb);
             if (PointInRect(rc, pt))
@@ -310,11 +303,13 @@ public:
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
             m_sv.SetCallback([](float fPos, float fPrevPos, void* pUser)
                 {
+                    const auto p = ((CScrollBar*)pUser);
                     EVT_SCROLL nm{};
                     nm.fPos = fPos;
                     nm.fPrevPos = fPrevPos;
                     nm.bAnimating = TRUE;
-                    ((CScrollBar*)pUser)->EvtScroll(nm);
+                    nm.bEndAnimation = p->m_sv.IsStop();
+                    p->EvtScroll(nm);
                 }, this);
             [[fallthrough]];
         case WM_THEMECHANGED:
@@ -422,6 +417,7 @@ public:
                 .fPos = nm.fPos,
                 .fPrevPos = nm.fPrevPos,
                 .bAnimating = nm.bAnimating,
+                .bEndAnimation = nm.bEndAnimation,
                 .pUser = m_pSccCallbackUser
             };
             m_pfnSccCallback(Data);

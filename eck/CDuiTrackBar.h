@@ -250,7 +250,7 @@ public:
         {
             if (m_bTransparentSpace)
             {
-                auto pt = *(Kw::Vec2*)lParam;
+                auto pt = LpPoint(lParam);
                 ClientToElement(pt);
                 Kw::Rect rcTrack;
                 GetTrackRect(rcTrack);
@@ -263,7 +263,7 @@ public:
         case WM_MOUSEMOVE:
         {
             if (TmState() & SapLButtonDown)
-                ChangePosition(HitTest(*(Kw::Vec2*)lParam), TRUE);
+                ChangePosition(HitTest(LpPoint(lParam)), TRUE);
             else if (!(TmState() & SaHot))
             {
                 TmState() |= SaHot;
@@ -290,7 +290,7 @@ public:
         case WM_LBUTTONDBLCLK:
         {
             SetFocus();
-            const auto& pt = *(Kw::Vec2*)lParam;
+            const auto& pt = LpPoint(lParam);
 
             Kw::Rect rcThumb;
             GetThumbRect(rcThumb);
@@ -315,7 +315,7 @@ public:
             ChangePosition(
                 (uMsg == WM_CAPTURECHANGED) ?
                 m_fDragPos :
-                HitTest(*(Kw::Vec2*)lParam), FALSE);
+                HitTest(LpPoint(lParam)), FALSE);
         }
         return 0;
 
@@ -432,6 +432,9 @@ public:
     EckInlineNdCe float GetSmallDelta() const noexcept { return m_fSmallDelta; }
     EckInlineCe void SetLargeDelta(float f) noexcept { m_fLargeDelta = f; }
     EckInlineNdCe float GetLargeDelta() const noexcept { return m_fLargeDelta; }
+
+    EckInlineCe void SetThumbSize(float cxy) noexcept { m_cxyThumb = cxy; }
+    EckInlineNdCe float GetThumbSize() const noexcept { return m_cxyThumb; }
 
     constexpr float HitTest(Kw::Vec2 pt) noexcept
     {

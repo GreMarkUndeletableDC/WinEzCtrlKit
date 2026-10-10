@@ -11,6 +11,7 @@ struct __declspec(novtable) IScrollControllerT
         TCoord fPos;
         TCoord fPrevPos;
         BOOLEAN bAnimating;
+        BOOLEAN bEndAnimation;
         void* pUser;
     };
     using FSccCallback = void(*)(const SCC_CALLBACK_DATA& Data);

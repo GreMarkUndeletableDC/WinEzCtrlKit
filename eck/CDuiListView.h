@@ -92,9 +92,9 @@ private:
         { IdTmInvalid, IdTmInvalid, IdCrFore, 0.f, 1.f },
     };
 
-    BITBOOL m_bUseBuiltInScrollBar : 1{ TRUE };
     BITBOOL m_bIndicator : 1{};
     BITBOOL m_bCapturedMouse : 1{};
+    BITBOOL m_bBubbleScrollEvent : 1{};
 protected:
     void PaintCell(
         const D2D1_RECT_F& rc,
@@ -230,41 +230,9 @@ protected:
         PaintCell(Kw::MakeD2DRectF(rcItem), idx, 0);
     }
 
-    void ScbCreateElement(BOOL bVert, BOOL bHorz) noexcept
-    {
-        const DWORD Style = TmDarkStyle() |
-            DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | DES_NOTIFY_PARENT;
-        if (!m_bUseBuiltInScrollBar)
-            return;
-        SccDisconnectEvent();
-        if (bVert)
-        {
-            if (!m_pSBVert)
-                m_pSBVert = std::make_unique<CScrollBar>();
-            m_pSccV = m_pSBVert.get();
-            if (!m_pSBVert->IsValid())
-            {
-                m_pSBVert->Create({}, Style, 0, 0, 0, 0, 0, this);
-                m_pSBVert->SetVertical(TRUE);
-            }
-        }
-        if (bHorz)
-        {
-            if (!m_pSBHorz)
-                m_pSBHorz = std::make_unique<CScrollBar>();
-            m_pSccH = m_pSBHorz.get();
-            if (!m_pSBHorz->IsValid())
-            {
-                m_pSBHorz->Create({}, Style, 0, 0, 0, 0, 0, this);
-                m_pSBHorz->SetVertical(FALSE);
-            }
-        }
-        SccConnectEvent();
-    }
-
     void ScbLayout() noexcept
     {
-        if ((!m_pSBHorz && !m_pSBVert) || !m_bUseBuiltInScrollBar)
+        if ((!m_pSBHorz && !m_pSBVert))
             return;
         const auto cx = GetWidth();
         const auto cy = GetHeight();
@@ -287,7 +255,7 @@ protected:
                 GetHeight() });
     }
 
-    void SccUpdatePage() noexcept
+    void ScbUpdatePage() noexcept
     {
         if (m_pSccV)
             m_pSccV->SccSetPage(GetHeight());
@@ -295,28 +263,32 @@ protected:
             m_pSccH->SccSetPage(GetWidth());
     }
 
-    void SccConnectEvent() noexcept
+    void ScbConnectEvent() noexcept
     {
         if (m_pSccV)
             m_pSccV->SccSetCallback(
-                [](const IScrollController::SCC_CALLBACK_DATA& Data)
+                [](const IScrollController::SCC_CALLBACK_DATA& Data) noexcept
                 {
                     const auto p = (CListView*)Data.pUser;
+                    p->GetWindow().RdLockUpdate();
                     p->m_Controller.ReCalculateTopItem();
-                    p->Invalidate();
+                    p->EvtScroll(Data, TRUE);
+                    p->Invalidate(FALSE);
+                    p->GetWindow().RdUnlockUpdate();
                 }, this);
         if (m_pSccH)
             m_pSccH->SccSetCallback(
-                [](const IScrollController::SCC_CALLBACK_DATA& Data)
+                [](const IScrollController::SCC_CALLBACK_DATA& Data) noexcept
                 {
                     const auto p = (CListView*)Data.pUser;
                     p->GetWindow().RdLockUpdate();
                     p->HdrLayout();
-                    p->Invalidate();
+                    p->Invalidate(FALSE);
+                    p->EvtScroll(Data, FALSE);
                     p->GetWindow().RdUnlockUpdate();
                 }, this);
     }
-    void SccDisconnectEvent() noexcept
+    void ScbDisconnectEvent() noexcept
     {
         if (m_pSccV)
             m_pSccV->SccSetCallback(nullptr, nullptr);
@@ -374,6 +346,24 @@ protected:
         if (HdrIsEnabled())
             m_pHeader->SetTextFormat(GetTextFormat().Get());
     }
+
+    void EvtScroll(
+        const IScrollController::SCC_CALLBACK_DATA& Data,
+        BOOL bVertical) noexcept
+    {
+        if (!m_bBubbleScrollEvent)
+            return;
+        EVT_SCROLL e
+        {
+            .fPos = Data.fPos,
+            .fPrevPos = Data.fPrevPos,
+            .bAnimating = Data.bAnimating,
+            .bVertical = (BOOLEAN)bVertical,
+            .bEndAnimation = Data.bEndAnimation,
+        };
+        e.uNotify = ENC_SCROLL;
+        SendNotify(&e);
+    }
 public:
     LRESULT OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {
@@ -387,11 +377,11 @@ public:
             if (m_Controller.GetAdapter())
             {
                 m_Controller.ForEachItem(
-                    [&](const TController::FOR_ITEM& e)
+                    [&](const TController::FOR_ITEM& e) noexcept
                     {
                         PaintItem(e.idx, ps.rcClip);
                     },
-                    [&](const TController::FOR_GROUP& e)
+                    [&](const TController::FOR_GROUP& e) noexcept
                     {
                         PaintGroup({ .Group = e.idxGroup }, ps.rcClip);
                     }, Kw::MakeRect(ps.rcClipInEle), TRUE);
@@ -416,7 +406,7 @@ public:
 
         case WM_SIZE:
         {
-            SccUpdatePage();
+            ScbUpdatePage();
             if (m_Controller.GetAdapter())
             {
                 m_Controller.ReCalculateScrollV();
@@ -430,7 +420,7 @@ public:
 
         case WM_MOUSEMOVE:
         {
-            const auto& pt = EagPoint(lParam);
+            const auto& pt = LpPoint(lParam);
             GetWindow().RdLockUpdate();
             m_Controller.OnMouseMove(pt.x, pt.y, wParam);
             GetWindow().RdUnlockUpdate();
@@ -440,7 +430,7 @@ public:
         {
             m_bCapturedMouse = TRUE;
             SetCapture();
-            const auto& pt = EagPoint(lParam);
+            const auto& pt = LpPoint(lParam);
             GetWindow().RdLockUpdate();
             m_Controller.OnLButtonDown(pt.x, pt.y, wParam);
             GetWindow().RdUnlockUpdate();
@@ -452,7 +442,7 @@ public:
             {
                 m_bCapturedMouse = FALSE;
                 ReleaseCapture();
-                const auto& pt = EagPoint(lParam);
+                const auto& pt = LpPoint(lParam);
                 GetWindow().RdLockUpdate();
                 m_Controller.OnLButtonUp(pt.x, pt.y, wParam);
                 GetWindow().RdUnlockUpdate();
@@ -480,8 +470,25 @@ public:
 
         case WM_MOUSEWHEEL:
         {
-            m_pSccV->SccMouseWheel(-(float)GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
-            GetWindow().KctWake();
+            if (wParam & MK_SHIFT)
+                goto ScrollH;
+            if (m_pSccV)
+            {
+                m_pSccV->SccMouseWheel(
+                    -(float)GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
+                GetWindow().KctWake();
+            }
+        }
+        return 0;
+        case WM_MOUSEHWHEEL:
+        {
+        ScrollH:
+            if (m_pSccH)
+            {
+                m_pSccH->SccMouseWheel(
+                    -(float)GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
+                GetWindow().KctWake();
+            }
         }
         return 0;
 
@@ -541,10 +548,10 @@ public:
 
         case WM_CREATE:
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
-            ScbCreateElement(TRUE, TRUE);
+            ScbCreateElement(TRUE, FALSE);
             break;
         case WM_DESTROY:
-            SccDisconnectEvent();
+            ScbDisconnectEvent();
             break;
         }
         return __super::OnEvent(uMsg, wParam, lParam);
@@ -610,6 +617,36 @@ public:
     EckInlineNdCe auto& GetController() const noexcept { return m_Controller; }
     EckInlineNdCe auto& GetController() noexcept { return m_Controller; }
 
+    void ScbCreateElement(BOOL bVert, BOOL bHorz) noexcept
+    {
+        const DWORD Style = TmDarkStyle() |
+            DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | DES_NOTIFY_PARENT;
+        ScbDisconnectEvent();
+        if (bVert)
+        {
+            if (!m_pSBVert)
+                m_pSBVert = std::make_unique<CScrollBar>();
+            m_pSccV = m_pSBVert.get();
+            if (!m_pSBVert->IsValid())
+            {
+                m_pSBVert->Create({}, Style, 0, 0, 0, 0, 0, this);
+                m_pSBVert->SetVertical(TRUE);
+            }
+        }
+        if (bHorz)
+        {
+            if (!m_pSBHorz)
+                m_pSBHorz = std::make_unique<CScrollBar>();
+            m_pSccH = m_pSBHorz.get();
+            if (!m_pSBHorz->IsValid())
+            {
+                m_pSBHorz->Create({}, Style, 0, 0, 0, 0, 0, this);
+                m_pSBHorz->SetVertical(FALSE);
+            }
+        }
+        ScbConnectEvent();
+    }
+
     EckInlineNd BOOL HdrIsEnabled() const noexcept { return m_pHeader && m_pHeader->IsValid(); }
     void HdrEnable(BOOL b) noexcept
     {
@@ -636,6 +673,9 @@ public:
 
     EckInline void SetImageList(RefPtr<CD2DImageList> pil) noexcept { m_pImgList = std::move(pil); }
     EckInlineNdCe const RefPtr<CD2DImageList>& GetImageList() const noexcept { return m_pImgList; }
+
+    EckInline void SetBubbleScrollEvent(BOOL b) noexcept { m_bBubbleScrollEvent = b; }
+    EckInlineNdCe BOOL GetBubbleScrollEvent() const noexcept { return m_bBubbleScrollEvent; }
 };
 
 

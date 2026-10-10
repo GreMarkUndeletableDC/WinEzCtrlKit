@@ -13,9 +13,10 @@ class CElement;
 // 元素样式
 enum
 {
-    DES_BLUR_BACK = (1u << 31), // 模糊背景
-    // 元素的内容受周边其他内容影响，若无效区域与元素相交，
-    // 则必须更新整个元素，设置时DES_BLURBKG强制设置此样式
+    // 元素将使用滤镜，如果同时设置了混合器，DUI系统适时产生RE_FILTER，
+    // 应用程序必须在RE_FILTER事件中应用滤镜而不是在WM_PAINT中
+    DES_FILTER = (1u << 31),
+    // 元素的内容受周边其他内容影响，若无效区域与该元素相交，则DUI系统必须更新整个元素
     DES_CONTENT_EXPAND = (1u << 30),
     // 元素的内容受周边其他内容影响，确定更新区域时DUI系统发送
     // EWM_QUERY_EXPAND_RECT以获取扩展矩形
@@ -112,6 +113,13 @@ enum
     //   RER_NONE           执行默认操作
     //   RER_NO_FILLBACK    跳过背景填充
     RE_FILLBACK,
+
+    // 应用滤镜
+    // Field:
+    //   Filter
+    // Return:
+    //   RER_NONE
+    RE_FILTER,
 };
 
 // 渲染事件返回值
@@ -150,6 +158,12 @@ union RENDER_EVENT
     {
         D2D1_RECT_F rc;
     } FillBack;
+    struct
+    {
+        D2D1_RECT_F rcClipInClient;
+        float ox;
+        float oy;
+    } Filter;
 };
 
 // 元素事件
@@ -187,6 +201,15 @@ struct PAINTINFO
 
 constexpr inline auto DrawTextLayoutFlags =
 D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT | D2D1_DRAW_TEXT_OPTIONS_NO_SNAP;
+
+struct EVT_SCROLL : ELENMHDR
+{
+    float fPos;
+    float fPrevPos;
+    BOOLEAN bAnimating;
+    BOOLEAN bVertical;
+    BOOLEAN bEndAnimation;
+};
 
 class CBitmap final
 {
@@ -243,8 +266,26 @@ public:
         else
             return m_rcSource;
     }
+
+    EckInlineNdCe explicit operator bool() const noexcept { return !!m_pBitmap; }
+
+    void Draw(
+        ID2D1DeviceContext* pDC,
+        const D2D1_RECT_F& rcDst,
+        float kOpacity = 1.f,
+        D2D1_INTERPOLATION_MODE eMode = D2D1_INTERPOLATION_MODE_LINEAR,
+        const D2D1_MATRIX_4X4_F* pTransform = nullptr) const noexcept
+    {
+        pDC->DrawBitmap(
+            m_pBitmap.Get(),
+            rcDst,
+            kOpacity,
+            eMode,
+            GetSourceRect(),
+            pTransform);
+    }
 };
 
-EckInlineNdCe Kw::Vec2& EagPoint(LPARAM lParam) noexcept { return *(Kw::Vec2*)lParam; }
+EckInlineNdCe Kw::Vec2& LpPoint(LPARAM lParam) noexcept { return *(Kw::Vec2*)lParam; }
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END

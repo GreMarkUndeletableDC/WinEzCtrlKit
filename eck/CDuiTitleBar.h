@@ -199,7 +199,7 @@ public:
 
         case WM_NCHITTEST:
         {
-            auto pt{ EagPoint(lParam) };
+            auto pt{ LpPoint(lParam) };
             ClientToElement(pt);
             const UdwPart ePart = HitTest(pt);
             switch (ePart)
@@ -249,7 +249,7 @@ public:
 
         case WM_NCLBUTTONUP:
         {
-            if (IsPartValid(m_ePressedPart))
+            if (IsValid() && IsPartValid(m_ePressedPart))
             {
                 POINT ptInScr ECK_GET_PT_LPARAM(lParam);
                 ScreenToClient(GetWindow().Handle, &ptInScr);
