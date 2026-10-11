@@ -55,7 +55,7 @@ private:
 public:
     ECK_DISABLE_COPY_MOVE(CSrwReadGuard);
     CSrwReadGuard(CSrwLock& x) noexcept : x{ x } { x.EnterRead(); }
-    ~CSrwReadGuard() { x.LeaveRead(); }
+    ~CSrwReadGuard() noexcept { x.LeaveRead(); }
 };
 
 class CSrwWriteGuard
@@ -65,6 +65,6 @@ private:
 public:
     ECK_DISABLE_COPY_MOVE(CSrwWriteGuard);
     CSrwWriteGuard(CSrwLock& x) noexcept : x{ x } { x.EnterWrite(); }
-    ~CSrwWriteGuard() { x.LeaveWrite(); }
+    ~CSrwWriteGuard() noexcept { x.LeaveWrite(); }
 };
 ECK_NAMESPACE_END

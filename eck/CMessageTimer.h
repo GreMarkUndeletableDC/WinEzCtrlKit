@@ -30,7 +30,7 @@ public:
                 while (!p->m_bExit)
                 {
                     const auto ms = (long)p->m_msInterval;
-                    p->m_Timer.SetDueTimeAndPeriod(ms, ms);
+                    p->m_Timer.SetDueTimeAndPeriodMs(ms, ms);
                     NtWaitForMultipleObjects(2, (HANDLE*)&p->m_Timer,
                         WaitAll, FALSE, nullptr);
                     SendNotifyMessageW(p->m_hWnd, p->m_uMsg, 0, 0);

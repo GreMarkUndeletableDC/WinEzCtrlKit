@@ -14,34 +14,33 @@ public:
         RtlInitializeConditionVariable(&m_cv);
     }
 
-    EckInline NTSTATUS SleepLi(RTL_CRITICAL_SECTION* pcs, LARGE_INTEGER* pli = nullptr) noexcept
+    EckInline NTSTATUS Sleep(
+        _In_ RTL_CRITICAL_SECTION* pcs,
+        _In_opt_ const LARGE_INTEGER* pli) noexcept
     {
-        return RtlSleepConditionVariableCS(&m_cv, pcs, pli);
+        return RtlSleepConditionVariableCS(&m_cv, pcs, (LARGE_INTEGER*)pli);
     }
-    EckInline NTSTATUS SleepLi(RTL_SRWLOCK* psrw, BOOL bReadLock, LARGE_INTEGER* pli = nullptr) noexcept
+    EckInline NTSTATUS Sleep(
+        _In_ RTL_SRWLOCK* psrw,
+        BOOL bReadLock,
+        _In_opt_ const LARGE_INTEGER* pli) noexcept
     {
-        return RtlSleepConditionVariableSRW(&m_cv, psrw, pli,
+        return RtlSleepConditionVariableSRW(
+            &m_cv,
+            psrw,
+            (LARGE_INTEGER*)pli,
             bReadLock ? CONDITION_VARIABLE_LOCKMODE_SHARED : 0);
     }
 
-    EckInline NTSTATUS Sleep100ns(RTL_CRITICAL_SECTION* pcs, LONGLONG ll) noexcept
+    EckInline NTSTATUS SleepMs(_In_ RTL_CRITICAL_SECTION* pcs, LONGLONG ms) noexcept
     {
-        ll *= -1;
-        return SleepLi(pcs, (LARGE_INTEGER*)&ll);
+        const LARGE_INTEGER li{ .QuadPart = ms * -10000ll };
+        return Sleep(pcs, &li);
     }
-    EckInline NTSTATUS Sleep100ns(RTL_SRWLOCK* psrw, BOOL bReadLock, LONGLONG ll) noexcept
+    EckInline NTSTATUS SleepMs(_In_ RTL_SRWLOCK* psrw, BOOL bReadLock, LONGLONG ms) noexcept
     {
-        ll *= -1;
-        return SleepLi(psrw, bReadLock, (LARGE_INTEGER*)&ll);
-    }
-
-    EckInline NTSTATUS Sleep(RTL_CRITICAL_SECTION* pcs, LONGLONG ll) noexcept
-    {
-        return Sleep100ns(pcs, ll * 10000ll);
-    }
-    EckInline NTSTATUS Sleep(RTL_SRWLOCK* psrw, BOOL bReadLock, LONGLONG ll) noexcept
-    {
-        return Sleep100ns(psrw, bReadLock, ll * 10000ll);
+        const LARGE_INTEGER li{ .QuadPart = ms * -10000ll };
+        return Sleep(psrw, bReadLock, &li);
     }
 
     EckInline void Wake() noexcept

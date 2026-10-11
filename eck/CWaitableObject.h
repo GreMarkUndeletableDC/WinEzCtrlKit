@@ -4,13 +4,18 @@
 ECK_NAMESPACE_BEGIN
 class CWaitableObject : public CNtObject {};
 
-EckInline NTSTATUS WaitObject(const CWaitableObject& Object, LONGLONG llMilliseconds) noexcept
+EckInline NTSTATUS WaitObjectMs(
+    const CWaitableObject& Object,
+    LONGLONG ms) noexcept
 {
-    return NtWaitForSingleObject(Object.Get(), FALSE, (LARGE_INTEGER*)&llMilliseconds);
+    ms *= -10000ll;
+    return NtWaitForSingleObject(Object.Get(), FALSE, (LARGE_INTEGER*)&ms);
 }
 
-EckInline NTSTATUS WaitObject(const CWaitableObject& Object, LARGE_INTEGER* pliMilliseconds = nullptr) noexcept
+EckInline NTSTATUS WaitObject(
+    const CWaitableObject& Object,
+    const LARGE_INTEGER* pli = nullptr) noexcept
 {
-    return NtWaitForSingleObject(Object.Get(), FALSE, pliMilliseconds);
+    return NtWaitForSingleObject(Object.Get(), FALSE, (LARGE_INTEGER*)pli);
 }
 ECK_NAMESPACE_END

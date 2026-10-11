@@ -22,7 +22,7 @@ public:
         return *this;
     }
     CNtObject& operator=(CNtObject&& x) noexcept { std::swap(m_hObject, x.m_hObject); }
-    ~CNtObject()
+    ~CNtObject() noexcept
     {
         if (m_hObject && m_hObject != INVALID_HANDLE_VALUE)
             NtClose(m_hObject);

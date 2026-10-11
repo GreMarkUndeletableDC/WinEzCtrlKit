@@ -162,14 +162,15 @@ EckInline void FreeSTRRET(const STRRET& strret) noexcept
 
 EckInline const auto* UserSharedData() noexcept { return USER_SHARED_DATA; }
 
-EckInline NTSTATUS WaitObject(HANDLE hObject, LONGLONG llMilliseconds) noexcept
+EckInline NTSTATUS WaitObjectMs(HANDLE hObject, LONGLONG ms) noexcept
 {
-    return NtWaitForSingleObject(hObject, FALSE, (LARGE_INTEGER*)&llMilliseconds);
+    ms *= -10000ll;
+    return NtWaitForSingleObject(hObject, FALSE, (LARGE_INTEGER*)&ms);
 }
 
-EckInline NTSTATUS WaitObject(HANDLE hObject, LARGE_INTEGER* pliMilliseconds = nullptr) noexcept
+EckInline NTSTATUS WaitObject(HANDLE hObject, const LARGE_INTEGER* pli = nullptr) noexcept
 {
-    return NtWaitForSingleObject(hObject, FALSE, pliMilliseconds);
+    return NtWaitForSingleObject(hObject, FALSE, (LARGE_INTEGER*)pli);
 }
 
 EckInline int GetKeyNameTextByVk(WORD wVk, PWSTR pszBuf, int cchBuf,

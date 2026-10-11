@@ -317,7 +317,7 @@ struct CoroTask
 
     void Wait() const
     {
-        CEvent Event(nullptr, FALSE, FALSE);
+        CEvent Event({}, FALSE, FALSE);
 
         [this, &Event]() -> CoroTask<> {
             co_await *this;
