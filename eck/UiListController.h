@@ -28,6 +28,7 @@ enum class Property
     Image,
 
     SystemState,    // TState
+    SystemSelection,// BOOL
 
     UiTextLayout,   // ComPtr<IDWriteTextLayout>
     UiPosition,     // TCoord
@@ -178,6 +179,12 @@ struct IAdapterT
     }
 
     // --
+
+    // 列表不提供系统状态被改变的通知，适配器应自行截获这些改变。
+    // 当列表为单选时，以SystemSelection代替SystemState，
+    // 这仅用于通知，若适配器不需要此信息可忽略该Property。
+    // 当从被选择项目切换时，对新选择项目以值TRUE调用LcaSet，忽略旧项目，
+    // 当被选择项目清除时，对该项目以值FALSE调用LcaSet
 
     virtual void LcaGet(const Index& idx, int idxCol, Property eProp, std::any& Data) const noexcept = 0;
     virtual void LcaSet(const Index& idx, int idxCol, Property eProp, std::any& Data, BOOL bMove = FALSE) noexcept = 0;
@@ -884,6 +891,12 @@ public:
                     InvalidateItem(idx);
                 m_idxMark = m_idxSel;
                 m_idxMarkItemGroup = m_idxSelItemGroup;
+                const Index idxNew{ m_idxSel, m_idxSelItemGroup };
+                if (idxNew.IsValid())
+                {
+                    std::any Data{ (BOOL)TRUE };
+                    m_pAdapter->LcaSet(idxNew, 0, Property::SystemSelection, Data);
+                }
             }
             break;
         case Selection::Multiple:
@@ -1081,13 +1094,21 @@ private:
 public:
     void ItmDeselectAll(BOOL bRedraw) noexcept
     {
+        std::any Data{};
         if (m_eSelection == Selection::Single)
         {
+            const Index idxOld{ m_idxSel, m_idxSelItemGroup };
             m_idxSel = m_idxSelItemGroup = -1;
+            if (idxOld.IsValid())
+            {
+                if (bRedraw)
+                    InvalidateItem(idxOld);
+                Data = BOOL{ FALSE };
+                m_pAdapter->LcaSet(idxOld, 0, Property::SystemSelection, Data);
+            }
             return;
         }
 
-        std::any Data{};
         if (m_bGroup)
         {
             Index idx{};
@@ -1112,6 +1133,7 @@ public:
 
     void ItmSelect(Index idx, BOOL bSelect = TRUE, BOOL bRedraw = TRUE) noexcept
     {
+        std::any Data{};
         if (m_eSelection == Selection::Single)
         {
             Index idxOld{ m_idxSel, m_idxSelItemGroup };
@@ -1123,14 +1145,16 @@ public:
             }
             else
                 m_idxSel = m_idxSelItemGroup = -1;
-            if (bRedraw && idxOld.IsValid() && idxOld != idx)
-                InvalidateItem(idxOld);
+            if (idxOld.IsValid())
+            {
+                if (bRedraw && idxOld != idx)
+                    InvalidateItem(idxOld);
+                Data = BOOL{ bSelect };
+                m_pAdapter->LcaSet(idxOld, 0, Property::SystemSelection, Data);
+            }
         }
         else
-        {
-            std::any Data{};
             ItmpSelect(idx, Data, bSelect, bRedraw);
-        }
     }
 
     BOOL ItmEnsureVisible(Index idx, BOOL bSmooth) noexcept
@@ -1209,8 +1233,10 @@ public:
     EckInlineNdCe TRect GetDragSelectRect() const noexcept
     {
         auto rc{ m_rcDragSel };
-        const auto dy = m_pHost->LchSccGetPosition(TRUE);
-        OffsetRect(rc, 0, -dy);
+        OffsetRect(
+            rc,
+            -m_pHost->LchSccGetPosition(FALSE),
+            -m_pHost->LchSccGetPosition(TRUE));
         return rc;
     }
 

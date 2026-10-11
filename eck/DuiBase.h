@@ -74,7 +74,7 @@ public:
 
     void SetRect(const Kw::Rect& rc) noexcept
     {
-        const auto rcOld = GetRect();
+        const auto rcOld = GetWholeRectInClient();
         __super::SetRect(rc);
         PostMoveSize(TRUE, TRUE, rcOld);
     }
@@ -411,7 +411,7 @@ private:
     PresentMode m_ePresentMode{ PresentMode::FlipSwapChain };
 
     BITBOOL m_bAutoTheme : 1{ TRUE };
-    BITBOOL m_bAutoThemeAccent : 1{};
+    BITBOOL m_bAutoThemeAccent : 1{ TRUE };
     BITBOOL m_bDbgDrawCompRect : 1{};
 
     BITBOOL m_bFullUpdate : 1{ TRUE };  // 当前是否需要完全重绘
@@ -1154,7 +1154,7 @@ public:
             if (m_bAutoThemeAccent)
             {
                 RdLockUpdate();
-                TmUpdateDwmColorizationColor();
+                TmUpdateAccentColorFromDwm();
                 RdInvalidate(FALSE);
                 RdUnlockUpdate();
             }
@@ -1167,6 +1167,8 @@ public:
             {
                 RdInitialize();
                 KctInitialize();
+                if (m_bAutoThemeAccent)
+                    TmUpdateAccentColorFromDwm();
             }
             return lResult;
         }
@@ -1389,10 +1391,12 @@ public:
         EtBroadcastEvent(WM_DWMCOLORIZATIONCOLORCHANGED, argb, 0);
     }
 
-    void TmUpdateDwmColorizationColor() noexcept
+    void TmUpdateAccentColorFromDwm() noexcept
     {
         TmUpdateAccentColor(GetDwmColorizationColor());
     }
+
+    EckInlineCe ARGB TmGetAccentColor() const noexcept { return m_argbAccent; }
 
     EckInlineCe void TmSetAutoTheme(BOOL b) noexcept { m_bAutoTheme = b; }
     EckInlineCe void TmSetAutoThemeAccent(BOOL b) noexcept { m_bAutoThemeAccent = b; }
@@ -1520,7 +1524,7 @@ inline void CElement::PostMoveSize(BOOL bSize, BOOL bMove, const Kw::Rect& rcOld
     Kw::Rect rc;
     UnionRect(rc, rcOld, GetWholeRectInClient());
     if (!IsRectEmpty(rc))
-        Invalidate(rc);
+        GetWindow().RdInvalidate(rc);
 }
 
 inline void CElement::SetStyleWorker(DWORD uStyle) noexcept
