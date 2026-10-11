@@ -168,7 +168,7 @@ EckInline NTSTATUS WaitObjectMs(HANDLE hObject, LONGLONG ms) noexcept
     return NtWaitForSingleObject(hObject, FALSE, (LARGE_INTEGER*)&ms);
 }
 
-EckInline NTSTATUS WaitObject(HANDLE hObject, const LARGE_INTEGER* pli = nullptr) noexcept
+EckInline NTSTATUS WaitObject(HANDLE hObject, _In_opt_ const LARGE_INTEGER* pli = nullptr) noexcept
 {
     return NtWaitForSingleObject(hObject, FALSE, (LARGE_INTEGER*)pli);
 }
