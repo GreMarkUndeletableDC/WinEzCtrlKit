@@ -278,9 +278,6 @@
     <ClCompile Include="eck\CPropertySheet.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\CQueueTimer.h">
-      <Filter>ECK Include</Filter>
-    </ClCompile>
     <ClCompile Include="eck\Crc.h">
       <Filter>ECK Include</Filter>
     </ClCompile>

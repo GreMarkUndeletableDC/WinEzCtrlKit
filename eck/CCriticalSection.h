@@ -16,7 +16,7 @@ public:
     {
         RtlInitializeCriticalSection(&m_cs);
     }
-    ~CCriticalSection()
+    ~CCriticalSection() noexcept
     {
         RtlDeleteCriticalSection(&m_cs);
     }
