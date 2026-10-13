@@ -144,9 +144,9 @@ public:
         m_bMoveable = bMoveable;
         CMenu SysMenu(GetSystemMenu(GetHandle(), FALSE));
         if (bMoveable)
-            SysMenu.EnableItem(SC_MOVE, MF_GRAYED, FALSE);
-        else
             SysMenu.EnableItem(SC_MOVE, MF_ENABLED, FALSE);
+        else
+            SysMenu.EnableItem(SC_MOVE, MF_GRAYED, FALSE);
         (void)SysMenu.Detach();
     }
     EckInlineNdCe BOOL GetMoveable() const noexcept { return m_bMoveable; }

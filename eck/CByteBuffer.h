@@ -304,13 +304,13 @@ public:
     /// <param name="cReplacing">替换进行的次数，0为执行所有替换</param>
     template<class TAllocator1, class TAllocator2>
     EckInline void ReplaceSub(const CByteBufferT<TAllocator1>& rbReplacedBin,
-        const CByteBufferT<TAllocator2>& rbSrcBin, size_t posStart = 0, int cReplacing = -1)
+        const CByteBufferT<TAllocator2>& rbSrcBin, size_t posStart = 0, int cReplacing = 0)
     {
         ReplaceSub(rbReplacedBin.Data(), rbReplacedBin.Size(), rbSrcBin.Data(), rbSrcBin.Size(),
             posStart, cReplacing);
     }
     EckInline void ReplaceSub(std::initializer_list<BYTE> ilReplacedBin,
-        std::initializer_list<BYTE> ilSrcBin, size_t posStart = 0, int cReplacing = -1)
+        std::initializer_list<BYTE> ilSrcBin, size_t posStart = 0, int cReplacing = 0)
     {
         ReplaceSub(ilReplacedBin.begin(), ilReplacedBin.size(), ilSrcBin.begin(), ilSrcBin.size(),
             posStart, cReplacing);
@@ -459,7 +459,7 @@ public:
 
     EckInline size_t FindByte(BYTE by, size_t posStart = 0) const noexcept
     {
-        const auto p = memchr(Data() + posStart, by, Size());
+        const auto p = memchr(Data() + posStart, by, Size() - posStart);
         return p ? size_t(p - Data()) : BinNPos;
     }
 

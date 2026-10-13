@@ -251,7 +251,7 @@ public:
 
     EckInline BOOL GetColumn(int idx, _Inout_ LVCOLUMNW* plvc) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETCALLBACKMASK, idx, (LPARAM)plvc);
+        return (BOOL)SendMessageW(LVM_GETCOLUMNW, idx, (LPARAM)plvc);
     }
 
     EckInline BOOL GetColumnOrderArray(_Out_writes_(cColumn) int* piOrder, int cColumn) const noexcept
@@ -606,12 +606,12 @@ public:
         return (COLORREF)SendMessageW(LVM_GETTEXTCOLOR, 0, 0);
     }
 
-    EckInline void GetTileInfomation(_Inout_ LVTILEINFO* plvti) const noexcept
+    EckInline void GetTileInformation(_Inout_ LVTILEINFO* plvti) const noexcept
     {
         SendMessageW(LVM_GETTILEINFO, 0, (LPARAM)plvti);
     }
 
-    EckInline void GetTileViewInfomation(_Inout_ LVTILEVIEWINFO* plvtvi) const noexcept
+    EckInline void GetTileViewInformation(_Inout_ LVTILEVIEWINFO* plvtvi) const noexcept
     {
         SendMessageW(LVM_GETTILEVIEWINFO, 0, (LPARAM)plvtvi);
     }
@@ -623,7 +623,7 @@ public:
 
     EckInline int GetTopIndex() const noexcept
     {
-        return (int)SendMessageW(LVM_GETTOOLTIPS, 0, 0);
+        return (int)SendMessageW(LVM_GETTOPINDEX, 0, 0);
     }
 
     EckInline BOOL GetUnicodeFormat() const noexcept
@@ -894,7 +894,7 @@ public:
         return (HIMAGELIST)SendMessageW(LVM_SETIMAGELIST, uType, (LPARAM)hImageList);
     }
 
-    EckInline BOOL SetInfomationTip(LVSETINFOTIP* plvsit) const noexcept
+    EckInline BOOL SetInformationTip(LVSETINFOTIP* plvsit) const noexcept
     {
         plvsit->cbSize = sizeof(LVSETINFOTIP);
         return (BOOL)SendMessageW(LVM_SETINFOTIP, 0, (LPARAM)plvsit);
@@ -1013,7 +1013,7 @@ public:
         return (COLORREF)SendMessageW(LVM_SETTEXTCOLOR, 0, cr);
     }
 
-    EckInline BOOL SetTileInfomation(int idx, UINT cColumn,
+    EckInline BOOL SetTileInformation(int idx, UINT cColumn,
         _In_reads_(cColumn) const UINT* piColumn,
         _In_reads_(cColumn) const int* piFmt) const noexcept
     {
@@ -1021,7 +1021,7 @@ public:
         return (BOOL)SendMessageW(LVM_SETTILEINFO, 0, (LPARAM)&lvti);
     }
 
-    EckInline BOOL SetTileInfomation(_In_ const LVTILEINFO* plvti) const noexcept
+    EckInline BOOL SetTileInformation(_In_ const LVTILEINFO* plvti) const noexcept
     {
         return (BOOL)SendMessageW(LVM_SETTILEINFO, 0, (LPARAM)plvti);
     }

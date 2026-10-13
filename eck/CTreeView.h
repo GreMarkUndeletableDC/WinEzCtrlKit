@@ -134,7 +134,7 @@ public:
     /// <returns>成功返回TRUE</returns>
     EckInline BOOL Expand(HTREEITEM hItem, UINT uOp) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_ENSUREVISIBLE, uOp, (LPARAM)hItem);
+        return (BOOL)SendMessageW(TVM_EXPAND, uOp, (LPARAM)hItem);
     }
 
     EckInline COLORREF GetBackgroundColor() const noexcept
@@ -375,7 +375,7 @@ public:
         return (BOOL)SendMessageW(TVM_SELECTITEM, TVGN_DROPHILITE, (LPARAM)hItem);
     }
 
-    EckInline void SetAutoScrollInfomation(int iPixelPreSecond, int iRedrawGap) const noexcept
+    EckInline void SetAutoScrollInformation(int iPixelPreSecond, int iRedrawGap) const noexcept
     {
         SendMessageW(TVM_SETAUTOSCROLLINFO, iPixelPreSecond, iRedrawGap);
     }

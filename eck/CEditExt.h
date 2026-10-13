@@ -47,7 +47,7 @@ protected:
 
     BITBOOL m_bEmpty : 1 = FALSE;               // 空编辑框标志
 
-    void UpdateTextInfomation()
+    void UpdateTextInformation()
     {
         const auto hDC = GetDC(Handle);
         SelectObject(hDC, GetFont());
@@ -72,7 +72,7 @@ protected:
     {
         if (!GetMultiLine())
         {
-            UpdateTextInfomation();
+            UpdateTextInformation();
             FrameChanged();
         }
     }
@@ -93,7 +93,7 @@ public:
         CWindow::AttachNew(hWnd);
         const auto dwStyle = GetStyle();
         m_bMultiLine = Multiline;
-        m_bAutoWrap = (m_bMultiLine ? IsBitSet(dwStyle, ES_AUTOHSCROLL) : FALSE);
+        m_bAutoWrap = (m_bMultiLine ? !IsBitSet(dwStyle, ES_AUTOHSCROLL) : FALSE);
         m_bEmpty = !GetWindowTextLengthW(hWnd);
         InternalAttachNew();
     }
@@ -356,7 +356,7 @@ public:
             auto lResult = CEdit::OnMessage(uMsg, wParam, lParam);
             if (!GetMultiLine())
             {
-                UpdateTextInfomation();
+                UpdateTextInformation();
                 FrameChanged();
             }
             return lResult;

@@ -254,7 +254,7 @@ struct CEasyD2D
 
         IDXGISurface1* pSurface;
         hr = m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pSurface));
-        if (!pSurface)
+        if (FAILED(hr))
         {
             EckDbgPrintFormatMessage(hr);
             EckDbgBreak();

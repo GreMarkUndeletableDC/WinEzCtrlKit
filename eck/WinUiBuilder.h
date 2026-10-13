@@ -622,7 +622,7 @@ namespace Detail
         case Type::VBox: case Type::HBox:
             LobParam.uWeight = Param.uWeight;
             break;
-        case Type::Table:
+        case Type::TableBox:
             LobParam.idxRow = Param.idxRow;
             LobParam.idxCol = Param.idxCol;
             LobParam.cRowSpan = Param.cRowSpan;

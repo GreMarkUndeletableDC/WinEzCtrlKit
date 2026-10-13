@@ -113,7 +113,7 @@ public:
         return rs;
     }
 
-    EckInline BOOL GetSplitInfomation(_Inout_ BUTTON_SPLITINFO* pbsi) const noexcept
+    EckInline BOOL GetSplitInformation(_Inout_ BUTTON_SPLITINFO* pbsi) const noexcept
     {
         return (BOOL)SendMessageW(BCM_GETSPLITINFO, 0, (LPARAM)pbsi);
     }
@@ -143,7 +143,7 @@ public:
         SendMessageW(BCM_SETSHIELD, 0, bShieldIcon);
     }
 
-    EckInline BOOL SetSplitInfomation(_In_ BUTTON_SPLITINFO* pbsi) const noexcept
+    EckInline BOOL SetSplitInformation(_In_ BUTTON_SPLITINFO* pbsi) const noexcept
     {
         return (BOOL)SendMessageW(BCM_SETSPLITINFO, 0, (LPARAM)pbsi);
     }

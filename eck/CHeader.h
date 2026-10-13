@@ -54,7 +54,7 @@ public:
 
     EckInline BOOL EditFilter(int idx, BOOL bDiscardUserInput) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_CLEARFILTER, idx, bDiscardUserInput);
+        return (BOOL)SendMessageW(HDM_EDITFILTER, idx, bDiscardUserInput);
     }
 
     EckInline int GetBitmapMargin() const noexcept

@@ -478,6 +478,9 @@ inline BOOL MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
     }
     NewBmp.UnLock();
     Bmp.UnLock();
+    for (auto& x : ET)
+        for (auto p : x.second)
+            delete p;
     return TRUE;
 }
 ECK_NAMESPACE_END

@@ -123,7 +123,7 @@ public:
         return (BOOL)SendMessageW(TB_GETBUTTON, idxButton, (LPARAM)ptbb);
     }
 
-    EckInline int GetButtonInfomation(int idCommand, TBBUTTONINFOW* ptbbi) const noexcept
+    EckInline int GetButtonInformation(int idCommand, TBBUTTONINFOW* ptbbi) const noexcept
     {
         return (int)SendMessageW(TB_GETBUTTONINFOW, idCommand, (LPARAM)ptbbi);
     }
@@ -386,7 +386,7 @@ public:
         return (BOOL)SendMessageW(TB_SETBITMAPSIZE, 0, MAKELPARAM(cx, cy));
     }
 
-    EckInline BOOL SetButtonInfomation(int idCommand, TBBUTTONINFOW* ptbbi) const noexcept
+    EckInline BOOL SetButtonInformation(int idCommand, TBBUTTONINFOW* ptbbi) const noexcept
     {
         return (BOOL)SendMessageW(TB_SETBUTTONINFOW, idCommand, (LPARAM)ptbbi);
     }

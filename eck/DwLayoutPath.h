@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "CGeometrySinkOffsetTranformer.h"
+#include "CGeometrySinkOffsetTransformer.h"
 
 ECK_NAMESPACE_BEGIN
 #if !ECK_OPT_NO_DX
@@ -176,7 +176,7 @@ inline HRESULT GetTextLayoutPathGeometry(
     pPath->Open(&pSink);
 
     CDwFetchPathRenderer Renderer{ fDpi,bPixelSnappingDisabled };
-    CGeometrySinkOffsetTranformer Forwarder{};
+    CGeometrySinkOffsetTransformer Forwarder{};
     Forwarder.GstSetSink(pSink.Get());
     Forwarder.GstEnableOffset(TRUE);
 

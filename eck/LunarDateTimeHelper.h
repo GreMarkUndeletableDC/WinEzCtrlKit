@@ -113,7 +113,7 @@ EckNfInlineNdCe LunarDate CeToLunar(CEDate CeDate) noexcept
     {
         Date.wYear = CeDate.wYear - 1;
         Date.bLeapMonth = FALSE;
-        const int iLeapMonth = LnGetLeapMonth(CeDate.wYear);
+        const int iLeapMonth = LnGetLeapMonth(Date.wYear);
         for (Date.byMonth = 12; Date.byMonth >= 1; --Date.byMonth)
         {
             if (Date.byMonth == iLeapMonth)
@@ -139,28 +139,26 @@ EckNfInlineNdCe LunarDate CeToLunar(CEDate CeDate) noexcept
     else// 需要在本年寻找
     {
         Date.wYear = CeDate.wYear;
-        Date.bLeapMonth = FALSE;
         const int iLeapMonth = LnGetLeapMonth(CeDate.wYear);
         for (Date.byMonth = 1; Date.byMonth <= 12; ++Date.byMonth)
         {
-            if (Date.byMonth == iLeapMonth)
-            {
-                Date.bLeapMonth = TRUE;
-                iDays = LnGetMonthDays(Date);
-                if (c + iDays < iCeDays)
-                    c += iDays;
-                else
-                    break;
-                Date.bLeapMonth = FALSE;
-            }
+            Date.bLeapMonth = FALSE;
             iDays = LnGetMonthDays(Date);
-            if (c + iDays < iCeDays)
+            if (c + iDays <= iCeDays)
+                c += iDays;
+            else
+                break;
+            if (Date.byMonth != iLeapMonth)
+                continue;
+            Date.bLeapMonth = TRUE;
+            iDays = LnGetMonthDays(Date);
+            if (c + iDays <= iCeDays)
                 c += iDays;
             else
                 break;
         }
 
-        Date.byDay = iCeDays - c;
+        Date.byDay = iCeDays - c + 1;
         return Date;
     }
 }

@@ -73,7 +73,7 @@ struct CRandom : public TBase
     template<std::integral T = UINT>
     constexpr T Next() noexcept
     {
-        if constexpr (sizeof(T) == 64)
+        if constexpr (sizeof(T) == 8)
             return (Next32() << 32) | Next32();
         else
             return (T)Next32();

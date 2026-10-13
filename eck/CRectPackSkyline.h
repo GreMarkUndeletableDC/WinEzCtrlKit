@@ -344,7 +344,7 @@ public:
                         (Pos.y == BestPos.y && MinWaste > Waste))
                     {
                         BestPos = Pos;
-                        bRight = FALSE;
+                        bRight = TRUE;
                         MinWaste = Waste;
                     }
                 }

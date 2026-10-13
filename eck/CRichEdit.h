@@ -226,7 +226,7 @@ public:
         return (UINT)SendMessageW(EM_GETEVENTMASK, 0, 0);
     }
 
-    EckInline void GetHyphenateInfomation(HYPHRESULT* phr) const noexcept
+    EckInline void GetHyphenateInformation(HYPHRESULT* phr) const noexcept
     {
         SendMessageW(EM_GETHYPHENATEINFO, (WPARAM)phr, 0);
     }
@@ -451,7 +451,7 @@ public:
         return (BOOL)SendMessageW(EM_SETFONTSIZE, iSize, 0);
     }
 
-    EckInline void SetHyphenateInfomation(HYPHENATEINFO* phr) const noexcept
+    EckInline void SetHyphenateInformation(HYPHENATEINFO* phr) const noexcept
     {
         SendMessageW(EM_SETHYPHENATEINFO, (LPARAM)phr, 0);
     }

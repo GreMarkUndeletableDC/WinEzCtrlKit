@@ -61,7 +61,8 @@ template<std::integral T>
 EckInlineCe void SetIntegerByte(T& i, int idxByte, BYTE by) noexcept
 {
     EckAssert(idxByte >= 0 && idxByte < sizeof(T));
-    i &= ((~(T)0b11111111) << (idxByte * 8));
+    i = (T)((i & ~((T)0b11111111 << (idxByte * 8))) |
+        ((T)by << (idxByte * 8)));
 }
 
 template<int N, std::integral T>
@@ -75,7 +76,8 @@ template<int N, std::integral T>
 EckInlineCe void SetIntegerByte(T& i, BYTE by) noexcept
 {
     static_assert(N >= 0 && N < sizeof(T));
-    i &= ((~(T)0b11111111) << (N * 8));
+    i = (T)((i & ~((T)0b11111111 << (N * 8))) |
+        ((T)by << (N * 8)));
 }
 
 /// <summary>
@@ -846,7 +848,7 @@ inline constexpr void GuidToString(const GUID& guid,
     if (bUpper)
         ToStringUpper(by, 16, pszResult);
     else
-        ToStringUpper(by, 16, pszResult);
+        ToStringLower(by, 16, pszResult);
 }
 #pragma endregion 字符串
 

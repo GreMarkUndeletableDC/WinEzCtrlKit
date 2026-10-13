@@ -1091,7 +1091,7 @@ public:
 
     EckInline ID3v2::FRAME* ItmEnsure(_In_reads_(4) PCCH Id) noexcept
     {
-        if (const auto it = ItmAt(Id); it == ItmEndIterator())
+        if (const auto it = ItmAt(Id); it != ItmEndIterator())
             return (*it).get();
         return ItmCreate(Id);
     }

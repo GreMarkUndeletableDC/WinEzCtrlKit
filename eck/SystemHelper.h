@@ -148,7 +148,7 @@ struct CPUINFO
     UINT uMaxClockSpeed;// 兆赫兹
 };
 
-inline HRESULT GetCpuInfomation(CPUINFO& ci) noexcept
+inline HRESULT GetCpuInformation(CPUINFO& ci) noexcept
 {
 #if !defined(_M_ARM64) && !defined(_M_ARM)
     int Register[4];

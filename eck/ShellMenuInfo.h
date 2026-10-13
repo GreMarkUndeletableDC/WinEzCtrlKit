@@ -134,7 +134,7 @@ private:
     void ReserveTempBuffer() noexcept
     {
         DWORD cchMaxBuf;
-        m_RegKey.QueryInfomation(nullptr, nullptr, nullptr, &cchMaxBuf);
+        m_RegKey.QueryInformation(nullptr, nullptr, nullptr, &cchMaxBuf);
         m_rsTmp.Reserve(cchMaxBuf * 3 / 2);
     }
 

@@ -80,7 +80,7 @@ public:
         return (int)SendMessageW(CB_FINDSTRINGEXACT, idxStart, (LPARAM)pszText);
     }
 
-    EckInline BOOL GetComboBoxInfomation(_Inout_ COMBOBOXINFO* pcbi) const noexcept
+    EckInline BOOL GetComboBoxInformation(_Inout_ COMBOBOXINFO* pcbi) const noexcept
     {
         return (BOOL)SendMessageW(CB_GETCOMBOBOXINFO, 0, (LPARAM)pcbi);
     }
@@ -141,9 +141,9 @@ public:
     /// 默认最小宽度为0，列表框宽度为max(最小宽度, 组合框主控件宽度)
     /// </summary>
     /// <returns>成功返回正的最小宽度，失败返回CB_ERR</returns>
-    EckInline BOOL GetDroppedWidth() const noexcept
+    EckInline int GetDroppedWidth() const noexcept
     {
-        return (BOOL)SendMessageW(CB_GETDROPPEDWIDTH, 0, 0);
+        return (int)SendMessageW(CB_GETDROPPEDWIDTH, 0, 0);
     }
 
     EckInline void GetEditSelection(
@@ -230,7 +230,7 @@ public:
     /// <param name="cItems">保留项目数</param>
     /// <param name="cbString">保留字符串长度</param>
     /// <returns>成功返回已预分配的项目总数，失败返回CB_ERRSPACE</returns>
-    EckInline int InitialzeStorage(int cItems, UINT cbString) const noexcept
+    EckInline int InitializeStorage(int cItems, UINT cbString) const noexcept
     {
         return (int)SendMessageW(CB_INITSTORAGE, cItems, cbString);
     }

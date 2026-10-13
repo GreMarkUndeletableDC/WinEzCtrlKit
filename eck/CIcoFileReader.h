@@ -37,6 +37,13 @@ public:
         m_pData = pData;
         m_pHeader = (ICONDIR*)pData;
         m_pEntry = (ICONDIRENTRY*)(pData + sizeof(ICONDIR));
+        if (!m_pData || m_pHeader->idReserved != 0 || m_pHeader->idType != 1)
+        {
+            m_pData = nullptr;
+            m_pHeader = nullptr;
+            m_pEntry = nullptr;
+            return 0;
+        }
         return m_pHeader->idCount;
     }
 
@@ -55,13 +62,14 @@ public:
         return m_pEntry[idx].dwBytesInRes;
     }
 
-    EckInlineNdCe int GetIconCount() const noexcept { return m_pHeader->idCount; }
+    EckInlineNdCe int GetIconCount() const noexcept { return m_pHeader ? m_pHeader->idCount : 0; }
 
     EckInlineNdCe int FindIcon(int cx, int cy) const noexcept
     {
         EckCounter(GetIconCount(), i)
         {
-            if (m_pEntry[i].bWidth == cx && m_pEntry[i].bHeight == cy)
+            if (int(m_pEntry[i].bWidth ? m_pEntry[i].bWidth : 256) == cx &&
+                int(m_pEntry[i].bHeight ? m_pEntry[i].bHeight : 256) == cy)
                 return i;
         }
         return -1;

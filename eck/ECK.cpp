@@ -334,7 +334,7 @@ static CSrwLock s_LkThemeMap{};
 constexpr THEME_INFO InvalidThemeInfo{ .eType = ThemeType::Invalid };
 
 // 查询主题信息。此函数返回引用，但在主题句柄被使用期间一定有效
-EckInline const THEME_INFO& UxfpGetThemeInfomation(HTHEME hTheme) noexcept
+EckInline const THEME_INFO& UxfpGetThemeInformation(HTHEME hTheme) noexcept
 {
     const auto it = s_hsThemeMap.find(hTheme);
     return it != s_hsThemeMap.end() ? it->second : InvalidThemeInfo;
@@ -1425,7 +1425,7 @@ static HRESULT WINAPI NewDrawThemeText(HTHEME hTheme, HDC hDC, int iPartId, int 
     {
         COLORREF cr;
         s_LkThemeMap.EnterRead();
-        const auto b = SUCCEEDED(UxfpGetThemeColor(UxfpGetThemeInfomation(hTheme), PtcCurrent(),
+        const auto b = SUCCEEDED(UxfpGetThemeColor(UxfpGetThemeInformation(hTheme), PtcCurrent(),
             hTheme, iPartId, iStateId, TMT_TEXTCOLOR, cr));
         s_LkThemeMap.LeaveRead();
         if (b)
@@ -1453,7 +1453,7 @@ static HRESULT WINAPI NewDrawThemeTextEx(HTHEME hTheme, HDC hDC, int iPartId, in
             !(pOptions->dwFlags & DTT_TEXTCOLOR))// 未指定颜色
         {
             CSrwReadGuard _{ s_LkThemeMap };
-            if (SUCCEEDED(UxfpGetThemeColor(UxfpGetThemeInfomation(hTheme),
+            if (SUCCEEDED(UxfpGetThemeColor(UxfpGetThemeInformation(hTheme),
                 PtcCurrent(), hTheme, iPartId, iStateId,
                 (pOptions && (pOptions->dwFlags & DTT_COLORPROP)) ?
                 pOptions->iColorPropId : TMT_TEXTCOLOR, NewOpt.crText)))
@@ -1485,7 +1485,7 @@ static HRESULT WINAPI NewDrawThemeBackgroundEx(HTHEME hTheme, HDC hDC, int iPart
     if (ShouldAppsUseDarkMode())
     {
         CSrwReadGuard _{ s_LkThemeMap };
-        if (SUCCEEDED(UxfpDrawThemeBackground(UxfpGetThemeInfomation(hTheme), PtcCurrent(),
+        if (SUCCEEDED(UxfpDrawThemeBackground(UxfpGetThemeInformation(hTheme), PtcCurrent(),
             hTheme, hDC, iPartId, iStateId, pRect, pOptions)))
             return S_OK;
     }
@@ -1507,7 +1507,7 @@ static HRESULT WINAPI NewDrawThemeBackground(HTHEME hTheme, HDC hDC, int iPartId
         else
             Options.dwFlags = 0;
         CSrwReadGuard _{ s_LkThemeMap };
-        if (SUCCEEDED(UxfpDrawThemeBackground(UxfpGetThemeInfomation(hTheme), PtcCurrent(),
+        if (SUCCEEDED(UxfpDrawThemeBackground(UxfpGetThemeInformation(hTheme), PtcCurrent(),
             hTheme, hDC, iPartId, iStateId, pRect, &Options)))
             return S_OK;
     }
@@ -1520,7 +1520,7 @@ static HRESULT WINAPI NewGetThemeColor(HTHEME hTheme, int iPartId, int iStateId,
     if (ShouldAppsUseDarkMode())
     {
         CSrwReadGuard _{ s_LkThemeMap };
-        if (SUCCEEDED(UxfpGetThemeColor(UxfpGetThemeInfomation(hTheme), PtcCurrent(),
+        if (SUCCEEDED(UxfpGetThemeColor(UxfpGetThemeInformation(hTheme), PtcCurrent(),
             hTheme, iPartId, iStateId, iPropId, *pColor)))
             return S_OK;
     }
@@ -1539,7 +1539,7 @@ static HRESULT WINAPI NewGetThemePartSize(HTHEME hTheme, HDC hDC, int iPartId, i
 {
     {
         CSrwReadGuard _{ s_LkThemeMap };
-        const auto& ti = UxfpGetThemeInfomation(hTheme);
+        const auto& ti = UxfpGetThemeInformation(hTheme);
         if (ti.eType == ThemeType::Header)
             switch (iPartId)
             {

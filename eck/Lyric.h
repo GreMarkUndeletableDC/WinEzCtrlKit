@@ -1419,8 +1419,8 @@ public:
         return idx;
     }
 
-    EckInlineNdCe auto& MgGetLabel() noexcept { return m_vLine; }
-    EckInlineNdCe auto& MgAtLabel(int idx) const noexcept { return m_vLine[idx]; }
+    EckInlineNdCe auto& MgGetLabel() noexcept { return m_vLabel; }
+    EckInlineNdCe auto& MgAtLabel(int idx) const noexcept { return m_vLabel[idx]; }
     int MgAtLabel(std::wstring_view svKey, int idxBegin = 0) noexcept
     {
         for (size_t i = idxBegin; i < m_vLabel.size(); ++i)

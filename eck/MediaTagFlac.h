@@ -732,7 +732,7 @@ public:
 
     auto& ItmEnsure(std::string_view svKey) noexcept
     {
-        if (const auto it = ItmAt(svKey); it == ItmEndIterator())
+        if (const auto it = ItmAt(svKey); it != ItmEndIterator())
             return *it;
         ITEM e{};
         e.rsKey.Assign(svKey);

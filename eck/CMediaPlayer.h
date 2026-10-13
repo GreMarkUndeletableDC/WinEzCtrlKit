@@ -49,7 +49,7 @@ public:
         Paused,
         Stopped,
 
-        BeginPaly,
+        BeginPlay,
         BeginPause,
         BeginStop,
     };
@@ -448,7 +448,7 @@ public:
         if (SUCCEEDED(hr))
         {
             CSrwWriteGuard _{ m_Lock };
-            m_eState = State::BeginPaly;
+            m_eState = State::BeginPlay;
         }
         return hr;
     }
@@ -474,7 +474,7 @@ public:
         if (SUCCEEDED(hr))
         {
             CSrwWriteGuard _{ m_Lock };
-            m_eState = State::BeginPaly;
+            m_eState = State::BeginPlay;
         }
         return hr;
     }
@@ -517,7 +517,7 @@ public:
         const auto eState = GetRawState();
         switch (eState)
         {
-        case State::BeginPaly:
+        case State::BeginPlay:
             return State::Playing;
         case State::BeginPause:
             return State::Paused;

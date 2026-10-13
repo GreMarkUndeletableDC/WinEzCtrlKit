@@ -153,7 +153,7 @@ private:
             if (ls == ERROR_SUCCESS)
             {
                 DWORD cchMaxSub;
-                ls = m_Reg.QueryInfomation(nullptr, nullptr, nullptr, &cchMaxSub);
+                ls = m_Reg.QueryInformation(nullptr, nullptr, nullptr, &cchMaxSub);
                 if (ls != ERROR_SUCCESS)
                     return ls;
                 m_rsBuffer.Reserve(cchMaxSub);
@@ -249,7 +249,7 @@ public:
             return ERROR_SUCCESS;
         }
 
-        BOOL AcquireBasicInfomation(BOOL bSkipWindowsInstaller,
+        BOOL AcquireBasicInformation(BOOL bSkipWindowsInstaller,
             PCWSTR pszKeyOrId, int cchKeyOrId, BOOL bMsi) noexcept
         {
             DWORD dwBuf{}, cbBuf{ sizeof(dwBuf) };
@@ -412,7 +412,7 @@ public:
             ZeroMemory(Str, sizeof(Str));
         }
 
-        void AcquireAllInfomation() noexcept
+        void AcquireAllInformation() noexcept
         {
             for (size_t i = size_t(AppwizString::MaximumImportant);
                 i < size_t(AppwizString::Maximum); ++i)
@@ -529,7 +529,7 @@ public:
             App.StringBuffer.Clear();
             App.StringBuffer.Reserve(MAX_PATH);
             App.Flags = GetRegistryFlags(m_idxCurrSource);
-            if (App.AcquireBasicInfomation(m_bSkipWindowsInstaller,
+            if (App.AcquireBasicInformation(m_bSkipWindowsInstaller,
                 m_rsBuffer.Data(), cbBuf / sizeof(WCHAR), FALSE))
                 return ERROR_SUCCESS;
         }
@@ -540,20 +540,20 @@ public:
             // 枚举MSI
             if ((ls = MsiEnumProductsW(m_idxCurr++, m_rsBuffer.Data())) != ERROR_SUCCESS)
                 return ls;
-            App.AcquireBasicInfomation(FALSE/* Not used */, m_rsBuffer.Data(), 38, TRUE);
+            App.AcquireBasicInformation(FALSE/* Not used */, m_rsBuffer.Data(), 38, TRUE);
         }
         if (m_bAutoCompleteAppInfo)
-            App.AcquireAllInfomation();
+            App.AcquireAllInformation();
         return ERROR_SUCCESS;
     }
 
     // 是否在获取每个应用的基本信息时自动获取所有信息，
     // 若仅需基本信息，可设置为FALSE以提高性能
-    EckInlineCe void SetAutoCompleteAppInfomation(BOOL bAutoComplete) noexcept
+    EckInlineCe void SetAutoCompleteAppInformation(BOOL bAutoComplete) noexcept
     {
         m_bAutoCompleteAppInfo = bAutoComplete;
     }
-    EckInlineNdCe BOOL GetAutoCompleteAppInfomation() const noexcept
+    EckInlineNdCe BOOL GetAutoCompleteAppInformation() const noexcept
     {
         return m_bAutoCompleteAppInfo;
     }

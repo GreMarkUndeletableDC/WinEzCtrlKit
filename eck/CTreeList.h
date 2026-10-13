@@ -816,7 +816,7 @@ private:
         m_idxTopItem = ScbGetPosition(SB_VERT);
     }
 
-    EckInline void UpdateThemeInfomation() noexcept
+    EckInline void UpdateThemeInformation() noexcept
     {
 #if ECK_OPT_SUPPORT_CLASSIC_THEME
         if (!m_hThemeTV)
@@ -834,7 +834,7 @@ private:
                 BP_CHECKBOX, CBS_UNCHECKEDNORMAL, nullptr, TS_TRUE, &m_sizeCheckBox);
     }
 
-    void UpdateColumnInfomation() noexcept
+    void UpdateColumnInformation() noexcept
     {
         int x = 0;
         const int cCol = (int)m_vCol.size();
@@ -919,28 +919,28 @@ private:
             si.fMask = SIF_ALL;
             si.nMin = si.nMax = si.nPos = 0;
             si.nPage = 0;
-            ScbSetInfomation(SB_VERT, &si);
-            ScbSetInfomation(SB_HORZ, &si);
+            ScbSetInformation(SB_VERT, &si);
+            ScbSetInformation(SB_HORZ, &si);
         }
 
         si.fMask = SIF_POS;
-        ScbGetInfomation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         si.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
         si.nMin = 0;
         si.nMax = (int)m_vItem.size() - 1;
         si.nPage = (cyView - m_cyHeader) / m_cyItem;
-        ScbSetInfomation(SB_VERT, &si);
+        ScbSetInformation(SB_VERT, &si);
         ReCalculateTopItem();
 
         si.fMask = SIF_POS;
-        ScbGetInfomation(SB_HORZ, &si);
+        ScbGetInformation(SB_HORZ, &si);
         si.fMask = SIF_PAGE | SIF_RANGE | SIF_POS;
         si.nMin = 0;
         si.nMax = (cxView >= m_cxItem) ? 0 : (m_cxItem - 1);
         si.nPage = cxView;
-        ScbSetInfomation(SB_HORZ, &si);
+        ScbSetInformation(SB_HORZ, &si);
         si.fMask = SIF_POS;
-        ScbGetInfomation(SB_HORZ, &si);
+        ScbGetInformation(SB_HORZ, &si);
         m_dxContent = -si.nPos;
     }
 
@@ -1128,7 +1128,7 @@ private:
                 si.fMask = SIF_POS | SIF_PAGE | SIF_RANGE;
                 if (GetStyle() & WS_VSCROLL)
                 {
-                    ScbGetInfomation(SB_VERT, &si);
+                    ScbGetInformation(SB_VERT, &si);
                     if (pt.y < m_cyHeader)
                     {
                         if (si.nPos > si.nMin)
@@ -1143,7 +1143,7 @@ private:
 
                 if (GetStyle() & WS_HSCROLL)
                 {
-                    ScbGetInfomation(SB_HORZ, &si);
+                    ScbGetInformation(SB_HORZ, &si);
                     if (pt.x < 0)
                     {
                         if (si.nPos > si.nMin)
@@ -1733,7 +1733,7 @@ public:
                     const auto p = (NMHEADERW*)lParam;
                     if (IsBitSet(p->pitem->mask, HDI_WIDTH))
                     {
-                        UpdateColumnInfomation();
+                        UpdateColumnInformation();
                         UpdateScrollBar();
                         SetWindowPos(m_Header.Handle, nullptr, m_dxContent, 0,
                             std::max(m_cxItem, m_cxClient), m_cyHeader, SWP_NOZORDER | SWP_NOACTIVATE);
@@ -1750,7 +1750,7 @@ public:
                 return 0;
 
                 case NM_RELEASEDCAPTURE:
-                    UpdateColumnInfomation();
+                    UpdateColumnInformation();
                     Redraw();
                     return 0;
 
@@ -1774,7 +1774,7 @@ public:
                     const auto p = (NMHEADERW*)lParam;
                     if (IsBitSet(p->pitem->mask, HDI_WIDTH))
                     {
-                        UpdateColumnInfomation();
+                        UpdateColumnInformation();
                         UpdateScrollBar();
                         SetWindowPos(m_HeaderFixed.Handle, nullptr, 0, 0,
                             m_vCol.front().iRight, m_cyHeader, SWP_NOZORDER | SWP_NOACTIVATE);
@@ -1891,7 +1891,7 @@ public:
             SCROLLINFO si;
             si.cbSize = sizeof(si);
             si.fMask = SIF_ALL;
-            ScbGetInfomation(SB_VERT, &si);
+            ScbGetInformation(SB_VERT, &si);
             const int iOld = si.nPos;
             switch (LOWORD(wParam))
             {
@@ -1919,8 +1919,8 @@ public:
             }
 
             si.fMask = SIF_POS;
-            ScbSetInfomation(SB_VERT, &si);
-            ScbGetInfomation(SB_VERT, &si);
+            ScbSetInformation(SB_VERT, &si);
+            ScbGetInformation(SB_VERT, &si);
             ReCalculateTopItem();
             if (m_bBackgroundNotSolid)
                 Redraw();
@@ -1940,7 +1940,7 @@ public:
             SCROLLINFO si;
             si.cbSize = sizeof(si);
             si.fMask = SIF_ALL;
-            ScbGetInfomation(SB_HORZ, &si);
+            ScbGetInformation(SB_HORZ, &si);
             switch (LOWORD(wParam))
             {
             case SB_LEFT:
@@ -1967,8 +1967,8 @@ public:
             }
 
             si.fMask = SIF_POS;
-            ScbSetInfomation(SB_HORZ, &si);
-            ScbGetInfomation(SB_HORZ, &si);
+            ScbSetInformation(SB_HORZ, &si);
+            ScbGetInformation(SB_HORZ, &si);
             m_dxContent = -si.nPos;
             UpdateHeaderPosition();
             Redraw();
@@ -2186,7 +2186,7 @@ public:
             m_hThemeTV = OpenThemeData(Handle, L"TreeView");
             m_hThemeLV = OpenThemeData(nullptr, L"ItemsView::ListView");
             m_hThemeBT = OpenThemeData(Handle, L"Button");
-            UpdateThemeInfomation();
+            UpdateThemeInformation();
             m_bHasFocus = (GetFocus() == Handle);
             UpdateSystemParameter();
 
@@ -2230,7 +2230,7 @@ public:
             m_hThemeLV = OpenThemeData(nullptr, L"ItemsView::ListView");
             CloseThemeData(m_hThemeBT);
             m_hThemeBT = OpenThemeData(Handle, L"Button");
-            UpdateThemeInfomation();
+            UpdateThemeInformation();
             UpdateDCAttribute();
             Redraw();
         }
@@ -2610,11 +2610,11 @@ public:
         SCROLLINFO si;
         si.cbSize = sizeof(si);
         si.fMask = SIF_POS;
-        ScbGetInfomation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         const int iOld = si.nPos;
         si.nPos += iDeltaLine;
-        ScbSetInfomation(SB_VERT, &si);
-        ScbGetInfomation(SB_VERT, &si);
+        ScbSetInformation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         ReCalculateTopItem();
         if (m_bBackgroundNotSolid)
             Redraw();
@@ -2634,10 +2634,10 @@ public:
         SCROLLINFO si;
         si.cbSize = sizeof(si);
         si.fMask = SIF_POS;
-        ScbGetInfomation(SB_HORZ, &si);
+        ScbGetInformation(SB_HORZ, &si);
         si.nPos += xDelta;
-        ScbSetInfomation(SB_HORZ, &si);
-        ScbGetInfomation(SB_HORZ, &si);
+        ScbSetInformation(SB_HORZ, &si);
+        ScbGetInformation(SB_HORZ, &si);
         m_dxContent = -si.nPos;
         m_Header.SetLeft(m_dxContent);
         Redraw();
@@ -2873,7 +2873,7 @@ public:
         }
 
         for (int i = idxBegin; i <= idxEnd; ++i)
-            m_vItem[i]->uFlags |= TLIF_SELECTED;
+            m_vItem[i]->uFlags &= ~TLIF_SELECTED;
     }
 
     int DeselectChildren(int idxParent) noexcept
@@ -3477,7 +3477,7 @@ inline LRESULT CTLHeader::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noe
         if (lResult >= 0)
         {
             m_TL.m_vCol.emplace_back();
-            m_TL.UpdateColumnInfomation();
+            m_TL.UpdateColumnInformation();
         }
         return lResult;
 
@@ -3487,7 +3487,7 @@ inline LRESULT CTLHeader::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noe
         if (lResult)
         {
             m_TL.m_vCol.pop_back();
-            m_TL.UpdateColumnInfomation();
+            m_TL.UpdateColumnInformation();
         }
         return lResult;
 
@@ -3495,7 +3495,7 @@ inline LRESULT CTLHeader::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noe
         m_TL.DismissEdit();
         lResult = __super::OnMessage(uMsg, wParam, lParam);
         if (lResult)
-            m_TL.UpdateColumnInfomation();
+            m_TL.UpdateColumnInformation();
         return lResult;
     }
     return __super::OnMessage(uMsg, wParam, lParam);

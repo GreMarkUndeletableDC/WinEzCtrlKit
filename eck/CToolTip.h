@@ -105,7 +105,7 @@ public:
         return (int)SendMessageW(TTM_GETTOOLCOUNT, 0, 0);
     }
 
-    EckInline BOOL GetToolInfomation(_Inout_ TTTOOLINFOW* pti) const noexcept
+    EckInline BOOL GetToolInformation(_Inout_ TTTOOLINFOW* pti) const noexcept
     {
         return (BOOL)SendMessageW(TTM_GETTOOLINFOW, 0, (LPARAM)pti);
     }
@@ -173,7 +173,7 @@ public:
         return (BOOL)SendMessageW(TTM_SETTITLEW, (WPARAM)hIcon, (LPARAM)pszTitle);
     }
 
-    EckInline void SetToolInfomation(_In_ const TTTOOLINFOW* pti) const noexcept
+    EckInline void SetToolInformation(_In_ const TTTOOLINFOW* pti) const noexcept
     {
         SendMessageW(TTM_SETTOOLINFOW, 0, (LPARAM)pti);
     }

@@ -239,7 +239,7 @@ private:
         SCROLLINFO si;
         si.cbSize = sizeof(si);
         si.fMask = SIF_ALL;
-        ScbGetInfomation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         const int yOld = si.nPos;
         switch (uCode)
         {
@@ -267,8 +267,8 @@ private:
         }
 
         si.fMask = SIF_POS;
-        ScbSetInfomation(SB_VERT, &si);
-        ScbGetInfomation(SB_VERT, &si);
+        ScbSetInformation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         ReCalculateTopItem();
         if (si.nPos != yOld)
         {
@@ -644,7 +644,7 @@ private:
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
         si.fMask = SIF_POS;
-        ScbGetInfomation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         const int yOld = si.nPos;
         UINT cScrollLines;
         SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &cScrollLines, 0);
@@ -652,8 +652,8 @@ private:
         if (d > m_cyClient)
             d = m_cyClient * 5 / 6;
         si.nPos += d;
-        ScbSetInfomation(SB_VERT, &si);
-        ScbGetInfomation(SB_VERT, &si);
+        ScbSetInformation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         ReCalculateTopItem();
         if (si.nPos != yOld)
         {
@@ -759,7 +759,7 @@ private:
         si.nMin = 0;
         si.nMax = GetItemCount() * m_cyItem;
         si.nPage = m_cyClient;
-        ScbSetInfomation(SB_VERT, &si);
+        ScbSetInformation(SB_VERT, &si);
         ReCalculateTopItem();
     }
 
@@ -1231,12 +1231,12 @@ public:
         SCROLLINFO si;
         si.cbSize = sizeof(si);
         si.fMask = SIF_ALL;
-        ScbGetInfomation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         const int yOld = si.nPos;
         si.nPos += yDelta;
         si.fMask = SIF_POS;
-        ScbSetInfomation(SB_VERT, &si);
-        ScbGetInfomation(SB_VERT, &si);
+        ScbSetInformation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         ReCalculateTopItem();
         ScrollWindow(Handle, 0, yOld - si.nPos, nullptr, nullptr);
         UpdateWindow(Handle);

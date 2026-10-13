@@ -232,7 +232,7 @@ namespace PixelEditor
 
     using RGBA8 = PixelAdapter<BYTE, 0, 1, 2, 3, false>;
     using BGRA8 = PixelAdapter<BYTE, 2, 1, 0, 3, false>;
-    using BGRA8P = PixelAdapter<BYTE, 0, 1, 2, 3, true>;
+    using BGRA8P = PixelAdapter<BYTE, 2, 1, 0, 3, true>;
 
     enum class Channel
     {

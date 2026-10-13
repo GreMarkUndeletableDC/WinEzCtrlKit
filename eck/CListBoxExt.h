@@ -109,7 +109,7 @@ public:
     };                                      // 工具提示信息
     HWND m_hParent = nullptr;
 private:
-    void UpdateThemeInfomation() noexcept
+    void UpdateThemeInformation() noexcept
     {
         CloseThemeData(m_hTheme);
         m_hTheme = OpenThemeData(m_hWnd, L"Button");
@@ -542,7 +542,7 @@ public:
             break;
 
         case WM_THEMECHANGED:
-            UpdateThemeInfomation();
+            UpdateThemeInformation();
             break;
         }
 
@@ -577,7 +577,7 @@ public:
         //if (m_Info.bDragList)
         ;// SetDragList(m_Info.bDragList);
 
-        UpdateThemeInfomation();
+        UpdateThemeInformation();
 
         m_ti.hwnd = m_hWnd;
         ::SendMessageW(m_hToolTip, TTM_ADDTOOL, 0, (LPARAM)&m_ti);
@@ -679,7 +679,7 @@ public:
         return TRUE;
     }
 
-    BOOL InitialzeStorage(int cItems) noexcept
+    BOOL InitializeStorage(int cItems) noexcept
     {
         if (::SendMessageW(m_hWnd, LB_INITSTORAGE, cItems, 0) == LB_ERRSPACE)
             return FALSE;

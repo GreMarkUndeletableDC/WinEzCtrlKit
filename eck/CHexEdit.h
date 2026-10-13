@@ -133,13 +133,13 @@ private:
         si.nMin = 0;
         si.nMax = m_cRow;
         si.nPage = (m_cyClient - m_cyChar - D.cyGap) / (m_cyChar + D.cyGap);
-        ScbSetInfomation(SB_VERT, &si);
+        ScbSetInformation(SB_VERT, &si);
 
         si.fMask = SIF_RANGE | SIF_PAGE;
         si.nMin = 0;
         si.nMax = m_cxContent;
         si.nPage = m_cxClient;
-        ScbSetInfomation(SB_HORZ, &si);
+        ScbSetInformation(SB_HORZ, &si);
     }
 
     void ReCalculateFirstVisible(int posSb) noexcept
@@ -549,7 +549,7 @@ public:
             SCROLLINFO si;
             si.cbSize = sizeof(si);
             si.fMask = SIF_ALL;
-            ScbGetInfomation(SB_VERT, &si);
+            ScbGetInformation(SB_VERT, &si);
             const int iOld = si.nPos;
             switch (LOWORD(wParam))
             {
@@ -577,8 +577,8 @@ public:
             }
 
             si.fMask = SIF_POS;
-            ScbSetInfomation(SB_VERT, &si);
-            ScbGetInfomation(SB_VERT, &si);
+            ScbSetInformation(SB_VERT, &si);
+            ScbGetInformation(SB_VERT, &si);
             ReCalculateFirstVisible(si.nPos);
             RECT rc{ 0,m_cyChar + D.cyGap,m_cxClient,m_cyClient };
             ScrollWindowEx(Handle, 0, (iOld - si.nPos) * (m_cyChar + D.cyGap), &rc, &rc, nullptr, nullptr, SW_INVALIDATE);
@@ -592,7 +592,7 @@ public:
             SCROLLINFO si;
             si.cbSize = sizeof(si);
             si.fMask = SIF_ALL;
-            ScbGetInfomation(SB_HORZ, &si);
+            ScbGetInformation(SB_HORZ, &si);
             const int iOld = si.nPos;
             switch (LOWORD(wParam))
             {
@@ -620,8 +620,8 @@ public:
             }
 
             si.fMask = SIF_POS;
-            ScbSetInfomation(SB_HORZ, &si);
-            ScbGetInfomation(SB_HORZ, &si);
+            ScbSetInformation(SB_HORZ, &si);
+            ScbGetInformation(SB_HORZ, &si);
             ScrollWindowEx(Handle, iOld - si.nPos, 0,
                 nullptr, nullptr, nullptr, nullptr, SW_INVALIDATE);
             UpdateWindow(Handle);
@@ -749,11 +749,11 @@ public:
         SCROLLINFO si;
         si.cbSize = sizeof(si);
         si.fMask = SIF_POS;
-        ScbGetInfomation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         const int iOld = si.nPos;
         si.nPos += d;
-        ScbSetInfomation(SB_VERT, &si);
-        ScbGetInfomation(SB_VERT, &si);
+        ScbSetInformation(SB_VERT, &si);
+        ScbGetInformation(SB_VERT, &si);
         if (iOld != si.nPos)
         {
             ReCalculateFirstVisible(si.nPos);
@@ -770,11 +770,11 @@ public:
         SCROLLINFO si;
         si.cbSize = sizeof(si);
         si.fMask = SIF_POS;
-        ScbGetInfomation(SB_HORZ, &si);
+        ScbGetInformation(SB_HORZ, &si);
         const int iOld = si.nPos;
         si.nPos += d;
-        ScbSetInfomation(SB_HORZ, &si);
-        ScbGetInfomation(SB_HORZ, &si);
+        ScbSetInformation(SB_HORZ, &si);
+        ScbGetInformation(SB_HORZ, &si);
         if (iOld != si.nPos)
         {
             ScrollWindowEx(Handle, iOld - si.nPos, 0, nullptr, nullptr,

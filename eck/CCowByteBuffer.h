@@ -103,7 +103,7 @@ public:
 
     void Reserve(size_t cbCapacity) noexcept
     {
-        if (cbCapacity <= Capacity())
+        if (cbCapacity > Capacity())
             PrepareWrite(Capacity());
     }
 
