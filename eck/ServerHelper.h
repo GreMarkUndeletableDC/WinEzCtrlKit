@@ -8,7 +8,7 @@ ECK_NAMESPACE_BEGIN
 ECK_SERVER_NAMESPACE_BEGIN
 using TQueryKv = std::pair<std::string_view, std::string_view>;
 
-std::span<const TQueryKv> ApiParseQueryString(
+inline std::span<const TQueryKv> ApiParseQueryString(
     std::string_view svQuery,
     std::span<TQueryKv> spResult) noexcept
 {
@@ -40,7 +40,7 @@ std::span<const TQueryKv> ApiParseQueryString(
     }
     return spResult.first(j);
 }
-void ApiParseInt(std::string_view sv, _Inout_ int& i) noexcept
+inline void ApiParseInt(std::string_view sv, _Inout_ int& i) noexcept
 {
     int j;
     if (TcvToInt(sv.data(), sv.size(), j, 10).eResult == TcvResult::Ok)

@@ -192,7 +192,7 @@ public:
         if (plStatus)
             *plStatus = ERROR_SUCCESS;
         DWORD cchMaxSub = 0;
-        QueryInfomation(nullptr, nullptr, nullptr, &cchMaxSub);
+        QueryInformation(nullptr, nullptr, nullptr, &cchMaxSub);
         DWORD idx = 0;
         CStringW rs(cchMaxSub);
         DWORD dw = cchMaxSub + 1;
@@ -285,7 +285,7 @@ public:
         if (plStatus)
             *plStatus = ERROR_SUCCESS;
         ULONGLONG ullData;
-        DWORD cb = sizeof(DWORD);
+        DWORD cb = sizeof(ULONGLONG);
         LSTATUS lStatus = GetValue(pszSubKey, pszValue, &ullData, &cb, dwFlags);
         if (lStatus == ERROR_SUCCESS)
             return ullData;
@@ -327,7 +327,7 @@ public:
         return ls;
     }
 
-    EckInline LSTATUS QueryInfomation(
+    EckInline LSTATUS QueryInformation(
         PWSTR pszClassBuf = nullptr,
         DWORD* pcchClassBuf = nullptr,
         DWORD* pcSubKeys = nullptr,
@@ -370,7 +370,7 @@ public:
         if (plStatus)
             *plStatus = ERROR_SUCCESS;
         ULONGLONG ullData;
-        DWORD cb = sizeof(DWORD);
+        DWORD cb = sizeof(ULONGLONG);
         LSTATUS lStatus = QueryValue(pszValue, &ullData, &cb);
         if (lStatus == ERROR_SUCCESS)
             return ullData;

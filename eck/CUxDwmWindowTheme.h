@@ -126,7 +126,7 @@ private:
     HTHEME m_hTheme{};
     HINSTANCE m_hInstStyle{};
 
-    void QueryAtlasInfomation(int iPart, _Out_ UDW_PART& Info) noexcept
+    void QueryAtlasInformation(int iPart, _Out_ UDW_PART& Info) noexcept
     {
         GetThemeRect(m_hTheme, iPart, 0, TMT_ATLASRECT, &Info.rcInAtlas);
         GetThemeMargins(m_hTheme, nullptr, iPart, 0, TMT_CONTENTMARGINS, nullptr, &Info.mgContent);
@@ -177,7 +177,7 @@ public:
         }
 
         for (int i = 0; i < PartCount; ++i)
-            QueryAtlasInfomation(i, m_vItem[i]);
+            QueryAtlasInformation(i, m_vItem[i]);
         return TRUE;
     }
 

@@ -185,7 +185,7 @@ public:
 
     EckInline void PBSetRange(int iMin, int iMax) const noexcept
     {
-        SendMessageW(TDM_SET_PROGRESS_BAR_POS, 0, MAKELPARAM(iMin, iMax));
+        SendMessageW(TDM_SET_PROGRESS_BAR_RANGE, 0, MAKELPARAM(iMin, iMax));
     }
 
     /// <summary>

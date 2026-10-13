@@ -87,12 +87,12 @@ inline std::wstring_view AptWrapAnyText(const std::any& Data) noexcept
     if (Data.type() == typeid(std::span<const WCHAR>))
     {
         const auto e = std::any_cast<std::span<const WCHAR>>(Data);
-        return { (PCWCH)e.data(), e.size() / sizeof(WCHAR) };
+        return { (PCWCH)e.data(), e.size() };
     }
     if (Data.type() == typeid(std::span<WCHAR>))
     {
         const auto e = std::any_cast<std::span<WCHAR>>(Data);
-        return { (PCWCH)e.data(), e.size() / sizeof(WCHAR) };
+        return { (PCWCH)e.data(), e.size() };
     }
     return {};
 }

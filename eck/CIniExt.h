@@ -32,9 +32,6 @@ enum : UINT
     INIE_IF_DISABLE_EXT = 1u << 1,      // 禁用扩展语法
     INIE_IF_ESCAPE = 1u << 2,           // 启用转义
     INIE_IF_KEEP_SPACE = 1u << 3,       // 保留等号周围的空白符
-
-    INIE_IF_EOL_BEFORE_SECTION = 1u << 4,       // 节之前有换行符
-    INIE_IF_END_CONTAINER_WITH_NAME = 1u << 5,  // 容器结束时标注名称
 };
 
 namespace Detail

@@ -47,7 +47,7 @@ public:
         return (int)SendMessageW(MCM_GETCALENDARCOUNT, 0, 0);
     }
 
-    EckInline BOOL GetGridInfomation(_Inout_ MCGRIDINFO* pmcgi) const noexcept
+    EckInline BOOL GetGridInformation(_Inout_ MCGRIDINFO* pmcgi) const noexcept
     {
         return (BOOL)SendMessageW(MCM_GETCALENDARGRIDINFO, 0, (LPARAM)pmcgi);
     }

@@ -189,7 +189,7 @@ struct CTexture
         D3D11_TEXTURE2D_DESC Desc;
         Desc.Width = cx;
         Desc.Height = cy;
-        Desc.MipLevels = 1u;
+        Desc.MipLevels = uMipLevels;
         Desc.ArraySize = 1u;
         Desc.Format = eFormat;
         Desc.SampleDesc.Count = 1u;
@@ -298,7 +298,7 @@ struct CDepthStencilView
     HRESULT Create(ID3D11Resource* pResource,
         const D3D11_DEPTH_STENCIL_VIEW_DESC* pDesc = nullptr) noexcept
     {
-        return g_pD3D11Device->CreateDepthStencilView(pResource, nullptr, pDsv.AtClear());
+        return g_pD3D11Device->CreateDepthStencilView(pResource, pDesc, pDsv.AtClear());
     }
 
     EckInlineNdCe auto operator->() const noexcept { return pDsv.Get(); }

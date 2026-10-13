@@ -77,7 +77,7 @@ public:
         return si.nPage;
     }
 
-    EckInline BOOL GetInfomation(SCROLLINFO* psi) const noexcept
+    EckInline BOOL GetInformation(SCROLLINFO* psi) const noexcept
     {
         return GetScrollInfo(m_hWnd, SB_CTL, psi);
     }
@@ -96,9 +96,9 @@ public:
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
         si.fMask = SIF_RANGE | (m_bDisableNoScroll ? SIF_DISABLENOSCROLL : 0);
-        SetScrollInfo(m_hWnd, SB_CTL, &si, bRedraw);
         si.nMin = iMin;
         si.nMax = iMax;
+        SetScrollInfo(m_hWnd, SB_CTL, &si, bRedraw);
     }
 
     EckInline void SetMinimum(int iMin, BOOL bRedraw = TRUE) const noexcept
@@ -132,7 +132,7 @@ public:
         SetScrollInfo(m_hWnd, SB_CTL, &si, bRedraw);
     }
 
-    EckInline void SetInfomation(SCROLLINFO* psi, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetInformation(SCROLLINFO* psi, BOOL bRedraw = TRUE) const noexcept
     {
         psi->fMask |= (m_bDisableNoScroll ? SIF_DISABLENOSCROLL : 0);
         SetScrollInfo(m_hWnd, SB_CTL, psi, bRedraw);
@@ -146,8 +146,8 @@ public:
             SCROLLINFO si;
             si.cbSize = sizeof(SCROLLINFO);
             si.fMask = SIF_ALL;
-            GetInfomation(&si);
-            SetInfomation(&si, TRUE);
+            GetInformation(&si);
+            SetInformation(&si, TRUE);
         }
     }
 

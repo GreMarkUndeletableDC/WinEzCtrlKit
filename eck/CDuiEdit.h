@@ -825,7 +825,7 @@ public:
         return (UINT)TxSendMessage(EM_GETEVENTMASK, 0, 0);
     }
 
-    EckInline void GetHyphenateInfomation(HYPHRESULT* phr) const
+    EckInline void GetHyphenateInformation(HYPHRESULT* phr) const
     {
         TxSendMessage(EM_GETHYPHENATEINFO, (WPARAM)phr, 0);
     }
@@ -1050,7 +1050,7 @@ public:
         return (BOOL)TxSendMessage(EM_SETFONTSIZE, iSize, 0);
     }
 
-    EckInline void SetHyphenateInfomation(HYPHENATEINFO* phr) const
+    EckInline void SetHyphenateInformation(HYPHENATEINFO* phr) const
     {
         TxSendMessage(EM_SETHYPHENATEINFO, (LPARAM)phr, 0);
     }

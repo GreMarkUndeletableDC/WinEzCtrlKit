@@ -26,7 +26,7 @@ public:
         SendMessageW(DTM_CLOSEMONTHCAL, 0, 0);
     }
 
-    void GetDateTimePickerInfomation(_Inout_ DATETIMEPICKERINFO* pdtpi) const noexcept
+    void GetDateTimePickerInformation(_Inout_ DATETIMEPICKERINFO* pdtpi) const noexcept
     {
         SendMessageW(DTM_GETDATETIMEPICKERINFO, 0, (LPARAM)pdtpi);
     }
@@ -72,7 +72,7 @@ public:
         return (BOOL)SendMessageW(DTM_SETFORMATW, 0, (LPARAM)pszText);
     }
 
-    COLORREF GetMonthCalendarColor(int iType, COLORREF cr) const noexcept
+    COLORREF SetMonthCalendarColor(int iType, COLORREF cr) const noexcept
     {
         return (COLORREF)SendMessageW(DTM_SETMCCOLOR, iType, cr);
     }

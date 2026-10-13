@@ -783,7 +783,7 @@ public:
         GetScrollInfo(m_hWnd, iType, &si);
         return si.nPage;
     }
-    EckInline BOOL ScbGetInfomation(int iType, SCROLLINFO* psi) const noexcept
+    EckInline BOOL ScbGetInformation(int iType, SCROLLINFO* psi) const noexcept
     {
         psi->cbSize = sizeof(SCROLLINFO);
         return GetScrollInfo(m_hWnd, iType, psi);
@@ -831,7 +831,7 @@ public:
         si.nPage = iPage;
         SetScrollInfo(m_hWnd, iType, &si, bRedraw);
     }
-    void ScbSetInfomation(int iType, const SCROLLINFO* psi, BOOL bRedraw = TRUE) const noexcept
+    void ScbSetInformation(int iType, const SCROLLINFO* psi, BOOL bRedraw = TRUE) const noexcept
     {
         SetScrollInfo(m_hWnd, iType, psi, bRedraw);
     }

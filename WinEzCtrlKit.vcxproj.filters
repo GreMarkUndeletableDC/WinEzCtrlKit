@@ -149,7 +149,7 @@
     <ClCompile Include="eck\CGeometryPath.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\CGeometrySinkOffsetTranformer.h">
+    <ClCompile Include="eck\CGeometrySinkOffsetTransformer.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\CHandleTable.h">

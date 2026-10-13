@@ -375,15 +375,17 @@ public:
     BOOL ScanLine(CStringT<TChar, TTrait, TAllocator>& rs) noexcept
     {
         EnsureReadToEol(FALSE);
-        if (m_posEol != MaxSizeT)
-        {
-            rs.PushBack((const TChar*)m_rbBuf.Data(), int(m_posEol / sizeof(TChar)));
-            if (rs[m_posEol] == '\r' &&
-                m_posEol + 1 < rs.Size() && rs[m_posEol] == '\n')
-                ++m_posEol;// CRLF检测
-            m_rbBuf.Erase(0, m_posEol + 1);
-            m_posEol = MaxSizeT;
-        }
+        if (m_posEol == MaxSizeT)
+            return FALSE;
+        const auto p = (const TChar*)m_rbBuf.Data();
+        auto cch = int(m_posEol / sizeof(TChar));
+        rs.PushBack(p, cch);
+        if (p[cch] == '\r' &&
+            (cch + 1) * sizeof(TChar) < m_rbBuf.Size() && p[cch + 1] == '\n')
+            ++cch;// CRLF检测
+        m_rbBuf.Erase(0, (cch + 1) * sizeof(TChar));
+        m_posEol = MaxSizeT;
+        return TRUE;
     }
 };
 ECK_CIO_NAMESPACE_END

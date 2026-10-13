@@ -232,7 +232,7 @@ inline int LcsUtf16LeToUtf32(
         cch = (int)wcslen(psz);
     const auto pOutOrg = pOut;
     const auto pEnd = psz + cch;
-    for (auto p = psz; psz < pEnd; ++psz)
+    for (auto p = psz; p < pEnd; ++p)
     {
         UINT u;
         if (IS_HIGH_SURROGATE(*p))

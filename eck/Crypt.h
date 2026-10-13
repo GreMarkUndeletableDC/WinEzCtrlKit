@@ -57,7 +57,7 @@ inline NTSTATUS AesEncrypt(PCVOID pKey, size_t cbKey, PCVOID pIv, size_t cbIv,
     if (cbBlock)
     {
         if (!NT_SUCCESS(nts = BCryptSetProperty(hAlg, BCRYPT_BLOCK_LENGTH,
-            (UCHAR*)&cbKey, sizeof(cbKey), 0)))
+            (UCHAR*)&cbBlock, sizeof(cbBlock), 0)))
             goto Tidyup;
     }
     else

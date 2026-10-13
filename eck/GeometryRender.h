@@ -2,7 +2,7 @@
 #include "MathHelper.h"
 
 ECK_NAMESPACE_BEGIN
-inline HRESULT MakePloyLinePath(const D2D1_POINT_2F* pPt, int cPt,
+inline HRESULT MakePolyLinePath(const D2D1_POINT_2F* pPt, int cPt,
     ID2D1Factory* pFactory, ID2D1PathGeometry*& pPathGeo) noexcept
 {
     ID2D1PathGeometry* pPathGeometry;
@@ -137,7 +137,7 @@ inline HRESULT DrawSpirograph(const DRAW_SPIROGRAPH_D2D_PARAM& Info,
         });
     ID2D1PathGeometry* pPathGeometry;
     HRESULT hr;
-    if (FAILED(hr = MakePloyLinePath(vPt.data(), (int)vPt.size(), Info.pFactory, pPathGeometry)))
+    if (FAILED(hr = MakePolyLinePath(vPt.data(), (int)vPt.size(), Info.pFactory, pPathGeometry)))
         return hr;
     Info.pRT->DrawGeometry(pPathGeometry, Info.pBrush, Info.cxStroke, Info.pStrokeStyle);
     if (ppPathGeometry)
@@ -254,7 +254,7 @@ inline HRESULT DrawButterflyCurve(const DRAW_BUTTERFLYCURVE_D2D_PARAM& Info,
         });
     ID2D1PathGeometry* pPathGeometry;
     HRESULT hr;
-    if (FAILED(hr = MakePloyLinePath(vPt.data(), (int)vPt.size(), Info.pFactory, pPathGeometry)))
+    if (FAILED(hr = MakePolyLinePath(vPt.data(), (int)vPt.size(), Info.pFactory, pPathGeometry)))
         return hr;
     Info.pRT->DrawGeometry(pPathGeometry, Info.pBrush, Info.cxStroke, Info.pStrokeStyle);
     if (ppPathGeometry)
@@ -367,7 +367,7 @@ inline HRESULT DrawRoseCurve(const DRAW_ROSECURVE_D2D_PARAM& Info,
         });
     ID2D1PathGeometry* pPathGeometry;
     HRESULT hr;
-    if (FAILED(hr = MakePloyLinePath(vPt.data(), (int)vPt.size(), Info.pFactory, pPathGeometry)))
+    if (FAILED(hr = MakePolyLinePath(vPt.data(), (int)vPt.size(), Info.pFactory, pPathGeometry)))
         return hr;
     Info.pRT->DrawGeometry(pPathGeometry, Info.pBrush, Info.cxStroke, Info.pStrokeStyle);
     if (ppPathGeometry)

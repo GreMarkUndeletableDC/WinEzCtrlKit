@@ -67,12 +67,12 @@ public:
 
     EckInline COLORREF SetBarColor(COLORREF cr) const noexcept
     {
-        return (COLORREF)SendMessageW(PBM_GETBARCOLOR, 0, cr);
+        return (COLORREF)SendMessageW(PBM_SETBARCOLOR, 0, cr);
     }
 
     EckInline COLORREF SetBackgroundColor(COLORREF cr) const noexcept
     {
-        return (COLORREF)SendMessageW(PBM_GETBKCOLOR, 0, cr);
+        return (COLORREF)SendMessageW(PBM_SETBKCOLOR, 0, cr);
     }
 
     EckInline void SetMarquee(BOOL bEnable, int msAnimation = 0) const noexcept

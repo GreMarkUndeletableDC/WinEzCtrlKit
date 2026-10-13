@@ -28,7 +28,7 @@ public:
 
     EckInline BOOL TryEnter() noexcept
     {
-        RtlTryEnterCriticalSection(&m_cs);
+        return RtlTryEnterCriticalSection(&m_cs);
     }
 
     EckInline _Releases_lock_(m_cs) void Leave() noexcept

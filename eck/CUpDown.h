@@ -72,7 +72,7 @@ public:
 
     EckInline int SetPosition(int iPos) const noexcept
     {
-        return (int)SendMessageW(UDM_SETPOS, 0, iPos);
+        return (int)SendMessageW(UDM_SETPOS32, 0, iPos);
     }
 
     EckInline void SetRange(int iMin, int iMax) const noexcept

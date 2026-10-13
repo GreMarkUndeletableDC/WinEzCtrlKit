@@ -651,7 +651,7 @@ private:
             lvti.cColumns = m_cMaxTileCol;
             lvti.puColumns = (UINT*)pTileCol + 1;
             lvti.piColFmt = pTileColFmt + 1;
-            GetTileInfomation(&lvti);
+            GetTileInformation(&lvti);
             ++lvti.cColumns;
 
             GetItemRect(idx, &rc, LVIR_LABEL);

@@ -5,7 +5,7 @@
 #include "CTrivialBuffer.h"
 
 ECK_NAMESPACE_BEGIN
-class CGeometrySinkOffsetTranformer final : public CUnknown<CGeometrySinkOffsetTranformer,
+class CGeometrySinkOffsetTransformer final : public CUnknown<CGeometrySinkOffsetTransformer,
     ID2D1SimplifiedGeometrySink,
     IGeometrySinkTransformer>
 {
@@ -21,8 +21,11 @@ public:
 
     STDMETHOD_(void, BeginFigure)(D2D1_POINT_2F startPoint, D2D1_FIGURE_BEGIN figureBegin) override
     {
-        startPoint.x += m_ox;
-        startPoint.y += m_oy;
+        if (m_bOffsetEnabled)
+        {
+            startPoint.x += m_ox;
+            startPoint.y += m_oy;
+        }
         m_pSink->BeginFigure(startPoint, figureBegin);
     }
 

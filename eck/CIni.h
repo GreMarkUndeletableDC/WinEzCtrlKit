@@ -211,20 +211,22 @@ private:
 public:
     static void Escape(CStringW& rsText, int posBegin = 0) noexcept
     {
-        for (int i = posBegin; i < rsText.Size() - 1; i++)
+        for (int i = posBegin; i < rsText.Size(); i++)
         {
-            if (rsText[i] == L'\\')
+            if (rsText[i] != L'\\')
+                continue;
+            if (i + 1 >= rsText.Size())
             {
-                rsText.Erase(i, 1);
-                if (rsText[i] == L'r')
-                    rsText[i] = L'\r';
-                else if (rsText[i] == L'n')
-                    rsText[i] = L'\n';
-                i++;
+                rsText.PopBack();
+                break;
             }
+            rsText.Erase(i, 1);
+            if (rsText[i] == L'r')
+                rsText[i] = L'\r';
+            else if (rsText[i] == L'n')
+                rsText[i] = L'\n';
+            ++i;
         }
-        if (rsText.Back() == L'\\')
-            rsText.PopBack(1);
     }
 
     static void UnEscape(CStringW& rsText, int posBegin = 0) noexcept
@@ -385,27 +387,37 @@ public:
 
     BOOL ReadStringArray(std::vector<CStringW>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
-        int pos0 = FindValuePosition(pszSection, pszKey);
+        const int pos0 = FindValuePosition(pszSection, pszKey);
         if (pos0 == StrNPos)
             return FALSE;
-        int pos1 = FindValueEndPosition(pos0);
-        const int cch = pos1 - pos0 - 1;
-        if (pos0 + 1 >= m_rsText.Size() || cch <= 0)
-            return FALSE;
-        if (m_bParseEscape)
-            SplitString(m_rsText.Data() + pos0 + 1, LR"(",")", 0, cch, 1,
-                [&v](PCWSTR pszStart, int cchSub)
-                {
-                    Escape(v.emplace_back(pszStart, cchSub));
-                    return FALSE;
-                });
-        else
-            SplitString(m_rsText.Data() + pos0 + 1, LR"(",")", 0, cch, 1,
+        const int pos1 = FindValueEndPosition(pos0);
+        if (pos1 <= pos0)
+            return TRUE;
+        if (!m_bParseEscape)
+        {
+            SplitString(m_rsText.Data() + pos0, L",", 0, pos1 - pos0, 1,
                 [&v](PCWSTR pszStart, int cchSub)
                 {
                     v.emplace_back(pszStart, cchSub);
                     return FALSE;
                 });
+            return TRUE;
+        }
+
+        int posElem = pos0;
+        for (int pos = pos0; pos < pos1;)
+        {
+            if (m_rsText[pos] == L'\\' && pos + 1 < pos1)
+                pos += 2;
+            else if (m_rsText[pos] == L',')
+            {
+                Escape(v.emplace_back(m_rsText.Data() + posElem, pos - posElem));
+                posElem = ++pos;
+            }
+            else
+                ++pos;
+        }
+        Escape(v.emplace_back(m_rsText.Data() + posElem, pos1 - posElem));
         return TRUE;
     }
 
@@ -480,24 +492,18 @@ public:
         const CStringW* Value, int cValue, BOOL bMustExist = FALSE) noexcept
     {
         CStringW rs{};
-        if (m_bParseEscape)
+        EckCounter(cValue, i)
         {
-            EckCounter(cValue, i)
-            {
-                rs.PushBack(Value[i]);
-                rs.PushBackChar(L',');
-            }
-        }
-        else
-        {
-            EckCounter(cValue, i)
+            if (m_bParseEscape)
             {
                 const int posBegin = rs.Size();
                 rs.PushBack(Value[i]);
                 if (!Value[i].IsEmpty())
                     UnEscape(rs, posBegin);
-                rs.PushBack(L",");
             }
+            else
+                rs.PushBack(Value[i]);
+            rs.PushBackChar(L',');
         }
         if (cValue)
             rs.PopBack();

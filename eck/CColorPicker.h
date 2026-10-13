@@ -157,11 +157,10 @@ public:
                         cc.lpCustColors = m_crCcDlgCustom;
                         cc.Flags = CC_ANYCOLOR | CC_FULLOPEN;
                         m_crCcDlgCustom[0] = m_crCustom;
-                        if (ChooseColorW(&cc))
-                        {
-                            m_crCustom = cc.rgbResult;
-                            InvalidateRect((HWND)lParam, nullptr, FALSE);
-                        }
+                        if (!ChooseColorW(&cc))
+                            return 0;
+                        m_crCustom = cc.rgbResult;
+                        InvalidateRect((HWND)lParam, nullptr, FALSE);
                         cr = m_crCustom;
                         Redraw();
                     }

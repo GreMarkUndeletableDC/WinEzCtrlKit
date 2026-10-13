@@ -661,10 +661,10 @@ public:
         UpdateStandardSize();
 
         SCROLLINFO si{ sizeof(si), SIF_ALL };
-        pWnd->ScbGetInfomation(SB_HORZ, &si);
-        m_ViewH.SetScrollInfomation(si);
-        pWnd->ScbGetInfomation(SB_VERT, &si);
-        m_ViewV.SetScrollInfomation(si);
+        pWnd->ScbGetInformation(SB_HORZ, &si);
+        m_ViewH.SetScrollInformation(si);
+        pWnd->ScbGetInformation(SB_VERT, &si);
+        m_ViewV.SetScrollInformation(si);
 
         m_hTheme = OpenNcThemeData(pWnd->Handle, L"ScrollBar");
 
@@ -762,7 +762,7 @@ public:
         switch (nBar)
         {
         case SB_HORZ:
-            m_ViewH.SetScrollInfomation(*psi);
+            m_ViewH.SetScrollInformation(*psi);
             m_bDisableH = FALSE;
             if (!m_ViewH.IsVisible())
             {
@@ -778,7 +778,7 @@ public:
                 Redraw();
             return m_ViewH.GetPosition();
         case SB_VERT:
-            m_ViewV.SetScrollInfomation(*psi);
+            m_ViewV.SetScrollInformation(*psi);
             m_bDisableV = FALSE;
             if (!m_ViewV.IsVisible())
             {
@@ -802,12 +802,12 @@ public:
         switch (nBar)
         {
         case SB_HORZ:
-            m_ViewH.GetScrollInfomation(*psi);
+            m_ViewH.GetScrollInformation(*psi);
             if ((psi->fMask & SIF_TRACKPOS) && m_eLBtnDownPart == Part::ThumbH)
                 psi->nTrackPos = m_ViewTracking.GetPosition();
             return TRUE;
         case SB_VERT:
-            m_ViewV.GetScrollInfomation(*psi);
+            m_ViewV.GetScrollInformation(*psi);
             if ((psi->fMask & SIF_TRACKPOS) && m_eLBtnDownPart == Part::ThumbV)
                 psi->nTrackPos = m_ViewTracking.GetPosition();
             return TRUE;

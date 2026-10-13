@@ -95,7 +95,7 @@ public:
             return FALSE;
         mii.fState &= (MF_CHECKED | MF_UNCHECKED);
         mii.fState |= (bCheck ? MF_CHECKED : MF_UNCHECKED);
-        return SetItemInfomation(&mii, uPos, bPosition);
+        return SetItemInformation(&mii, uPos, bPosition);
     }
 
     EckInline BOOL CheckRadioItem(UINT uBegin, UINT uEnd, UINT uCheck, BOOL bPosition = FALSE) const noexcept
@@ -134,7 +134,7 @@ public:
         return GetMenuDefaultItem(m_hMenu, PositionFlag(bPosition), uFlags);
     }
 
-    EckInline BOOL GetInfomation(MENUINFO* pmi) const noexcept
+    EckInline BOOL GetInformation(MENUINFO* pmi) const noexcept
     {
         return GetMenuInfo(m_hMenu, pmi);
     }
@@ -314,7 +314,7 @@ public:
         return SetMenuDefaultItem(m_hMenu, uPos, bPosition);
     }
 
-    EckInline BOOL SetInfomation(const MENUINFO* pmi) const noexcept
+    EckInline BOOL SetInformation(const MENUINFO* pmi) const noexcept
     {
         return SetMenuInfo(m_hMenu, pmi);
     }
@@ -328,7 +328,7 @@ public:
         return SetMenuItemBitmaps(m_hMenu, uPos, PositionFlag(bPosition), hbmUnchecked, hbmChecked);
     }
 
-    EckInline BOOL SetItemInfomation(
+    EckInline BOOL SetItemInformation(
         _In_ const MENUITEMINFOW* pmii,
         UINT uPos,
         BOOL bPosition = FALSE) const noexcept

@@ -28,8 +28,8 @@ public:
     public:
         constexpr operator bool() const noexcept { return m_That.Test(m_idx); }
         Proxy& operator=(bool b) noexcept { m_That.Set(m_idx, b); return *this; }
-        constexpr bool operator~() noexcept { !m_That.Test(m_idx); return *this; }
-        Proxy& operator=(const Proxy& x) noexcept { m_That.Set(m_idx, x); }
+        constexpr bool operator~() noexcept { return !m_That.Test(m_idx); }
+        Proxy& operator=(const Proxy& x) noexcept { m_That.Set(m_idx, x); return *this; }
     };
 
     CBitSet() = default;

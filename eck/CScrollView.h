@@ -161,7 +161,7 @@ public:
 #endif // _DEBUG
     }
 
-    constexpr void SetScrollInfomation(const SCROLLINFO& si) noexcept
+    constexpr void SetScrollInformation(const SCROLLINFO& si) noexcept
     {
         if (si.fMask & SIF_RANGE)
         {
@@ -175,7 +175,7 @@ public:
         RangeChanged();
     }
 
-    constexpr void GetScrollInfomation(_Inout_ SCROLLINFO& si) const noexcept
+    constexpr void GetScrollInformation(_Inout_ SCROLLINFO& si) const noexcept
     {
         if (si.fMask & SIF_RANGE)
         {
