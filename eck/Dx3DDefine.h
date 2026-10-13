@@ -3,11 +3,11 @@
 
 #include <d3dcompiler.h>
 
-#define ECK_EZDX_NAMESPACE_BEGIN    namespace EzDx {
-#define ECK_EZDX_NAMESPACE_END      }
+#define ECK_DX3D_NAMESPACE_BEGIN    namespace Dx3D {
+#define ECK_DX3D_NAMESPACE_END      }
 
 ECK_NAMESPACE_BEGIN
-ECK_EZDX_NAMESPACE_BEGIN
+ECK_DX3D_NAMESPACE_BEGIN
 inline HRESULT CompileShader(
     _Out_ ID3DBlob*& pShaderBlob,
     _In_reads_(cchShader) PCCH pszShader,
@@ -34,7 +34,7 @@ inline HRESULT CompileShader(
 
 struct CBuffer
 {
-    ComPtr<ID3D11Buffer> pBuffer;
+    ComPtr<ID3D11Buffer> p;
 
     HRESULT Create(
         size_t cb,
@@ -62,19 +62,27 @@ struct CBuffer
         return g_pD3D11Device->CreateBuffer(
             &Desc,
             pData ? &InitData : nullptr,
-            pBuffer.AtClear());
+            p.AtClear());
     }
     HRESULT CreateConstantBuffer(size_t cb, PCVOID pData = nullptr) noexcept
     {
-        return Create(cb, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC,
-            D3D11_CPU_ACCESS_WRITE, 0u, pData);
+        return Create(
+            cb,
+            D3D11_BIND_CONSTANT_BUFFER,
+            D3D11_USAGE_DYNAMIC,
+            D3D11_CPU_ACCESS_WRITE,
+            0u,
+            pData);
     }
     HRESULT CreateVertexBuffer(BOOL bImmutable, size_t cb, PCVOID pData = nullptr) noexcept
     {
-        return Create(cb, D3D11_BIND_VERTEX_BUFFER,
+        return Create(
+            cb,
+            D3D11_BIND_VERTEX_BUFFER,
             bImmutable ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC,
             bImmutable ? 0 : D3D11_CPU_ACCESS_WRITE,
-            0u, pData);
+            0u,
+            pData);
     }
     HRESULT CreateIndexBuffer(BOOL bImmutable, size_t cb, PCVOID pData = nullptr) noexcept
     {
@@ -91,18 +99,20 @@ struct CBuffer
     {
         D3D11_MAPPED_SUBRESOURCE Mapped;
         const auto hr = pContext->Map(
-            pBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Mapped);
+            p.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &Mapped);
         if (FAILED(hr))
             return hr;
         memcpy(Mapped.pData, pData, cbData);
-        pContext->Unmap(pBuffer.Get(), 0);
+        pContext->Unmap(p.Get(), 0);
         return S_OK;
     }
 
-    EckInlineNdCe auto operator->() const noexcept { return pBuffer.Get(); }
-    EckInlineNdCe auto Get() const noexcept { return pBuffer.Get(); }
-    EckInlineNdCe auto At() const noexcept { return pBuffer.At(); }
-    EckInline void Clear() noexcept { pBuffer.Clear(); }
+    EckInlineNdCe auto operator->() const noexcept { return p.Get(); }
+    EckInlineNdCe auto operator&() noexcept { return &p; }
+    EckInlineNdCe auto operator&() const noexcept { return &p; }
+    EckInlineNdCe auto Get() const noexcept { return p.Get(); }
+    EckInlineNdCe auto At() const noexcept { return p.At(); }
+    EckInline void Clear() noexcept { p.Clear(); }
 };
 
 namespace Detail
@@ -110,12 +120,14 @@ namespace Detail
     template<class TClass, class TInterface>
     struct CShader
     {
-        ComPtr<TInterface> pShader;
+        ComPtr<TInterface> p;
 
-        EckInlineNdCe auto operator->() const noexcept { return pShader.Get(); }
-        EckInlineNdCe auto Get() const noexcept { return pShader.Get(); }
-        EckInlineNdCe auto At() const noexcept { return pShader.At(); }
-        EckInline void Clear() noexcept { pShader.Clear(); }
+        EckInlineNdCe auto operator->() const noexcept { return p.Get(); }
+        EckInlineNdCe auto operator&() noexcept { return &p; }
+        EckInlineNdCe auto operator&() const noexcept { return &p; }
+        EckInlineNdCe auto Get() const noexcept { return p.Get(); }
+        EckInlineNdCe auto At() const noexcept { return p.At(); }
+        EckInline void Clear() noexcept { p.Clear(); }
 
         EckInline HRESULT Create(ID3DBlob* pBlob) noexcept
         {
@@ -131,7 +143,7 @@ struct CPixelShader : Detail::CShader<CPixelShader, ID3D11PixelShader>
         size_t cbBytecode) noexcept
     {
         return g_pD3D11Device->CreatePixelShader(pBytecode,
-            cbBytecode, nullptr, pShader.AtClear());
+            cbBytecode, nullptr, p.AtClear());
     }
 };
 struct CVertexShader : Detail::CShader<CVertexShader, ID3D11VertexShader>
@@ -141,13 +153,13 @@ struct CVertexShader : Detail::CShader<CVertexShader, ID3D11VertexShader>
         size_t cbBytecode) noexcept
     {
         return g_pD3D11Device->CreateVertexShader(pBytecode,
-            cbBytecode, nullptr, pShader.AtClear());
+            cbBytecode, nullptr, p.AtClear());
     }
 };
-struct CVSAndInputLayout
+struct CVertexShaderAndInputLayout
 {
     CVertexShader Shader;
-    ComPtr<ID3D11InputLayout> pInputLayout;
+    ComPtr<ID3D11InputLayout> InputLayout;
 
     HRESULT Create(
         _In_reads_bytes_(cbBytecode) PCVOID pBytecode,
@@ -157,24 +169,27 @@ struct CVSAndInputLayout
     {
         HRESULT hr;
         hr = Shader.Create(pBytecode, cbBytecode);
-        if (FAILED(hr)) return hr;
-        hr = g_pD3D11Device->CreateInputLayout(pInput, (UINT)cInput,
-            pBytecode, cbBytecode, pInputLayout.AtClear());
+        if (FAILED(hr))
+            return hr;
+        hr = g_pD3D11Device->CreateInputLayout(
+            pInput, (UINT)cInput,
+            pBytecode, cbBytecode,
+            InputLayout.AtClear());
         return hr;
     }
 
-    EckInlineNdCe auto GetInputLayout() const noexcept { return pInputLayout.Get(); }
+    EckInlineNdCe auto GetInputLayout() const noexcept { return InputLayout.Get(); }
     EckInlineNdCe auto GetShader() const noexcept { return Shader.Get(); }
     EckInline void Clear() noexcept
     {
         Shader.Clear();
-        pInputLayout.Clear();
+        InputLayout.Clear();
     }
 };
 
 struct CTexture
 {
-    ComPtr<ID3D11Texture2D> pTexture;
+    ComPtr<ID3D11Texture2D> p;
 
     HRESULT Create(
         UINT cx, UINT cy,
@@ -198,20 +213,23 @@ struct CTexture
         Desc.BindFlags = eBind;
         Desc.CPUAccessFlags = uCPUAccessFlags;
         Desc.MiscFlags = uMiscFlags;
-        return g_pD3D11Device->CreateTexture2D(&Desc, pInitData, pTexture.AtClear());
+        return g_pD3D11Device->CreateTexture2D(&Desc, pInitData, p.AtClear());
     }
 
-    EckInlineNdCe auto operator->() const noexcept { return pTexture.Get(); }
-    EckInlineNdCe auto Get() const noexcept { return pTexture.Get(); }
-    EckInlineNdCe auto At() const noexcept { return pTexture.At(); }
-    EckInline void Clear() noexcept { pTexture.Clear(); }
+    EckInlineNdCe auto operator->() const noexcept { return p.Get(); }
+    EckInlineNdCe auto operator&() noexcept { return &p; }
+    EckInlineNdCe auto operator&() const noexcept { return &p; }
+    EckInlineNdCe auto Get() const noexcept { return p.Get(); }
+    EckInlineNdCe auto At() const noexcept { return p.At(); }
+    EckInline void Clear() noexcept { p.Clear(); }
 };
 
 struct CSampler
 {
     ComPtr<ID3D11SamplerState> pSampler;
 
-    HRESULT Create(D3D11_FILTER eFilter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+    HRESULT Create(
+        D3D11_FILTER eFilter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
         D3D11_TEXTURE_ADDRESS_MODE eAddressU = D3D11_TEXTURE_ADDRESS_CLAMP,
         D3D11_TEXTURE_ADDRESS_MODE eAddressV = D3D11_TEXTURE_ADDRESS_CLAMP,
         D3D11_TEXTURE_ADDRESS_MODE eAddressW = D3D11_TEXTURE_ADDRESS_CLAMP,
@@ -232,7 +250,8 @@ struct CSampler
         _In_reads_opt_(4) const float* pBorderColor,
         D3D11_FILTER eFilter = D3D11_FILTER_MIN_MAG_MIP_LINEAR) noexcept
     {
-        return Create(eFilter,
+        return Create(
+            eFilter,
             D3D11_TEXTURE_ADDRESS_BORDER,
             D3D11_TEXTURE_ADDRESS_BORDER,
             D3D11_TEXTURE_ADDRESS_BORDER,
@@ -241,6 +260,8 @@ struct CSampler
     }
 
     EckInlineNdCe auto operator->() const noexcept { return pSampler.Get(); }
+    EckInlineNdCe auto operator&() noexcept { return &pSampler; }
+    EckInlineNdCe auto operator&() const noexcept { return &pSampler; }
     EckInlineNdCe auto Get() const noexcept { return pSampler.Get(); }
     EckInlineNdCe auto At() const noexcept { return pSampler.At(); }
     EckInline void Clear() noexcept { pSampler.Clear(); }
@@ -248,17 +269,17 @@ struct CSampler
 
 struct CShaderResourceView
 {
-    ComPtr<ID3D11ShaderResourceView> pSrv;
+    ComPtr<ID3D11ShaderResourceView> p;
 
     HRESULT Create(
-        ID3D11Resource* pResource,
+        _In_ ID3D11Resource* pResource,
         const D3D11_SHADER_RESOURCE_VIEW_DESC& Desc) noexcept
     {
         return g_pD3D11Device->CreateShaderResourceView(
-            pResource, &Desc, pSrv.AtClear());
+            pResource, &Desc, p.AtClear());
     }
     HRESULT Create(
-        ID3D11Resource* pResource,
+        _In_ ID3D11Resource* pResource,
         DXGI_FORMAT eFormat = DXGI_FORMAT_UNKNOWN,
         D3D11_SRV_DIMENSION eDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
         UINT uMipLevels = 1u) noexcept
@@ -270,51 +291,58 @@ struct CShaderResourceView
         return Create(pResource, Desc);
     }
 
-    EckInlineNdCe auto operator->() const noexcept { return pSrv.Get(); }
-    EckInlineNdCe auto Get() const noexcept { return pSrv.Get(); }
-    EckInlineNdCe auto At() const noexcept { return pSrv.At(); }
-    EckInline void Clear() noexcept { pSrv.Clear(); }
+    EckInlineNdCe auto operator->() const noexcept { return p.Get(); }
+    EckInlineNdCe auto operator&() noexcept { return &p; }
+    EckInlineNdCe auto operator&() const noexcept { return &p; }
+    EckInlineNdCe auto Get() const noexcept { return p.Get(); }
+    EckInlineNdCe auto At() const noexcept { return p.At(); }
+    EckInline void Clear() noexcept { p.Clear(); }
 };
 
 struct CRenderTargetView
 {
-    ComPtr<ID3D11RenderTargetView> pRtv;
+    ComPtr<ID3D11RenderTargetView> p;
 
-    HRESULT Create(ID3D11Resource* pResource) noexcept
+    HRESULT Create(_In_ ID3D11Resource* pResource) noexcept
     {
-        return g_pD3D11Device->CreateRenderTargetView(pResource, nullptr, pRtv.AtClear());
+        return g_pD3D11Device->CreateRenderTargetView(pResource, nullptr, p.AtClear());
     }
 
-    EckInlineNdCe auto operator->() const noexcept { return pRtv.Get(); }
-    EckInlineNdCe auto Get() const noexcept { return pRtv.Get(); }
-    EckInlineNdCe auto At() const noexcept { return pRtv.At(); }
-    EckInline void Clear() noexcept { pRtv.Clear(); }
+    EckInlineNdCe auto operator->() const noexcept { return p.Get(); }
+    EckInlineNdCe auto operator&() noexcept { return &p; }
+    EckInlineNdCe auto operator&() const noexcept { return &p; }
+    EckInlineNdCe auto Get() const noexcept { return p.Get(); }
+    EckInlineNdCe auto At() const noexcept { return p.At(); }
+    EckInline void Clear() noexcept { p.Clear(); }
 };
 
 struct CDepthStencilView
 {
-    ComPtr<ID3D11DepthStencilView> pDsv;
+    ComPtr<ID3D11DepthStencilView> p;
 
-    HRESULT Create(ID3D11Resource* pResource,
+    HRESULT Create(
+        _In_ ID3D11Resource* pResource,
         const D3D11_DEPTH_STENCIL_VIEW_DESC* pDesc = nullptr) noexcept
     {
-        return g_pD3D11Device->CreateDepthStencilView(pResource, pDesc, pDsv.AtClear());
+        return g_pD3D11Device->CreateDepthStencilView(pResource, pDesc, p.AtClear());
     }
 
-    EckInlineNdCe auto operator->() const noexcept { return pDsv.Get(); }
-    EckInlineNdCe auto Get() const noexcept { return pDsv.Get(); }
-    EckInlineNdCe auto At() const noexcept { return pDsv.At(); }
-    EckInline void Clear() noexcept { pDsv.Clear(); }
+    EckInlineNdCe auto operator->() const noexcept { return p.Get(); }
+    EckInlineNdCe auto operator&() noexcept { return &p; }
+    EckInlineNdCe auto operator&() const noexcept { return &p; }
+    EckInlineNdCe auto Get() const noexcept { return p.Get(); }
+    EckInlineNdCe auto At() const noexcept { return p.At(); }
+    EckInline void Clear() noexcept { p.Clear(); }
 };
 
-class CGpuRwTexture
+struct RwTexture
 {
-private:
-    EzDx::CTexture m_Tex{};
-    EzDx::CRenderTargetView m_Rtv{};
-    EzDx::CShaderResourceView m_Srv{};
-public:
-    HRESULT Create(UINT cx, UINT cy,
+    CTexture Texture{};
+    CRenderTargetView Rtv{};
+    CShaderResourceView Srv{};
+
+    HRESULT Create(
+        UINT cx, UINT cy,
         DXGI_FORMAT eFormat = DXGI_FORMAT_B8G8R8A8_UNORM,
         PCVOID pData = nullptr,
         UINT cbStride = 0u) noexcept
@@ -325,25 +353,18 @@ public:
         if (pData)
         {
             const D3D11_SUBRESOURCE_DATA Data{ pData,cbStride };
-            hr = m_Tex.Create(cx, cy, eFormat, Bind,
+            hr = Texture.Create(cx, cy, eFormat, Bind,
                 D3D11_USAGE_DEFAULT, &Data);
         }
         else
-            hr = m_Tex.Create(cx, cy, eFormat, Bind);
+            hr = Texture.Create(cx, cy, eFormat, Bind);
         if (FAILED(hr))
             return hr;
-        hr = m_Srv.Create(m_Tex.Get());
+        hr = Srv.Create(Texture.Get());
         if (FAILED(hr))
             return hr;
-        return m_Rtv.Create(m_Tex.Get());
+        return Rtv.Create(Texture.Get());
     }
-
-    EckInlineNdCe auto& GetTexture() noexcept { return m_Tex; }
-    EckInlineNdCe auto& GetRenderTargetView() noexcept { return m_Rtv; }
-    EckInlineNdCe auto& GetShaderResourceView() noexcept { return m_Srv; }
-    EckInlineNdCe auto& GetTexture() const noexcept { return m_Tex; }
-    EckInlineNdCe auto& GetRenderTargetView() const noexcept { return m_Rtv; }
-    EckInlineNdCe auto& GetShaderResourceView() const noexcept { return m_Srv; }
 };
-ECK_EZDX_NAMESPACE_END
+ECK_DX3D_NAMESPACE_END
 ECK_NAMESPACE_END
