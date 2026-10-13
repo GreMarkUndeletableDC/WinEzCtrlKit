@@ -335,7 +335,7 @@ struct CDepthStencilView
     EckInline void Clear() noexcept { p.Clear(); }
 };
 
-struct RwTexture
+struct CRwTexture
 {
     CTexture Texture{};
     CRenderTargetView Rtv{};
