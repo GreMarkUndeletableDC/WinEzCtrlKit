@@ -226,7 +226,7 @@ struct CTexture
 
 struct CSampler
 {
-    ComPtr<ID3D11SamplerState> pSampler;
+    ComPtr<ID3D11SamplerState> p;
 
     HRESULT Create(
         D3D11_FILTER eFilter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
@@ -244,7 +244,7 @@ struct CSampler
         Desc.ComparisonFunc = eComparisonFunc;
         if (pBorderColor)
             memcpy(Desc.BorderColor, pBorderColor, 4 * sizeof(float));
-        return g_pD3D11Device->CreateSamplerState(&Desc, pSampler.AtClear());
+        return g_pD3D11Device->CreateSamplerState(&Desc, p.AtClear());
     }
     HRESULT CreateBorder(
         _In_reads_opt_(4) const float* pBorderColor,
@@ -259,12 +259,12 @@ struct CSampler
             pBorderColor);
     }
 
-    EckInlineNdCe auto operator->() const noexcept { return pSampler.Get(); }
-    EckInlineNdCe auto operator&() noexcept { return &pSampler; }
-    EckInlineNdCe auto operator&() const noexcept { return &pSampler; }
-    EckInlineNdCe auto Get() const noexcept { return pSampler.Get(); }
-    EckInlineNdCe auto At() const noexcept { return pSampler.At(); }
-    EckInline void Clear() noexcept { pSampler.Clear(); }
+    EckInlineNdCe auto operator->() const noexcept { return p.Get(); }
+    EckInlineNdCe auto operator&() noexcept { return &p; }
+    EckInlineNdCe auto operator&() const noexcept { return &p; }
+    EckInlineNdCe auto Get() const noexcept { return p.Get(); }
+    EckInlineNdCe auto At() const noexcept { return p.At(); }
+    EckInline void Clear() noexcept { p.Clear(); }
 };
 
 struct CShaderResourceView
