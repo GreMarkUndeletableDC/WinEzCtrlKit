@@ -458,9 +458,9 @@ inline LRESULT MsgOnControlColorXxx(
     {
         bHandled = TRUE;
         const auto* const ptc = PtcCurrent();
-        SetTextColor((HDC)wParam, ptc->crDefText);
-        SetBkColor((HDC)wParam, crBk != CLR_DEFAULT ? crBk : ptc->crDefBkg);
-        SetDCBrushColor((HDC)wParam, crBk != CLR_DEFAULT ? crBk : ptc->crDefBkg);
+        SetTextColor((HDC)wParam, (crText != CLR_DEFAULT) ? crText : ptc->crDefText);
+        SetBkColor((HDC)wParam, (crBk != CLR_DEFAULT) ? crBk : ptc->crDefBkg);
+        SetDCBrushColor((HDC)wParam, (crBk != CLR_DEFAULT) ? crBk : ptc->crDefBkg);
         return (LRESULT)GetStockObject(DC_BRUSH);
     }
     break;
