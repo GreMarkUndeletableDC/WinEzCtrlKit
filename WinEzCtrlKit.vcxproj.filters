@@ -437,7 +437,7 @@
     <ClCompile Include="eck\AutoLink.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\Dx3DDefine.h">
+    <ClCompile Include="eck\D3DHelper.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\FileHelper.h">
