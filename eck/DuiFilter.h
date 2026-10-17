@@ -64,8 +64,8 @@ public:
     }
 
     // 应用滤镜到当前设备上下文内容的指定范围。
-    // 调用方负责初始化缓存（如位图和效果），还负责刷新DC上任何挂起的操作
-    // WARNING 使用CopyEffect且不使用图层的滤镜时，调用方负责设置合适的轴对齐剪辑
+    // 调用方负责初始化缓存（如位图），还负责刷新DC上任何挂起的操作
+    // WARNING 如有必要，调用方负责设置合适的轴对齐剪辑
     virtual HRESULT FilterDC(
         const D2D1_RECT_F& rc,
         float ox, float oy,

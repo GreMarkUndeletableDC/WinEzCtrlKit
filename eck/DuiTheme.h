@@ -478,13 +478,15 @@ EckInline auto TmMakeTheme(BOOL bDark) noexcept
 
 // WM_STYLECHANGED DES_DARK_MODE被改变时的默认处理
 template<class TElement>
-EckInline void TmAutoSwitchTheme(TElement* pEle, WPARAM wParam) noexcept
+EckInline BOOL TmAutoSwitchTheme(TElement* pEle, WPARAM wParam) noexcept
 {
     if ((pEle->GetStyle() ^ wParam) & DES_DARK_MODE)
     {
         const auto bDark = !!(pEle->GetStyle() & DES_DARK_MODE);
         pEle->SetTheme(TElement::TmDefaultTheme(bDark).Get());
+        return TRUE;
     }
+    return FALSE;
 }
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END
