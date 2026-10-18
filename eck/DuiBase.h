@@ -61,14 +61,6 @@ public:
 
     virtual LRESULT OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept;
 
-    void CeInflateRectWithExpandRadius(_Inout_ Kw::Rect& rc, float f) const noexcept
-    {
-        auto rcTemp{ rc };
-        InflateRect(rcTemp, f, f);
-        if (IntersectRect(rcTemp, rcTemp, GetWholeRectInClient()))// 裁剪到元素矩形
-            UnionRect(rc, rc, rcTemp);
-    }
-
     EckInlineNdCe CDuiWindow& GetWindow() const noexcept { return *(CDuiWindow*)GetContainer(); }
     EckInlineNdCe ID2D1DeviceContext* GetDC() const noexcept;
 
@@ -112,8 +104,8 @@ public:
 
     void SetText(std::wstring_view sv) noexcept
     {
-        if (!CallEvent(WM_SETTEXT, sv.size(), (LPARAM)sv.data()))
-            m_rsText.Assign(sv.data(), (int)sv.size());
+        m_rsText.Assign(sv.data(), (int)sv.size());
+        CallEvent(WM_SETTEXT, sv.size(), (LPARAM)sv.data());
     }
     EckInlineNdCe auto& GetText() const noexcept { return m_rsText; }
 protected:
@@ -590,15 +582,15 @@ private:
 #ifdef _DEBUG
                 if (m_bDbgDrawCompRect)
                 {
-                    const auto pBr = CcGetBrush();
-                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Aqua });
-                    pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBr);
+                    const auto pBrush = CcGetBrush();
+                    pBrush->SetColor(D2D1::ColorF{ D2D1::ColorF::Aqua });
+                    pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBrush);
 
-                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Green });
-                    pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBr);
+                    pBrush->SetColor(D2D1::ColorF{ D2D1::ColorF::Green });
+                    pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBrush);
 
-                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Orange });
-                    pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBr);
+                    pBrush->SetColor(D2D1::ColorF{ D2D1::ColorF::Orange });
+                    pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBrush);
                 }
 #endif
             }
@@ -718,12 +710,11 @@ private:
 #ifdef _DEBUG
         if (DbgGetDrawDirtyRect())
         {
-            ComPtr<ID2D1SolidColorBrush> pBr;
+            ComPtr<ID2D1SolidColorBrush> pBrush;
             InflateRect(rcDirtyLogical, -1.f, -1.f);
             pDC->SetTransform(D2D1::Matrix3x2F::Identity());
-            ARGB Cr = m_Pcg.Next() | 0xFF000000;
-            pDC->CreateSolidColorBrush(D2D1::ColorF{ Cr }, &pBr);
-            pDC->DrawRectangle(MakeD2DRectF(rcDirtyLogical), pBr.Get(), 2.f);
+            pDC->CreateSolidColorBrush(D2D1::ColorF{ m_Pcg.Next() | 0xFF000000 }, &pBrush);
+            pDC->DrawRectangle(MakeD2DRectF(rcDirtyLogical), pBrush.Get(), 2.f);
         }
 #endif // _DEBUG
         if (bPostRender)
@@ -1557,15 +1548,15 @@ inline HRESULT CElement::CompUpdateCacheBitmap(float cx, float cy) noexcept
     }
 
     HRESULT hr;
-    const int cxPhy = (int)ceilf(LogicalToPixel((float)cx));
-    const int cyPhy = (int)ceilf(LogicalToPixel((float)cy));
+    const int cxPixel = (int)ceilf(LogicalToPixel((float)cx));
+    const int cyPixel = (int)ceilf(LogicalToPixel((float)cy));
     CBitmap Bitmap{};
     if (GetStyle() & DES_OWNER_COMP_CACHE)
-        hr = m_pCompositor->CreateCacheBitmap(cxPhy, cyPhy, Bitmap);
+        hr = m_pCompositor->CreateCacheBitmap(cxPixel, cyPixel, Bitmap);
     else
     {
         ComPtr<ID2D1Bitmap1> pBitmap;
-        hr = GetWindow().RdCreateBitmap(cxPhy, cyPhy, pBitmap.Self());
+        hr = GetWindow().RdCreateBitmap(cxPixel, cyPixel, pBitmap.Self());
         Bitmap.Set(pBitmap.Get());
     }
     m_pCompositor->EleUpdateCacheBitmap(Bitmap);

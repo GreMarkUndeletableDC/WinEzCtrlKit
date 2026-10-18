@@ -166,11 +166,11 @@ struct SimpleStyle
     {
         struct
         {
-            UINT CrFore;
-            UINT CrBack;
-            UINT CrBorder;
+            UINT Fore;
+            UINT Back;
+            UINT Border;
         };
-        UINT Cr[3];
+        UINT Color[3];
     };
 
     float rRound;
@@ -189,7 +189,7 @@ struct SimpleStyle
     EckInlineNdCe BOOL HasRoundCorner() const noexcept { return rRound >= 1.f; }
     EckInlineNdCe BOOL HasBorder() const noexcept
     {
-        return cxBorder >= 1.f && CrBorder != IdTmInvalid;
+        return cxBorder >= 1.f && Border != IdTmInvalid;
     }
 };
 
@@ -253,7 +253,7 @@ public:
 
     UINT GetStyleColor(const SimpleStyle* pStyle, UINT sf, UINT argbDefault = 0) const noexcept
     {
-        const auto u = pStyle->Cr[sf];
+        const auto u = pStyle->Color[sf];
         const auto bArgb = pStyle->bArgb[sf];
         if (bArgb)
             return u;
@@ -263,7 +263,7 @@ public:
     D2D1_COLOR_F GetStyleColorD2D(const SimpleStyle* pStyle, UINT sf,
         const D2D1_COLOR_F& Default = {}) const noexcept
     {
-        const auto u = pStyle->Cr[sf];
+        const auto u = pStyle->Color[sf];
         const auto bArgb = pStyle->bArgb[sf];
         if (bArgb)
             return ArgbToD2DColorF(u);
@@ -312,30 +312,30 @@ inline SimpleStyle TmSsLerp(
     s.rRound = s1.rRound + (s2.rRound - s1.rRound) * kLerp;
     s.cxBorder = s1.cxBorder + (s2.cxBorder - s1.cxBorder) * kLerp;
 
-    const auto crFore = TmSsLerpColor(pTheme, s1.bForeArgb, s1.CrFore, s2.CrFore, kLerp);
+    const auto crFore = TmSsLerpColor(pTheme, s1.bForeArgb, s1.Fore, s2.Fore, kLerp);
     if (crFore)
     {
-        s.CrFore = *crFore;
+        s.Fore = *crFore;
         s.bForeArgb = TRUE;
     }
     else
-        s.CrFore = IdTmInvalid;
-    const auto crBack = TmSsLerpColor(pTheme, s1.bBackArgb, s1.CrBack, s2.CrBack, kLerp);
+        s.Fore = IdTmInvalid;
+    const auto crBack = TmSsLerpColor(pTheme, s1.bBackArgb, s1.Back, s2.Back, kLerp);
     if (crBack)
     {
-        s.CrBack = *crBack;
+        s.Back = *crBack;
         s.bBackArgb = TRUE;
     }
     else
-        s.CrBack = IdTmInvalid;
-    const auto crBorder = TmSsLerpColor(pTheme, s1.bBorderArgb, s1.CrBorder, s2.CrBorder, kLerp);
+        s.Back = IdTmInvalid;
+    const auto crBorder = TmSsLerpColor(pTheme, s1.bBorderArgb, s1.Border, s2.Border, kLerp);
     if (crBorder)
     {
-        s.CrBorder = *crBorder;
+        s.Border = *crBorder;
         s.bBorderArgb = TRUE;
     }
     else
-        s.CrBorder = IdTmInvalid;
+        s.Border = IdTmInvalid;
     return s;
 }
 

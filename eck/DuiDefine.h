@@ -192,7 +192,7 @@ namespace Detail
 
 struct PAINTINFO
 {
-    D2D1_RECT_F rcClip;        // 剪裁矩形，相对客户区
+    D2D1_RECT_F rcClip;       // 剪裁矩形，相对客户区
     D2D1_RECT_F rcClipInEle;  // 剪裁矩形，相对元素
     float ox;
     float oy;
