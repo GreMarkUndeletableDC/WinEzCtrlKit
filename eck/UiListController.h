@@ -348,7 +348,7 @@ private:
 
     // --
 
-    // 拖动选择起始点，X：视图空间，Y：为绝对空间
+    // 拖动选择起始点，X：视图空间，Y：绝对空间
     TCoord m_xDragSelStart{}, m_yDragSelStart{};
     TRect m_rcDragSel{};        // 当前选择矩形，相对视图空间
     TCoord m_dCursorToItemMax{};// 鼠标指针到项目的最大距离
