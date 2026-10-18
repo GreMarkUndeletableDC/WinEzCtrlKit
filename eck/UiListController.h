@@ -337,8 +337,8 @@ private:
     TCoord m_cyGroupHeader{ 40 };   // 组头高度
     TCoord m_cxGroupImage{};        // 组图片宽度
     TCoord m_cyGroupImage{};        // 组图片高度
-    TCoord m_cyGroupItemTopPadding{ 4 };      // 组头与项目间的空白
-    TCoord m_cyGroupItemBottomPadding{};   // 项目区底部空白
+    TCoord m_cyGroupItemTopPadding{ 4 };    // 组头与项目间的空白
+    TCoord m_cyGroupItemBottomPadding{};    // 项目区底部空白
 
     // -- 图标
 
@@ -348,9 +348,9 @@ private:
 
     // --
 
-    // 拖动选择起始点，X：视图空间，Y：绝对空间
+    // 拖动选择起始点，相对绝对空间
     TCoord m_xDragSelStart{}, m_yDragSelStart{};
-    TRect m_rcDragSel{};        // 当前选择矩形，相对视图空间
+    TRect m_rcDragSel{};        // 当前选择矩形，相对绝对空间
     TCoord m_dCursorToItemMax{};// 鼠标指针到项目的最大距离
 
     View m_eView{ View::List };
@@ -370,7 +370,7 @@ private:
     {
         m_bDraggingSel = TRUE;
         m_bPendingDragSel = FALSE;
-        m_xDragSelStart = x;
+        m_xDragSelStart = x + m_pHost->LchSccGetPosition(FALSE);
         m_yDragSelStart = y + m_pHost->LchSccGetPosition(TRUE);
         m_dCursorToItemMax = 0;
         m_rcDragSel = {};
@@ -387,19 +387,19 @@ private:
         else if (!m_bDraggingSel)
             return;
         m_bPendingDragSel = m_bDraggingSel = FALSE;
-        TRect rcOld{ m_rcDragSel };
-        OffsetRect(rcOld, 0, -m_pHost->LchSccGetPosition(TRUE));
-        m_pHost->LchInvalidateRect(&rcOld);
+        const auto rc = GetDragSelectRect();
+        m_pHost->LchInvalidateRect(&rc);
     }
 
     void DragMouseMove(TCoord x, TCoord y, WPARAM wParam) noexcept
     {
         EckAssert(m_bDraggingSel);
 
+        const auto dx = m_pHost->LchSccGetPosition(FALSE);
         const auto dy = m_pHost->LchSccGetPosition(TRUE);
         TRect rcOld{ m_rcDragSel }, rcJudge, rcItem;
-        OffsetRect(rcOld, 0, -dy);
-        m_rcDragSel = MakeRect<TRect>(x, y, m_xDragSelStart, m_yDragSelStart - dy);
+        OffsetRect(rcOld, -dx, -dy);
+        m_rcDragSel = MakeRect<TRect>(x, y, m_xDragSelStart - dx, m_yDragSelStart - dy);
         UnionRect(rcJudge, rcOld, m_rcDragSel);
 
         std::any Data{};
@@ -441,7 +441,7 @@ private:
             }, rcJudge, FALSE);
         InflateRect(rcJudge, 1.f, 1.f);
         m_pHost->LchInvalidateRect(&rcJudge);
-        OffsetRect(m_rcDragSel, 0.f, dy);
+        OffsetRect(m_rcDragSel, dx, dy);
     }
 public:
     CControllerT() = default;
@@ -1246,7 +1246,9 @@ public:
     EckInlineNdCe TRect GetDragSelectRect() const noexcept
     {
         auto rc{ m_rcDragSel };
-        OffsetRect(rc, 0, -m_pHost->LchSccGetPosition(TRUE));
+        OffsetRect(rc,
+            -m_pHost->LchSccGetPosition(FALSE),
+            -m_pHost->LchSccGetPosition(TRUE));
         return rc;
     }
 
