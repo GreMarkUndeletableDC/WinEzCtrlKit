@@ -348,9 +348,9 @@ private:
 
     // --
 
-    // 拖动选择起始点，相对绝对空间
+    // 拖动选择起始点，X：视图空间，Y：为绝对空间
     TCoord m_xDragSelStart{}, m_yDragSelStart{};
-    TRect m_rcDragSel{};        // 当前选择矩形，相对绝对空间
+    TRect m_rcDragSel{};        // 当前选择矩形，相对视图空间
     TCoord m_dCursorToItemMax{};// 鼠标指针到项目的最大距离
 
     View m_eView{ View::List };
@@ -897,6 +897,11 @@ public:
                     std::any Data{ (BOOL)TRUE };
                     m_pAdapter->LcaSet(idxNew, 0, Property::SystemSelection, Data);
                 }
+                else if (idx.IsValid())// 选中被清除
+                {
+                    std::any Data{ (BOOL)FALSE };
+                    m_pAdapter->LcaSet(idx, 0, Property::SystemSelection, Data);
+                }
             }
             break;
         case Selection::Multiple:
@@ -1133,28 +1138,36 @@ public:
 
     void ItmSelect(Index idx, BOOL bSelect = TRUE, BOOL bRedraw = TRUE) noexcept
     {
-        std::any Data{};
         if (m_eSelection == Selection::Single)
         {
-            Index idxOld{ m_idxSel, m_idxSelItemGroup };
+            const Index idxOld{ m_idxSel, m_idxSelItemGroup };
             if (bSelect)
-            {
                 m_idxSel = idx.Item, m_idxSelItemGroup = idx.Group;
-                if (bRedraw && idx.IsValid())
-                    InvalidateItem(idx);
-            }
             else
                 m_idxSel = m_idxSelItemGroup = -1;
-            if (idxOld.IsValid())
+            const Index idxNew{ m_idxSel, m_idxSelItemGroup };
+
+            if (bSelect && bRedraw && idx.IsValid() && idx != idxOld)
+                InvalidateItem(idx);
+            if (bRedraw && idxOld.IsValid() && idxOld != idxNew)
+                InvalidateItem(idxOld);
+
+            if (idxNew.IsValid() && idxNew != idxOld)
             {
-                if (bRedraw && idxOld != idx)
-                    InvalidateItem(idxOld);
-                Data = BOOL{ bSelect };
+                std::any Data{ BOOL{ TRUE } };
+                m_pAdapter->LcaSet(idxNew, 0, Property::SystemSelection, Data);
+            }
+            else if (idxOld.IsValid() && idxOld != idxNew)
+            {
+                std::any Data{ BOOL{ FALSE } };
                 m_pAdapter->LcaSet(idxOld, 0, Property::SystemSelection, Data);
             }
         }
         else
+        {
+            std::any Data{};
             ItmpSelect(idx, Data, bSelect, bRedraw);
+        }
     }
 
     BOOL ItmEnsureVisible(Index idx, BOOL bSmooth) noexcept
@@ -1233,10 +1246,7 @@ public:
     EckInlineNdCe TRect GetDragSelectRect() const noexcept
     {
         auto rc{ m_rcDragSel };
-        OffsetRect(
-            rc,
-            -m_pHost->LchSccGetPosition(FALSE),
-            -m_pHost->LchSccGetPosition(TRUE));
+        OffsetRect(rc, 0, -m_pHost->LchSccGetPosition(TRUE));
         return rc;
     }
 

@@ -111,7 +111,7 @@ protected:
             m_Controller.GetAdapter()->LcaGet(idx, idxCol, UiBasic::Lc::Property::Image, Data);
             if (Data.type() == typeid(CBitmap))
             {
-                const auto& Bitmap = std::any_cast<CBitmap>(Data);
+                const auto& Bitmap = std::any_cast<const CBitmap&>(Data);
                 if (Bitmap)
                 {
                     auto rcImg = Bitmap.GetActualSourceRect();
@@ -147,12 +147,14 @@ protected:
                 if (idxImg >= 0)
                 {
                     D2D1_RECT_F rcImg;
+                    float cxImg;
                     if (m_bFitImage)
                     {
                         rcImg = { 0.f, 0.f, Size.width, Size.height };
                         AdjustRectToFitAnother(rcImg, rc);
+                        cxImg = rcImg.right - rcImg.left;
                         rcImg.left = rc.left;
-                        rcImg.right = rc.left + Size.width;
+                        rcImg.right = rc.left + cxImg;
                     }
                     else
                     {
@@ -160,9 +162,10 @@ protected:
                         rcImg.top = rc.top + (rc.bottom - rc.top - Size.height) / 2;
                         rcImg.right = rcImg.left + Size.width;
                         rcImg.bottom = rcImg.top + Size.height;
+                        cxImg = Size.width;
                     }
                     m_pImgList->Draw(GetDC(), idxImg, rcImg);
-                    x += (Size.width + GetTheme()->GetMetric(IdMePaddingInner));
+                    x += (cxImg + GetTheme()->GetMetric(IdMePaddingInner));
                 }
             }
         }

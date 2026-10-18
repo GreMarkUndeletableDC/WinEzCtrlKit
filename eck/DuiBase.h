@@ -31,7 +31,10 @@ private:
     RcPtr<CTheme> m_pTheme{};
     ComPtr<IDWriteTextFormat> m_pTextFormat{};
 
-    void InvalidateInternal(const Kw::Rect* prcInEle, BOOL bUpdateNow) noexcept;
+    void InvalidateInternal(
+        _In_opt_ const Kw::Rect* prcInEle,
+        BOOL bUpdateNow,
+        BOOL bClipToEle = TRUE) noexcept;
 
     void SetStyleWorker(DWORD uStyle) noexcept;
 
@@ -169,17 +172,23 @@ public:
     }
     EckInlineNdCe auto& GetTextFormat() const noexcept { return m_pTextFormat; }
 
-    EckInline void Invalidate(const Kw::Rect& rcInEle, BOOL bUpdateNow = TRUE) noexcept
+    EckInline void Invalidate(
+        const Kw::Rect& rcInEle,
+        BOOL bUpdateNow = TRUE,
+        BOOL bClipToEle = TRUE) noexcept
     {
-        InvalidateInternal(&rcInEle, bUpdateNow);
+        InvalidateInternal(&rcInEle, bUpdateNow, bClipToEle);
     }
     EckInline void Invalidate(BOOL bUpdateNow = TRUE) noexcept
     {
         InvalidateInternal(nullptr, bUpdateNow);
     }
-    EckInline void Invalidate(const D2D1_RECT_F& rcInEle, BOOL bUpdateNow = TRUE) noexcept
+    EckInline void Invalidate(
+        const D2D1_RECT_F& rcInEle,
+        BOOL bUpdateNow = TRUE,
+        BOOL bClipToEle = TRUE) noexcept
     {
-        InvalidateInternal(&Kw::MakeRect(rcInEle), bUpdateNow);
+        InvalidateInternal(&Kw::MakeRect(rcInEle), bUpdateNow, bClipToEle);
     }
 
     void BeginPaint(_Out_ PAINTINFO& ps, WPARAM wParam, LPARAM lParam) noexcept;
@@ -1450,18 +1459,33 @@ inline LRESULT CElement::OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexce
     return __super::OnEvent(uMsg, wParam, lParam);
 }
 
-inline void CElement::InvalidateInternal(const Kw::Rect* prcInEle, BOOL bUpdateNow) noexcept
+inline void CElement::InvalidateInternal(
+    _In_opt_ const Kw::Rect* prcInEle,
+    BOOL bUpdateNow,
+    BOOL bClipToEle) noexcept
 {
     if (!IsVisible())
         return;
     Kw::Rect rcTemp;
-    if (!prcInEle || (GetStyle() & DES_CONTENT_EXPAND))
+    if (!prcInEle)
         rcTemp = GetWholeRectInClient();
+    else if (GetStyle() & DES_CONTENT_EXPAND)
+    {
+        if (bClipToEle)
+            rcTemp = GetWholeRectInClient();
+        else
+        {
+            rcTemp = *prcInEle;
+            ElementToClient(rcTemp);
+            UnionRect(rcTemp, rcTemp, GetWholeRectInClient());
+        }
+    }
     else
     {
         rcTemp = *prcInEle;
         ElementToClient(rcTemp);
-        IntersectRect(rcTemp, rcTemp, GetWholeRectInClient());// 裁剪到元素矩形
+        if (bClipToEle)
+            IntersectRect(rcTemp, rcTemp, GetWholeRectInClient());// 裁剪到元素矩形
     }
     if (IsRectEmpty(rcTemp))
         return;
@@ -1513,7 +1537,10 @@ inline void CElement::PostMoveSize(BOOL bSize, BOOL bMove, const Kw::Rect& rcOld
     Kw::Rect rc;
     UnionRect(rc, rcOld, GetWholeRectInClient());
     if (!IsRectEmpty(rc))
-        GetWindow().RdInvalidate(rc);
+    {
+        ClientToElement(rc);
+        Invalidate(rc, TRUE, FALSE);
+    }
 }
 
 inline void CElement::SetStyleWorker(DWORD uStyle) noexcept
