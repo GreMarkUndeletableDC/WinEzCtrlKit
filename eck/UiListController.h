@@ -28,6 +28,7 @@ enum class Property
     Image,
 
     SystemState,    // TState
+    SystemSelection,// BOOL
 
     UiTextLayout,   // ComPtr<IDWriteTextLayout>
     UiPosition,     // TCoord
@@ -178,6 +179,12 @@ struct IAdapterT
     }
 
     // --
+
+    // 列表不提供系统状态被改变的通知，适配器应自行截获这些改变。
+    // 当列表为单选时，以SystemSelection代替SystemState，
+    // 这仅用于通知，若适配器不需要此信息可忽略该Property。
+    // 当从被选择项目切换时，对新选择项目以值TRUE调用LcaSet，忽略旧项目，
+    // 当被选择项目清除时，对该项目以值FALSE调用LcaSet
 
     virtual void LcaGet(const Index& idx, int idxCol, Property eProp, std::any& Data) const noexcept = 0;
     virtual void LcaSet(const Index& idx, int idxCol, Property eProp, std::any& Data, BOOL bMove = FALSE) noexcept = 0;
@@ -330,8 +337,8 @@ private:
     TCoord m_cyGroupHeader{ 40 };   // 组头高度
     TCoord m_cxGroupImage{};        // 组图片宽度
     TCoord m_cyGroupImage{};        // 组图片高度
-    TCoord m_cyGroupItemTopPadding{ 4 };      // 组头与项目间的空白
-    TCoord m_cyGroupItemBottomPadding{};   // 项目区底部空白
+    TCoord m_cyGroupItemTopPadding{ 4 };    // 组头与项目间的空白
+    TCoord m_cyGroupItemBottomPadding{};    // 项目区底部空白
 
     // -- 图标
 
@@ -363,7 +370,7 @@ private:
     {
         m_bDraggingSel = TRUE;
         m_bPendingDragSel = FALSE;
-        m_xDragSelStart = x;
+        m_xDragSelStart = x + m_pHost->LchSccGetPosition(FALSE);
         m_yDragSelStart = y + m_pHost->LchSccGetPosition(TRUE);
         m_dCursorToItemMax = 0;
         m_rcDragSel = {};
@@ -380,19 +387,19 @@ private:
         else if (!m_bDraggingSel)
             return;
         m_bPendingDragSel = m_bDraggingSel = FALSE;
-        TRect rcOld{ m_rcDragSel };
-        OffsetRect(rcOld, 0, -m_pHost->LchSccGetPosition(TRUE));
-        m_pHost->LchInvalidateRect(&rcOld);
+        const auto rc = GetDragSelectRect();
+        m_pHost->LchInvalidateRect(&rc);
     }
 
     void DragMouseMove(TCoord x, TCoord y, WPARAM wParam) noexcept
     {
         EckAssert(m_bDraggingSel);
 
+        const auto dx = m_pHost->LchSccGetPosition(FALSE);
         const auto dy = m_pHost->LchSccGetPosition(TRUE);
         TRect rcOld{ m_rcDragSel }, rcJudge, rcItem;
-        OffsetRect(rcOld, 0, -dy);
-        m_rcDragSel = MakeRect<TRect>(x, y, m_xDragSelStart, m_yDragSelStart - dy);
+        OffsetRect(rcOld, -dx, -dy);
+        m_rcDragSel = MakeRect<TRect>(x, y, m_xDragSelStart - dx, m_yDragSelStart - dy);
         UnionRect(rcJudge, rcOld, m_rcDragSel);
 
         std::any Data{};
@@ -434,7 +441,7 @@ private:
             }, rcJudge, FALSE);
         InflateRect(rcJudge, 1.f, 1.f);
         m_pHost->LchInvalidateRect(&rcJudge);
-        OffsetRect(m_rcDragSel, 0.f, dy);
+        OffsetRect(m_rcDragSel, dx, dy);
     }
 public:
     CControllerT() = default;
@@ -884,6 +891,17 @@ public:
                     InvalidateItem(idx);
                 m_idxMark = m_idxSel;
                 m_idxMarkItemGroup = m_idxSelItemGroup;
+                const Index idxNew{ m_idxSel, m_idxSelItemGroup };
+                if (idxNew.IsValid())
+                {
+                    std::any Data{ (BOOL)TRUE };
+                    m_pAdapter->LcaSet(idxNew, 0, Property::SystemSelection, Data);
+                }
+                else if (idx.IsValid())// 选中被清除
+                {
+                    std::any Data{ (BOOL)FALSE };
+                    m_pAdapter->LcaSet(idx, 0, Property::SystemSelection, Data);
+                }
             }
             break;
         case Selection::Multiple:
@@ -1081,13 +1099,21 @@ private:
 public:
     void ItmDeselectAll(BOOL bRedraw) noexcept
     {
+        std::any Data{};
         if (m_eSelection == Selection::Single)
         {
+            const Index idxOld{ m_idxSel, m_idxSelItemGroup };
             m_idxSel = m_idxSelItemGroup = -1;
+            if (idxOld.IsValid())
+            {
+                if (bRedraw)
+                    InvalidateItem(idxOld);
+                Data = BOOL{ FALSE };
+                m_pAdapter->LcaSet(idxOld, 0, Property::SystemSelection, Data);
+            }
             return;
         }
 
-        std::any Data{};
         if (m_bGroup)
         {
             Index idx{};
@@ -1114,17 +1140,28 @@ public:
     {
         if (m_eSelection == Selection::Single)
         {
-            Index idxOld{ m_idxSel, m_idxSelItemGroup };
+            const Index idxOld{ m_idxSel, m_idxSelItemGroup };
             if (bSelect)
-            {
                 m_idxSel = idx.Item, m_idxSelItemGroup = idx.Group;
-                if (bRedraw && idx.IsValid())
-                    InvalidateItem(idx);
-            }
             else
                 m_idxSel = m_idxSelItemGroup = -1;
-            if (bRedraw && idxOld.IsValid() && idxOld != idx)
+            const Index idxNew{ m_idxSel, m_idxSelItemGroup };
+
+            if (bSelect && bRedraw && idx.IsValid() && idx != idxOld)
+                InvalidateItem(idx);
+            if (bRedraw && idxOld.IsValid() && idxOld != idxNew)
                 InvalidateItem(idxOld);
+
+            if (idxNew.IsValid() && idxNew != idxOld)
+            {
+                std::any Data{ BOOL{ TRUE } };
+                m_pAdapter->LcaSet(idxNew, 0, Property::SystemSelection, Data);
+            }
+            else if (idxOld.IsValid() && idxOld != idxNew)
+            {
+                std::any Data{ BOOL{ FALSE } };
+                m_pAdapter->LcaSet(idxOld, 0, Property::SystemSelection, Data);
+            }
         }
         else
         {
@@ -1209,8 +1246,9 @@ public:
     EckInlineNdCe TRect GetDragSelectRect() const noexcept
     {
         auto rc{ m_rcDragSel };
-        const auto dy = m_pHost->LchSccGetPosition(TRUE);
-        OffsetRect(rc, 0, -dy);
+        OffsetRect(rc,
+            -m_pHost->LchSccGetPosition(FALSE),
+            -m_pHost->LchSccGetPosition(TRUE));
         return rc;
     }
 

@@ -501,7 +501,7 @@ public:
             const auto cxRect = rc.right - rc.left;
             pEle->TmGenericDrawBackground(pStyle, rc);
 
-            if (pStyle->CrFore != IdTmInvalid)
+            if (pStyle->Fore != IdTmInvalid)
             {
                 const auto pBrush = pEle->GetWindow().CcSetBrushColor(
                     GetStyleColorD2D(pStyle, SfFore));

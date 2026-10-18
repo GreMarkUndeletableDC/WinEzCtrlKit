@@ -17,12 +17,20 @@ public:
 private:
     ComPtr<IDWriteTextLayout> m_pLayout{};
     CBitmap m_Bitmap{};
-    BITBOOL m_bSpacePressed : 1{};
-    BITBOOL m_bAutoScale : 1{ TRUE };
+    Kw::Vec2 m_IconSize{};
+
     Alignment m_eAlignH{ Alignment::Center };
     Alignment m_eAlignV{ Alignment::Center };
+
     BYTE m_eInter{ D2D1_INTERPOLATION_MODE_LINEAR };
+
     float m_kIconOpacity{ 1.f };
+
+    BITBOOL m_bSpacePressed : 1{};
+
+    BITBOOL m_bAutoScale : 1{ TRUE };
+    BITBOOL m_bUserSize : 1{};
+
     SimpleStyle m_Style[SsMax]
     {
         TmsSsMakeNormal(1.f),
@@ -34,6 +42,9 @@ private:
     Kw::Vec2 CalculateIconSize(float cxText) const noexcept
     {
         EckAssert(m_Bitmap.Get());
+        if (m_bUserSize)
+            return m_IconSize;
+
         const auto rc = m_Bitmap.GetActualSourceRect();
         const auto cx = rc.right - rc.left;
         const auto cy = rc.bottom - rc.top;
@@ -123,16 +134,19 @@ public:
             D2D1_RECT_F rc;
             if (m_Bitmap.Get())
             {
-                const auto sizeBitmap = CalculateIconSize(tm.width);
-                rc.left = (GetWidth() - sizeBitmap.x -
+                const auto IconSize = CalculateIconSize(tm.width);
+                rc.left = (GetWidth() - IconSize.x -
                     (tm.width > 0.f ? (dInner + tm.width) : 0.f)) / 2.f;
-                rc.top = (GetHeight() - sizeBitmap.y) / 2.f;
-                rc.right = rc.left + sizeBitmap.x;
-                rc.bottom = rc.top + sizeBitmap.y;
+                rc.top = (GetHeight() - IconSize.y) / 2.f;
+                rc.right = rc.left + IconSize.x;
+                rc.bottom = rc.top + IconSize.y;
                 ElementToClient(rc);
 
-                GetDC()->DrawBitmap(m_Bitmap.Get(), &rc, m_kIconOpacity,
-                    (D2D1_INTERPOLATION_MODE)m_eInter, m_Bitmap.GetSourceRect());
+                m_Bitmap.Draw(
+                    GetDC(),
+                    rc,
+                    m_kIconOpacity,
+                    (D2D1_INTERPOLATION_MODE)m_eInter);
                 rc.left = rc.right + dInner;
             }
             else
@@ -146,9 +160,15 @@ public:
                 Kw::Vec2 pt{ rc.left };
                 switch (m_eAlignV)
                 {
-                case Alignment::Near:   pt.y = GetTheme()->GetMetric(IdMePaddingOuter); break;
-                case Alignment::Center: pt.y = (GetHeight() - tm.height) / 2.f; break;
-                case Alignment::Far:    pt.y = GetHeight() - GetTheme()->GetMetric(IdMePaddingOuter) - tm.height; break;
+                case Alignment::Near:
+                    pt.y = GetTheme()->GetMetric(IdMePaddingOuter);
+                    break;
+                case Alignment::Center:
+                    pt.y = (GetHeight() - tm.height) / 2.f;
+                    break;
+                case Alignment::Far:
+                    pt.y = GetHeight() - GetTheme()->GetMetric(IdMePaddingOuter) - tm.height;
+                    break;
                 }
 
                 pt.y += GetOffsetInClient().y;
@@ -312,6 +332,12 @@ public:
 
     EckInlineCe void SetIconOpacity(float f) noexcept { m_kIconOpacity = f; }
     EckInlineNdCe float GetIconOpacity() const noexcept { return m_kIconOpacity; }
+
+    EckInlineCe void SetIconSize(const Kw::Vec2& sz) noexcept { m_IconSize = sz; }
+    EckInlineNdCe auto& GetIconSize() const noexcept { return m_IconSize; }
+
+    EckInlineCe void SetUserIconSize(BOOL b) noexcept { m_bUserSize = b; }
+    EckInlineNdCe BOOL GetUserIconSize() const noexcept { return m_bUserSize; }
 };
 
 class CTmButton : public CTheme

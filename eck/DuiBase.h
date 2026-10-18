@@ -31,7 +31,10 @@ private:
     RcPtr<CTheme> m_pTheme{};
     ComPtr<IDWriteTextFormat> m_pTextFormat{};
 
-    void InvalidateInternal(const Kw::Rect* prcInEle, BOOL bUpdateNow) noexcept;
+    void InvalidateInternal(
+        _In_opt_ const Kw::Rect* prcInEle,
+        BOOL bUpdateNow,
+        BOOL bClipToEle = TRUE) noexcept;
 
     void SetStyleWorker(DWORD uStyle) noexcept;
 
@@ -61,20 +64,12 @@ public:
 
     virtual LRESULT OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept;
 
-    void CeInflateRectWithExpandRadius(_Inout_ Kw::Rect& rc, float f) const noexcept
-    {
-        auto rcTemp{ rc };
-        InflateRect(rcTemp, f, f);
-        if (IntersectRect(rcTemp, rcTemp, GetWholeRectInClient()))// 裁剪到元素矩形
-            UnionRect(rc, rc, rcTemp);
-    }
-
     EckInlineNdCe CDuiWindow& GetWindow() const noexcept { return *(CDuiWindow*)GetContainer(); }
     EckInlineNdCe ID2D1DeviceContext* GetDC() const noexcept;
 
     void SetRect(const Kw::Rect& rc) noexcept
     {
-        const auto rcOld = GetRect();
+        const auto rcOld = GetWholeRectInClient();
         __super::SetRect(rc);
         PostMoveSize(TRUE, TRUE, rcOld);
     }
@@ -112,8 +107,8 @@ public:
 
     void SetText(std::wstring_view sv) noexcept
     {
-        if (!CallEvent(WM_SETTEXT, sv.size(), (LPARAM)sv.data()))
-            m_rsText.Assign(sv.data(), (int)sv.size());
+        m_rsText.Assign(sv.data(), (int)sv.size());
+        CallEvent(WM_SETTEXT, sv.size(), (LPARAM)sv.data());
     }
     EckInlineNdCe auto& GetText() const noexcept { return m_rsText; }
 protected:
@@ -177,17 +172,23 @@ public:
     }
     EckInlineNdCe auto& GetTextFormat() const noexcept { return m_pTextFormat; }
 
-    EckInline void Invalidate(const Kw::Rect& rcInEle, BOOL bUpdateNow = TRUE) noexcept
+    EckInline void Invalidate(
+        const Kw::Rect& rcInEle,
+        BOOL bUpdateNow = TRUE,
+        BOOL bClipToEle = TRUE) noexcept
     {
-        InvalidateInternal(&rcInEle, bUpdateNow);
+        InvalidateInternal(&rcInEle, bUpdateNow, bClipToEle);
     }
     EckInline void Invalidate(BOOL bUpdateNow = TRUE) noexcept
     {
         InvalidateInternal(nullptr, bUpdateNow);
     }
-    EckInline void Invalidate(const D2D1_RECT_F& rcInEle, BOOL bUpdateNow = TRUE) noexcept
+    EckInline void Invalidate(
+        const D2D1_RECT_F& rcInEle,
+        BOOL bUpdateNow = TRUE,
+        BOOL bClipToEle = TRUE) noexcept
     {
-        InvalidateInternal(&Kw::MakeRect(rcInEle), bUpdateNow);
+        InvalidateInternal(&Kw::MakeRect(rcInEle), bUpdateNow, bClipToEle);
     }
 
     void BeginPaint(_Out_ PAINTINFO& ps, WPARAM wParam, LPARAM lParam) noexcept;
@@ -411,7 +412,7 @@ private:
     PresentMode m_ePresentMode{ PresentMode::FlipSwapChain };
 
     BITBOOL m_bAutoTheme : 1{ TRUE };
-    BITBOOL m_bAutoThemeAccent : 1{};
+    BITBOOL m_bAutoThemeAccent : 1{ TRUE };
     BITBOOL m_bDbgDrawCompRect : 1{};
 
     BITBOOL m_bFullUpdate : 1{ TRUE };  // 当前是否需要完全重绘
@@ -506,13 +507,13 @@ private:
             const auto uStyle = pEle->GetStyle();
             if (!(uStyle & DES_VISIBLE) || (uStyle & DES_NO_REDRAW) ||
                 IsRectEmpty(rcEle))
-                goto NextElem;
+                goto NextElement;
             if ((pEle->GetCompositor() &&
                 !(uStyle & DES_COMP_NO_REDIRECTION) &&
                 IsRectsIntersect(pEle->GetWholeRectInClient(), rc)))
                 rcClip = rcEle;
             else if (!IntersectRect(rcClip, rcEle, rc))
-                goto NextElem;
+                goto NextElement;
 
             if (pEle->GetCompositor())
             {
@@ -549,11 +550,9 @@ private:
             pEle->CallEvent(WM_PAINT, 0, (LPARAM)pExtra);
             if (pEle->GetCompositor())
             {
-                if (uStyle & DES_COMP_NO_REDIRECTION)
-                    RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
-                else
+                RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
+                if (!(uStyle & DES_COMP_NO_REDIRECTION))
                 {
-                    RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
                     pDC->Flush();
                     pDC->SetTarget(pOldTarget.Get());
                 }
@@ -590,21 +589,21 @@ private:
 #ifdef _DEBUG
                 if (m_bDbgDrawCompRect)
                 {
-                    const auto pBr = CcGetBrush();
-                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Aqua });
-                    pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBr);
+                    const auto pBrush = CcGetBrush();
+                    pBrush->SetColor(D2D1::ColorF{ D2D1::ColorF::Aqua });
+                    pDC->DrawRectangle(pEle->CompGetCompositedRect(), pBrush);
 
-                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Green });
-                    pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBr);
+                    pBrush->SetColor(D2D1::ColorF{ D2D1::ColorF::Green });
+                    pDC->DrawRectangle(pEle->CompGetRealCompositedRect(), pBrush);
 
-                    pBr->SetColor(D2D1::ColorF{ D2D1::ColorF::Orange });
-                    pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBr);
+                    pBrush->SetColor(D2D1::ColorF{ D2D1::ColorF::Orange });
+                    pDC->DrawRectangle(pEle->GetRectInClientD2D(), pBrush);
                 }
 #endif
             }
             else
                 RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
-        NextElem:
+        NextElement:
             pEle = pEle->EtNext();
         }
     }
@@ -718,12 +717,11 @@ private:
 #ifdef _DEBUG
         if (DbgGetDrawDirtyRect())
         {
-            ComPtr<ID2D1SolidColorBrush> pBr;
+            ComPtr<ID2D1SolidColorBrush> pBrush;
             InflateRect(rcDirtyLogical, -1.f, -1.f);
             pDC->SetTransform(D2D1::Matrix3x2F::Identity());
-            ARGB Cr = m_Pcg.Next() | 0xFF000000;
-            pDC->CreateSolidColorBrush(D2D1::ColorF{ Cr }, &pBr);
-            pDC->DrawRectangle(MakeD2DRectF(rcDirtyLogical), pBr.Get(), 2.f);
+            pDC->CreateSolidColorBrush(D2D1::ColorF{ m_Pcg.Next() | 0xFF000000 }, &pBrush);
+            pDC->DrawRectangle(MakeD2DRectF(rcDirtyLogical), pBrush.Get(), 2.f);
         }
 #endif // _DEBUG
         if (bPostRender)
@@ -1154,7 +1152,7 @@ public:
             if (m_bAutoThemeAccent)
             {
                 RdLockUpdate();
-                TmUpdateDwmColorizationColor();
+                TmUpdateAccentColorFromDwm();
                 RdInvalidate(FALSE);
                 RdUnlockUpdate();
             }
@@ -1167,6 +1165,8 @@ public:
             {
                 RdInitialize();
                 KctInitialize();
+                if (m_bAutoThemeAccent)
+                    TmUpdateAccentColorFromDwm();
             }
             return lResult;
         }
@@ -1389,10 +1389,12 @@ public:
         EtBroadcastEvent(WM_DWMCOLORIZATIONCOLORCHANGED, argb, 0);
     }
 
-    void TmUpdateDwmColorizationColor() noexcept
+    void TmUpdateAccentColorFromDwm() noexcept
     {
         TmUpdateAccentColor(GetDwmColorizationColor());
     }
+
+    EckInlineCe ARGB TmGetAccentColor() const noexcept { return m_argbAccent; }
 
     EckInlineCe void TmSetAutoTheme(BOOL b) noexcept { m_bAutoTheme = b; }
     EckInlineCe void TmSetAutoThemeAccent(BOOL b) noexcept { m_bAutoThemeAccent = b; }
@@ -1457,18 +1459,33 @@ inline LRESULT CElement::OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexce
     return __super::OnEvent(uMsg, wParam, lParam);
 }
 
-inline void CElement::InvalidateInternal(const Kw::Rect* prcInEle, BOOL bUpdateNow) noexcept
+inline void CElement::InvalidateInternal(
+    _In_opt_ const Kw::Rect* prcInEle,
+    BOOL bUpdateNow,
+    BOOL bClipToEle) noexcept
 {
     if (!IsVisible())
         return;
     Kw::Rect rcTemp;
-    if (!prcInEle || (GetStyle() & DES_CONTENT_EXPAND))
+    if (!prcInEle)
         rcTemp = GetWholeRectInClient();
+    else if (GetStyle() & DES_CONTENT_EXPAND)
+    {
+        if (bClipToEle)
+            rcTemp = GetWholeRectInClient();
+        else
+        {
+            rcTemp = *prcInEle;
+            ElementToClient(rcTemp);
+            UnionRect(rcTemp, rcTemp, GetWholeRectInClient());
+        }
+    }
     else
     {
         rcTemp = *prcInEle;
         ElementToClient(rcTemp);
-        IntersectRect(rcTemp, rcTemp, GetWholeRectInClient());// 裁剪到元素矩形
+        if (bClipToEle)
+            IntersectRect(rcTemp, rcTemp, GetWholeRectInClient());
     }
     if (IsRectEmpty(rcTemp))
         return;
@@ -1520,7 +1537,10 @@ inline void CElement::PostMoveSize(BOOL bSize, BOOL bMove, const Kw::Rect& rcOld
     Kw::Rect rc;
     UnionRect(rc, rcOld, GetWholeRectInClient());
     if (!IsRectEmpty(rc))
-        Invalidate(rc);
+    {
+        ClientToElement(rc);
+        Invalidate(rc, TRUE, FALSE);
+    }
 }
 
 inline void CElement::SetStyleWorker(DWORD uStyle) noexcept
@@ -1553,15 +1573,15 @@ inline HRESULT CElement::CompUpdateCacheBitmap(float cx, float cy) noexcept
     }
 
     HRESULT hr;
-    const int cxPhy = (int)ceilf(LogicalToPixel((float)cx));
-    const int cyPhy = (int)ceilf(LogicalToPixel((float)cy));
+    const int cxPixel = (int)ceilf(LogicalToPixel((float)cx));
+    const int cyPixel = (int)ceilf(LogicalToPixel((float)cy));
     CBitmap Bitmap{};
     if (GetStyle() & DES_OWNER_COMP_CACHE)
-        hr = m_pCompositor->CreateCacheBitmap(cxPhy, cyPhy, Bitmap);
+        hr = m_pCompositor->CreateCacheBitmap(cxPixel, cyPixel, Bitmap);
     else
     {
         ComPtr<ID2D1Bitmap1> pBitmap;
-        hr = GetWindow().RdCreateBitmap(cxPhy, cyPhy, pBitmap.Self());
+        hr = GetWindow().RdCreateBitmap(cxPixel, cyPixel, pBitmap.Self());
         Bitmap.Set(pBitmap.Get());
     }
     m_pCompositor->EleUpdateCacheBitmap(Bitmap);

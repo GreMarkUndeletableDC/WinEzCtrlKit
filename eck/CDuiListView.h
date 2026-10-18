@@ -95,6 +95,9 @@ private:
     BITBOOL m_bIndicator : 1{};
     BITBOOL m_bCapturedMouse : 1{};
     BITBOOL m_bBubbleScrollEvent : 1{};
+    // 已启用非图像列表的图标支持，Property::Image响应CBitmap
+    BITBOOL m_bNonImageListIcon : 1{};
+    BITBOOL m_bFitImage : 1{};
 protected:
     void PaintCell(
         const D2D1_RECT_F& rc,
@@ -103,7 +106,38 @@ protected:
     {
         std::any Data{};
         float x{ rc.left };
-        if (m_pImgList)
+        if (m_bNonImageListIcon)
+        {
+            m_Controller.GetAdapter()->LcaGet(idx, idxCol, UiBasic::Lc::Property::Image, Data);
+            if (Data.type() == typeid(CBitmap))
+            {
+                const auto& Bitmap = std::any_cast<const CBitmap&>(Data);
+                if (Bitmap)
+                {
+                    auto rcImg = Bitmap.GetActualSourceRect();
+                    float cxImg;
+                    if (m_bFitImage)
+                    {
+                        AdjustRectToFitAnother(rcImg, rc);
+                        cxImg = rcImg.right - rcImg.left;
+                        rcImg.left = rc.left;
+                        rcImg.right = rc.left + cxImg;
+                    }
+                    else
+                    {
+                        const auto cyImg = rcImg.bottom - rcImg.top;
+                        cxImg = rcImg.right - rcImg.left;
+                        rcImg.left = rc.left;
+                        rcImg.top = rc.top + (rc.bottom - rc.top - cyImg) / 2;
+                        rcImg.right = rcImg.left + cxImg;
+                        rcImg.bottom = rcImg.top + cyImg;
+                    }
+                    Bitmap.Draw(GetDC(), rcImg);
+                    x += (cxImg + GetTheme()->GetMetric(IdMePaddingInner));
+                }
+            }
+        }
+        else if (m_pImgList)
         {
             const auto Size = m_pImgList->GetTileSizeLogical();
             m_Controller.GetAdapter()->LcaGet(idx, idxCol, UiBasic::Lc::Property::Image, Data);
@@ -112,13 +146,26 @@ protected:
                 const auto idxImg = std::any_cast<int>(Data);
                 if (idxImg >= 0)
                 {
-                    Kw::Rect rcImg;
-                    rcImg.left = rc.left;
-                    rcImg.top = rc.top + (rc.bottom - rc.top - Size.height) / 2;
-                    rcImg.right = rcImg.left + Size.width;
-                    rcImg.bottom = rcImg.top + Size.height;
-                    m_pImgList->Draw(GetDC(), idxImg, Kw::MakeD2DRectF(rcImg));
-                    x += (Size.width + GetTheme()->GetMetric(IdMePaddingInner));
+                    D2D1_RECT_F rcImg;
+                    float cxImg;
+                    if (m_bFitImage)
+                    {
+                        rcImg = { 0.f, 0.f, Size.width, Size.height };
+                        AdjustRectToFitAnother(rcImg, rc);
+                        cxImg = rcImg.right - rcImg.left;
+                        rcImg.left = rc.left;
+                        rcImg.right = rc.left + cxImg;
+                    }
+                    else
+                    {
+                        rcImg.left = rc.left;
+                        rcImg.top = rc.top + (rc.bottom - rc.top - Size.height) / 2;
+                        rcImg.right = rcImg.left + Size.width;
+                        rcImg.bottom = rcImg.top + Size.height;
+                        cxImg = Size.width;
+                    }
+                    m_pImgList->Draw(GetDC(), idxImg, rcImg);
+                    x += (cxImg + GetTheme()->GetMetric(IdMePaddingInner));
                 }
             }
         }
@@ -676,6 +723,12 @@ public:
 
     EckInline void SetBubbleScrollEvent(BOOL b) noexcept { m_bBubbleScrollEvent = b; }
     EckInlineNdCe BOOL GetBubbleScrollEvent() const noexcept { return m_bBubbleScrollEvent; }
+
+    EckInline void SetNonImageListIcon(BOOL b) noexcept { m_bNonImageListIcon = b; }
+    EckInlineNdCe BOOL GetNonImageListIcon() const noexcept { return m_bNonImageListIcon; }
+
+    EckInline void SetFitImage(BOOL b) noexcept { m_bFitImage = b; }
+    EckInlineNdCe BOOL GetFitImage() const noexcept { return m_bFitImage; }
 };
 
 
