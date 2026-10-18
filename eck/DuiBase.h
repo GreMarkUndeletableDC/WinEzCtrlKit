@@ -498,13 +498,13 @@ private:
             const auto uStyle = pEle->GetStyle();
             if (!(uStyle & DES_VISIBLE) || (uStyle & DES_NO_REDRAW) ||
                 IsRectEmpty(rcEle))
-                goto NextElem;
+                goto NextElement;
             if ((pEle->GetCompositor() &&
                 !(uStyle & DES_COMP_NO_REDIRECTION) &&
                 IsRectsIntersect(pEle->GetWholeRectInClient(), rc)))
                 rcClip = rcEle;
             else if (!IntersectRect(rcClip, rcEle, rc))
-                goto NextElem;
+                goto NextElement;
 
             if (pEle->GetCompositor())
             {
@@ -541,11 +541,9 @@ private:
             pEle->CallEvent(WM_PAINT, 0, (LPARAM)pExtra);
             if (pEle->GetCompositor())
             {
-                if (uStyle & DES_COMP_NO_REDIRECTION)
-                    RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
-                else
+                RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
+                if (!(uStyle & DES_COMP_NO_REDIRECTION))
                 {
-                    RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
                     pDC->Flush();
                     pDC->SetTarget(pOldTarget.Get());
                 }
@@ -596,7 +594,7 @@ private:
             }
             else
                 RdpRenderTree(pEle->EtFirstChild(), rcClip, pExtra);
-        NextElem:
+        NextElement:
             pEle = pEle->EtNext();
         }
     }
