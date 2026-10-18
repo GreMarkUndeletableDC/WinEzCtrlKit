@@ -1485,7 +1485,7 @@ inline void CElement::InvalidateInternal(
         rcTemp = *prcInEle;
         ElementToClient(rcTemp);
         if (bClipToEle)
-            IntersectRect(rcTemp, rcTemp, GetWholeRectInClient());// 裁剪到元素矩形
+            IntersectRect(rcTemp, rcTemp, GetWholeRectInClient());
     }
     if (IsRectEmpty(rcTemp))
         return;
