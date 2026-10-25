@@ -1,8 +1,6 @@
 ﻿#pragma once
 #include "ComPtr.h"
 #include "CScopeGuard.h"
-#include "Utility.h"
-#include "GraphicsHelper.h"
 
 ECK_NAMESPACE_BEGIN
 class CD2DShadow
@@ -30,8 +28,8 @@ public:
                 ID2D1Geometry* pGeometry;
                 D2D1_POINT_2F Offset;
                 D2D1_POINT_2F Scale;
-            };
-        };
+            } Geometry;
+        } Shape;
     };
 private:
     constexpr static float DefaultScale = 0.1f;
@@ -150,17 +148,17 @@ public:
         Shape.eShape = eShape;
         Shape.pBrush = pBrush;
         if (eShape == Shape::Geometry)
-            Shape.pGeometry = pGeometry;
+            Shape.Shape.Geometry.pGeometry = pGeometry;
 
         switch (eShape)
         {
         case Shape::Rect:
-            Shape.rc = m_rcCacheContent;
+            Shape.Shape.rc = m_rcCacheContent;
             break;
         case Shape::RoundRect:
             if (yCornerRadius < 0.f)
                 yCornerRadius = xCornerRadius;
-            Shape.rrc =
+            Shape.Shape.rrc =
             {
                 m_rcCacheContent,
                 xCornerRadius * m_fScale,
@@ -168,7 +166,7 @@ public:
             };
             break;
         case Shape::Ellipse:
-            Shape.ell =
+            Shape.Shape.ell =
             {
                 {
                     (m_rcCacheContent.left + m_rcCacheContent.right) * 0.5f,
@@ -186,8 +184,8 @@ public:
                 {
                     const auto cx = rcBounds.right - rcBounds.left;
                     const auto cy = rcBounds.bottom - rcBounds.top;
-                    Shape.Offset = { rcBounds.left, rcBounds.top };
-                    Shape.Scale =
+                    Shape.Shape.Geometry.Offset = { rcBounds.left, rcBounds.top };
+                    Shape.Shape.Geometry.Scale =
                     {
                         (m_rcCacheContent.right - m_rcCacheContent.left) / cx,
                         (m_rcCacheContent.bottom - m_rcCacheContent.top) / cy,
@@ -249,26 +247,30 @@ public:
             switch (pShape->eShape)
             {
             case Shape::Rect:
-                m_pDC->FillRectangle(pShape->rc, pShape->pBrush);
+                m_pDC->FillRectangle(pShape->Shape.rc, pShape->pBrush);
                 break;
             case Shape::RoundRect:
-                m_pDC->FillRoundedRectangle(pShape->rrc, pShape->pBrush);
-                m_CacheCornerRadius = { pShape->rrc.radiusX, pShape->rrc.radiusY };
+                m_pDC->FillRoundedRectangle(pShape->Shape.rrc, pShape->pBrush);
+                m_CacheCornerRadius = { pShape->Shape.rrc.radiusX, pShape->Shape.rrc.radiusY };
                 break;
             case Shape::Ellipse:
-                m_pDC->FillEllipse(pShape->ell, pShape->pBrush);
+                m_pDC->FillEllipse(pShape->Shape.ell, pShape->pBrush);
                 break;
             case Shape::Geometry:
+            {
+                const auto& Offset = pShape->Shape.Geometry.Offset;
+                const auto& Scale = pShape->Shape.Geometry.Scale;
                 m_pDC->SetTransform(
                     D2D1::Matrix3x2F
                     {
-                        pShape->Scale.x, 0.f,
-                        0.f, pShape->Scale.y,
-                        m_rcCacheContent.left - pShape->Offset.x * pShape->Scale.x,
-                        m_rcCacheContent.top - pShape->Offset.y * pShape->Scale.y
+                        pShape->Shape.Geometry.Scale.x, 0.f,
+                        0.f, pShape->Shape.Geometry.Scale.y,
+                        m_rcCacheContent.left - Offset.x * Scale.x,
+                        m_rcCacheContent.top - Offset.y * Scale.y
                     });
-                m_pDC->FillGeometry(pShape->pGeometry, pShape->pBrush);
-                break;
+                m_pDC->FillGeometry(pShape->Shape.Geometry.pGeometry, pShape->pBrush);
+            }
+            break;
             }
             hr = m_pDC->EndDraw();
             m_pDC->SetTransform(MatOld);
