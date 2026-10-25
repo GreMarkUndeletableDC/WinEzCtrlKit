@@ -27,9 +27,6 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="eck\CD2DShadow.h">
-      <Filter>ECK Include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="eck\ECK.cpp">
@@ -759,6 +756,9 @@
       <Filter>ECK Include</Filter>
     </ClCompile>
     <ClCompile Include="eck\DuiFilterGradientBlur.h">
+      <Filter>ECK Include</Filter>
+    </ClCompile>
+    <ClCompile Include="eck\CD2DShadow.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
   </ItemGroup>
