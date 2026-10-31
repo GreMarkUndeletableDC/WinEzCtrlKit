@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "ComPtr.h"
 #include "CScopeGuard.h"
+#include "Utility.h"
 
 ECK_NAMESPACE_BEGIN
 class CD2DShadow
@@ -17,6 +18,8 @@ public:
     struct DRAW_SHAPE
     {
         Shape eShape;
+        BOOLEAN bHollow;
+        float mgHollow;
         ID2D1Brush* pBrush;
         union
         {
@@ -27,7 +30,7 @@ public:
             {
                 ID2D1Geometry* pGeometry;
                 D2D1_POINT_2F Offset;
-                D2D1_POINT_2F Scale;
+                D2D1_POINT_2F kScale;
             } Geometry;
         } Shape;
     };
@@ -42,10 +45,10 @@ private:
     D2D1_SIZE_U m_SizeCachePixel{};
     D2D1_SIZE_F m_SizeCacheLogical{};
     D2D1_RECT_F m_rcCacheContent{};
-    D2D1_POINT_2F m_CacheCornerRadius{};
-    float m_fScale{ DefaultScale };
+    D2D1_POINT_2F m_rCacheCorner{};
+    float m_kScale{ DefaultScale };
     float m_xDpi{ 96.f }, m_yDpi{ 96.f };
-    float m_fMarginCache{};
+    float m_mgCache{};
 
     EckInlineNd static UINT CalculateSize(float fSize, float fDpi) noexcept
     {
@@ -68,11 +71,11 @@ public:
     {
         HRESULT hr;
         m_pDC.Clear();
-        m_fScale = fScale;
+        m_kScale = fScale;
         pDC->GetDpi(&m_xDpi, &m_yDpi);
-        m_CacheCornerRadius = {};
+        m_rCacheCorner = {};
         const auto fCacheSigma = fSigma * fScale;
-        m_fMarginCache = fCacheSigma * BlurExtentFactor;
+        m_mgCache = fCacheSigma * BlurExtentFactor;
 
         hr = pDC->CreateEffect(CLSID_D2D1GaussianBlur, m_pFxBlur.AtClear());
         if (FAILED(hr))
@@ -95,8 +98,8 @@ public:
         };
         m_SizeCachePixel =
         {
-            CalculateSize(CacheContentSize.width + m_fMarginCache * 2.f, m_xDpi),
-            CalculateSize(CacheContentSize.height + m_fMarginCache * 2.f, m_yDpi),
+            CalculateSize(CacheContentSize.width + m_mgCache * 2.f, m_xDpi),
+            CalculateSize(CacheContentSize.height + m_mgCache * 2.f, m_yDpi),
         };
 
         const D2D1_BITMAP_PROPERTIES1 Prop
@@ -133,7 +136,7 @@ public:
     /// <param name="eShape">类型</param>
     /// <param name="pBrush">画刷，**不添加引用**</param>
     /// <param name="pGeometry">若类型为Geometry，则指定几何形，**不添加引用**</param>
-    /// <param name="xCornerRadius、yCornerRadius">
+    /// <param name="rxCorner、ryCorner">
     /// 若类型为RoundRect，则指定圆角半径，y半径为负时表示与x相同
     /// </param>
     /// <returns>形状参数</returns>
@@ -141,8 +144,8 @@ public:
         Shape eShape,
         _In_ ID2D1Brush* pBrush,
         _In_opt_ ID2D1Geometry* pGeometry = nullptr,
-        float xCornerRadius = 0.f,
-        float yCornerRadius = -1.f) const noexcept
+        float rxCorner = 0.f,
+        float ryCorner = -1.f) const noexcept
     {
         DRAW_SHAPE Shape{};
         Shape.eShape = eShape;
@@ -156,13 +159,13 @@ public:
             Shape.Shape.rc = m_rcCacheContent;
             break;
         case Shape::RoundRect:
-            if (yCornerRadius < 0.f)
-                yCornerRadius = xCornerRadius;
+            if (ryCorner < 0.f)
+                ryCorner = rxCorner;
             Shape.Shape.rrc =
             {
                 m_rcCacheContent,
-                xCornerRadius * m_fScale,
-                yCornerRadius * m_fScale,
+                rxCorner * m_kScale,
+                ryCorner * m_kScale,
             };
             break;
         case Shape::Ellipse:
@@ -185,7 +188,7 @@ public:
                     const auto cx = rcBounds.right - rcBounds.left;
                     const auto cy = rcBounds.bottom - rcBounds.top;
                     Shape.Shape.Geometry.Offset = { rcBounds.left, rcBounds.top };
-                    Shape.Shape.Geometry.Scale =
+                    Shape.Shape.Geometry.kScale =
                     {
                         (m_rcCacheContent.right - m_rcCacheContent.left) / cx,
                         (m_rcCacheContent.bottom - m_rcCacheContent.top) / cy,
@@ -202,7 +205,7 @@ public:
         _In_opt_ const DRAW_SHAPE* pShape) noexcept
     {
         HRESULT hr;
-        m_CacheCornerRadius = {};
+        m_rCacheCorner = {};
 
         ComPtr<ID2D1Bitmap1> pInternalBitmap;
         if (pTempBitmap)
@@ -251,7 +254,7 @@ public:
                 break;
             case Shape::RoundRect:
                 m_pDC->FillRoundedRectangle(pShape->Shape.rrc, pShape->pBrush);
-                m_CacheCornerRadius = { pShape->Shape.rrc.radiusX, pShape->Shape.rrc.radiusY };
+                m_rCacheCorner = { pShape->Shape.rrc.radiusX, pShape->Shape.rrc.radiusY };
                 break;
             case Shape::Ellipse:
                 m_pDC->FillEllipse(pShape->Shape.ell, pShape->pBrush);
@@ -259,12 +262,12 @@ public:
             case Shape::Geometry:
             {
                 const auto& Offset = pShape->Shape.Geometry.Offset;
-                const auto& Scale = pShape->Shape.Geometry.Scale;
+                const auto& Scale = pShape->Shape.Geometry.kScale;
                 m_pDC->SetTransform(
                     D2D1::Matrix3x2F
                     {
-                        pShape->Shape.Geometry.Scale.x, 0.f,
-                        0.f, pShape->Shape.Geometry.Scale.y,
+                        pShape->Shape.Geometry.kScale.x, 0.f,
+                        0.f, pShape->Shape.Geometry.kScale.y,
                         m_rcCacheContent.left - Offset.x * Scale.x,
                         m_rcCacheContent.top - Offset.y * Scale.y
                     });
@@ -272,6 +275,41 @@ public:
             }
             break;
             }
+
+            if (pShape->bHollow)
+            {
+                ComPtr<ID2D1SolidColorBrush> pBrush;
+                m_pDC->CreateSolidColorBrush({}, &pBrush);
+                const auto eBlend = m_pDC->GetPrimitiveBlend();
+                m_pDC->SetPrimitiveBlend(D2D1_PRIMITIVE_BLEND_COPY);
+                switch (pShape->eShape)
+                {
+                case Shape::Rect:
+                {
+                    auto rc{ pShape->Shape.rc };
+                    InflateRect(rc, -pShape->mgHollow, -pShape->mgHollow);
+                    m_pDC->FillRectangle(pShape->Shape.rc, pShape->pBrush);
+                }
+                break;
+                case Shape::RoundRect:
+                {
+                    auto rrc{ pShape->Shape.rrc };
+                    InflateRect(rrc.rect, -pShape->mgHollow, -pShape->mgHollow);
+                    m_pDC->FillRoundedRectangle(pShape->Shape.rrc, pShape->pBrush);
+                }
+                break;
+                case Shape::Ellipse:
+                {
+                    auto ell{ pShape->Shape.ell };
+                    ell.radiusX -= pShape->mgHollow;
+                    ell.radiusY -= pShape->mgHollow;
+                    m_pDC->FillEllipse(pShape->Shape.ell, pShape->pBrush);
+                }
+                break;
+                }
+                m_pDC->SetPrimitiveBlend(eBlend);
+            }
+
             hr = m_pDC->EndDraw();
             m_pDC->SetTransform(MatOld);
             if (FAILED(hr))
@@ -297,94 +335,93 @@ public:
     /// </summary>
     /// <param name="pDC">设备上下文</param>
     /// <param name="rcContent">目标内容矩形，阴影环绕此矩形向外扩展</param>
-    /// <param name="fMargin">阴影扩展距离</param>
+    /// <param name="mg">阴影扩展距离</param>
     /// <param name="eInterMode">插值模式</param>
     /// <param name="fAlpha">透明度</param>
     /// <param name="pMatrix">4x4变换</param>
-    /// <param name="fMarginTex">缓存纹理中阴影的外侧扩展距离，这通常为GetTextureMargin()</param>
-    /// <param name="fMarginTexInner">
-    /// 缓存纹理中阴影的内侧扩展距离，默认为GetTextureMargin()的1/8，圆角阴影忽略此参数，内侧扩展由圆角半径决定
+    /// <param name="mgCache">缓存纹理中阴影的外侧扩展距离，这通常为GetCacheMargin()</param>
+    /// <param name="mgCacheInner">
+    /// 缓存纹理中阴影的内侧扩展距离，默认为GetCacheMargin()的1/8，圆角阴影忽略此参数，内侧扩展由圆角半径决定
     /// </param>
     void DrawGrid(
         _In_ ID2D1DeviceContext* pDC,
         const D2D1_RECT_F& rcContent,
-        float fMargin,
+        float mg,
         D2D1_INTERPOLATION_MODE eInterMode = D2D1_INTERPOLATION_MODE_LINEAR,
         float fAlpha = 1.f,
         _In_opt_ const D2D1_MATRIX_4X4_F* pMatrix = nullptr,
-        float fMarginTex = 0.f,
-        float fMarginTexInner = 0.f) const noexcept
+        float mgCache = 0.f,
+        float mgCacheInner = 0.f) const noexcept
     {
         const auto& rcTex = m_rcCacheContent;
         const auto& rc = rcContent;
-        const auto m1 = (fMarginTex > 0.f) ? fMarginTex : m_fMarginCache;
-        const auto m2 = (fMarginTexInner > 0.f) ? fMarginTexInner : (m_fMarginCache / 8.f);
-        const auto n = fMargin;
+        const auto m1 = (mgCache > 0.f) ? mgCache : m_mgCache;
+        const auto m2 = (mgCacheInner > 0.f) ? mgCacheInner : (m_mgCache / 8.f);
         const auto DrawPart = [=](const D2D1_RECT_F& rcSrc, const D2D1_RECT_F& rcDst) noexcept
             {
                 pDC->DrawBitmap(m_pBlurBitmap.Get(), rcDst, fAlpha, eInterMode, rcSrc);
             };
 
-        if (m_CacheCornerRadius.x > 0.f || m_CacheCornerRadius.y > 0.f)
+        if (m_rCacheCorner.x > 0.f || m_rCacheCorner.y > 0.f)
         {
             const auto k = std::max(
                 (rc.right - rc.left) / (rcTex.right - rcTex.left),
                 (rc.bottom - rc.top) / (rcTex.bottom - rcTex.top));
-            const auto xm = m_CacheCornerRadius.x;
-            const auto ym = m_CacheCornerRadius.y;
+            const auto xm = m_rCacheCorner.x;
+            const auto ym = m_rCacheCorner.y;
             const auto xn = xm * k;
             const auto yn = ym * k;
 
             DrawPart(// 左上圆角
                 { rcTex.left - m1,  rcTex.top - m1,    rcTex.left + xm,  rcTex.top + ym },
-                { rc.left - n,      rc.top - n,        rc.left + xn,     rc.top + yn });
+                { rc.left - mg,     rc.top - mg,       rc.left + xn,     rc.top + yn });
             DrawPart(// 上边
                 { rcTex.left + xm,  rcTex.top - m1,    rcTex.right - xm, rcTex.top + ym },
-                { rc.left + xn,     rc.top - n,        rc.right - xn,    rc.top + yn });
+                { rc.left + xn,     rc.top - mg,       rc.right - xn,    rc.top + yn });
             DrawPart(// 右上圆角
                 { rcTex.right - xm, rcTex.top - m1,    rcTex.right + m1, rcTex.top + ym },
-                { rc.right - xn,    rc.top - n,        rc.right + n,     rc.top + yn });
+                { rc.right - xn,    rc.top - mg,       rc.right + mg,    rc.top + yn });
             DrawPart(// 左边
                 { rcTex.left - m1,  rcTex.top + ym,    rcTex.left + xm,  rcTex.bottom - ym },
-                { rc.left - n,      rc.top + yn,       rc.left + xn,     rc.bottom - yn });
+                { rc.left - mg,     rc.top + yn,       rc.left + xn,     rc.bottom - yn });
             DrawPart(// 右边
                 { rcTex.right - xm, rcTex.top + ym,    rcTex.right + m1, rcTex.bottom - ym },
-                { rc.right - xn,    rc.top + yn,       rc.right + n,     rc.bottom - yn });
+                { rc.right - xn,    rc.top + yn,       rc.right + mg,    rc.bottom - yn });
             DrawPart(// 右下圆角
                 { rcTex.right - xm, rcTex.bottom - ym, rcTex.right + m1, rcTex.bottom + m1 },
-                { rc.right - xn,    rc.bottom - yn,    rc.right + n,     rc.bottom + n });
+                { rc.right - xn,    rc.bottom - yn,    rc.right + mg,    rc.bottom + mg });
             DrawPart(// 下边
                 { rcTex.left + xm,  rcTex.bottom - ym, rcTex.right - xm, rcTex.bottom + ym },
-                { rc.left + xn,     rc.bottom - n,     rc.right - xn,    rc.bottom + n });
+                { rc.left + xn,     rc.bottom - mg,    rc.right - xn,    rc.bottom + mg });
             DrawPart(// 左下圆角
                 { rcTex.left - m1,  rcTex.bottom - ym, rcTex.left + xm,  rcTex.bottom + m1 },
-                { rc.left - n,      rc.bottom - yn,    rc.left + xn,     rc.bottom + n });
+                { rc.left - mg,     rc.bottom - yn,    rc.left + xn,     rc.bottom + mg });
             return;
         }
         DrawPart(// 左上
             { rcTex.left - m1,  rcTex.top - m1,    rcTex.left + m2,  rcTex.top + m2 },
-            { rc.left - n,      rc.top - n,        rc.left,          rc.top });
+            { rc.left - mg,     rc.top - mg,       rc.left,          rc.top });
         DrawPart(// 上
             { rcTex.left + m2,  rcTex.top - m1,    rcTex.right - m2, rcTex.top + m2 },
-            { rc.left,          rc.top - n,        rc.right,         rc.top });
+            { rc.left,          rc.top - mg,       rc.right,         rc.top });
         DrawPart(// 右上
             { rcTex.right - m2, rcTex.top - m1,    rcTex.right + m1, rcTex.top + m2 },
-            { rc.right,         rc.top - n,        rc.right + n,     rc.top });
+            { rc.right,         rc.top - mg,       rc.right + mg,    rc.top });
         DrawPart(// 左
             { rcTex.left - m1,  rcTex.top + m2,    rcTex.left + m2,  rcTex.bottom - m2 },
-            { rc.left - n,      rc.top,            rc.left,          rc.bottom });
+            { rc.left - mg,     rc.top,            rc.left,          rc.bottom });
         DrawPart(// 右
             { rcTex.right - m2, rcTex.top + m2,    rcTex.right + m1, rcTex.bottom - m2 },
-            { rc.right,         rc.top,            rc.right + n,     rc.bottom });
+            { rc.right,         rc.top,            rc.right + mg,    rc.bottom });
         DrawPart(// 左下
             { rcTex.left - m1,  rcTex.bottom - m2, rcTex.left + m2,  rcTex.bottom + m1 },
-            { rc.left - n,      rc.bottom,         rc.left,          rc.bottom + n });
+            { rc.left - mg,     rc.bottom,         rc.left,          rc.bottom + mg });
         DrawPart(// 下
             { rcTex.left + m2,  rcTex.bottom - m2, rcTex.right - m2, rcTex.bottom + m1 },
-            { rc.left,          rc.bottom,         rc.right,         rc.bottom + n });
+            { rc.left,          rc.bottom,         rc.right,         rc.bottom + mg });
         DrawPart(// 右下
             { rcTex.right - m2, rcTex.bottom - m2, rcTex.right + m1, rcTex.bottom + m1 },
-            { rc.right,         rc.bottom,         rc.right + n,     rc.bottom + n });
+            { rc.right,         rc.bottom,         rc.right + mg,    rc.bottom + mg });
     }
 
     HRESULT DrawFull(
@@ -396,7 +433,7 @@ public:
     {
         const auto& rcTex = m_rcCacheContent;
         const auto& rc = rcContent;
-        const auto m = m_fMarginCache;
+        const auto m = m_mgCache;
         const auto kx = (rc.right - rc.left) / (rcTex.right - rcTex.left);
         const auto ky = (rc.bottom - rc.top) / (rcTex.bottom - rcTex.top);
 
@@ -423,7 +460,7 @@ public:
     EckInlineNdCe D2D1_SIZE_U GetCachePixelSize() const noexcept { return m_SizeCachePixel; }
     EckInlineNdCe D2D1_SIZE_F GetCacheLogicalSize() const noexcept { return m_SizeCacheLogical; }
     EckInlineNdCe D2D1_RECT_F GetCacheContentRect() const noexcept { return m_rcCacheContent; }
-    EckInlineNdCe float GetCacheMargin() const noexcept { return m_fMarginCache; }
-    EckInlineNdCe float GetScale() const noexcept { return m_fScale; }
+    EckInlineNdCe float GetCacheMargin() const noexcept { return m_mgCache; }
+    EckInlineNdCe float GetScale() const noexcept { return m_kScale; }
 };
 ECK_NAMESPACE_END
