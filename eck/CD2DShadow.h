@@ -288,14 +288,14 @@ public:
                 {
                     auto rc{ pShape->Shape.rc };
                     InflateRect(rc, -pShape->mgHollow, -pShape->mgHollow);
-                    m_pDC->FillRectangle(pShape->Shape.rc, pShape->pBrush);
+                    m_pDC->FillRectangle(rc, pBrush.Get());
                 }
                 break;
                 case Shape::RoundRect:
                 {
                     auto rrc{ pShape->Shape.rrc };
                     InflateRect(rrc.rect, -pShape->mgHollow, -pShape->mgHollow);
-                    m_pDC->FillRoundedRectangle(pShape->Shape.rrc, pShape->pBrush);
+                    m_pDC->FillRoundedRectangle(rrc, pBrush.Get());
                 }
                 break;
                 case Shape::Ellipse:
@@ -303,7 +303,7 @@ public:
                     auto ell{ pShape->Shape.ell };
                     ell.radiusX -= pShape->mgHollow;
                     ell.radiusY -= pShape->mgHollow;
-                    m_pDC->FillEllipse(pShape->Shape.ell, pShape->pBrush);
+                    m_pDC->FillEllipse(ell, pBrush.Get());
                 }
                 break;
                 }
@@ -337,7 +337,7 @@ public:
     /// <param name="rcContent">目标内容矩形，阴影环绕此矩形向外扩展</param>
     /// <param name="mg">阴影扩展距离</param>
     /// <param name="eInterMode">插值模式</param>
-    /// <param name="fAlpha">透明度</param>
+    /// <param name="kAlpha">透明度</param>
     /// <param name="pMatrix">4x4变换</param>
     /// <param name="mgCache">缓存纹理中阴影的外侧扩展距离，这通常为GetCacheMargin()</param>
     /// <param name="mgCacheInner">
@@ -348,7 +348,7 @@ public:
         const D2D1_RECT_F& rcContent,
         float mg,
         D2D1_INTERPOLATION_MODE eInterMode = D2D1_INTERPOLATION_MODE_LINEAR,
-        float fAlpha = 1.f,
+        float kAlpha = 1.f,
         _In_opt_ const D2D1_MATRIX_4X4_F* pMatrix = nullptr,
         float mgCache = 0.f,
         float mgCacheInner = 0.f) const noexcept
@@ -359,7 +359,7 @@ public:
         const auto m2 = (mgCacheInner > 0.f) ? mgCacheInner : (m_mgCache / 8.f);
         const auto DrawPart = [=](const D2D1_RECT_F& rcSrc, const D2D1_RECT_F& rcDst) noexcept
             {
-                pDC->DrawBitmap(m_pBlurBitmap.Get(), rcDst, fAlpha, eInterMode, rcSrc);
+                pDC->DrawBitmap(m_pBlurBitmap.Get(), rcDst, kAlpha, eInterMode, rcSrc, pMatrix);
             };
 
         if (m_rCacheCorner.x > 0.f || m_rCacheCorner.y > 0.f)
@@ -428,7 +428,7 @@ public:
         _In_ ID2D1DeviceContext* pDC,
         const D2D1_RECT_F& rcContent,
         D2D1_INTERPOLATION_MODE eInterMode = D2D1_INTERPOLATION_MODE_LINEAR,
-        float fAlpha = 1.f,
+        float kAlpha = 1.f,
         _In_opt_ const D2D1_MATRIX_4X4_F* pMatrix = nullptr) const noexcept
     {
         const auto& rcTex = m_rcCacheContent;
@@ -451,7 +451,7 @@ public:
             rcContent.right + m * kx,
             rcContent.bottom + m * ky,
         };
-        pDC->DrawBitmap(m_pBlurBitmap.Get(), rcDraw, fAlpha, eInterMode, rcSrc, pMatrix);
+        pDC->DrawBitmap(m_pBlurBitmap.Get(), rcDraw, kAlpha, eInterMode, rcSrc, pMatrix);
         return S_OK;
     }
 
