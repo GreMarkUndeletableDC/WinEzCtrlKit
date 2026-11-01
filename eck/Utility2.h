@@ -180,7 +180,7 @@ EckInline int GetKeyNameTextByVk(
     bool bExtended = false,
     bool bDontCare = false) noexcept
 {
-    const LPARAM lParam =
+    const LONG lParam =
         (MapVirtualKeyW(wVk, MAPVK_VK_TO_VSC) << 16) |
         (int(!!bExtended) << 24) |
         (int(!!bDontCare) << 25);
