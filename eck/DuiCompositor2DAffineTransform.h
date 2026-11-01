@@ -11,7 +11,7 @@ private:
     float m_kOpacity{ 1.f };
     D2D1_INTERPOLATION_MODE m_eInterMode{ D2D1_INTERPOLATION_MODE_LINEAR };
 public:
-    void TransformPoint(_Inout_ Kw::Vec2& pt, BOOL bNormalToComposited) noexcept override
+    void TransformPoint(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept override
     {
         D2D1_POINT_2F pt0;
         if (bNormalToComposited)
@@ -22,7 +22,7 @@ public:
         pt.y = pt0.y;
     }
 
-    void CalculateCompositedRect(_Out_ D2D1_RECT_F& rc, BOOL bInClientOrParent) noexcept override
+    void CalculateCompositedRect(_Out_ D2D1_RECT_F& rc, bool bInClientOrParent) noexcept override
     {
         const auto pEle = GetElement();
         const auto cx = pEle->GetWidth();
@@ -42,7 +42,7 @@ public:
             pEle->EtParent()->ClientToElement(rc);
     }
 
-    BOOL IsInPlace() const noexcept override { return FALSE; }
+    bool IsInPlace() const noexcept override { return false; }
 
     void PostRender(COMP_RENDER_INFO& cri) noexcept override
     {

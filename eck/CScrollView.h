@@ -19,11 +19,11 @@ protected:
 
     T m_oxyThumbCursor{};
 #ifdef _DEBUG
-    BOOL m_bLBtnDown = FALSE;
+    bool m_bLBtnDown = false;
 #endif // _DEBUG
 
     // 若数据超界返回TRUE
-    constexpr BOOL RangeChanged() noexcept
+    constexpr bool RangeChanged() noexcept
     {
         if (!IsValid())
             SetPositionUncheck(GetMinimum());
@@ -32,8 +32,8 @@ protected:
         else if (GetPosition() > GetMaxWithPage())
             SetPositionUncheck(GetMaxWithPage());
         else
-            return FALSE;
-        return TRUE;
+            return false;
+        return true;
     }
 public:
     EckInlineCe T GetMinimum() const noexcept { return m_Min; }
@@ -60,7 +60,7 @@ public:
 
     EckInlineCe T GetPosition() const noexcept { return m_Pos; }
     // 若数据超界返回TRUE
-    EckInlineCe BOOL SetPosition(T Pos) noexcept
+    EckInlineCe bool SetPosition(T Pos) noexcept
     {
         m_Pos = Pos;
         return RangeChanged();
@@ -78,7 +78,7 @@ public:
         return GetMaxWithPage() - GetMinimum();
     }
 
-    EckInlineCe BOOL IsValid() const noexcept { return GetRangeDistance() > 0; }
+    EckInlineCe bool IsValid() const noexcept { return GetRangeDistance() > 0; }
 
     constexpr void OnMouseWheel(T Delta) noexcept
     {
@@ -130,7 +130,7 @@ public:
     {
 #ifdef _DEBUG
         EckAssert(!m_bLBtnDown);
-        m_bLBtnDown = TRUE;
+        m_bLBtnDown = true;
 #endif // _DEBUG
         if (!IsValid())
             return;
@@ -138,26 +138,26 @@ public:
         m_oxyThumbCursor = xy - GetThumbPosition();
     }
 
-    EckInlineCe BOOL OnMouseMove(T xy) noexcept
+    EckInlineCe bool OnMouseMove(T xy) noexcept
     {
         EckAssert(m_bLBtnDown);
         if (!IsValid())
-            return FALSE;
+            return false;
         const auto pos = GetMinimum() +
             (xy - m_oxyThumbCursor) *
             GetRangeDistance() /
             (GetViewSize() - GetThumbSize());
         if (!CanMove(pos - GetPosition()))
-            return FALSE;
+            return false;
         SetPosition(pos);
-        return TRUE;
+        return true;
     }
 
     EckInlineCe void OnLButtonUp() noexcept
     {
 #ifdef _DEBUG
         EckAssert(m_bLBtnDown);
-        m_bLBtnDown = FALSE;
+        m_bLBtnDown = false;
 #endif // _DEBUG
     }
 
@@ -189,17 +189,17 @@ public:
     }
 
     // 是否有必要显示滚动条
-    EckInlineCe BOOL IsVisible() const noexcept
+    EckInlineCe bool IsVisible() const noexcept
     {
         return IsValid() && GetViewSize() > GetMinimumThumbSize();
     }
 
-    EckInlineNdCe BOOL IsMinimum() const noexcept { return GetPosition() <= GetMinimum(); }
-    EckInlineNdCe BOOL IsMaximum() const noexcept { return GetPosition() >= GetMaxWithPage(); }
-    EckInlineNdCe BOOL CanMove(T d) const noexcept
+    EckInlineNdCe bool IsMinimum() const noexcept { return GetPosition() <= GetMinimum(); }
+    EckInlineNdCe bool IsMaximum() const noexcept { return GetPosition() >= GetMaxWithPage(); }
+    EckInlineNdCe bool CanMove(T d) const noexcept
     {
         if (d == 0)
-            return FALSE;
+            return false;
         return d > 0 ? !IsMaximum() : !IsMinimum();
     }
 };

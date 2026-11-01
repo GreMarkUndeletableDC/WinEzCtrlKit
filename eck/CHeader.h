@@ -37,9 +37,9 @@ public:
     /// </summary>
     /// <param name="idx">列索引，若为-1则清除所有筛选器</param>
     /// <returns></returns>
-    EckInline BOOL ClearFilter(int idx) const noexcept
+    EckInline bool ClearFilter(int idx) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_CLEARFILTER, idx, 0);
+        return (bool)SendMessageW(HDM_CLEARFILTER, idx, 0);
     }
 
     EckInline HIMAGELIST CreateDragImage(int idx) const noexcept
@@ -47,14 +47,14 @@ public:
         return (HIMAGELIST)SendMessageW(HDM_CREATEDRAGIMAGE, idx, 0);
     }
 
-    EckInline BOOL DeleteItem(int idx) const noexcept
+    EckInline bool DeleteItem(int idx) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_DELETEITEM, idx, 0);
+        return (bool)SendMessageW(HDM_DELETEITEM, idx, 0);
     }
 
-    EckInline BOOL EditFilter(int idx, BOOL bDiscardUserInput) const noexcept
+    EckInline bool EditFilter(int idx, bool bDiscardUserInput) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_EDITFILTER, idx, bDiscardUserInput);
+        return (bool)SendMessageW(HDM_EDITFILTER, idx, bDiscardUserInput);
     }
 
     EckInline int GetBitmapMargin() const noexcept
@@ -74,9 +74,9 @@ public:
 
     EckInline HIMAGELIST GetImageList() const noexcept { return GetImageList(HDSIL_NORMAL); }
 
-    EckInline BOOL GetItem(int idx, _Inout_ HDITEMW* phdi) const noexcept
+    EckInline bool GetItem(int idx, _Inout_ HDITEMW* phdi) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_GETITEMW, idx, (LPARAM)phdi);
+        return (bool)SendMessageW(HDM_GETITEMW, idx, (LPARAM)phdi);
     }
 
     EckInline int GetItemCount() const noexcept
@@ -90,9 +90,9 @@ public:
     /// <param name="idx">项目索引</param>
     /// <param name="prc">矩形指针，相对控件父窗口</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL GetItemDropDownRect(int idx, _Out_ RECT* prc) const noexcept
+    EckInline bool GetItemDropDownRect(int idx, _Out_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_GETITEMDROPDOWNRECT, idx, (LPARAM)prc);
+        return (bool)SendMessageW(HDM_GETITEMDROPDOWNRECT, idx, (LPARAM)prc);
     }
 
     /// <summary>
@@ -101,17 +101,17 @@ public:
     /// <param name="idx">项目索引</param>
     /// <param name="prc">矩形指针，相对控件父窗口</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL GetItemRect(int idx, _Out_ RECT* prc) const noexcept
+    EckInline bool GetItemRect(int idx, _Out_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_GETITEMRECT, idx, (LPARAM)prc);
+        return (bool)SendMessageW(HDM_GETITEMRECT, idx, (LPARAM)prc);
     }
 
-    EckInline BOOL GetOrderArray(_Out_writes_(cBuf) int* piOrder, size_t cBuf) const noexcept
+    EckInline bool GetOrderArray(_Out_writes_(cBuf) int* piOrder, size_t cBuf) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_GETORDERARRAY, cBuf, (LPARAM)piOrder);
+        return (bool)SendMessageW(HDM_GETORDERARRAY, cBuf, (LPARAM)piOrder);
     }
 
-    EckInline BOOL GetOrderArray(std::vector<int>& vOrder) const noexcept
+    EckInline bool GetOrderArray(std::vector<int>& vOrder) const noexcept
     {
         vOrder.resize(GetItemCount());
         return GetOrderArray(vOrder.data(), vOrder.size());
@@ -122,9 +122,9 @@ public:
     /// </summary>
     /// <param name="prc">矩形指针，相对屏幕</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL GetOverFlowRect(_Out_ RECT* prc) const noexcept
+    EckInline bool GetOverFlowRect(_Out_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_GETOVERFLOWRECT, 0, (LPARAM)prc);
+        return (bool)SendMessageW(HDM_GETOVERFLOWRECT, 0, (LPARAM)prc);
     }
 
     EckInline int HitTest(_Inout_ HDHITTESTINFO* phdhti) const noexcept
@@ -162,9 +162,9 @@ public:
         return InsertItem(idx, &hdi);
     }
 
-    EckInline BOOL Layout(_Inout_ HDLAYOUT* phdl) const noexcept
+    EckInline bool Layout(_Inout_ HDLAYOUT* phdl) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_LAYOUT, 0, (LPARAM)phdl);
+        return (bool)SendMessageW(HDM_LAYOUT, 0, (LPARAM)phdl);
     }
 
     EckInline int OrderToIndex(int iOrder) const noexcept
@@ -182,19 +182,19 @@ public:
         return (int)SendMessageW(HDM_SETFILTERCHANGETIMEOUT, 0, iTimeout);
     }
 
-    EckInline BOOL SetFocusedItem(int idx) const noexcept
+    EckInline bool SetFocusedItem(int idx) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_SETFOCUSEDITEM, 0, idx);
+        return (bool)SendMessageW(HDM_SETFOCUSEDITEM, 0, idx);
     }
 
     EckInline int SetHotDivider(int idxDivider) const noexcept
     {
-        return (int)SendMessageW(HDM_SETHOTDIVIDER, FALSE, idxDivider);
+        return (int)SendMessageW(HDM_SETHOTDIVIDER, false, idxDivider);
     }
 
     EckInline int SetHotDivider(POINT ptCursor) const noexcept
     {
-        return (int)SendMessageW(HDM_SETHOTDIVIDER, TRUE, MAKELPARAM(ptCursor.x, ptCursor.y));
+        return (int)SendMessageW(HDM_SETHOTDIVIDER, true, MAKELPARAM(ptCursor.x, ptCursor.y));
     }
 
     EckInline HIMAGELIST SetImageList(HIMAGELIST hImageList, UINT uType) const noexcept
@@ -207,14 +207,14 @@ public:
         return SetImageList(hImageList, HDSIL_NORMAL);
     }
 
-    EckInline BOOL SetItem(int idx, _In_ const HDITEMW* phdi) const noexcept
+    EckInline bool SetItem(int idx, _In_ const HDITEMW* phdi) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_SETITEMW, idx, (LPARAM)phdi);
+        return (bool)SendMessageW(HDM_SETITEMW, idx, (LPARAM)phdi);
     }
 
-    EckInline BOOL SetOrderArray(const int* piOrder) const noexcept
+    EckInline bool SetOrderArray(const int* piOrder) const noexcept
     {
-        return (BOOL)SendMessageW(HDM_SETORDERARRAY, GetItemCount(), (LPARAM)piOrder);
+        return (bool)SendMessageW(HDM_SETORDERARRAY, GetItemCount(), (LPARAM)piOrder);
     }
 
     void RadioSetSortMark(int idx, int iFmt) const noexcept
@@ -232,7 +232,7 @@ public:
         }
     }
 
-    BOOL SetItemFilter(int idx, HEADER_FILTER& hf) const noexcept
+    bool SetItemFilter(int idx, HEADER_FILTER& hf) const noexcept
     {
         HDITEMW hdi;
         hdi.mask = HDI_FILTER;
@@ -252,7 +252,7 @@ public:
         return SetItem(idx, &hdi);
     }
 
-    BOOL GetItemFilter(int idx, HEADER_FILTER& hf) const noexcept
+    bool GetItemFilter(int idx, HEADER_FILTER& hf) const noexcept
     {
         hf.iType = HDFT_HASNOVALUE;
         HDITEMW hdi;
@@ -260,9 +260,9 @@ public:
         hdi.type = HDFT_HASNOVALUE;
         hdi.pvFilter = nullptr;
         if (!GetItem(idx, &hdi))
-            return FALSE;
+            return false;
         if (hdi.type == HDFT_HASNOVALUE)
-            return TRUE;
+            return true;
         hf.iType = hdi.type;
         switch (hdi.type)
         {

@@ -240,12 +240,12 @@ namespace Detail
     }
 }
 
-inline BOOL KrcDecrypt(_Inout_bytecount_(cb) void* p, size_t cb, CByteBuffer& rbResult) noexcept
+inline bool KrcDecrypt(_Inout_bytecount_(cb) void* p, size_t cb, CByteBuffer& rbResult) noexcept
 {
     if (!p || cb <= 4)
-        return FALSE;
+        return false;
     if (memcmp(p, "krc1", 4) != 0)
-        return FALSE;
+        return false;
     p = (BYTE*)p + 4;
     cb -= 4;
     constexpr BYTE Key[]{ 64,71,97,119,94,50,116,71,81,54,49,45,206,210,110,105 };
@@ -254,15 +254,15 @@ inline BOOL KrcDecrypt(_Inout_bytecount_(cb) void* p, size_t cb, CByteBuffer& rb
     return ZLibSuccess(ZLibDecompress(p, cb, rbResult));
 }
 
-inline BOOL QrcDecrypt(_Inout_bytecount_(cb) void* p, size_t cb, CByteBuffer& rbResult) noexcept
+inline bool QrcDecrypt(_Inout_bytecount_(cb) void* p, size_t cb, CByteBuffer& rbResult) noexcept
 {
     if (!p || cb <= 11)
-        return FALSE;
+        return false;
     Detail::Qmc1Decrypt((BYTE*)p, cb);
     p = (BYTE*)p + 11;
     cb -= 11;
     if (cb % 8)
-        return FALSE;
+        return false;
     constexpr BYTE Key[]{ "!@#)(*$%123ZXC!@!@#)(NHL" };
     BYTE Sch[3][16][6]{}, Out[8];
     Detail::Qrc3DesSetupKey(Key, Sch, Detail::QRC_DES_DECRYPT);

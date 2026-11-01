@@ -37,7 +37,7 @@ namespace Declaration
         EWM_DUMMY = WM_USER_SAFE,
 
         EWM_SHOWFOCUS,  // void(bShow, 0)
-        EWM_BUBBLE,     // BOOL(0, BBEVENT*)  返回是否拦截
+        EWM_BUBBLE,     // bool(0, BBEVENT*)  返回是否拦截
 
         // 转发OLE拖放
         EWM_DRAGENTER,  // HRESULT(DRAGDROPINFO*, 0)
@@ -79,7 +79,7 @@ namespace Declaration
     struct ELENMHDR
     {
         UINT uNotify;
-        BOOL bProcessed;
+        bool bProcessed;
     };
 
     // UiHook事件
@@ -399,7 +399,7 @@ private:
         }
     }
 
-    EckInlineNdCe BOOL UiaIsInitialized() const noexcept { return !!m_pUia.Get(); }
+    EckInlineNdCe bool UiaIsInitialized() const noexcept { return !!m_pUia.Get(); }
 public:
     ECK_W_NONATTACHABLE(CElementContainer);
     ECK_W_CREATE_CLASS_INST(WCN_DUIHOST, g_hInstance);
@@ -409,7 +409,7 @@ public:
         if ((uMsg >= WM_MOUSEFIRST && uMsg <= WM_MOUSELAST))
         {
             if (uMsg == WM_LBUTTONUP)
-                EleShowFocus(FALSE);
+                EleShowFocus(false);
             TPoint pt{ (TCoord)GET_X_LPARAM(lParam), (TCoord)GET_Y_LPARAM(lParam) };
             PixelToLogical(pt);
             if (m_bMouseCaptured)
@@ -418,7 +418,7 @@ public:
             if (pEle)
             {
                 pEle->ClientToElement(pt);
-                pEle->EhTransform(pt, FALSE);
+                pEle->EhTransform(pt, false);
                 pEle->CallEvent(uMsg, wParam, (LPARAM)&pt);
             }
 
@@ -506,7 +506,7 @@ public:
                         m_pEleFocus->EtNextTabStop(!(GetKeyState(VK_SHIFT) & 0x8000));
                     if (pNextFocus)
                     {
-                        EleShowFocus(TRUE);
+                        EleShowFocus(true);
                         EleSetFocus(pNextFocus);
                         goto CallDefault;
                     }
@@ -540,7 +540,7 @@ public:
         {
             const auto pEle = (m_pEleMouseCapture ? m_pEleMouseCapture : m_pEleCurrNcHitTest);
             if (pEle && pEle->CallEvent(uMsg, wParam, lParam))
-                return TRUE;
+                return true;
         }
         break;
 
@@ -577,7 +577,7 @@ public:
         {
             if (m_bMouseCaptured)
             {
-                m_bMouseCaptured = FALSE;
+                m_bMouseCaptured = false;
                 if (m_pEleMouseCapture)
                 {
                     m_pEleMouseCapture->CallEvent(WM_CAPTURECHANGED, 0, NULL);
@@ -791,7 +791,7 @@ public:
         if (GetCapture() != Handle)
         {
             SetCapture(Handle);
-            m_bMouseCaptured = TRUE;
+            m_bMouseCaptured = true;
         }
         if (pOld)
             pOld->CallEvent(WM_CAPTURECHANGED, 0, (LPARAM)pEle);
@@ -806,19 +806,19 @@ public:
     }
     EckInlineNdCe TElement* EleGetCapture() const noexcept { return m_pEleMouseCapture; }
 
-    BOOL EleSetTimer(TElement* pEle, UINT_PTR uId, UINT uElapse) noexcept
+    bool EleSetTimer(TElement* pEle, UINT_PTR uId, UINT uElapse) noexcept
     {
         if (!SetTimer(Handle, uId, uElapse, nullptr))
-            return FALSE;
+            return false;
         for (auto& e : m_vTimer)
         {
             if (e.pEle == pEle && e.uId == uId)
-                return TRUE;
+                return true;
         }
         m_vTimer.emplace_back(pEle, uId);
-        return TRUE;
+        return true;
     }
-    BOOL EleKillTimer(TElement* pEle, UINT_PTR uId) noexcept
+    bool EleKillTimer(TElement* pEle, UINT_PTR uId) noexcept
     {
         for (auto it = m_vTimer.begin(); it != m_vTimer.end(); ++it)
         {
@@ -826,20 +826,20 @@ public:
             {
                 KillTimer(Handle, uId);
                 m_vTimer.erase(it);
-                return TRUE;
+                return true;
             }
         }
-        return FALSE;
+        return false;
     }
 
-    void EleShowFocus(BOOL bShow) noexcept
+    void EleShowFocus(bool bShow) noexcept
     {
         if (m_bShowFocus == !!bShow)
             return;
         m_bShowFocus = !!bShow;
         EtBroadcastEvent(EWM_SHOWFOCUS, m_bShowFocus, 0);
     }
-    EckInlineNdCe BOOL EleIsShowingFocus() const noexcept { return m_bShowFocus; }
+    EckInlineNdCe bool EleIsShowingFocus() const noexcept { return m_bShowFocus; }
 public:
     EckInlineNdCe TCoord GetClientWidthLogical() const noexcept { return m_sizeClientLog.x; }
     EckInlineNdCe TCoord GetClientHeightLogical() const noexcept { return m_sizeClientLog.y; }
@@ -858,7 +858,7 @@ public:
         return S_OK;
     }
 
-    HRESULT EnableDragDrop(BOOL bEnable) noexcept
+    HRESULT EnableDragDrop(bool bEnable) noexcept
     {
         if (!!m_bEnableOleDragDrop == !!bEnable)
             return S_FALSE;
@@ -960,10 +960,10 @@ protected:
         return S_OK;
     }
 public:
-    EckInlineCe void DbgSetDrawFrame(BOOL b) noexcept { m_bDbgDrawFrame = b; }
-    EckInlineNdCe BOOL DbgGetDrawFrame() const noexcept { return m_bDbgDrawFrame; }
-    EckInlineCe void DbgSetDrawDirtyRect(BOOL b) noexcept { m_bDbgDrawDirtyRect = b; }
-    EckInlineNdCe BOOL DbgGetDrawDirtyRect() const noexcept { return m_bDbgDrawDirtyRect; }
+    EckInlineCe void DbgSetDrawFrame(bool b) noexcept { m_bDbgDrawFrame = b; }
+    EckInlineNdCe bool DbgGetDrawFrame() const noexcept { return m_bDbgDrawFrame; }
+    EckInlineCe void DbgSetDrawDirtyRect(bool b) noexcept { m_bDbgDrawDirtyRect = b; }
+    EckInlineNdCe bool DbgGetDrawDirtyRect() const noexcept { return m_bDbgDrawDirtyRect; }
 
     EckInlineNdCe auto& GetUiHookEventChain() noexcept { return m_ecUiHook; }
 };
@@ -1213,7 +1213,7 @@ public:
         if (!(GetStyle() & DES_DEF_NO_BUBBLE) &&
             IsNeedBubble(uMsg))
         {
-            BOOL b;
+            bool b;
             const auto lResult = BubbleEvent(uMsg, wParam, lParam, b);
             if (b)
                 return lResult;
@@ -1223,7 +1223,7 @@ public:
 
     virtual LRESULT OnNotify(ELENMHDR* pnm) noexcept { return 0; }
 
-    virtual BOOL EhTransform(_Inout_ TPoint& pt, BOOL bInClient) noexcept { return FALSE; }
+    virtual bool EhTransform(_Inout_ TPoint& pt, bool bInClient) noexcept { return false; }
 
     virtual HRESULT EhUiaMakeInterface() noexcept
     {
@@ -1260,9 +1260,9 @@ public:
     }
 
     LRESULT BubbleEvent(UINT uMsg, WPARAM wParam, LPARAM lParam,
-        _Out_ BOOL& bProcessed) noexcept
+        _Out_ bool& bProcessed) noexcept
     {
-        bProcessed = FALSE;
+        bProcessed = false;
         auto pParent = EtParent();
         if (!pParent)
             return 0;
@@ -1271,7 +1271,7 @@ public:
         {
             if (pParent->CallEvent(EWM_BUBBLE, 0, (LPARAM)&Event))
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 return Event.lResult;
             }
             pParent = pParent->EtParent();
@@ -1279,13 +1279,13 @@ public:
         return 0;
     }
 
-    EckInlineNdCe BOOL IsNeedBubble(UINT uMsg) const noexcept
+    EckInlineNdCe bool IsNeedBubble(UINT uMsg) const noexcept
     {
         if (GetStyle() & DES_BUBBLE_ALL)
-            return TRUE;
+            return true;
         if ((GetStyle() & DES_BUBBLE_INPUT) && IsInputMessage(uMsg))
-            return TRUE;
-        return FALSE;
+            return true;
+        return false;
     }
 
     LRESULT SendNotify(ELENMHDR* pnm) noexcept
@@ -1524,7 +1524,7 @@ public:
             if (pEle->GetStyle() & DES_VISIBLE)
             {
                 pt0 = ptInClient;
-                pEle->EhTransform(pt0, TRUE);
+                pEle->EhTransform(pt0, true);
                 if (PointInRect(pEle->GetRectInClient(), pt0))
                 {
                     const auto pHit = pEle->EtHitTest(ptInClient, pResult);
@@ -1556,7 +1556,7 @@ public:
         return EtHitTest(EtLastChild(), ptInClient, pResult);
     }
 private:
-    static THost* EtpNextElement(CElement* pCurr, BOOL bNextOrPrev) noexcept
+    static THost* EtpNextElement(CElement* pCurr, bool bNextOrPrev) noexcept
     {
         THost* pEle;
         if (bNextOrPrev)
@@ -1578,7 +1578,7 @@ private:
         return pEle;
     }
 public:
-    THost* EtNextTabStop(BOOL bNextOrPrev) noexcept
+    THost* EtNextTabStop(bool bNextOrPrev) noexcept
     {
         constexpr UINT Style = DES_VISIBLE | DES_TABSTOP;
         constexpr UINT StyleExclude = DES_DISABLE | DES_NO_FOCUSABLE;
@@ -1685,16 +1685,16 @@ protected:
 #pragma endregion ElementTree
 public:
     // 是否可见。函数自底向上遍历父元素，如果存在不可见父元素，则返回FALSE，否则返回TRUE。
-    EckInlineNdCe BOOL IsVisible() const noexcept
+    EckInlineNdCe bool IsVisible() const noexcept
     {
         auto pParent = this;
         do
         {
             if (!(pParent->GetStyle() & DES_VISIBLE))
-                return FALSE;
+                return false;
             pParent = pParent->EtParent();
         } while (pParent);
-        return TRUE;
+        return true;
     }
 public:
     EckInlineCe void PixelToLogical(_Inout_ TPoint& pt) const noexcept { GetContainer()->PixelToLogical(pt); }
@@ -1712,7 +1712,7 @@ protected:
 public:
     EckInlineNdCe UINT TmGetState() const noexcept { return m_uTmState; }
 
-    EckInlineNdCe BOOL TmIsDarkMode() const noexcept { return !!(GetStyle() & DES_DARK_MODE); }
+    EckInlineNdCe bool TmIsDarkMode() const noexcept { return !!(GetStyle() & DES_DARK_MODE); }
     EckInlineNdCe UINT TmDarkStyle() const noexcept { return GetStyle() & DES_DARK_MODE; }
 };
 ECK_UIBASIC_NAMESPACE_END

@@ -144,7 +144,7 @@ public:
     EckInlineNdCe size_t Size() const noexcept { return m_cSize; }
     EckInlineNdCe size_t ByteSize() const noexcept { return m_cSize * sizeof(T); }
 
-    EckInlineNdCe BOOL IsEmpty() const noexcept { return !m_cSize; }
+    EckInlineNdCe bool IsEmpty() const noexcept { return !m_cSize; }
 
     EckInlineNdCe auto& Front() noexcept { EckAssert(!IsEmpty()); return *m_pData; }
     EckInlineNdCe auto& Front() const noexcept { EckAssert(!IsEmpty()); return *m_pData; }

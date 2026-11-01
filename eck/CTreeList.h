@@ -82,7 +82,7 @@ struct TLHITTEST
 struct NMTLFILLCHILDREN
 {
     NMHDR nmhdr;
-    BOOL bQueryRoot;    // 是否请求根节点
+    bool bQueryRoot;    // 是否请求根节点
     TLNODE* pParent;    // 正在请求其子项目的父项
     int cChildren;      // 根节点的数量
     TLNODE** pChildren; // 所有子项的数组
@@ -192,7 +192,7 @@ struct NMTLDRAG
     NMHDR nmhdr;
     const TLHITTEST* pHitTestInfo;
     int idx;
-    BOOL bRBtn;
+    bool bRBtn;
     UINT uKeyFlags;
 };
 
@@ -316,30 +316,30 @@ private:
     BITBOOL m_bDbgDrawMarkItem : 1 = 0;         // 【调试】绘制mark项
     BITBOOL m_bDbgDrawPartRect : 1 = 0;         // 【调试】绘制部件矩形 
 #endif
-    BITBOOL m_bExpandBtnHot : 1 = FALSE;        // 展开按钮是否点燃
-    BITBOOL m_bDraggingSel : 1 = FALSE;         // 是否处于拖动选择状态
+    BITBOOL m_bExpandBtnHot : 1 = false;        // 展开按钮是否点燃
+    BITBOOL m_bDraggingSel : 1 = false;         // 是否处于拖动选择状态
     BITBOOL m_bFocusIndicatorVisible : 1 = Debug;   // 焦点指示器是否可见
-    BITBOOL m_bHasFocus : 1 = FALSE;            // 是否有焦点
-    BITBOOL m_bWaitEditDelay : 1 = FALSE;       // 是否等待编辑
-    BITBOOL m_bBuildInEditChanged : 1 = FALSE;  // 内置编辑框内容是否已改变
-    BITBOOL m_bDraggingItem : 1 = FALSE;        // 正在拖动项目
-    BITBOOL m_bRDragging : 1 = FALSE;           // 正在右键拖动
+    BITBOOL m_bHasFocus : 1 = false;            // 是否有焦点
+    BITBOOL m_bWaitEditDelay : 1 = false;       // 是否等待编辑
+    BITBOOL m_bBuildInEditChanged : 1 = false;  // 内置编辑框内容是否已改变
+    BITBOOL m_bDraggingItem : 1 = false;        // 正在拖动项目
+    BITBOOL m_bRDragging : 1 = false;           // 正在右键拖动
     //--------风格
-    BITBOOL m_bFlatMode : 1 = FALSE;                    // 平面列表模式
-    BITBOOL m_bFlatListFilter : 1 = FALSE;              // 平面列表模式下是否有不可见项目
-    BITBOOL m_bSingleSel : 1 = FALSE;                   // 单选
-    BITBOOL m_bDisallowBeginDragInItemSpace : 1 = FALSE;// 禁止在项目内的空白区启动拖动选择
-    BITBOOL m_bBackgroundNotSolid : 1 = FALSE;          // 背景不为纯色
-    BITBOOL m_bHasLines : 1 = FALSE;                    // 分支线
-    BITBOOL m_bDisableAutoToolTip : 1 = FALSE;          // 禁止自动显示工具提示
-    BITBOOL m_bCheckBox : 1 = FALSE;                    // 复选框
-    BITBOOL m_bDisableHScrollWithShift : 1 = FALSE;     // 禁止Shift+滚轮水平滚动
-    BITBOOL m_bDisableSelectAllWithCtrlA : 1 = FALSE;   // 禁止Ctrl+A全选
-    BITBOOL m_bEditLabel : 1 = FALSE;                   // 编辑标签
-    BITBOOL m_b3StateCheckBox : 1 = FALSE;              // 三态复选框
-    BITBOOL m_bCascadeCheck : 1 = FALSE;                // 级联选中状态
-    BITBOOL m_bSplitCol0 : 1 = FALSE;                   // 分离第一列
-    BITBOOL m_bStickyScroll : 1 = FALSE;                // 粘滞滚动
+    BITBOOL m_bFlatMode : 1 = false;                    // 平面列表模式
+    BITBOOL m_bFlatListFilter : 1 = false;              // 平面列表模式下是否有不可见项目
+    BITBOOL m_bSingleSel : 1 = false;                   // 单选
+    BITBOOL m_bDisallowBeginDragInItemSpace : 1 = false;// 禁止在项目内的空白区启动拖动选择
+    BITBOOL m_bBackgroundNotSolid : 1 = false;          // 背景不为纯色
+    BITBOOL m_bHasLines : 1 = false;                    // 分支线
+    BITBOOL m_bDisableAutoToolTip : 1 = false;          // 禁止自动显示工具提示
+    BITBOOL m_bCheckBox : 1 = false;                    // 复选框
+    BITBOOL m_bDisableHScrollWithShift : 1 = false;     // 禁止Shift+滚轮水平滚动
+    BITBOOL m_bDisableSelectAllWithCtrlA : 1 = false;   // 禁止Ctrl+A全选
+    BITBOOL m_bEditLabel : 1 = false;                   // 编辑标签
+    BITBOOL m_b3StateCheckBox : 1 = false;              // 三态复选框
+    BITBOOL m_bCascadeCheck : 1 = false;                // 级联选中状态
+    BITBOOL m_bSplitCol0 : 1 = false;                   // 分离第一列
+    BITBOOL m_bStickyScroll : 1 = false;                // 粘滞滚动
     //--------DPI相关
     int m_iDpi = USER_DEFAULT_SCREEN_DPI;   // DPI
     ECK_DS_BEGIN(DPIS)
@@ -390,7 +390,7 @@ private:
         {
             int cChildrenReal = 0;
 
-            BOOL b = FALSE;
+            bool b = false;
             EckCounter(cChildren, i)
             {
                 NMTLFILLCHILDREN nm{};
@@ -429,11 +429,11 @@ private:
 
         RECT rcItem{ x,y,m_cxItem + x,y + m_cyItem };
         RECT rc{ x,rcItem.top, m_vCol.front().iRight + x,rcItem.bottom };// left和Right仅用于下面一行的判断，后续将被覆盖
-        const BOOL bFirstColVisible = (rc.right - rc.left > 0 && (rc.left < rcPaint.right && rc.right > rcPaint.left));
+        const bool bFirstColVisible = (rc.right - rc.left > 0 && (rc.left < rcPaint.right && rc.right > rcPaint.left));
 
         HRGN hRgn{};
 #if ECK_OPT_SUPPORT_CLASSIC_THEME
-        BOOL bTextHighLight{};
+        bool bTextHighLight{};
 #endif // ECK_OPT_SUPPORT_CLASSIC_THEME
         //---------------画分隔线
         int iStateId;
@@ -505,11 +505,11 @@ private:
         else
 #endif // ECK_OPT_SUPPORT_CLASSIC_THEME
         {
-            BOOL bPostDrawBk{};
+            bool bPostDrawBk{};
             if (nmcd.crBk != CLR_DEFAULT)
             {
                 if (ShouldAppsUseDarkMode())
-                    bPostDrawBk = TRUE;
+                    bPostDrawBk = true;
                 else
                 {
                     SetDCBrushColor(hDC, nmcd.crBk);
@@ -542,7 +542,7 @@ private:
         {
             if (nmcd.crText == CLR_DEFAULT)
                 nmcd.crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
-            bTextHighLight = TRUE;
+            bTextHighLight = true;
         }
 #endif // ECK_OPT_SUPPORT_CLASSIC_THEME
         //---------------画展开按钮
@@ -577,7 +577,7 @@ private:
             const HGDIOBJ hOldPen = SelectObject(hDC, GetStockBrush(DC_PEN));
             int idxParent = idx;
 
-            BOOL bLastItem = (e->uFlags & TLIF_HASNOTSIBLING);
+            bool bLastItem = (e->uFlags & TLIF_HASNOTSIBLING);
             if ((e->uFlags & TLIF_HASCHILDREN))
                 bLastItem = bLastItem && (e->uFlags & TLIF_CLOSED);
             for (int i = e->iLevel - 1; i >= 1; --i)
@@ -587,7 +587,7 @@ private:
                     const int xLine = x + (i - 1) * m_sizeTVGlyph.cx + m_sizeTVGlyph.cx / 2;
                     const auto f = m_vItem[idxParent];
 
-                    BOOL b = (f->uFlags & TLIF_HASNOTSIBLING);
+                    bool b = (f->uFlags & TLIF_HASNOTSIBLING);
                     if (b && (f->uFlags & TLIF_HASCHILDREN))
                         if (f->uFlags & TLIF_CLOSED)
                             b = bLastItem;
@@ -896,10 +896,10 @@ private:
     {
         int cxView = m_cxClient;
         int cyView = m_cyClient;
-        BOOL bHSB = FALSE;
+        bool bHSB = false;
         if (cxView < m_cxItem)
         {
-            bHSB = TRUE;
+            bHSB = true;
             if (!IsBitSet(GetStyle(), WS_HSCROLL))
                 cyView -= GetSystemMetrics(SM_CYHSCROLL);
         }
@@ -958,7 +958,7 @@ private:
         m_ptDraggingSelStart = { xBegin - m_dxContent,yBegin + m_idxTopItem * m_cyItem };
         m_rcDraggingSel = { m_ptDraggingSelStart.x,m_ptDraggingSelStart.y,
             m_ptDraggingSelStart.x,m_ptDraggingSelStart.y };
-        m_bDraggingSel = TRUE;
+        m_bDraggingSel = true;
         MSG msg;
         GetCursorPos(&msg.pt);
         auto ullTime = NtGetTickCount64();
@@ -989,10 +989,10 @@ private:
                 case WM_MOUSEHWHEEL:
                 case WM_MOUSEWHEEL:
                 {
-                    SetRedraw(FALSE);// 暂时禁止重画
+                    SetRedraw(false);// 暂时禁止重画
                     TranslateMessage(&msg);
                     DispatchMessageW(&msg);
-                    SetRedraw(TRUE);
+                    SetRedraw(true);
                 }
                 break;
 
@@ -1018,12 +1018,12 @@ private:
 
                         if (xDelta || yDelta)
                         {
-                            SetRedraw(FALSE);
+                            SetRedraw(false);
                             if (xDelta)
                                 ScrollH(xDelta);
                             if (yDelta)
                                 ScrollV(yDelta);
-                            SetRedraw(TRUE);
+                            SetRedraw(true);
                         }
                     }
                     //----------准备坐标
@@ -1074,8 +1074,8 @@ private:
                         if (!(e->uFlags & TLIF_DISABLED))
                         {
                             GetItemRect(i, rcItem);
-                            const BOOL bIntersectOld = IsRectsIntersect(rcItem, rcOld);
-                            const BOOL bIntersectNew = IsRectsIntersect(rcItem, m_rcDraggingSel);
+                            const bool bIntersectOld = IsRectsIntersect(rcItem, rcOld);
+                            const bool bIntersectNew = IsRectsIntersect(rcItem, m_rcDraggingSel);
 
                             if (msg.wParam & MK_CONTROL)
                             {
@@ -1122,7 +1122,7 @@ private:
             {
                 POINT pt{ msg.pt };
                 ScreenToClient(m_hWnd, &pt);
-                BOOL b = FALSE;
+                bool b = false;
                 SCROLLINFO si;
                 si.cbSize = sizeof(si);
                 si.fMask = SIF_POS | SIF_PAGE | SIF_RANGE;
@@ -1132,12 +1132,12 @@ private:
                     if (pt.y < m_cyHeader)
                     {
                         if (si.nPos > si.nMin)
-                            b = TRUE;
+                            b = true;
                     }
                     else if (pt.y > m_cyClient)
                     {
                         if (si.nPos < si.nMax - (int)si.nPage + 1)
-                            b = TRUE;
+                            b = true;
                     }
                 }
 
@@ -1147,12 +1147,12 @@ private:
                     if (pt.x < 0)
                     {
                         if (si.nPos > si.nMin)
-                            b = TRUE;
+                            b = true;
                     }
                     else if (pt.x > m_cxClient)
                     {
                         if (si.nPos < si.nMax - (int)si.nPage + 1)
-                            b = TRUE;
+                            b = true;
                     }
                 }
 
@@ -1164,7 +1164,7 @@ private:
         }
     ExitDraggingLoop:
         ReleaseCapture();
-        m_bDraggingSel = FALSE;
+        m_bDraggingSel = false;
         OffsetRect(m_rcDraggingSel, m_dxContent, -m_idxTopItem * m_cyItem);// 转客户坐标
         Redraw(m_rcDraggingSel);
         UpdateWindow(m_hWnd);
@@ -1192,7 +1192,7 @@ private:
         if (m_idxHot >= c)
         {
             m_idxHot = -1;
-            m_bExpandBtnHot = FALSE;
+            m_bExpandBtnHot = false;
         }
         if (m_idxFocus >= c)
             m_idxFocus = -1;
@@ -1213,7 +1213,7 @@ private:
         if (m_idxHot >= idxBegin && m_idxHot <= idxEnd)
         {
             m_idxHot = -1;// 强行修改点燃项到其他位置是没有道理的
-            m_bExpandBtnHot = FALSE;
+            m_bExpandBtnHot = false;
         }
         if (m_idxFocus >= idxBegin && m_idxFocus <= idxEnd)
             m_idxFocus = idxSuggestion;
@@ -1237,7 +1237,7 @@ private:
         if (!m_bEditLabel)
             return;
         CancelEditDelay();
-        m_bWaitEditDelay = TRUE;
+        m_bWaitEditDelay = true;
         m_idxEditing = idx;
         m_idxEditingSubItemDisplay = idxSubItemDisplay;
         SetTimer(m_hWnd, IDT_EDITDELAY, 600, nullptr);
@@ -1249,7 +1249,7 @@ private:
             return;
         if (m_bWaitEditDelay)
         {
-            m_bWaitEditDelay = FALSE;
+            m_bWaitEditDelay = false;
             m_idxEditing = m_idxEditingSubItemDisplay = -1;
             KillTimer(m_hWnd, IDT_EDITDELAY);
         }
@@ -1285,7 +1285,7 @@ private:
                 else if (wParam & MK_CONTROL)
                     ToggleSelectItemForClick(idx);
                 else
-                    SelectItemForClick(idx, TRUE);
+                    SelectItemForClick(idx, true);
             }
             UpdateWindow(m_hWnd);
         }
@@ -1314,24 +1314,24 @@ private:
         else
         {
             int idxChangeBegin = -1, idxChangeEnd = -1;
-            BOOL bAlreadyDoSelect =
+            bool bAlreadyDoSelect =
                 (m_bSingleSel ?
                     (m_idxSel != idx) :
                     (idx >= 0 && !(m_vItem[idx]->uFlags & TLIF_SELECTED)));
             if (bAlreadyDoSelect)
                 ButtonSelect(idx, wParam, idxChangeBegin, idxChangeEnd);
 
-            const BOOL bRBtn = (uMsg == WM_RBUTTONDOWN);
+            const bool bRBtn = (uMsg == WM_RBUTTONDOWN);
             POINT pt{ tlht.pt };
             ClientToScreen(hWnd, &pt);
             if (IsMouseMovedBeforeDragging(hWnd, pt.x, pt.y))// YEILD
             {
-                BOOL bAllowDragSel = FALSE;
+                bool bAllowDragSel = false;
 
                 if (!m_bSingleSel)
                     if (idx < 0 ||
                         (bAlreadyDoSelect && (tlht.iPart == TLIP_NONE && !m_bDisallowBeginDragInItemSpace)))
-                        bAllowDragSel = TRUE;
+                        bAllowDragSel = true;
 
                 if (bAllowDragSel)
                 {
@@ -1342,7 +1342,7 @@ private:
                 }
                 else if (idx >= 0)
                 {
-                    m_bDraggingItem = TRUE;
+                    m_bDraggingItem = true;
                     m_bRDragging = bRBtn;
                     SetCapture(hWnd);
                     NMTLDRAG nm;
@@ -1399,8 +1399,8 @@ private:
         int idxBottom = m_idxTopItem + (m_cyClient - m_cyHeader) / m_cyItem - 1;
         if (idxBottom >= (int)m_vItem.size())
             idxBottom = (int)m_vItem.size() - 1;
-        const BOOL bCtrlPressed = GetAsyncKeyState(VK_CONTROL) & 0x8000;
-        const BOOL bShiftPressed = GetAsyncKeyState(VK_SHIFT) & 0x8000;
+        const bool bCtrlPressed = GetAsyncKeyState(VK_CONTROL) & 0x8000;
+        const bool bShiftPressed = GetAsyncKeyState(VK_SHIFT) & 0x8000;
         switch (wParam)
         {
         case VK_UP:
@@ -1460,7 +1460,7 @@ private:
                 {
                     idxChangeBegin = m_idxFocus;
                     const int idxOldTop = m_idxTopItem;
-                    ExpandItem(m_idxFocus, TLEIO_TOGGLE, FALSE);
+                    ExpandItem(m_idxFocus, TLEIO_TOGGLE, false);
                     if (m_bSingleSel)
                         SelectItemForClick(m_idxFocus, 0);
                     else
@@ -1469,7 +1469,7 @@ private:
                         DeselectAll(idx0, idx1);
                         if (idxChangeBegin > idx0)
                             idxChangeBegin = idx0;
-                        SelectItemForClick(m_idxFocus, TRUE);
+                        SelectItemForClick(m_idxFocus, true);
                     }
                     if (m_idxTopItem != idxOldTop)
                         Redraw();
@@ -1486,7 +1486,7 @@ private:
                     else
                     {
                         DeselectAll(idxChangeBegin, idxChangeEnd);
-                        SelectItemForClick(e->idxParent, TRUE);
+                        SelectItemForClick(e->idxParent, true);
                         if (idxChangeBegin >= 0)
                             RedrawItem(idxChangeBegin, idxChangeEnd);
                         RedrawItem(e->idxParent);
@@ -1505,7 +1505,7 @@ private:
                 {
                     idxChangeBegin = m_idxFocus;
                     const int idxOldTop = m_idxTopItem;
-                    ExpandItem(m_idxFocus, TLEIO_TOGGLE, FALSE);
+                    ExpandItem(m_idxFocus, TLEIO_TOGGLE, false);
                     if (m_bSingleSel)
                         SelectItemForClick(m_idxFocus, 0);
                     else
@@ -1514,7 +1514,7 @@ private:
                         DeselectAll(idx0, idx1);
                         if (idxChangeBegin > idx0)
                             idxChangeBegin = idx0;
-                        SelectItemForClick(m_idxFocus, TRUE);
+                        SelectItemForClick(m_idxFocus, true);
                     }
                     if (m_idxTopItem != idxOldTop)
                         Redraw();
@@ -1531,7 +1531,7 @@ private:
                     else
                     {
                         DeselectAll(idxChangeBegin, idxChangeEnd);
-                        SelectItemForClick(m_idxFocus + 1, TRUE);
+                        SelectItemForClick(m_idxFocus + 1, true);
                         if (idxChangeBegin >= 0)
                             RedrawItem(idxChangeBegin, idxChangeEnd);
                     }
@@ -1576,11 +1576,11 @@ private:
         return;
         case VK_MULTIPLY:
             if (m_idxFocus >= 0)
-                ExpandItemRecurse(m_idxFocus, TLEIO_EXPAND, TRUE);
+                ExpandItemRecurse(m_idxFocus, TLEIO_EXPAND, true);
             return;
         case VK_DIVIDE:
             if (m_idxFocus >= 0)
-                ExpandItemRecurse(m_idxFocus, TLEIO_COLLAPSE, TRUE);
+                ExpandItemRecurse(m_idxFocus, TLEIO_COLLAPSE, true);
             return;
         case VK_ADD:
             if (bCtrlPressed)
@@ -1591,10 +1591,10 @@ private:
                 SetCursor(hCursorOld);
             }
             else
-                ExpandItem(m_idxFocus, TLEIO_EXPAND, TRUE);
+                ExpandItem(m_idxFocus, TLEIO_EXPAND, true);
             return;
         case VK_SUBTRACT:
-            ExpandItem(m_idxFocus, TLEIO_COLLAPSE, TRUE);
+            ExpandItem(m_idxFocus, TLEIO_COLLAPSE, true);
             return;
         }
 
@@ -1618,7 +1618,7 @@ private:
                             else// mark无效，只选中当前项
                             {
                                 DeselectAll(idxChangeBegin, idxChangeEnd);
-                                SelectItemForClick(m_idxFocus, TRUE);
+                                SelectItemForClick(m_idxFocus, true);
                                 if (m_idxFocus < idxChangeBegin || m_idxFocus > idxChangeEnd)
                                     RedrawItem(m_idxFocus);
                             }
@@ -1632,7 +1632,7 @@ private:
                         else
                         {
                             DeselectAll(idxChangeBegin, idxChangeEnd);
-                            SelectItemForClick(m_idxFocus, TRUE);
+                            SelectItemForClick(m_idxFocus, true);
                             if (idxChangeBegin >= 0)
                                 RedrawItem(idxChangeBegin, idxChangeEnd);
                             if (m_idxFocus < idxChangeBegin || m_idxFocus > idxChangeEnd)
@@ -1692,7 +1692,7 @@ public:
             tlht.pt = ECK_GET_PT_LPARAM(lParam);
             tlht.uFlags = TLHTF_NOHITTEXTLABEL;
             int idx = HitTest(tlht);
-            BOOL bExpBtnHot = m_bExpandBtnHot;
+            bool bExpBtnHot = m_bExpandBtnHot;
             m_bExpandBtnHot = (tlht.iPart == TLIP_EXPANDBTN);
             if (idx != m_idxHot)
             {
@@ -1740,7 +1740,7 @@ public:
                         Redraw();
                     }
                 }
-                return FALSE;
+                return false;
 
                 case HDN_ITEMCLICKW:
                 {
@@ -1781,7 +1781,7 @@ public:
                         Redraw();
                     }
                 }
-                return FALSE;
+                return false;
                 }
             }
             else if (pnmhdr->hwndFrom == m_ToolTip.Handle)
@@ -1858,13 +1858,13 @@ public:
                             RECT rc;
                             GetItemTextRect(m_idxToolTip, m_idxToolTipSubItemDisplay, rc);
                             ClientToScreen(Handle, &rc);
-                            m_ToolTip.AdjustRect(TRUE, &rc);
+                            m_ToolTip.AdjustRect(true, &rc);
                             SetWindowPos(m_ToolTip.Handle, HWND_TOPMOST,
                                 rc.left, rc.top, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE);
                         }
                     }
                 }
-                return TRUE;
+                return true;
                 case TTN_POP:
                     m_idxToolTip = m_idxToolTipSubItemDisplay = -1;
                     return 0;
@@ -2004,7 +2004,7 @@ public:
         case WM_COMMAND:
         {
             if (HIWORD(wParam) == EN_CHANGE && lParam == (LPARAM)m_Edit.Handle)
-                m_bBuildInEditChanged = TRUE;
+                m_bBuildInEditChanged = true;
         }
         break;
 
@@ -2077,7 +2077,7 @@ public:
         {
             if (m_idxCheckBoxLBtnDown >= 0)
             {
-                EckAssert(m_bDraggingItem == FALSE);
+                EckAssert(m_bDraggingItem == false);
                 TLHITTEST tlht;
                 tlht.pt = ECK_GET_PT_LPARAM(lParam);
                 tlht.uFlags = 0;
@@ -2099,7 +2099,7 @@ public:
                 if ((m_bRDragging && (uMsg == WM_RBUTTONUP)) ||
                     (!m_bRDragging && (uMsg == WM_LBUTTONUP)))
                 {
-                    m_bDraggingItem = FALSE;
+                    m_bDraggingItem = false;
                     ReleaseCapture();
                     NMTLDRAG nm;
                     nm.bRBtn = m_bRDragging;
@@ -2138,14 +2138,14 @@ public:
         {
             if (!(HIWORD(wParam) & UISF_HIDEFOCUS))// 焦点指示器未改变
                 break;
-            const BOOL bOld = m_bFocusIndicatorVisible;
+            const bool bOld = m_bFocusIndicatorVisible;
             switch (LOWORD(wParam))
             {
             case UIS_SET:
-                m_bFocusIndicatorVisible = FALSE;
+                m_bFocusIndicatorVisible = false;
                 break;
             case UIS_CLEAR:
-                m_bFocusIndicatorVisible = TRUE;
+                m_bFocusIndicatorVisible = true;
                 break;
             }
             if (m_bFocusIndicatorVisible != bOld && m_idxFocus >= 0)
@@ -2245,7 +2245,7 @@ public:
 
         case WM_SETFOCUS:
         {
-            m_bHasFocus = TRUE;
+            m_bHasFocus = true;
             if (m_bSingleSel)
             {
                 if (m_idxSel >= 0)
@@ -2258,7 +2258,7 @@ public:
 
         case WM_KILLFOCUS:
         {
-            m_bHasFocus = FALSE;
+            m_bHasFocus = false;
             if (m_bSingleSel)
             {
                 if (m_idxSel >= 0)
@@ -2326,9 +2326,9 @@ public:
         else
         {
             NMTLFILLCHILDREN nm{};
-            nm.bQueryRoot = TRUE;
+            nm.bQueryRoot = true;
             NmFillHeaderAndSend(nm, NM_TL_FILLCHILDREN);
-            BOOL b = FALSE;
+            bool b = false;
             EckCounter(nm.cChildren, i)
             {
                 const int idxCurrParent = (int)m_vItem.size();
@@ -2339,7 +2339,7 @@ public:
                     !b)
                 {
                     nm.pChildren[nm.cChildren - i - 1]->uFlags |= TLIF_HASNOTSIBLING;// 确定最后一个同级项中的最后一个
-                    b = TRUE;
+                    b = true;
                 }
 
                 NmFillHeaderAndSend(nm2, NM_TL_FILLCHILDREN);
@@ -2503,7 +2503,7 @@ public:
     /// <param name="bExcludeIndent"></param>
     /// <returns></returns>
     EckInline void GetSubItemRect(int idx, int idxSubItemDisplay, RECT& rc,
-        BOOL bExcludeIndent = FALSE) const noexcept
+        bool bExcludeIndent = false) const noexcept
     {
         EckAssert(idx >= 0 && idx < (int)m_vItem.size());
         EckAssert(idxSubItemDisplay >= 0 && idxSubItemDisplay < (int)m_vCol.size());
@@ -2554,7 +2554,7 @@ public:
         return nm.Item.pszText;
     }
 
-    BOOL IsTextTooLong(int idx, int idxSubItemDisplay) const noexcept
+    bool IsTextTooLong(int idx, int idxSubItemDisplay) const noexcept
     {
         int cchText;
         auto pszText = GetItemText(idx, ColumnDisplayToActual(idxSubItemDisplay), &cchText);
@@ -2584,14 +2584,14 @@ public:
         rc.bottom = rc.top + size.cy;
     }
 
-    BOOL RedrawItem(int idx) const noexcept
+    bool RedrawItem(int idx) const noexcept
     {
         RECT rc;
         GetItemRect(idx, rc);
         return Redraw(rc);
     }
 
-    BOOL RedrawItem(int idxBegin, int idxEnd) const noexcept
+    bool RedrawItem(int idxBegin, int idxEnd) const noexcept
     {
         RECT rc;
         GetItemRect(idxBegin, rc);
@@ -2658,13 +2658,13 @@ public:
     EckInlineCe void SetDraggingSelectScrollGap(int ms) noexcept { m_msDraggingSelScrollGap = ms; }
     EckInlineNdCe int GetDraggingSelectScrollGap() const noexcept { return m_msDraggingSelScrollGap; }
 
-    void SetSingleSelect(BOOL bSingleSel) noexcept
+    void SetSingleSelect(bool bSingleSel) noexcept
     {
         if (m_bSingleSel == bSingleSel)
             return;
         if (m_bSingleSel)
         {
-            m_bSingleSel = FALSE;
+            m_bSingleSel = false;
             if (m_idxSel >= 0)
             {
                 m_vItem[m_idxSel]->uFlags |= TLIF_SELECTED;// 转换到多选数据
@@ -2673,7 +2673,7 @@ public:
         }
         else
         {
-            m_bSingleSel = TRUE;
+            m_bSingleSel = true;
             m_idxSel = -1;
             int i = 0;
             for (; i < (int)m_vItem.size(); ++i)
@@ -2691,19 +2691,19 @@ public:
         Redraw();
     }
 
-    EckInlineNdCe BOOL GetSingleSelect() const noexcept { return m_bSingleSel; }
+    EckInlineNdCe bool GetSingleSelect() const noexcept { return m_bSingleSel; }
 
-    EckInlineCe void SetFlatMode(BOOL b) noexcept { m_bFlatMode = b; }
-    EckInlineNdCe BOOL GetFlatMode() const noexcept { return m_bFlatMode; }
+    EckInlineCe void SetFlatMode(bool b) noexcept { m_bFlatMode = b; }
+    EckInlineNdCe bool GetFlatMode() const noexcept { return m_bFlatMode; }
 
     EckInline void SetWatermarkString(PCWSTR pszText) noexcept { m_rsWatermark = pszText; }
     EckInlineNdCe const CStringW& GetWatermarkString() const noexcept { return m_rsWatermark; }
 
-    EckInlineCe void SetBackgroundNotSolid(BOOL b) noexcept { m_bBackgroundNotSolid = b; }
-    EckInlineNdCe BOOL GetBackgroundNotSolid() const noexcept { return m_bBackgroundNotSolid; }
+    EckInlineCe void SetBackgroundNotSolid(bool b) noexcept { m_bBackgroundNotSolid = b; }
+    EckInlineNdCe bool GetBackgroundNotSolid() const noexcept { return m_bBackgroundNotSolid; }
 
-    EckInlineCe void SetHasLines(BOOL b) noexcept { m_bHasLines = b; }
-    EckInlineNdCe BOOL GetHasLines() const noexcept { return m_bHasLines; }
+    EckInlineCe void SetHasLines(bool b) noexcept { m_bHasLines = b; }
+    EckInlineNdCe bool GetHasLines() const noexcept { return m_bHasLines; }
 
     EckInlineCe void SetLineColor(COLORREF cr) noexcept { m_crBranchLine = cr; }
     EckInlineNdCe COLORREF GetLineColor() const noexcept { return m_crBranchLine; }
@@ -2714,11 +2714,11 @@ public:
         return m_vItem[idx];
     }
 
-    EckInlineCe void SetUseFilterInFlatMode(BOOL b) noexcept { m_bFlatListFilter = b; }
-    EckInlineNdCe BOOL GetUseFilterInFlatMode() const noexcept { return m_bFlatListFilter; }
+    EckInlineCe void SetUseFilterInFlatMode(bool b) noexcept { m_bFlatListFilter = b; }
+    EckInlineNdCe bool GetUseFilterInFlatMode() const noexcept { return m_bFlatListFilter; }
 
-    EckInlineCe void SetDisallowBeginDragInItemSpace(BOOL b) noexcept { m_bDisallowBeginDragInItemSpace = b; }
-    EckInlineNdCe BOOL GetDisallowBeginDragInItemSpace() const noexcept { return m_bDisallowBeginDragInItemSpace; }
+    EckInlineCe void SetDisallowBeginDragInItemSpace(bool b) noexcept { m_bDisallowBeginDragInItemSpace = b; }
+    EckInlineNdCe bool GetDisallowBeginDragInItemSpace() const noexcept { return m_bDisallowBeginDragInItemSpace; }
 
     void EnsureVisible(int idx) noexcept
     {
@@ -2960,7 +2960,7 @@ public:
     /// </summary>
     /// <param name="idx"></param>
     /// <param name="bSel"></param>
-    void SelectItemForClick(int idx, BOOL bSel) noexcept
+    void SelectItemForClick(int idx, bool bSel) noexcept
     {
         EckAssert(idx >= 0 && idx < (int)m_vItem.size());
 
@@ -2974,7 +2974,7 @@ public:
                 m_idxMark = idx;
             }
 
-            if (idx >= 0 ? (!(m_vItem[idx]->uFlags & TLIF_DISABLED)) : TRUE)
+            if (idx >= 0 ? (!(m_vItem[idx]->uFlags & TLIF_DISABLED)) : true)
             {
                 m_idxSel = idx;
                 if (idx >= 0)
@@ -3038,7 +3038,7 @@ public:
     /// </summary>
     /// <param name="idx">索引</param>
     /// <param name="iOp">操作，TLEIO_常量</param>
-    void ExpandItem(int idx, int iOp, BOOL bRedraw = TRUE, BOOL bRebuildTree = TRUE) noexcept
+    void ExpandItem(int idx, int iOp, bool bRedraw = true, bool bRebuildTree = true) noexcept
     {
         EckAssert(idx >= 0 && idx < (int)m_vItem.size());
 
@@ -3161,7 +3161,7 @@ public:
     /// <param name="iOp"></param>
     /// <param name="bRebuildTree"></param>
     void ExpandItemRecurse(int idx, int iOp,
-        BOOL bRedraw = TRUE, BOOL bRebuildTree = TRUE) noexcept
+        bool bRedraw = true, bool bRebuildTree = true) noexcept
     {
         EckAssert(idx >= 0 && idx < (int)m_vItem.size());
 
@@ -3179,7 +3179,7 @@ public:
             NMTLFILLCHILDREN nmfc;
             nmfc.nmhdr = nm.nmhdr;
             nmfc.nmhdr.code = NM_TL_FILLCHILDREN;
-            nmfc.bQueryRoot = FALSE;
+            nmfc.bQueryRoot = false;
             nmfc.cChildren = 0;
             nmfc.pChildren = nullptr;
             nmfc.pParent = e;
@@ -3261,8 +3261,8 @@ public:
 
     EckInlineNdCe CToolTip& GetToolTip() noexcept { return m_ToolTip; }
 
-    EckInlineCe void SetDisableAutoToolTip(BOOL b) noexcept { m_bDisableAutoToolTip = b; }
-    EckInlineNdCe BOOL GetDisableAutoToolTip() const noexcept { return m_bDisableAutoToolTip; }
+    EckInlineCe void SetDisableAutoToolTip(bool b) noexcept { m_bDisableAutoToolTip = b; }
+    EckInlineNdCe bool GetDisableAutoToolTip() const noexcept { return m_bDisableAutoToolTip; }
 
     /// <summary>
     /// 置检查框
@@ -3272,18 +3272,18 @@ public:
     {
         if (i == 0)
         {
-            m_bCheckBox = FALSE;
-            m_b3StateCheckBox = FALSE;
+            m_bCheckBox = false;
+            m_b3StateCheckBox = false;
         }
         else if (i == 1)
         {
-            m_bCheckBox = TRUE;
-            m_b3StateCheckBox = FALSE;
+            m_bCheckBox = true;
+            m_b3StateCheckBox = false;
         }
         else if (i == 2)
         {
-            m_bCheckBox = TRUE;
-            m_b3StateCheckBox = TRUE;
+            m_bCheckBox = true;
+            m_b3StateCheckBox = true;
         }
     }
 
@@ -3299,8 +3299,8 @@ public:
             return 0;
     }
 
-    EckInlineCe void SetDisableHScrollWithShift(BOOL b) noexcept { m_bDisableHScrollWithShift = b; }
-    EckInlineNdCe BOOL GetDisableHScrollWithShift() const noexcept { return m_bDisableHScrollWithShift; }
+    EckInlineCe void SetDisableHScrollWithShift(bool b) noexcept { m_bDisableHScrollWithShift = b; }
+    EckInlineNdCe bool GetDisableHScrollWithShift() const noexcept { return m_bDisableHScrollWithShift; }
 
     void EnterEdit(int idx, int idxSubItemDisplay) noexcept
     {
@@ -3314,7 +3314,7 @@ public:
         nm.idxSubItemDisplay = idxSubItemDisplay;
         nm.idxSubItem = ColumnDisplayToActual(idxSubItemDisplay);
         nm.uFlags = TLEDF_BUILDINEDIT;
-        GetSubItemRect(idx, idxSubItemDisplay, nm.rc, TRUE);
+        GetSubItemRect(idx, idxSubItemDisplay, nm.rc, true);
         NmFillHeaderAndSend(nm, NM_TL_PREEDIT);
         if (nm.uFlags & TLEDF_DONTEDIT)
             return;
@@ -3330,12 +3330,12 @@ public:
             m_Edit.SetFont(m_hFont);
             m_Edit.SelectAll();
             m_Edit.Show(SW_SHOW);
-            m_bBuildInEditChanged = FALSE;
+            m_bBuildInEditChanged = false;
             SetFocus(m_Edit.Handle);
         }
     }
 
-    void DismissEdit(BOOL bNotifySave = FALSE) noexcept
+    void DismissEdit(bool bNotifySave = false) noexcept
     {
         if (!m_bEditLabel)
             return;
@@ -3364,12 +3364,12 @@ public:
 
     EckInlineNdCe CTLEditExt& GetEdit() noexcept { return m_Edit; }
 
-    EckInlineNdCe BOOL IsEditing() const noexcept { return m_idxEditing >= 0 && !m_bWaitEditDelay; }
+    EckInlineNdCe bool IsEditing() const noexcept { return m_idxEditing >= 0 && !m_bWaitEditDelay; }
 
-    EckInlineCe void SetDisableSelectAllWithCtrlA(BOOL b) noexcept { m_bDisableSelectAllWithCtrlA = b; }
-    EckInlineNdCe BOOL GetDisableSelectAllWithCtrlA() const noexcept { return m_bDisableSelectAllWithCtrlA; }
+    EckInlineCe void SetDisableSelectAllWithCtrlA(bool b) noexcept { m_bDisableSelectAllWithCtrlA = b; }
+    EckInlineNdCe bool GetDisableSelectAllWithCtrlA() const noexcept { return m_bDisableSelectAllWithCtrlA; }
 
-    void SetEditLabel(BOOL b) noexcept
+    void SetEditLabel(bool b) noexcept
     {
         if (m_bWaitEditDelay || m_idxEditing >= 0)
         {
@@ -3378,7 +3378,7 @@ public:
         }
         m_bEditLabel = b;
     }
-    EckInlineNdCe BOOL GetEditLabel() const noexcept { return m_bEditLabel; }
+    EckInlineNdCe bool GetEditLabel() const noexcept { return m_bEditLabel; }
 
     /// <summary>
     /// 计算展开按钮*及其*前置空白造成的缩进宽度
@@ -3510,7 +3510,7 @@ inline LRESULT CTLEditExt::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) no
         switch (wParam)
         {
         case VK_RETURN:
-            m_TL.DismissEdit(TRUE);
+            m_TL.DismissEdit(true);
             break;
         case VK_ESCAPE:
             m_TL.DismissEdit();
@@ -3520,7 +3520,7 @@ inline LRESULT CTLEditExt::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) no
     break;
 
     case WM_KILLFOCUS:
-        m_TL.DismissEdit(TRUE);
+        m_TL.DismissEdit(true);
         break;
     }
 

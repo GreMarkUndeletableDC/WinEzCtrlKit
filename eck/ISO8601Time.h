@@ -3,7 +3,7 @@
 #include "CString.h"
 
 ECK_NAMESPACE_BEGIN
-inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
+inline bool Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
 {
     enum class State
     {
@@ -67,7 +67,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
             else if (ch == 'Z' || ch == '+' || ch == '-')
             {
                 if (eTimezone != Timezone::None)
-                    return FALSE;
+                    return false;
                 eState = State::Hour;
                 switch (ch)
                 {
@@ -84,7 +84,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 ++p;
             }
             else
-                return FALSE;
+                return false;
             if (eState != State::Year)
             {
                 st.wYear = (WORD)atoi(pStateBegin);
@@ -101,7 +101,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 if (eAfterYear != AfterYear::Week)
                 {
                     if (eAfterYear != AfterYear::None)
-                        return FALSE;
+                        return false;
                     eAfterYear = AfterYear::Month;
                 }
                 eState = State::Day;
@@ -110,7 +110,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
             else if (ch == 'Z' || ch == '+' || ch == '-')
             {
                 if (eTimezone != Timezone::None)
-                    return FALSE;
+                    return false;
                 eState = State::Hour;
                 switch (ch)
                 {
@@ -127,7 +127,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 ++p;
             }
             else
-                return FALSE;
+                return false;
             if (eState != State::AfterYear)
             {
                 const int cch = (int)(p - pStateBegin);
@@ -135,7 +135,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 {
                     const auto t = atoi(pStateBegin);
                     if (t < 1 || t > 366)
-                        return FALSE;
+                        return false;
                     st.wDay = (WORD)t;
                     GetNumOfDaysDate(st);
                 }
@@ -147,7 +147,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                         {
                             st.wDay = ((WORD)atoi(pStateBegin) - 1) * 7;
                             if (st.wDay < 1 || st.wDay > 366)
-                                return FALSE;
+                                return false;
                             GetNumOfDaysDate(st);
                         }
                         else
@@ -158,7 +158,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                     pStateBegin = p;
                 }
                 else
-                    return FALSE;
+                    return false;
             }
         }
         break;
@@ -174,7 +174,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
             else if (ch == 'Z' || ch == '+' || ch == '-')
             {
                 if (eTimezone != Timezone::None)
-                    return FALSE;
+                    return false;
                 eState = State::Hour;
                 switch (ch)
                 {
@@ -191,14 +191,14 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 ++p;
             }
             else
-                return FALSE;
+                return false;
             if (eState != State::Day)
             {
                 if (st.wDayOfWeek)
                 {
                     st.wDay = (st.wDayOfWeek - 1) * 7 + (WORD)atoi(pStateBegin);
                     if (st.wDay < 1 || st.wDay > 366)
-                        return FALSE;
+                        return false;
                     st.wDayOfWeek = 0;
                     GetNumOfDaysDate(st);
                 }
@@ -210,7 +210,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
         break;
         case State::Hour:
         {
-            BOOL bConvertToTimezones = FALSE;
+            bool bConvertToTimezones = false;
             if (ch >= '0' && ch <= '9')
                 ++p;
             else if (ch == ':')
@@ -221,9 +221,9 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
             else if (ch == 'Z' || ch == '+' || ch == '-')
             {
                 if (eTimezone != Timezone::None)
-                    return FALSE;
+                    return false;
                 eState = State::Hour;
-                bConvertToTimezones = TRUE;
+                bConvertToTimezones = true;
                 switch (ch)
                 {
                 case 'Z':eTimezone = Timezone::UTC; break;
@@ -239,7 +239,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 ++p;
             }
             else
-                return FALSE;
+                return false;
             if (eState != State::Hour || bConvertToTimezones)
             {
                 if (eTimezone == Timezone::Plus)
@@ -264,7 +264,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
             else if (ch == 'Z' || ch == '+' || ch == '-')
             {
                 if (eTimezone != Timezone::None)
-                    return FALSE;
+                    return false;
                 eState = State::Hour;
                 switch (ch)
                 {
@@ -281,11 +281,11 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 ++p;
             }
             else
-                return FALSE;
+                return false;
             if (eState != State::Minute)
             {
                 if (eTimezone != Timezone::None && eState != State::Accept)
-                    return FALSE;
+                    return false;
                 if (eTimezone == Timezone::Plus)
                     TimeDeltaMinute(st, atoi(pStateBegin));
                 else if (eTimezone == Timezone::Minus)
@@ -308,7 +308,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
             else if (ch == 'Z' || ch == '+' || ch == '-')
             {
                 if (eTimezone != Timezone::None)
-                    return FALSE;
+                    return false;
                 eState = State::Hour;
                 switch (ch)
                 {
@@ -325,7 +325,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 ++p;
             }
             else
-                return FALSE;
+                return false;
             if (eState != State::Second)
             {
                 st.wSecond = (WORD)atoi(pStateBegin);
@@ -340,7 +340,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
             else if (ch == 'Z' || ch == '+' || ch == '-')
             {
                 if (eTimezone != Timezone::None)
-                    return FALSE;
+                    return false;
                 eState = State::Hour;
                 switch (ch)
                 {
@@ -357,7 +357,7 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
                 ++p;
             }
             else
-                return FALSE;
+                return false;
             if (eState != State::Millisecond)
             {
                 st.wMilliseconds = (WORD)atoi(pStateBegin);
@@ -365,11 +365,11 @@ inline BOOL Iso8601ToSystemTime(PCSTR pszIso8601, SYSTEMTIME& st) noexcept
             }
         }
         break;
-        case State::Accept: return TRUE;
+        case State::Accept: return true;
         default: ECK_UNREACHABLE;
         }
     }
-    return FALSE;
+    return false;
 }
 
 inline void SystemTimeToIso8601(const SYSTEMTIME& st, CStringA& rs,

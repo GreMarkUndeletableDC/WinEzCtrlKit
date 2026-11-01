@@ -195,9 +195,9 @@ public:
         return E_NOTIMPL;
     }
 
-    STDMETHODIMP MemIsLocked(BOOL* pbLocked) override
+    STDMETHODIMP MemIsLocked(bool* pbLocked) override
     {
-        *pbLocked = FALSE;
+        *pbLocked = false;
         return E_NOTIMPL;
     }
 };

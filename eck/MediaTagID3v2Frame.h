@@ -140,7 +140,7 @@ struct FRAME
         CByteBuffer& rbWork;
         const ID3v2_HEADER* pTagHdr;
         const ID3v2_FRAME_HEADER* pFrameHdr;
-        BOOLEAN bFrameHdr;
+        bool bFrameHdr;
     };
 
     CHAR Id[4]{};       // 帧标识
@@ -165,7 +165,7 @@ struct FRAME
 
     virtual FRAME* Clone() const noexcept = 0;
 
-    EckInlineNd BOOL EqualId(_In_reads_(4) PCCH Id_) const noexcept
+    EckInlineNd bool EqualId(_In_reads_(4) PCCH Id_) const noexcept
     {
         return memcmp(Id, Id_, 4) == 0;
     }
@@ -186,7 +186,7 @@ struct FRAME
             rb.PushBackByte(0);
     }
 
-    static BOOL TagIsValidFrameId(PCCH Id) noexcept
+    static bool TagIsValidFrameId(PCCH Id) noexcept
     {
         return isalnum(Id[0]) && isalnum(Id[1]) && isalnum(Id[2]) && isalnum(Id[3]) &&
             memcmp(Id, "ID3", 3) != 0 &&
@@ -286,25 +286,25 @@ protected:
     // 调用方从返回爬行器的当前位置开始读取帧内容，不能假定当前位置一定在起始处
     CMemoryReader PreDeserialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx)
     {
-        EckAssert(Ctx.bFrameHdr ? rb.Size() >= sizeof(ID3v2_FRAME_HEADER) : TRUE);
+        EckAssert(Ctx.bFrameHdr ? rb.Size() >= sizeof(ID3v2_FRAME_HEADER) : true);
         memcpy(Id, Ctx.pFrameHdr->Id, 4);
         if (Ctx.pTagHdr->Ver == 3)
         {
             if (Ctx.pFrameHdr->Flags[0] & ID3V23FF_TAG_ALTER_DISCARD)
-                bTagAlterDiscard = TRUE;
+                bTagAlterDiscard = true;
             if (Ctx.pFrameHdr->Flags[0] & ID3V23FF_FILE_ALTER_DISCARD)
-                bFileAlterDiscard = TRUE;
+                bFileAlterDiscard = true;
             if (Ctx.pFrameHdr->Flags[0] & ID3V23FF_READ_ONLY)
-                bReadOnly = TRUE;
+                bReadOnly = true;
 
             if (Ctx.pFrameHdr->Flags[1] & ID3V23FF_HAS_GROUP_IDENTITY)
-                bHasGroupId = TRUE;
+                bHasGroupId = true;
             if (Ctx.pFrameHdr->Flags[1] & ID3V23FF_COMPRESSION)
-                bCompressed = TRUE;
+                bCompressed = true;
             if (Ctx.pFrameHdr->Flags[1] & ID3V23FF_ENCRYPTION)
-                bEncrypted = TRUE;
+                bEncrypted = true;
 
-            bUnsynchronized = bHasDataLengthIndicator = FALSE;
+            bUnsynchronized = bHasDataLengthIndicator = false;
 
             if (Ctx.pTagHdr->Flags & ID3V2HF_UNSYNCHRONIZATION)
                 rb.ReplaceSub({ 0xFF, 0x00 }, { 0xFF });
@@ -312,22 +312,22 @@ protected:
         else
         {
             if (Ctx.pFrameHdr->Flags[0] & ID3V24FF_TAG_ALTER_DISCARD)
-                bTagAlterDiscard = TRUE;
+                bTagAlterDiscard = true;
             if (Ctx.pFrameHdr->Flags[0] & ID3V24FF_FILE_ALTER_DISCARD)
-                bFileAlterDiscard = TRUE;
+                bFileAlterDiscard = true;
             if (Ctx.pFrameHdr->Flags[0] & ID3V24FF_READ_ONLY)
-                bReadOnly = TRUE;
+                bReadOnly = true;
 
             if (Ctx.pFrameHdr->Flags[1] & ID3V24FF_HAS_GROUP_IDENTITY)
-                bHasGroupId = TRUE;
+                bHasGroupId = true;
             if (Ctx.pFrameHdr->Flags[1] & ID3V24FF_COMPRESSION)
-                bCompressed = TRUE;
+                bCompressed = true;
             if (Ctx.pFrameHdr->Flags[1] & ID3V24FF_ENCRYPTION)
-                bEncrypted = TRUE;
+                bEncrypted = true;
             if (Ctx.pFrameHdr->Flags[1] & ID3V24FF_UNSYNCHRONIZATION)
-                bUnsynchronized = TRUE;
+                bUnsynchronized = true;
             if (Ctx.pFrameHdr->Flags[1] & ID3V24FF_HAS_DATA_LENGTH_INDICATOR)
-                bHasDataLengthIndicator = TRUE;
+                bHasDataLengthIndicator = true;
 
             if (Ctx.pTagHdr->Flags & ID3V2HF_UNSYNCHRONIZATION ||
                 bUnsynchronized)
@@ -385,7 +385,7 @@ protected:
         CByteBuffer& rb,
         const CStringW& rsStr,
         TextEncoding eEncoding,
-        BOOL bTerminator = FALSE) noexcept
+        bool bTerminator = false) noexcept
     {
         if (rsStr.IsEmpty())
         {
@@ -452,13 +452,13 @@ protected:
         CByteBuffer& rb,
         const std::vector<CStringW>& v,
         TextEncoding eEncoding,
-        BOOL bTerminator = FALSE) noexcept
+        bool bTerminator = false) noexcept
     {
         if (v.size() == 1u)
             return ConvertTextEncoding(rb, v.front(), eEncoding, bTerminator);
         for (size_t i = 0; i < v.size() - 1; ++i)
-            ConvertTextEncoding(rb, v[i], eEncoding, TRUE);
-        ConvertTextEncoding(rb, v.back(), eEncoding, TRUE);
+            ConvertTextEncoding(rb, v[i], eEncoding, true);
+        ConvertTextEncoding(rb, v.back(), eEncoding, true);
     }
 
     static void ConvertTextEncoding(
@@ -470,7 +470,7 @@ protected:
         EckAssert(iTextEncoding >= 0 && iTextEncoding <= 3);
 
         rsResult.Clear();
-        const BOOL bTerminator = (cb < 0);
+        const bool bTerminator = (cb < 0);
 
         switch (iTextEncoding)
         {
@@ -545,17 +545,17 @@ protected:
         ConvertTextEncoding(rsResult, w, cb, (int)iTextEncoding);
     }
 
-    static BOOL CheckLanguageId(_Inout_count_(3) PCHAR pszLangId) noexcept
+    static bool CheckLanguageId(_Inout_count_(3) PCHAR pszLangId) noexcept
     {
         for (size_t i = 0; i < 3; ++i)
         {
             if (pszLangId[i] < 'a' || pszLangId[i] > 'z')
             {
                 memcpy(pszLangId, "XXX", 3);
-                return FALSE;
+                return false;
             }
         }
-        return TRUE;
+        return true;
     }
 
     static void StepOverTerminator(
@@ -618,7 +618,7 @@ struct TEXTFRAME : public FRAME
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
         if (EqualId("TENC") || EqualId("TLEN"))
-            bFileAlterDiscard = TRUE;
+            bFileAlterDiscard = true;
 
         Ctx.rbWork.Clear();
         ConvertTextEncoding(Ctx.rbWork, vText, eEncoding);
@@ -669,7 +669,7 @@ struct TXXX : public FRAME
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
         Ctx.rbWork.Clear();
-        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, TRUE);
+        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, true);
         ConvertTextEncoding(Ctx.rbWork, rsText, eEncoding);
         const size_t cbFrame = 1 + Ctx.rbWork.Size();
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -725,7 +725,7 @@ struct WXXX : public FRAME
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
         Ctx.rbWork.Clear();
-        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, TRUE);
+        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, true);
         const size_t cbFrame = 1 + Ctx.rbWork.Size() + rsUrl.Size();
         auto w = PreSerialize(rb, Ctx, cbFrame);
         w << eEncoding << Ctx.rbWork;
@@ -785,7 +785,7 @@ struct ETCO final : public FRAME
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         const size_t cbFrame = 1 + 5 * vEvent.size();
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -845,7 +845,7 @@ struct SYTC final : public FRAME
                 return Result::Value;
         }
 
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
         auto w = PreSerialize(rb, Ctx, cbFrame);
         w << eTimestampFmt;
         for (const auto& e : vTempo)
@@ -902,7 +902,7 @@ struct USLT final : public FRAME
         CheckLanguageId(byLang);
 
         Ctx.rbWork.Clear();
-        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, TRUE);
+        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, true);
         ConvertTextEncoding(Ctx.rbWork, rsLrc, eEncoding);
         const size_t cbFrame = 4 + Ctx.rbWork.Size();
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -946,19 +946,19 @@ struct SYLT final : public FRAME
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
         CheckLanguageId(byLang);
 
         std::vector<std::pair<size_t, size_t>> vRange(vSync.size() + 1);
         Ctx.rbWork.Clear();
         // 描述
-        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, TRUE);
+        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, true);
         vRange[0] = { 0u, Ctx.rbWork.Size() };
         // 歌词
         EckCounter(vSync.size(), i)
         {
             const auto pos = Ctx.rbWork.Size();
-            ConvertTextEncoding(Ctx.rbWork, vSync[i].rsText, eEncoding, TRUE);
+            ConvertTextEncoding(Ctx.rbWork, vSync[i].rsText, eEncoding, true);
             vRange[i + 1] = { pos, Ctx.rbWork.Size() };
         }
 
@@ -1019,7 +1019,7 @@ struct COMM final : public FRAME
         CheckLanguageId(byLang);
 
         Ctx.rbWork.Clear();
-        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, TRUE);
+        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, true);
         ConvertTextEncoding(Ctx.rbWork, rsText, eEncoding);
         const size_t cbFrame = 4 + Ctx.rbWork.Size();
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -1061,7 +1061,7 @@ struct RVA2 final : public FRAME
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         size_t cbFrame = rsId.Size() + 1 + vChannel.size() * 4;
         for (const auto& e : vChannel)
@@ -1118,7 +1118,7 @@ struct EQU2 final : public FRAME
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         const size_t cbFrame = 1 + rsId.Size() + 1 + vPoint.size() * 4;
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -1198,7 +1198,7 @@ struct APIC final : public FRAME
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
         Ctx.rbWork.Clear();
-        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, TRUE);
+        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, true);
         const size_t cbFrame = 2 + rsMime.Size() + 1 +
             Ctx.rbWork.Size() + rbData.Size();
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -1236,8 +1236,8 @@ struct GEOB final : public FRAME
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
         Ctx.rbWork.Clear();
-        ConvertTextEncoding(Ctx.rbWork, rsFile, eEncoding, TRUE);
-        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, TRUE);
+        ConvertTextEncoding(Ctx.rbWork, rsFile, eEncoding, true);
+        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, true);
         const size_t cbFrame = 1 + rsMime.Size() + 1 +
             Ctx.rbWork.Size() + rbObj.Size();
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -1380,7 +1380,7 @@ struct AENC final : public FRAME
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         const size_t cbFrame = rsOwnerId.Size() + 1 + 4 + rbData.Size();
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -1444,7 +1444,7 @@ struct POSS final : public FRAME
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         constexpr size_t cbFrame = 5;
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -1554,8 +1554,8 @@ struct COMR final : public FRAME
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
         Ctx.rbWork.Clear();
-        ConvertTextEncoding(Ctx.rbWork, rsSeller, eEncoding, TRUE);
-        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, TRUE);
+        ConvertTextEncoding(Ctx.rbWork, rsSeller, eEncoding, true);
+        ConvertTextEncoding(Ctx.rbWork, rsDesc, eEncoding, true);
 
         const size_t cbFrame = 1 + rsPrice.Size() + 1 + 8 +
             rsUrl.Size() + 1 + 1 + Ctx.rbWork.Size() +
@@ -1709,7 +1709,7 @@ struct SEEK final : public FRAME
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         constexpr size_t cbFrame = 4;
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -1743,7 +1743,7 @@ struct ASPI final : public FRAME
     {
         if (N != 8 && N != 16)
             return Result::Value;
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         const size_t cbFrame = 11 + vIndex.size() * 2;
         auto w = PreSerialize(rb, Ctx, cbFrame);
@@ -1819,8 +1819,8 @@ struct IPLS final :public FRAME
         for (const auto& e : vMap)
         {
             cchOrg += (e.rsPosition.Size() + e.rsName.Size());
-            ConvertTextEncoding(Ctx.rbWork, e.rsPosition, eEncoding, TRUE);
-            ConvertTextEncoding(Ctx.rbWork, e.rsName, eEncoding, TRUE);
+            ConvertTextEncoding(Ctx.rbWork, e.rsPosition, eEncoding, true);
+            ConvertTextEncoding(Ctx.rbWork, e.rsName, eEncoding, true);
         }
         if (!cchOrg)
             return Result::EmptyData;
@@ -1882,9 +1882,9 @@ struct RVAD final : public FRAME
 {
     BYTE byCtrl{};
     BYTE cBits{};
-    BOOLEAN bHasBack{};
-    BOOLEAN bHasCenter{};
-    BOOLEAN bHasBass{};
+    bool bHasBack{};
+    bool bHasCenter{};
+    bool bHasBass{};
     ULONGLONG VolRight{};       // 右调整
     ULONGLONG VolLeft{};        // 左调整
     ULONGLONG PeakRight{};      // 右峰值
@@ -1904,7 +1904,7 @@ struct RVAD final : public FRAME
             return Result::ReservedData;
         if (cBits > 64)
             return Result::Value;
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         const size_t cbField = CeilDivide<UINT>(cBits, 8);
         size_t cbFrame = 2 + (cbField * 4);
@@ -1949,7 +1949,7 @@ struct RVAD final : public FRAME
             return Result::ReservedData;
         if (cBits > 64)
             return Result::Value;
-        bHasBack = bHasCenter = bHasBass = FALSE;
+        bHasBack = bHasCenter = bHasBass = false;
         VolRight = VolLeft = PeakRight = PeakLeft = 0;
         VolRightBack = VolLeftBack = PeakRightBack = PeakLeftBack = 0;
         VolCenter = PeakCenter = VolBass = PeakBass = 0;
@@ -1964,7 +1964,7 @@ struct RVAD final : public FRAME
         }
         if (!w.IsEnd())
         {
-            bHasBack = TRUE;
+            bHasBack = true;
             w.ReadReversed(&VolRightBack, cbField);
             w.ReadReversed(&VolLeftBack, cbField);
             w.ReadReversed(&PeakRightBack, cbField);
@@ -1972,13 +1972,13 @@ struct RVAD final : public FRAME
         }
         if (!w.IsEnd())
         {
-            bHasCenter = TRUE;
+            bHasCenter = true;
             w.ReadReversed(&VolCenter, cbField);
             w.ReadReversed(&PeakCenter, cbField);
         }
         if (!w.IsEnd())
         {
-            bHasBass = TRUE;
+            bHasBass = true;
             w.ReadReversed(&VolBass, cbField);
             w.ReadReversed(&PeakBass, cbField);
         }
@@ -2006,7 +2006,7 @@ struct EQUA final : public FRAME
     {
         if (!cBits || cBits > 63)
             return Result::Value;
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         const size_t cbField = CeilDivide<UINT>(cBits, 8);
         const size_t cbFrame = 1 + vAdjust.size() * (2 + cbField);
@@ -2091,7 +2091,7 @@ struct TXXX_ReplayGain : public TXXX
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         const auto rsVal = Format(
             (eType == ReplayGainType::TrackGain || eType == ReplayGainType::AlbumGain) ?
@@ -2145,7 +2145,7 @@ struct RGAD final : public FRAME
 
     Result Serialize(CByteBuffer& rb, const SERIAL_CONTEXT& Ctx) noexcept override
     {
-        bFileAlterDiscard = TRUE;
+        bFileAlterDiscard = true;
 
         const size_t cbFrame = 4 + 2 + 2;
         auto w = PreSerialize(rb, Ctx, cbFrame);

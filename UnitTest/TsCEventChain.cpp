@@ -31,7 +31,7 @@ public:
     {
         value = x;
         if (x > 100)
-            ctx.Processed(TRUE);
+            ctx.Processed(true);
     }
 
     int InterceptMethodWithReturn(int x, Slot& ctx)
@@ -39,7 +39,7 @@ public:
         value = x;
         if (x > 100)
         {
-            ctx.Processed(TRUE);
+            ctx.Processed(true);
             return x * 10;
         }
         return x * 2;
@@ -66,7 +66,7 @@ void InterceptFunc(int x, Slot& ctx)
 {
     g_testValue = x;
     if (x > 50)
-        ctx.Processed(TRUE);
+        ctx.Processed(true);
 }
 
 int InterceptFuncWithReturn(int x, Slot& ctx)
@@ -74,7 +74,7 @@ int InterceptFuncWithReturn(int x, Slot& ctx)
     g_testValue = x;
     if (x > 50)
     {
-        ctx.Processed(TRUE);
+        ctx.Processed(true);
         return x * 5;
     }
     return x * 3;
@@ -108,7 +108,7 @@ public:
 
         signal.Connect([](int x, Slot& Ctx)
             {
-                Ctx.Processed(TRUE);
+                Ctx.Processed(true);
                 return x * 2; });
 
         int result = signal.Emit(21);
@@ -303,7 +303,7 @@ public:
         signal.Connect([&](int x, Slot& ctx) {
             order.push_back(1);
             if (x > 50)
-                ctx.Processed(TRUE);
+                ctx.Processed(true);
             });
 
         signal.Emit(100);
@@ -327,7 +327,7 @@ public:
         signal.Connect([](int x, Slot& ctx) -> int {
             if (x > 50)
             {
-                ctx.Processed(TRUE);
+                ctx.Processed(true);
                 return x * 10;
             }
             return x * 2;
@@ -380,7 +380,7 @@ public:
         CEventChain<Intercept_T, int, int> signal;
 
         signal.Connect([](int x, Slot& ctx) -> int {
-            ctx.Processed(TRUE);
+            ctx.Processed(true);
             return x + 100;
             });
         signal.Connect([&signal](int x, Slot& ctx) -> int {
@@ -429,7 +429,7 @@ public:
         signal.Emit(0);
         Assert::AreEqual(2, count);
 
-        BOOL result = signal.Disconnect(100);
+        bool result = signal.Disconnect(100);
         Assert::IsTrue(result);
 
         count = 0;
@@ -444,7 +444,7 @@ public:
 
         signal.Connect([](int x) {}, 100);
 
-        BOOL result = signal.Disconnect(999);
+        bool result = signal.Disconnect(999);
         Assert::IsFalse(result);
     }
 
@@ -555,7 +555,7 @@ public:
         signal2.Connect([&](int x, Slot& ctx) {
             order.push_back(20);
             if (x > 50)
-                ctx.Processed(TRUE);
+                ctx.Processed(true);
             });
 
         signal1.Connect(signal2);
@@ -600,7 +600,7 @@ public:
             return "no2";
             });
         signal.Connect([](int i, std::string s, Slot& ctx) {
-            ctx.Processed(TRUE);
+            ctx.Processed(true);
             return s + std::to_string(i);
             });
         signal.Connect([](int i, std::string s, Slot& ctx) {
@@ -667,7 +667,7 @@ public:
 
         signal.Connect([](int x, Slot& ctx)
             {
-                ctx.Processed(TRUE);
+                ctx.Processed(true);
                 return x * 2;
             });
         result = signal.EmitWithDefault(ctx, 999, 42);

@@ -165,7 +165,7 @@ inline void LcsUtf8DecodeChar(
 }
 
 EckNfInlineNdCe int LcsUtf8CountChar(
-    _In_reads_or_z_(cch) PCCH psz, int cch, _Out_ BOOL& bValid) noexcept
+    _In_reads_or_z_(cch) PCCH psz, int cch, _Out_ bool& bValid) noexcept
 {
     if (cch < 0)
         cch = (int)strlen(psz);
@@ -180,7 +180,7 @@ EckNfInlineNdCe int LcsUtf8CountChar(
             ++c;
         else if (byState == UTF8DC_REJECT)
         {
-            bValid = FALSE;
+            bValid = false;
             return c;
         }
     }
@@ -225,8 +225,8 @@ inline int LcsUtf16LeToUtf32(
     _In_reads_or_z_(cch) PCWCH psz,
     int cch,
     _Out_writes_(cch) UINT* pOut,
-    _Out_ BOOL& bValid,
-    BOOL bLittleEndian) noexcept
+    _Out_ bool& bValid,
+    bool bLittleEndian) noexcept
 {
     if (cch < 0)
         cch = (int)wcslen(psz);
@@ -241,7 +241,7 @@ inline int LcsUtf16LeToUtf32(
             if (pNext >= pEnd ||
                 !IS_LOW_SURROGATE(*pNext))
             {
-                bValid = FALSE;
+                bValid = false;
                 return int(psz - p);
             }
             u = 0x10000 + (((*p - 0xD800) << 10) | (*pNext - 0xDC00));
@@ -249,14 +249,14 @@ inline int LcsUtf16LeToUtf32(
         }
         else if (IS_LOW_SURROGATE(*p))
         {
-            bValid = FALSE;
+            bValid = false;
             return int(psz - p);
         }
         else
             u = *p;
         *pOut++ = (bLittleEndian ? u : ReverseInteger(u));
     }
-    bValid = TRUE;
+    bValid = true;
     return int(pOut - pOutOrg);
 }
 ECK_NAMESPACE_END

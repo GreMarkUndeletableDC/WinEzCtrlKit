@@ -35,7 +35,7 @@ protected:
         const auto bHasIdealSize =
             (e.uFlags & LF_IDEAL) ?
             e.pObject->LoGetIdealSize(sizeIdeal) :
-            FALSE;
+            false;
         if (bHasIdealSize)
         {
             if (e.uFlags & LF_IDEAL_WIDTH)
@@ -45,7 +45,7 @@ protected:
         }
     }
 public:
-    void LoShow(BOOL bShow) noexcept override
+    void LoShow(bool bShow) noexcept override
     {
         for (const auto& e : m_vItem)
             e.pObject->LoShow(bShow);

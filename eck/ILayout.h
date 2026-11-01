@@ -40,13 +40,13 @@ struct __declspec(novtable) ILayout : public CObject
 
     // 输入参照尺寸（可为0），基于参照尺寸计算理想尺寸，更具体的行为由实现决定
     // 如果未实现此函数，返回FALSE
-    virtual BOOL LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept { return FALSE; }
+    virtual bool LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept { return false; }
     virtual void LoSetPosition(LYTPOINT pt) noexcept = 0;
     virtual void LoSetSize(LYTSIZE size) noexcept = 0;
     virtual void LoSetRect(const LYTRECT& rc) noexcept = 0;
     virtual LYTPOINT LoGetPosition() noexcept = 0;
     virtual LYTSIZE LoGetSize() noexcept = 0;
-    virtual void LoShow(BOOL bShow) noexcept = 0;
+    virtual void LoShow(bool bShow) noexcept = 0;
     // 提交对布局所做的修改，通常仅对非原子布局生效
     virtual void LoCommit() noexcept {}
     // 若当前类为窗口，则返回窗口句柄
@@ -64,7 +64,7 @@ struct __declspec(novtable) ILayout : public CObject
     // 到其下的所有子布局
     // WARNING Win32要求被录制窗口必须具有相同的父窗口，若确实可能违反此限制，
     // 调用方可对布局器使用SetUseDwp
-    virtual BOOL LoDwpAttach(HDWP hDwp) noexcept { return FALSE; }
+    virtual bool LoDwpAttach(HDWP hDwp) noexcept { return false; }
     // 取回DWP句柄，若返回值有效，所有权归属调用方
     // LoDwpAttach成功后必须调用本函数
     virtual HDWP LoDwpDetach() noexcept { return nullptr; }

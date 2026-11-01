@@ -30,12 +30,12 @@ private:
         return iPos;
     }
 public:
-    BOOL ToLogFont(LOGFONTW& lf) noexcept
+    bool ToLogFont(LOGFONTW& lf) noexcept
     {
         const auto rs = GetText();
         const int iPos = FindFontName(rs);
         if (iPos < 0)
-            return FALSE;
+            return false;
 
         wcsncpy_s(lf.lfFaceName, rs.Data(), iPos);
 
@@ -47,15 +47,15 @@ public:
         ReleaseDC(Handle, hDC);
 
         lf.lfWeight = iWeight;
-        return TRUE;
+        return true;
     }
 
-    BOOL FromInformation(const FONTPICKERINFO& fpi) noexcept
+    bool FromInformation(const FONTPICKERINFO& fpi) noexcept
     {
         WCHAR szBuf[LF_FACESIZE + Int32StringBufferSize * 2 + 5];
         swprintf_s(szBuf, L"%s,%d,%d", fpi.pszFontName, fpi.iPointSize, fpi.iWeight);
         SetText(szBuf);
-        return TRUE;
+        return true;
     }
 
     [[nodiscard]] CStringW ToInformation(FONTPICKERINFO& fpi)
@@ -72,7 +72,7 @@ public:
     void OnButtonClick() noexcept override
     {
         LOGFONTW lf{};
-        const BOOL bHasInfo = ToLogFont(lf);
+        const bool bHasInfo = ToLogFont(lf);
 
         CHOOSEFONTW cf{ sizeof(CHOOSEFONTW) };
         cf.hwndOwner = Handle;

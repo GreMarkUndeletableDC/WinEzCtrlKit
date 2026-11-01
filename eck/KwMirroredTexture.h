@@ -20,7 +20,7 @@ private:
 public:
     // 先创建CPU缓冲区，然后才能创建GPU缓冲区
 
-    void CpuCreate(BYTE cbPixel, BOOL bZero, TCoord cx, TCoord cy) noexcept
+    void CpuCreate(BYTE cbPixel, bool bZero, TCoord cx, TCoord cy) noexcept
     {
         m_cbPixel = cbPixel;
         m_Buffer.ReSize(PixelCb() * cx * cy);
@@ -29,7 +29,7 @@ public:
         m_cx = cx, m_cy = cy;
     }
     HRESULT GpuCreate(
-        BOOL bUpload,
+        bool bUpload,
         DXGI_FORMAT eFormat = DXGI_FORMAT_B8G8R8A8_UNORM,
         UINT uBind = D3D11_BIND_SHADER_RESOURCE) noexcept
     {
@@ -60,7 +60,7 @@ public:
             &Desc, &Data, m_pTexture.AtClear());
     }
 
-    void CpuReSize(BOOL bZero, TCoord cx, TCoord cy) noexcept
+    void CpuReSize(bool bZero, TCoord cx, TCoord cy) noexcept
     {
         m_Buffer.ReSize(PixelCb() * cx * cy);
         m_cx = cx, m_cy = cy;
@@ -68,7 +68,7 @@ public:
             CpuZero();
     }
     // 重设大小，但在左上角保留原有数据
-    void CpuReSizeReserve(BOOL bZeroExtended, TCoord cx, TCoord cy) noexcept
+    void CpuReSizeReserve(bool bZeroExtended, TCoord cx, TCoord cy) noexcept
     {
         CTrivialBuffer<BYTE> NewBuffer{};
         const auto cbPixel = PixelCb();
@@ -91,7 +91,7 @@ public:
         m_cx = cx;
         m_cy = cy;
     }
-    HRESULT GpuReSize(BOOL bUpload) noexcept
+    HRESULT GpuReSize(bool bUpload) noexcept
     {
         if (!m_pTexture.Get())
             return E_NOT_VALID_STATE;

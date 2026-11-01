@@ -133,15 +133,15 @@ public:
         else
             m_vCtrl.emplace(it, CTRL{ hWnd, Extra });
     }
-    BOOL Remove(HWND hWnd) noexcept
+    bool Remove(HWND hWnd) noexcept
     {
         const auto it = LowerBound(hWnd);
         if (it != m_vCtrl.end() && it->hWnd == hWnd)
         {
             m_vCtrl.erase(it);
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
     const TExtra* At(HWND hWnd) const noexcept
     {
@@ -165,12 +165,12 @@ EckInlineNd CWindow::HSlot DdxpConnect(CWindow& Ctrl, CWindow& Parent, const TEx
     return hSlot;
 }
 template<class Fn, USHORT Id>
-EckInlineNd BOOL DdxpDisconnect(CWindow& Ctrl, CWindow& Parent) noexcept
+EckInlineNd bool DdxpDisconnect(CWindow& Ctrl, CWindow& Parent) noexcept
 {
     auto& ec = Parent.GetEventChain();
     const auto hSlot = ec.FindSlot(Id);
     if (hSlot)
         return ec.GetFunctionTarget<Fn>(hSlot)->Remove(Ctrl.Handle);
-    return FALSE;
+    return false;
 }
 ECK_NAMESPACE_END

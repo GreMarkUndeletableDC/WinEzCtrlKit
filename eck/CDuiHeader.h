@@ -18,7 +18,7 @@ public:
     struct HITTEST
     {
         Kw::Vec2 pt;
-        BOOLEAN bHitDivider;
+        bool bHitDivider;
         int io;
     };
 
@@ -65,7 +65,7 @@ private:
     USHORT m_msLastDuration{};
 
     BITBOOL m_bDraggable : 1{};
-    BITBOOL m_bAllowReSize : 1{ TRUE };
+    BITBOOL m_bAllowReSize : 1{ true };
 
     BITBOOL m_bHitDivider : 1{};
     BITBOOL m_bDragging : 1{};
@@ -146,7 +146,7 @@ private:
     // 为了方便起见，允许传入超出有效范围的序号，函数自动夹紧到[0, ItemCount)
     void ReCalculateItemPosition(int ioBegin = 0) noexcept
     {
-        m_bAnimating = FALSE;
+        m_bAnimating = false;
         if (ioBegin >= GetItemCount())
             return;
         if (ioBegin < 0)
@@ -212,7 +212,7 @@ private:
         ReCalculateItemPosition(std::min(io, ioNew));
     }
 
-    void DragEnd(BOOL bCommitOrder) noexcept
+    void DragEnd(bool bCommitOrder) noexcept
     {
         if (m_idxDrag < 0)
             return;
@@ -237,10 +237,10 @@ private:
         m_ioDrag = -1;
         m_ioInsertMark = -1;
         m_idxHot = -1;
-        m_bHitDivider = FALSE;
-        m_bDragging = FALSE;
-        m_bDraggingDivider = FALSE;
-        m_bAnimating = FALSE;
+        m_bHitDivider = false;
+        m_bDragging = false;
+        m_bDraggingDivider = false;
+        m_bAnimating = false;
 
         GetWindow().RdLockUpdate();
         if (ioTo != ioDragOld)
@@ -301,9 +301,9 @@ private:
         return ioBest;
     }
 
-    BOOL DragBeginAnimation() noexcept
+    bool DragBeginAnimation() noexcept
     {
-        BOOL bNeedAnimation{};
+        bool bNeedAnimation{};
         EckCounter(GetItemCount(), i)
         {
             if (i == m_idxDrag)
@@ -311,12 +311,12 @@ private:
             auto& e = m_vItem[i];
             e.xStart = e.x;
             if (fabsf(e.xTarget - e.x) > 0.1f)
-                bNeedAnimation = TRUE;
+                bNeedAnimation = true;
         }
 
         if (bNeedAnimation)
         {
-            m_bAnimating = TRUE;
+            m_bAnimating = true;
             m_ec.Start(0.f, 1.f);
             GetWindow().KctWake();
         }
@@ -328,7 +328,7 @@ private:
                     continue;
                 m_vItem[i].x = m_vItem[i].xTarget;
             }
-            m_bAnimating = FALSE;
+            m_bAnimating = false;
         }
         return bNeedAnimation;
     }
@@ -348,11 +348,11 @@ private:
         rcItem.bottom = GetHeight();
     }
 public:
-    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(bool bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(bool bDark) noexcept
     {
-        static auto p1{ TmMakeDefaultTheme(TRUE) };
-        static auto p2{ TmMakeDefaultTheme(FALSE) };
+        static auto p1{ TmMakeDefaultTheme(true) };
+        static auto p2{ TmMakeDefaultTheme(false) };
         return bDark ? p1 : p2;
     }
 
@@ -399,9 +399,9 @@ public:
             if (m_bAllowReSize && m_bHitDivider)
             {
                 SetCursor(LoadCursorW(nullptr, IDC_SIZEWE));
-                return TRUE;
+                return true;
             }
-            return FALSE;
+            return false;
 
         case WM_MOUSEMOVE:
         {
@@ -457,7 +457,7 @@ public:
                 {
                     if (m_bDraggable)
                     {
-                        m_bDragging = TRUE;
+                        m_bDragging = true;
                         m_xDragOffset = ht.pt.x - m_vItem[idx].x;
                         m_ioInsertMark = ht.io;
                         DragSavePosition();
@@ -491,7 +491,7 @@ public:
         {
             int idx{ -1 };
             std::swap(m_idxHot, idx);
-            m_bHitDivider = FALSE;
+            m_bHitDivider = false;
             if (idx >= 0)
                 InvalidateItem(idx);
         }
@@ -508,12 +508,12 @@ public:
             m_idxDrag = idx;
             m_ioDrag = ht.io;
             m_idxPressed = idx;
-            m_bAnimating = FALSE;
+            m_bAnimating = false;
 
             if (ht.bHitDivider && m_bAllowReSize &&
                 uMsg == WM_LBUTTONDOWN)
             {
-                m_bDraggingDivider = TRUE;
+                m_bDraggingDivider = true;
                 m_xDragOffset = ht.pt.x - m_vItem[idx].x - m_vItem[idx].cx;
             }
             InvalidateItem(idx);
@@ -523,13 +523,13 @@ public:
         {
             if (m_idxDrag >= 0)
             {
-                DragEnd(TRUE);
+                DragEnd(true);
                 ReleaseCapture();
             }
         }
         return 0;
         case WM_CAPTURECHANGED:
-            DragEnd(FALSE);
+            DragEnd(false);
             break;
 
         case WM_SETFONT:
@@ -564,7 +564,7 @@ public:
         m_msLastDuration = (USHORT)iMs;
         if (!m_bDragging || m_idxDrag < 0 || m_idxDrag >= GetItemCount())
         {
-            m_bAnimating = FALSE;
+            m_bAnimating = false;
             return;
         }
 
@@ -590,11 +590,11 @@ public:
                         0,
                         std::max(e.x, xOld) + e.cx,
                         GetHeight()
-                    }, FALSE);
+                    }, false);
             }
         }
     }
-    BOOL TlIsValid() noexcept override { return m_bAnimating; }
+    bool TlIsValid() noexcept override { return m_bAnimating; }
     int TlGetCurrentInterval() const noexcept override { return (int)m_msLastDuration; }
 
     void EvtWidthChanged(int idx) noexcept
@@ -632,8 +632,8 @@ public:
 
     int InsertItem(int idx, std::wstring_view sv, float cx = 100.f) noexcept
     {
-        DragEnd(FALSE);
-        m_bAnimating = FALSE;
+        DragEnd(false);
+        m_bAnimating = false;
 
         if (idx < 0 || idx > GetItemCount())
             idx = GetItemCount();
@@ -662,8 +662,8 @@ public:
 
     void DeleteItem(int idx) noexcept
     {
-        DragEnd(FALSE);
-        m_bAnimating = FALSE;
+        DragEnd(false);
+        m_bAnimating = false;
 
         if (m_idxHot == idx)
             m_idxHot = -1;
@@ -713,10 +713,10 @@ public:
         m_idxDrag = -1;
         m_ioDrag = -1;
         m_ioInsertMark = -1;
-        m_bHitDivider = FALSE;
-        m_bDragging = FALSE;
-        m_bDraggingDivider = FALSE;
-        m_bAnimating = FALSE;
+        m_bHitDivider = false;
+        m_bDragging = false;
+        m_bDraggingDivider = false;
+        m_bAnimating = false;
     }
 
     void SetItemText(int idx, std::wstring_view sv) noexcept
@@ -736,16 +736,16 @@ public:
 
     EckInlineNdCe int GetItemCount() const noexcept { return (int)m_vItem.size(); }
 
-    EckInlineCe void SetDraggable(BOOL b) noexcept { m_bDraggable = b; }
-    EckInlineNdCe BOOL GetDraggable() const noexcept { return m_bDraggable; }
+    EckInlineCe void SetDraggable(bool b) noexcept { m_bDraggable = b; }
+    EckInlineNdCe bool GetDraggable() const noexcept { return m_bDraggable; }
 
-    EckInlineCe void SetAllowReSize(BOOL b) noexcept
+    EckInlineCe void SetAllowReSize(bool b) noexcept
     {
         m_bAllowReSize = b;
         if (!m_bAllowReSize)
-            m_bHitDivider = FALSE;
+            m_bHitDivider = false;
     }
-    EckInlineNdCe BOOL GetAllowReSize() const noexcept { return m_bAllowReSize; }
+    EckInlineNdCe bool GetAllowReSize() const noexcept { return m_bAllowReSize; }
 
     void InvalidateCache(int idx = -1) noexcept
     {
@@ -766,15 +766,15 @@ public:
             {
                 if (m_bAllowReSize &&
                     ht.pt.x > e.x + e.cx - DividerHitTestWidthHalf)
-                    ht.bHitDivider = TRUE;// 分隔条左界
+                    ht.bHitDivider = true;// 分隔条左界
                 else
-                    ht.bHitDivider = FALSE;
+                    ht.bHitDivider = false;
                 ht.io = io;
                 return OrderToIndex(io);
             }
         }
         ht.io = -1;
-        ht.bHitDivider = FALSE;
+        ht.bHitDivider = false;
         return -1;
     }
 
@@ -841,7 +841,7 @@ public:
         return TmResult::Ok;
     }
 };
-inline RcPtr<CTheme> CHeader::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CHeader::TmMakeDefaultTheme(bool bDark) noexcept
 {
     const auto pTheme = TmMakeTheme<CTmHeader>(bDark);
     const auto pmc = TmsMakeMetricCollection();

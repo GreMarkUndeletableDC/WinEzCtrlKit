@@ -5,7 +5,7 @@
 #include "../ThirdPartyLibrary/ZLib/zlib.h"
 
 ECK_NAMESPACE_BEGIN
-EckInlineNdCe BOOL ZLibSuccess(int iRet) noexcept { return iRet >= 0; }
+EckInlineNdCe bool ZLibSuccess(int iRet) noexcept { return iRet >= 0; }
 
 inline int ZLibDecompress(_In_reads_bytes_(cbOrg) PCVOID pOrg,
     size_t cbOrg, CByteBuffer& rbResult) noexcept

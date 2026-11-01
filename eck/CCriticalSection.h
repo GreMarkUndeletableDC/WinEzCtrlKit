@@ -26,7 +26,7 @@ public:
         RtlEnterCriticalSection(&m_cs);
     }
 
-    EckInline BOOL TryEnter() noexcept
+    EckInline bool TryEnter() noexcept
     {
         return RtlTryEnterCriticalSection(&m_cs);
     }

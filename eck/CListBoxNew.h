@@ -102,22 +102,22 @@ private:
     int m_cyItem{ 24 };
     int m_cyFont{};
 
-    BITBOOL m_bMultiSel : 1 = FALSE;    // 多选
-    BITBOOL m_bExtendSel : 1 = FALSE;   // 扩展多选
-    BITBOOL m_bAllowDrag : 1 = FALSE;   // 允许拖放项目
-    BITBOOL m_bAutoItemHeight : 1 = TRUE;       // 自动计算项目高度
+    BITBOOL m_bMultiSel : 1 = false;    // 多选
+    BITBOOL m_bExtendSel : 1 = false;   // 扩展多选
+    BITBOOL m_bAllowDrag : 1 = false;   // 允许拖放项目
+    BITBOOL m_bAutoItemHeight : 1 = true;       // 自动计算项目高度
 
 #ifdef _DEBUG
     BITBOOL m_bDbgDrawMarkItem : 1 = 0; // [调试]绘制标记项目
 #endif
-    BITBOOL m_bHasFocus : 1 = FALSE;    // 是否有焦点
-    BITBOOL m_bLBtnDown : 1 = FALSE;    // 鼠标左键已按下
-    BITBOOL m_bRBtnDown : 1 = FALSE;    // 鼠标右键已按下
+    BITBOOL m_bHasFocus : 1 = false;    // 是否有焦点
+    BITBOOL m_bLBtnDown : 1 = false;    // 鼠标左键已按下
+    BITBOOL m_bRBtnDown : 1 = false;    // 鼠标右键已按下
     BITBOOL m_bFocusIndicatorVisible : 1 = Debug;   // 焦点指示器是否可见
-    BITBOOL m_bNmDragging : 1 = FALSE;          // 正在拖放项目，产生NM_LBN_BEGINDRAG时设置为TRUE
-    BITBOOL m_bTrackComboBoxList : 1 = FALSE;   // 正在作为组合框的下拉列表显示
-    BITBOOL m_bProtectCapture : 1 = FALSE;      // 允许其他窗口占用鼠标捕获，通常用于弹出下拉列表时显示菜单等
-    BITBOOL m_bGenItemNotify : 1 = FALSE;       // 是否生成项目通知
+    BITBOOL m_bNmDragging : 1 = false;          // 正在拖放项目，产生NM_LBN_BEGINDRAG时设置为TRUE
+    BITBOOL m_bTrackComboBoxList : 1 = false;   // 正在作为组合框的下拉列表显示
+    BITBOOL m_bProtectCapture : 1 = false;      // 允许其他窗口占用鼠标捕获，通常用于弹出下拉列表时显示菜单等
+    BITBOOL m_bGenItemNotify : 1 = false;       // 是否生成项目通知
 
     int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
 
@@ -151,7 +151,7 @@ private:
         return NotifyItemChanged(idx, idx, uOldFlags, uNewFlags);
     }
 
-    BOOL OnCreate(HWND hWnd, CREATESTRUCTW* pcs) noexcept
+    bool OnCreate(HWND hWnd, CREATESTRUCTW* pcs) noexcept
     {
         m_hParent = pcs->hwndParent;
 
@@ -162,7 +162,7 @@ private:
 
         SetItemsViewTheme();
         m_hTheme = OpenThemeData(hWnd, L"ListView");
-        return TRUE;
+        return true;
     }
 
     void OnPaint(HWND hWnd, WPARAM wParam) noexcept
@@ -440,10 +440,10 @@ private:
 
                 case WM_MOUSEWHEEL:
                 {
-                    SetRedraw(FALSE);// 暂时禁止重画
+                    SetRedraw(false);// 暂时禁止重画
                     TranslateMessage(&msg);
                     DispatchMessageW(&msg);
-                    SetRedraw(TRUE);
+                    SetRedraw(true);
                 }
                 break;
 
@@ -459,9 +459,9 @@ private:
 
                     if (yDelta)
                     {
-                        SetRedraw(FALSE);
+                        SetRedraw(false);
                         ScrollV(yDelta);
-                        SetRedraw(TRUE);
+                        SetRedraw(true);
                     }
                     //----------选中
                     int idxCurr = HitTest(0, pt.y);
@@ -549,10 +549,10 @@ private:
         }
     ExitDraggingLoop:
         ReleaseCapture();
-        m_bLBtnDown = FALSE;
+        m_bLBtnDown = false;
     }
 
-    void OnLButtonDown(HWND hWnd, BOOL bDoubleClick, int x, int y, UINT uKeyFlags) noexcept
+    void OnLButtonDown(HWND hWnd, bool bDoubleClick, int x, int y, UINT uKeyFlags) noexcept
     {
         if (m_hComboBox)
         {
@@ -573,7 +573,7 @@ private:
                 POINT ptScr{ x,y };
                 ClientToScreen(hWnd, &ptScr);
                 EckAssert(GetCapture() == hWnd);
-                m_bLBtnDown = FALSE;
+                m_bLBtnDown = false;
                 CbBeginProtectCapture();
                 ReleaseCapture();
                 __super::OnMessage(WM_NCLBUTTONDOWN,
@@ -585,7 +585,7 @@ private:
             }
             else// 通常情况
             {
-                m_bLBtnDown = TRUE;
+                m_bLBtnDown = true;
 
                 const int idx = HitTest(x, y);
                 if (idx < 0)
@@ -618,7 +618,7 @@ private:
         {
             if (!IsValid())// revalidate
                 return;
-            m_bLBtnDown = TRUE;
+            m_bLBtnDown = true;
             SetCapture(hWnd);
 
             int idxHot{ -1 };
@@ -628,7 +628,7 @@ private:
 
             if (m_bAllowDrag)
             {
-                m_bNmDragging = TRUE;
+                m_bNmDragging = true;
                 NMLBNDRAG nm;
                 nm.idx = idx;
                 nm.uKeyFlags = uKeyFlags;
@@ -670,7 +670,7 @@ private:
         m_oyTop = m_idxTop * m_cyItem - ySB;
     }
 
-    void PaintItem(NMCUSTOMDRAWEXT& ne, BOOL bNotifyItemDraw) noexcept
+    void PaintItem(NMCUSTOMDRAWEXT& ne, bool bNotifyItemDraw) noexcept
     {
         const auto* const ptc = PtcCurrent();
         const int idx = (int)ne.dwItemSpec;
@@ -698,11 +698,11 @@ private:
         const auto lRet = bNotifyItemDraw ? NmSend(ne, m_hParent) : 0;
         if (!(lRet & CDRF_SKIPDEFAULT))
         {
-            BOOL bFillBk{};
+            bool bFillBk{};
             if (ne.crBk != CLR_DEFAULT)
             {
                 if (ShouldAppsUseDarkMode())
-                    bFillBk = TRUE;
+                    bFillBk = true;
                 else
                 {
                     SetDCBrushColor(ne.hdc, ne.crBk);
@@ -851,13 +851,13 @@ public:
                 const RECT rcClient{ 0,0,m_cxClient,m_cyClient };
                 if (!PointInRect(rcClient, ECK_GET_PT_LPARAM(lParam)))
                     break;
-                m_bRBtnDown = TRUE;
+                m_bRBtnDown = true;
                 // 无需捕获鼠标
                 EckAssert(m_bTrackComboBoxList);
             }
             else
             {
-                m_bRBtnDown = TRUE;
+                m_bRBtnDown = true;
                 SetCapture(Handle);
             }
         }
@@ -881,7 +881,7 @@ public:
             {
                 if (!m_hComboBox)
                     ReleaseCapture();
-                m_bRBtnDown = FALSE;
+                m_bRBtnDown = false;
                 NMMOUSENOTIFY nm;
                 nm.pt = ECK_GET_PT_LPARAM(lParam);
                 nm.uKeyFlags = (UINT)wParam;
@@ -898,7 +898,7 @@ public:
         {
             if (m_bLBtnDown)
             {
-                m_bLBtnDown = FALSE;
+                m_bLBtnDown = false;
                 POINT pt ECK_GET_PT_LPARAM(lParam);
                 ReleaseCapture();
                 if (!m_hComboBox && m_bNmDragging)
@@ -1046,14 +1046,14 @@ public:
         {
             if (m_hComboBox)
             {
-                m_bLBtnDown = FALSE;
-                m_bRBtnDown = FALSE;
+                m_bLBtnDown = false;
+                m_bRBtnDown = false;
                 if (!m_bProtectCapture)
                     CbNotifyDismiss();
             }
             else
             {
-                m_bRBtnDown = FALSE;
+                m_bRBtnDown = false;
                 if (m_bLBtnDown)
                 {
                     POINT pt;
@@ -1067,7 +1067,7 @@ public:
 
         case WM_SETFOCUS:
         {
-            m_bHasFocus = TRUE;
+            m_bHasFocus = true;
 
             NMFOCUS nm;
             nm.hWnd = (HWND)wParam;
@@ -1077,7 +1077,7 @@ public:
 
         case WM_KILLFOCUS:
         {
-            m_bHasFocus = FALSE;
+            m_bHasFocus = false;
 
             NMFOCUS nm;
             nm.hWnd = (HWND)wParam;
@@ -1135,7 +1135,7 @@ public:
             m_oyTop = 0;
             m_SelRange.Clear();
             m_bHasFocus = m_bLBtnDown =
-                m_bNmDragging = m_bTrackComboBoxList = FALSE;
+                m_bNmDragging = m_bTrackComboBoxList = false;
             m_hComboBox = nullptr;
         }
         break;
@@ -1203,7 +1203,7 @@ public:
 
     EckInlineNdCe int GetCurrentSelection() const noexcept { return m_idxSel; }
 
-    EckInlineNdCe BOOL IsItemSelected(int idx) noexcept
+    EckInlineNdCe bool IsItemSelected(int idx) noexcept
     {
         if (m_bMultiSel || m_bExtendSel)
             return m_SelRange.IsSelected(idx);
@@ -1287,7 +1287,7 @@ public:
 
     void SetItemHeight(int cy) noexcept
     {
-        m_bAutoItemHeight = FALSE;
+        m_bAutoItemHeight = false;
         m_cyItem = cy;
         ReCalculateScrollBar();
     }
@@ -1309,7 +1309,7 @@ public:
     EckInline void CbEnterTrack() noexcept
     {
         SetCapture(Handle);
-        m_bTrackComboBoxList = TRUE;
+        m_bTrackComboBoxList = true;
     }
 
     EckInline void CbLeaveTrack() noexcept
@@ -1317,30 +1317,30 @@ public:
         if (m_bTrackComboBoxList)
         {
             ReleaseCapture();
-            m_bTrackComboBoxList = FALSE;
+            m_bTrackComboBoxList = false;
         }
     }
 
     EckInline void CbBeginProtectCapture() noexcept
     {
         EckAssert(m_hComboBox && !m_bProtectCapture);
-        m_bProtectCapture = TRUE;
+        m_bProtectCapture = true;
     }
 
     EckInline void CbEndProtectCapture() noexcept
     {
         EckAssert(m_hComboBox && m_bProtectCapture);
-        m_bProtectCapture = FALSE;
+        m_bProtectCapture = false;
     }
 #pragma endregion 组合框交互
 
-    EckInline constexpr void SetMultiSel(BOOL b) noexcept { m_bMultiSel = b; }
-    EckInline constexpr BOOL GetMultiSel() const noexcept { return m_bMultiSel; }
+    EckInline constexpr void SetMultiSel(bool b) noexcept { m_bMultiSel = b; }
+    EckInline constexpr bool GetMultiSel() const noexcept { return m_bMultiSel; }
 
-    EckInline constexpr void SetExtendSel(BOOL b) noexcept { m_bExtendSel = b; }
-    EckInline constexpr BOOL GetExtendSel() const noexcept { return m_bExtendSel; }
+    EckInline constexpr void SetExtendSel(bool b) noexcept { m_bExtendSel = b; }
+    EckInline constexpr bool GetExtendSel() const noexcept { return m_bExtendSel; }
 
-    void SetAutoItemHeight(BOOL b) noexcept
+    void SetAutoItemHeight(bool b) noexcept
     {
         m_bAutoItemHeight = b;
         if (b)
@@ -1349,7 +1349,7 @@ public:
             ReCalculateScrollBar();
         }
     }
-    EckInlineNdCe BOOL GetAutoItemHeight() const noexcept { return m_bAutoItemHeight; }
+    EckInlineNdCe bool GetAutoItemHeight() const noexcept { return m_bAutoItemHeight; }
 
     EckInlineCe void SetNotifyParentWindow(HWND h) noexcept { m_hParent = h; }
 
@@ -1414,8 +1414,8 @@ public:
         return -1;
     }
 
-    EckInlineCe void SetGenerateItemNotify(BOOL b) noexcept { m_bGenItemNotify = b; }
-    EckInlineNdCe BOOL GetGenerateItemNotify() const noexcept { return m_bGenItemNotify; }
+    EckInlineCe void SetGenerateItemNotify(bool b) noexcept { m_bGenItemNotify = b; }
+    EckInlineNdCe bool GetGenerateItemNotify() const noexcept { return m_bGenItemNotify; }
 
     EckInlineNdCe HTHEME GetThemeHandle() const noexcept { return m_hTheme; }
 };

@@ -45,7 +45,7 @@ public:
 
     CByteBufferT(PCVOID p, size_t cb, const TAllocator& Al = TAllocator{}) : m_Alloc{ Al }
     {
-        EckAssert(p ? TRUE : (cb == 0));
+        EckAssert(p ? true : (cb == 0));
         Assign(p, cb);
     }
 
@@ -156,7 +156,7 @@ public:
     EckInlineNdCe const BYTE* Data() const noexcept { return m_pStream; }
     EckInlineNdCe size_t Capacity() const noexcept { return m_cbCapacity; }
     EckInlineNdCe size_t Size() const noexcept { return m_cb; }
-    EckInlineNdCe BOOL IsEmpty() const noexcept { return Size() == 0; }
+    EckInlineNdCe bool IsEmpty() const noexcept { return Size() == 0; }
 
     EckInline void Assign(PCVOID p, size_t cb)
     {
@@ -244,7 +244,7 @@ public:
     EckInline void Replace(size_t posStart, size_t cbReplacing,
         PCVOID pNew = nullptr, size_t cbNew = 0u)
     {
-        EckAssert(cbNew ? (!!pNew) : TRUE);
+        EckAssert(cbNew ? (!!pNew) : true);
         const size_t cbOrg = Size();
         ReSizeExtra(Size() + cbNew - cbReplacing);
         memmove(
@@ -391,7 +391,7 @@ public:
     EckInline CByteBufferT& Insert(size_t pos, PCVOID p, size_t cb)
     {
         EckAssert(pos <= Size());
-        EckAssert(p ? TRUE : (cb == 0));
+        EckAssert(p ? true : (cb == 0));
         ReSizeExtra(Size() + cb);
         memmove(
             Data() + pos + cb,

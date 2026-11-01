@@ -81,7 +81,7 @@ public:
         EckAssert(idx >= 0 && idx < GetIconCount());
         return CreateIconFromResourceEx(
             (BYTE*)GetIconData(idx), GetIconDataSize(idx),
-            TRUE, 0x00030000, cx, cy, uFlags);
+            true, 0x00030000, cx, cy, uFlags);
     }
 
     EckInlineNdCe auto At(int idx) const noexcept

@@ -21,7 +21,7 @@ struct DelVA
     void operator()(T* p) noexcept { VFree(p); }
 };
 
-inline HANDLE NaOpenProcess(DWORD dwDesiredAccess, BOOL bInheritHandle,
+inline HANDLE NaOpenProcess(DWORD dwDesiredAccess, bool bInheritHandle,
     UINT uProcessId, NTSTATUS* pnts = nullptr) noexcept
 {
     OBJECT_ATTRIBUTES oa
@@ -41,7 +41,7 @@ inline HANDLE NaOpenFile(_In_ const UNICODE_STRING* pusFile,
     DWORD dwAccess, DWORD dwShareMode, DWORD dwOptions = 0u,
     _Out_opt_ NTSTATUS* pnts = nullptr,
     _Out_opt_ IO_STATUS_BLOCK* piost = nullptr,
-    BOOL bInheritHandle = FALSE, HANDLE hRootDirectory = nullptr) noexcept
+    bool bInheritHandle = false, HANDLE hRootDirectory = nullptr) noexcept
 {
     OBJECT_ATTRIBUTES oa;
     InitializeObjectAttributes(&oa, pusFile, OBJ_CASE_INSENSITIVE, hRootDirectory, nullptr);
@@ -60,7 +60,7 @@ inline HANDLE NaOpenFile(_In_z_ PCWSTR pszFile,
     DWORD dwAccess, DWORD dwShareMode, DWORD dwOptions = 0u,
     _Out_opt_ NTSTATUS* pnts = nullptr,
     _Out_opt_ IO_STATUS_BLOCK* piost = nullptr,
-    BOOL bInheritHandle = FALSE, HANDLE hRootDirectory = nullptr) noexcept
+    bool bInheritHandle = false, HANDLE hRootDirectory = nullptr) noexcept
 {
     UNICODE_STRING usFile;
     if (hRootDirectory)
@@ -89,7 +89,7 @@ inline HANDLE NaCreateFile(_In_ const UNICODE_STRING* pusFile,
     _Out_opt_ NTSTATUS* pnts = nullptr,
     _Out_opt_ IO_STATUS_BLOCK* piost = nullptr,
     DWORD dwAttributes = FILE_ATTRIBUTE_NORMAL, ULONGLONG cbInit = 0ll,
-    BOOL bInheritHandle = FALSE, HANDLE hRootDirectory = nullptr) noexcept
+    bool bInheritHandle = false, HANDLE hRootDirectory = nullptr) noexcept
 {
     OBJECT_ATTRIBUTES oa;
     InitializeObjectAttributes(&oa, pusFile, OBJ_CASE_INSENSITIVE, hRootDirectory, nullptr);
@@ -113,7 +113,7 @@ inline HANDLE NaCreateFile(_In_z_ PCWSTR pszFile,
     _Out_opt_ NTSTATUS* pnts = nullptr,
     _Out_opt_ IO_STATUS_BLOCK* piost = nullptr,
     DWORD dwAttributes = FILE_ATTRIBUTE_NORMAL, ULONGLONG cbInit = 0ll,
-    BOOL bInheritHandle = FALSE) noexcept
+    bool bInheritHandle = false) noexcept
 {
     UNICODE_STRING usFile;
     if (!RtlDosPathNameToNtPathName_U(pszFile, &usFile, nullptr, nullptr))
@@ -153,7 +153,7 @@ inline NTSTATUS NaDeviceIoControl(
             dwIoControlCode, pInBuf, cbInBuf, pOutBuf, cbOutBuf);
     if (nts == STATUS_PENDING)
     {
-        NtWaitForSingleObject(hDevice, FALSE, nullptr);
+        NtWaitForSingleObject(hDevice, false, nullptr);
         nts = iosb.Status;
     }
     if (pcbReturned)

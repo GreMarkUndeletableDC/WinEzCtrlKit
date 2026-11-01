@@ -72,14 +72,14 @@ private:
     Part m_eLBtnDownPart{ Part::Invalid };
     HotState m_eHotState{ HotState::None };
 
-    BITBOOL m_bProtectStyle : 1{ FALSE };
-    BITBOOL m_bLeftScrollBar : 1{ FALSE };
-    BITBOOL m_bVisibleH : 1{ TRUE };
-    BITBOOL m_bVisibleV : 1{ TRUE };
-    BITBOOL m_bDisableH : 1{ FALSE };
-    BITBOOL m_bDisableV : 1{ FALSE };
+    BITBOOL m_bProtectStyle : 1{ false };
+    BITBOOL m_bLeftScrollBar : 1{ false };
+    BITBOOL m_bVisibleH : 1{ true };
+    BITBOOL m_bVisibleV : 1{ true };
+    BITBOOL m_bDisableH : 1{ false };
+    BITBOOL m_bDisableV : 1{ false };
 
-    BITBOOL m_bStdSize : 1{ TRUE };
+    BITBOOL m_bStdSize : 1{ true };
 
 
     void ReCalculateScrollRect() noexcept
@@ -477,7 +477,7 @@ public:
             const auto dwStyle = m_pWnd->GetStyle();
             if (dwStyle & (WS_HSCROLL | WS_VSCROLL))
             {
-                m_bProtectStyle = TRUE;
+                m_bProtectStyle = true;
                 m_pWnd->SetStyle(dwStyle & ~(WS_HSCROLL | WS_VSCROLL));
             }
             const RECT rcWnd{ *(RECT*)lParam };
@@ -485,7 +485,7 @@ public:
             if (dwStyle & (WS_HSCROLL | WS_VSCROLL))
             {
                 m_pWnd->SetStyle(dwStyle);
-                m_bProtectStyle = FALSE;
+                m_bProtectStyle = false;
             }
             const auto prcClient = (RECT*)lParam;
             m_Margins.cxLeftWidth = prcClient->left - rcWnd.left;
@@ -757,38 +757,38 @@ public:
         return Part::Invalid;
     }
 
-    int HkSetScrollInfo(HWND hWnd, int nBar, const SCROLLINFO* psi, BOOL bRedraw) noexcept
+    int HkSetScrollInfo(HWND hWnd, int nBar, const SCROLLINFO* psi, bool bRedraw) noexcept
     {
         switch (nBar)
         {
         case SB_HORZ:
             m_ViewH.SetScrollInformation(*psi);
-            m_bDisableH = FALSE;
+            m_bDisableH = false;
             if (!m_ViewH.IsVisible())
             {
                 if (psi->fMask & SIF_DISABLENOSCROLL)
-                    m_bDisableH = TRUE;
+                    m_bDisableH = true;
                 else if (m_bVisibleH)
-                    HkShowScrollBar(hWnd, SB_HORZ, FALSE);
+                    HkShowScrollBar(hWnd, SB_HORZ, false);
             }
             else if (!m_bVisibleH)
-                HkShowScrollBar(hWnd, SB_HORZ, TRUE);
+                HkShowScrollBar(hWnd, SB_HORZ, true);
             ReCalculateThumbH();
             if (bRedraw)
                 Redraw();
             return m_ViewH.GetPosition();
         case SB_VERT:
             m_ViewV.SetScrollInformation(*psi);
-            m_bDisableV = FALSE;
+            m_bDisableV = false;
             if (!m_ViewV.IsVisible())
             {
                 if (psi->fMask & SIF_DISABLENOSCROLL)
-                    m_bDisableV = TRUE;
+                    m_bDisableV = true;
                 else if (m_bVisibleV)
-                    HkShowScrollBar(hWnd, SB_VERT, FALSE);
+                    HkShowScrollBar(hWnd, SB_VERT, false);
             }
             else if (!m_bVisibleV)
-                HkShowScrollBar(hWnd, SB_VERT, TRUE);
+                HkShowScrollBar(hWnd, SB_VERT, true);
             ReCalculateThumbV();
             if (bRedraw)
                 Redraw();
@@ -797,7 +797,7 @@ public:
         return 0;
     }
 
-    BOOL HkGetScrollInfo(HWND hWnd, int nBar, SCROLLINFO* psi) noexcept
+    bool HkGetScrollInfo(HWND hWnd, int nBar, SCROLLINFO* psi) noexcept
     {
         switch (nBar)
         {
@@ -805,17 +805,17 @@ public:
             m_ViewH.GetScrollInformation(*psi);
             if ((psi->fMask & SIF_TRACKPOS) && m_eLBtnDownPart == Part::ThumbH)
                 psi->nTrackPos = m_ViewTracking.GetPosition();
-            return TRUE;
+            return true;
         case SB_VERT:
             m_ViewV.GetScrollInformation(*psi);
             if ((psi->fMask & SIF_TRACKPOS) && m_eLBtnDownPart == Part::ThumbV)
                 psi->nTrackPos = m_ViewTracking.GetPosition();
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
-    BOOL HkShowScrollBar(HWND hWnd, int nBar, BOOL bShow) noexcept
+    bool HkShowScrollBar(HWND hWnd, int nBar, bool bShow) noexcept
     {
         switch (nBar)
         {
@@ -824,35 +824,35 @@ public:
             const auto dwStyle = m_pWnd->GetStyle();
             if (bShow)
                 if (dwStyle & WS_HSCROLL)
-                    return TRUE;
+                    return true;
                 else
                     m_pWnd->SetStyle(dwStyle | WS_HSCROLL);
             else
                 if (dwStyle & WS_HSCROLL)
                     m_pWnd->SetStyle(dwStyle & ~WS_HSCROLL);
                 else
-                    return TRUE;
+                    return true;
             m_pWnd->FrameChanged();
         }
-        return TRUE;
+        return true;
         case SB_VERT:
         {
             const auto dwStyle = m_pWnd->GetStyle();
             if (bShow)
                 if (dwStyle & WS_VSCROLL)
-                    return TRUE;
+                    return true;
                 else
                     m_pWnd->SetStyle(dwStyle | WS_VSCROLL);
             else
                 if (dwStyle & WS_VSCROLL)
                     m_pWnd->SetStyle(dwStyle & ~WS_VSCROLL);
                 else
-                    return TRUE;
+                    return true;
             m_pWnd->FrameChanged();
         }
-        return TRUE;
+        return true;
         }
-        return FALSE;
+        return false;
     }
 
     void UpdateStandardSize() noexcept
@@ -865,8 +865,8 @@ public:
         m_cySBArrow = DaGetSystemMetrics(SM_CYVSCROLL, m_iDpi);
     }
 
-    EckInlineCe void SetStandardSize(BOOL bStdSize) noexcept { m_bStdSize = bStdSize; }
-    EckInlineNdCe BOOL GetStandardSize() const noexcept { return m_bStdSize; }
+    EckInlineCe void SetStandardSize(bool bStdSize) noexcept { m_bStdSize = bStdSize; }
+    EckInlineNdCe bool GetStandardSize() const noexcept { return m_bStdSize; }
 
     EckInlineNdCe HTHEME GetThemeHandle() const noexcept { return m_hTheme; }
 };

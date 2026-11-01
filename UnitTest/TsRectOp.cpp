@@ -38,7 +38,7 @@ public:
         RECT rc2 = { 5, 5, 15, 15 };
         RECT rcDst;
 
-        BOOL result = IntersectRect(rcDst, rc1, rc2);
+        bool result = IntersectRect(rcDst, rc1, rc2);
         Assert::IsTrue(result);
         Assert::AreEqual(5L, rcDst.left);
         Assert::AreEqual(5L, rcDst.top);
@@ -112,7 +112,7 @@ public:
         RECT rc = { -5, -5, 15, 15 };
         RECT rcRef = { 0, 0, 100, 100 };
 
-        BOOL result = AdjustRectIntoAnother(rc, rcRef);
+        bool result = AdjustRectIntoAnother(rc, rcRef);
         Assert::IsTrue(result);
         Assert::IsTrue(rc.left >= rcRef.left);
         Assert::IsTrue(rc.top >= rcRef.top);
@@ -130,7 +130,7 @@ public:
         RECT rc = { 0, 0, 200, 100 };
         RECT rcRef = { 0, 0, 100, 100 };
 
-        BOOL result = AdjustRectToFitAnother(rc, rcRef);
+        bool result = AdjustRectToFitAnother(rc, rcRef);
         Assert::IsTrue(result);
 
         int width = rc.right - rc.left;
@@ -144,7 +144,7 @@ public:
         RECT rc = { 0, 0, 100, 50 };
         RECT rcRef = { 0, 0, 100, 100 };
 
-        BOOL result = AdjustRectToFillAnother(rc, rcRef);
+        bool result = AdjustRectToFillAnother(rc, rcRef);
         Assert::IsTrue(result);
 
         int width = rc.right - rc.left;
@@ -201,7 +201,7 @@ public:
         RCWH rc2 = { 5, 5, 10, 10 };
         RCWH rcDst;
 
-        BOOL result = IntersectRect(rcDst, rc1, rc2);
+        bool result = IntersectRect(rcDst, rc1, rc2);
         Assert::IsTrue(result);
         Assert::AreEqual(5, rcDst.x);
         Assert::AreEqual(5, rcDst.y);
@@ -272,7 +272,7 @@ public:
         RCWH rc = { -5, -5, 20, 20 };
         RCWH rcRef = { 0, 0, 100, 100 };
 
-        BOOL result = AdjustRectIntoAnother(rc, rcRef);
+        bool result = AdjustRectIntoAnother(rc, rcRef);
         Assert::IsTrue(result);
         Assert::IsTrue(rc.x >= rcRef.x);
         Assert::IsTrue(rc.y >= rcRef.y);
@@ -285,7 +285,7 @@ public:
         RCWH rc = { 0, 0, 200, 100 };
         RCWH rcRef = { 0, 0, 100, 100 };
 
-        BOOL result = AdjustRectToFitAnother(rc, rcRef);
+        bool result = AdjustRectToFitAnother(rc, rcRef);
         Assert::IsTrue(result);
         Assert::AreEqual(100, rc.cx);
         Assert::AreEqual(50, rc.cy);
@@ -296,7 +296,7 @@ public:
         RCWH rc = { 0, 0, 100, 50 };
         RCWH rcRef = { 0, 0, 100, 100 };
 
-        BOOL result = AdjustRectToFillAnother(rc, rcRef);
+        bool result = AdjustRectToFillAnother(rc, rcRef);
         Assert::IsTrue(result);
         Assert::AreEqual(200, rc.cx);
         Assert::AreEqual(100, rc.cy);
@@ -350,7 +350,7 @@ public:
         D2D1_RECT_F rc2 = { 5.0f, 5.0f, 15.0f, 15.0f };
         D2D1_RECT_F rcDst;
 
-        BOOL result = IntersectRect(rcDst, rc1, rc2);
+        bool result = IntersectRect(rcDst, rc1, rc2);
         Assert::IsTrue(result);
         Assert::AreEqual(5.0f, rcDst.left, 0.001f);
         Assert::AreEqual(5.0f, rcDst.top, 0.001f);
@@ -415,7 +415,7 @@ public:
         D2D1_RECT_F rc = { -5.0f, -5.0f, 15.0f, 15.0f };
         D2D1_RECT_F rcRef = { 0.0f, 0.0f, 100.0f, 100.0f };
 
-        BOOL result = AdjustRectIntoAnother(rc, rcRef);
+        bool result = AdjustRectIntoAnother(rc, rcRef);
         Assert::IsTrue(result);
         Assert::IsTrue(rc.left >= rcRef.left);
         Assert::IsTrue(rc.top >= rcRef.top);
@@ -428,7 +428,7 @@ public:
         D2D1_RECT_F rc = { 0.0f, 0.0f, 200.0f, 100.0f };
         D2D1_RECT_F rcRef = { 0.0f, 0.0f, 100.0f, 100.0f };
 
-        BOOL result = AdjustRectToFitAnother(rc, rcRef);
+        bool result = AdjustRectToFitAnother(rc, rcRef);
         Assert::IsTrue(result);
 
         float width = rc.right - rc.left;
@@ -442,7 +442,7 @@ public:
         D2D1_RECT_F rc = { 0.0f, 0.0f, 100.0f, 50.0f };
         D2D1_RECT_F rcRef = { 0.0f, 0.0f, 100.0f, 100.0f };
 
-        BOOL result = AdjustRectToFillAnother(rc, rcRef);
+        bool result = AdjustRectToFillAnother(rc, rcRef);
         Assert::IsTrue(result);
 
         float width = rc.right - rc.left;

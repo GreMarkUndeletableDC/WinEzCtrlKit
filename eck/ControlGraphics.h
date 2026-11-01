@@ -51,7 +51,7 @@ inline void DrawSelectionRect(HDC hDC, const RECT& rc, int cxFrame) noexcept
     DeleteObject(SelectObject(hDC, hOldPen));
 }
 
-inline void DrawPlusMinusGlyph(HDC hDC, BOOL bPlus, const RECT& rc,
+inline void DrawPlusMinusGlyph(HDC hDC, bool bPlus, const RECT& rc,
     COLORREF crBorder, COLORREF crSign) noexcept
 {
     SetDCBrushColor(hDC, crBorder);
@@ -70,7 +70,7 @@ inline void DrawPlusMinusGlyph(HDC hDC, BOOL bPlus, const RECT& rc,
     SelectObject(hDC, hOld);
 }
 
-inline BOOL AlphaBlendColor(HDC hDC, const RECT& rc,
+inline bool AlphaBlendColor(HDC hDC, const RECT& rc,
     COLORREF cr, BYTE byAlpha = ColorFillAlpha) noexcept
 {
     CMemoryDC DC{};

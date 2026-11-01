@@ -4,15 +4,15 @@
 
 ECK_NAMESPACE_BEGIN
 #define ECK_W_TABE_STYLE(Name, Style)                    \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;   \
-    BOOL StyleGet##Name() const noexcept                 \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;   \
+    bool StyleGet##Name() const noexcept                 \
     {                                                    \
         if constexpr (Style == 0)                        \
             return !GetTABExtendStyle();                 \
         else                                             \
             return IsBitSet(GetTABExtendStyle(), Style); \
     }                                                    \
-    void StyleSet##Name(BOOL b) const noexcept           \
+    void StyleSet##Name(bool b) const noexcept           \
     {                                                    \
         SetTABExtendStyle(b ? Style : 0, Style);         \
     }
@@ -73,19 +73,19 @@ public:
     /// </summary>
     /// <param name="prc">RECT指针</param>
     /// <param name="bValidAeraToWndAera">为TRUE则从显示区域转换到窗口区域，为FALSE则相反</param>
-    void AdjustRect(RECT* prc, BOOL bValidAeraToWndAera) const noexcept
+    void AdjustRect(RECT* prc, bool bValidAeraToWndAera) const noexcept
     {
         SendMessageW(TCM_ADJUSTRECT, bValidAeraToWndAera, (LPARAM)prc);
     }
 
-    BOOL DeleteAllItems() const noexcept
+    bool DeleteAllItems() const noexcept
     {
-        return (BOOL)SendMessageW(TCM_DELETEALLITEMS, 0, 0);
+        return (bool)SendMessageW(TCM_DELETEALLITEMS, 0, 0);
     }
 
-    BOOL DeleteItem(int idx) const noexcept
+    bool DeleteItem(int idx) const noexcept
     {
-        return (BOOL)SendMessageW(TCM_DELETEITEM, idx, 0);
+        return (bool)SendMessageW(TCM_DELETEITEM, idx, 0);
     }
 
     /// <summary>
@@ -93,7 +93,7 @@ public:
     /// 仅设置TCS_BUTTONS时有效
     /// </summary>
     /// <param name="bAllTab">若为TRUE，则重置所有项，若为FALSE，则重置除当前页面之外的所有项</param>
-    void DeselectAll(BOOL bAllTab) const noexcept
+    void DeselectAll(bool bAllTab) const noexcept
     {
         SendMessageW(TCM_DESELECTALL, bAllTab, 0);
     }
@@ -118,9 +118,9 @@ public:
         return (HIMAGELIST)SendMessageW(TCM_GETIMAGELIST, 0, 0);
     }
 
-    BOOL GetItem(int idx, TCITEMW* ptci) const noexcept
+    bool GetItem(int idx, TCITEMW* ptci) const noexcept
     {
-        return (BOOL)SendMessageW(TCM_GETITEMW, idx, (LPARAM)ptci);
+        return (bool)SendMessageW(TCM_GETITEMW, idx, (LPARAM)ptci);
     }
 
     int GetItemCount() const noexcept
@@ -128,9 +128,9 @@ public:
         return (int)SendMessageW(TCM_GETITEMCOUNT, 0, 0);
     }
 
-    BOOL GetItemRect(int idx, RECT* prc) const noexcept
+    bool GetItemRect(int idx, RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(TCM_GETITEMRECT, idx, (LPARAM)prc);
+        return (bool)SendMessageW(TCM_GETITEMRECT, idx, (LPARAM)prc);
     }
 
     int GetRowCount() const noexcept
@@ -143,9 +143,9 @@ public:
         return (HWND)SendMessageW(TCM_GETTOOLTIPS, 0, 0);
     }
 
-    BOOL HighlightItem(int idx, BOOL bHighlight) const noexcept
+    bool HighlightItem(int idx, bool bHighlight) const noexcept
     {
-        return (BOOL)SendMessageW(TCM_HIGHLIGHTITEM, idx, MAKELPARAM(bHighlight, 0));
+        return (bool)SendMessageW(TCM_HIGHLIGHTITEM, idx, MAKELPARAM(bHighlight, 0));
     }
 
     int HitTest(TCHITTESTINFO* ptchti) const noexcept
@@ -199,14 +199,14 @@ public:
         return (HIMAGELIST)SendMessageW(TCM_SETIMAGELIST, 0, (LPARAM)hImageList);
     }
 
-    BOOL SetItem(int idx, TCITEMW* ptci) const noexcept
+    bool SetItem(int idx, TCITEMW* ptci) const noexcept
     {
-        return (BOOL)SendMessageW(TCM_SETITEMW, idx, (LPARAM)ptci);
+        return (bool)SendMessageW(TCM_SETITEMW, idx, (LPARAM)ptci);
     }
 
-    BOOL SetItemExtra(UINT cbExtra) const noexcept
+    bool SetItemExtra(UINT cbExtra) const noexcept
     {
-        return (BOOL)SendMessageW(TCM_SETITEMEXTRA, cbExtra, 0);
+        return (bool)SendMessageW(TCM_SETITEMEXTRA, cbExtra, 0);
     }
 
     void SetItemSize(int cx, int cy, int* piOldWidth = nullptr, int* piOldHeight = nullptr) const noexcept

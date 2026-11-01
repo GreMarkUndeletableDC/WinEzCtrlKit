@@ -7,7 +7,7 @@ class CLayoutDummy : public CLayoutBase
 public:
     ECK_RTTI(CLayoutDummy, CLayoutBase);
 
-    void LoShow(BOOL) noexcept override {}
+    void LoShow(bool) noexcept override {}
     size_t LobGetObjectCount() const noexcept override { return 0; }
     void LobUpdateIdealSize() noexcept override {}
     void LobAddObject(const LOB_PARAM& Param) noexcept override {}

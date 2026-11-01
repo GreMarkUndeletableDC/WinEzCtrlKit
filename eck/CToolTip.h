@@ -17,19 +17,19 @@ public:
     ECK_W_STYLE(NoPrefix, TTS_NOPREFIX);
     ECK_W_STYLE(UseVisualStyle, TTS_USEVISUALSTYLE);
 
-    EckInline void Active(BOOL bActive) const noexcept
+    EckInline void Active(bool bActive) const noexcept
     {
         SendMessageW(TTM_ACTIVATE, bActive, 0);
     }
 
-    EckInline BOOL AddTool(_In_ const TTTOOLINFOW* pti) const noexcept
+    EckInline bool AddTool(_In_ const TTTOOLINFOW* pti) const noexcept
     {
-        return (BOOL)SendMessageW(TTM_ADDTOOLW, 0, (LPARAM)pti);
+        return (bool)SendMessageW(TTM_ADDTOOLW, 0, (LPARAM)pti);
     }
 
-    EckInline BOOL AdjustRect(BOOL bTextToWnd, _Inout_ RECT* prc) const noexcept
+    EckInline bool AdjustRect(bool bTextToWnd, _Inout_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(TTM_ADJUSTRECT, bTextToWnd, (LPARAM)prc);
+        return (bool)SendMessageW(TTM_ADJUSTRECT, bTextToWnd, (LPARAM)prc);
     }
 
     EckInline void DeleteTool(_In_ const TTTOOLINFOW* pti) const noexcept
@@ -42,22 +42,22 @@ public:
         SendMessageW(TTM_ENUMTOOLSW, idxTool, (LPARAM)pti);
     }
 
-    EckInline BOOL GetBubbleSize(_In_ const TTTOOLINFOW* pti,
+    EckInline bool GetBubbleSize(_In_ const TTTOOLINFOW* pti,
         _Out_opt_ int* pcx, _Out_opt_ int* pcy) const noexcept
     {
         const auto uRet = (UINT)SendMessageW(TTM_GETBUBBLESIZE, 0, (LPARAM)pti);
         if (uRet == 0)
-            return FALSE;
+            return false;
         if (pcx)
             *pcx = LOWORD(uRet);
         if (pcy)
             *pcy = HIWORD(uRet);
-        return TRUE;
+        return true;
     };
 
-    EckInline BOOL GetCurrentTool(_Inout_ TTTOOLINFOW* pti) const noexcept
+    EckInline bool GetCurrentTool(_Inout_ TTTOOLINFOW* pti) const noexcept
     {
-        return (BOOL)SendMessageW(TTM_GETCURRENTTOOL, 0, (LPARAM)pti);
+        return (bool)SendMessageW(TTM_GETCURRENTTOOL, 0, (LPARAM)pti);
     }
 
     /// <summary>
@@ -105,14 +105,14 @@ public:
         return (int)SendMessageW(TTM_GETTOOLCOUNT, 0, 0);
     }
 
-    EckInline BOOL GetToolInformation(_Inout_ TTTOOLINFOW* pti) const noexcept
+    EckInline bool GetToolInformation(_Inout_ TTTOOLINFOW* pti) const noexcept
     {
-        return (BOOL)SendMessageW(TTM_GETTOOLINFOW, 0, (LPARAM)pti);
+        return (bool)SendMessageW(TTM_GETTOOLINFOW, 0, (LPARAM)pti);
     }
 
-    EckInline BOOL HitTest(_Inout_ TTHITTESTINFOW* pti) const noexcept
+    EckInline bool HitTest(_Inout_ TTHITTESTINFOW* pti) const noexcept
     {
-        return (BOOL)SendMessageW(TTM_HITTEST, 0, (LPARAM)pti);
+        return (bool)SendMessageW(TTM_HITTEST, 0, (LPARAM)pti);
     }
 
     /// <summary>
@@ -164,13 +164,13 @@ public:
         SendMessageW(TTM_SETTIPTEXTCOLOR, cr, 0);
     }
 
-    EckInline BOOL SetTitle(int iIcon, _In_z_ PCWSTR pszTitle) const noexcept
+    EckInline bool SetTitle(int iIcon, _In_z_ PCWSTR pszTitle) const noexcept
     {
-        return (BOOL)SendMessageW(TTM_SETTITLEW, iIcon, (LPARAM)pszTitle);
+        return (bool)SendMessageW(TTM_SETTITLEW, iIcon, (LPARAM)pszTitle);
     }
-    EckInline BOOL SetTitleHIcon(HICON hIcon, _In_z_ PCWSTR pszTitle) const noexcept
+    EckInline bool SetTitleHIcon(HICON hIcon, _In_z_ PCWSTR pszTitle) const noexcept
     {
-        return (BOOL)SendMessageW(TTM_SETTITLEW, (WPARAM)hIcon, (LPARAM)pszTitle);
+        return (bool)SendMessageW(TTM_SETTITLEW, (WPARAM)hIcon, (LPARAM)pszTitle);
     }
 
     EckInline void SetToolInformation(_In_ const TTTOOLINFOW* pti) const noexcept
@@ -184,7 +184,7 @@ public:
     /// <param name="pti">hwnd、uId</param>
     /// <param name="bActivate"></param>
     /// <returns></returns>
-    EckInline void TrackActivate(_In_ const TTTOOLINFOW* pti, BOOL bActivate) const noexcept
+    EckInline void TrackActivate(_In_ const TTTOOLINFOW* pti, bool bActivate) const noexcept
     {
         SendMessageW(TTM_TRACKACTIVATE, bActivate, (LPARAM)pti);
     }

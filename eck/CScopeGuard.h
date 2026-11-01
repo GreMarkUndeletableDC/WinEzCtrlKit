@@ -7,23 +7,23 @@ class CScopeGuard
 {
 private:
     F m_Fn;
-    BOOLEAN m_bActive;
+    bool m_bActive;
 public:
     template<class I>
     explicit CScopeGuard(I&& f) noexcept
-        : m_Fn{ std::forward<I>(f) }, m_bActive{ TRUE } {}
+        : m_Fn{ std::forward<I>(f) }, m_bActive{ true } {}
 
     CScopeGuard(CScopeGuard&& x) noexcept
         : m_Fn{ std::move(x.m_Fn) }, m_bActive{ x.m_bActive }
     {
-        x.m_bActive = FALSE;
+        x.m_bActive = false;
     }
     CScopeGuard& operator=(CScopeGuard&& x) noexcept
     {
         if (&x == this)
             return *this;
         m_Fn = std::move(x.m_Fn);
-        x.m_bActive = FALSE;
+        x.m_bActive = false;
     }
 
     CScopeGuard(const CScopeGuard&) = delete;

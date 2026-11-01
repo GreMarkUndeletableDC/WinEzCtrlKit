@@ -35,7 +35,7 @@ private:
     std::vector<TLEXTNODE*> m_vRoot{};
     std::vector<TLEXTNODE*> m_vFlat{};
 
-    BITBOOL m_bMaintainFlatList : 1 = FALSE;
+    BITBOOL m_bMaintainFlatList : 1 = false;
 
     void RemoveNodeFromFlatList(HTLENODE hNode) noexcept
     {
@@ -137,7 +137,7 @@ public:
     }
 
     LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept override
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept override
     {
         switch (uMsg)
         {
@@ -147,7 +147,7 @@ public:
             {
             case NM_TL_FILLCHILDREN:
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto p = (NMTLFILLCHILDREN*)lParam;
                 if (p->bQueryRoot)
                 {
@@ -166,7 +166,7 @@ public:
             case NM_TL_FILLALLFLATITEM:
             {
                 EckAssert(m_bMaintainFlatList);
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto p = (NMTLFILLALLFLATITEM*)lParam;
                 p->pItems = (TLNODE**)m_vFlat.data();
                 p->cItem = (int)m_vFlat.size();
@@ -175,7 +175,7 @@ public:
 
             case NM_TL_GETDISPINFO:
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto p = (NMTLGETDISPINFO*)lParam;
                 const auto pNode = (TLEXTNODE*)p->Item.pNode;
                 // if (p->Item.uMask & TLIM_TEXT)
@@ -196,7 +196,7 @@ public:
         return __super::OnNotifyMessage(hParent, uMsg, wParam, lParam, bProcessed);
     }
 
-    EckInlineCe void SetMaintainFlatList(BOOL b) noexcept { m_bMaintainFlatList = b; }
-    EckInlineNdCe BOOL GetMaintainFlatList() const noexcept { return m_bMaintainFlatList; }
+    EckInlineCe void SetMaintainFlatList(bool b) noexcept { m_bMaintainFlatList = b; }
+    EckInlineNdCe bool GetMaintainFlatList() const noexcept { return m_bMaintainFlatList; }
 };
 ECK_NAMESPACE_END

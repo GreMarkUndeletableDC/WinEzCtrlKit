@@ -14,7 +14,7 @@ private:
         CStringW rsFace;
         float cy;
         DWRITE_FONT_WEIGHT eWeight;
-        BOOL bItalic;
+        bool bItalic;
     };
     IDWriteFontCollection* m_pFontCollection{};
     TEMPLATE m_Template{};
@@ -57,7 +57,7 @@ public:
         m_Template.rsFace = lf.lfFaceName;
         m_Template.cy = fabsf((float)lf.lfHeight);
         m_Template.eWeight = (DWRITE_FONT_WEIGHT)lf.lfWeight;
-        m_Template.bItalic = lf.lfItalic ? TRUE : FALSE;
+        m_Template.bItalic = lf.lfItalic ? true : false;
     }
 
     void SetFontCollection(IDWriteFontCollection* pFontCollection) noexcept
@@ -70,7 +70,7 @@ public:
     }
 
     EckInline HRESULT NewFont(_Out_ IDWriteTextFormat*& pTf, PCWSTR pszFace,
-        float fSize, BOOL bItalic = FALSE,
+        float fSize, bool bItalic = false,
         DWRITE_FONT_WEIGHT eWeight = DWRITE_FONT_WEIGHT_NORMAL) const noexcept
     {
         return g_pDwFactory->CreateTextFormat(
@@ -81,7 +81,7 @@ public:
     }
 
     EckInline HRESULT NewFont(_Out_ IDWriteTextFormat*& pTf, PCWSTR pszFace,
-        float fSize, BOOL bItalic = FALSE, int iWeight = 400) const noexcept
+        float fSize, bool bItalic = false, int iWeight = 400) const noexcept
     {
         return NewFont(pTf, pszFace, fSize, bItalic, (DWRITE_FONT_WEIGHT)iWeight);
     }
@@ -94,7 +94,7 @@ public:
 
     EckInline HRESULT NewFont(_Out_ IDWriteTextFormat*& pTf,
         Alignment eAlignText = Alignment::Near, Alignment eAlignPara = Alignment::Near,
-        float fSize = -1.f, int iWeight = 400, BOOL bEllipsis = FALSE) const noexcept
+        float fSize = -1.f, int iWeight = 400, bool bEllipsis = false) const noexcept
     {
         const auto hr = NewFont(pTf, m_Template.rsFace.Data(),
             fSize < 0.f ? m_Template.cy : fSize,

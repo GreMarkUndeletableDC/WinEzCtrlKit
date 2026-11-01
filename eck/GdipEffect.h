@@ -188,7 +188,7 @@ public:
         GdipSetEffectParameters(m_pEffect, &Params, sizeof(Params));
     }
 
-    CGpFxBlur(float fRadius, BOOL bExpandEdges) noexcept : CGpFxBlur{ { fRadius, bExpandEdges } } {}
+    CGpFxBlur(float fRadius, bool bExpandEdges) noexcept : CGpFxBlur{ { fRadius, bExpandEdges } } {}
 
     EckInline GpStatus SetParameters(const GpBlurParams& Params) noexcept
     {

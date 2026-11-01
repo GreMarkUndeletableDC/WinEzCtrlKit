@@ -590,15 +590,15 @@ constexpr inline TChar EOL_CRLF[]{ '\r', '\n' };
 constexpr inline size_t MaxSizeT{ std::numeric_limits<size_t>::max() };
 
 #ifdef _DEBUG
-constexpr inline BOOL Debug{ TRUE };
+constexpr inline bool Debug{ true };
 #else
-constexpr inline BOOL Debug{ FALSE };
+constexpr inline bool Debug{ false };
 #endif
 
 #ifdef _WIN64
-constexpr inline BOOL Win64{ TRUE };
+constexpr inline bool Win64{ true };
 #else
-constexpr inline BOOL Win64{ FALSE };
+constexpr inline bool Win64{ false };
 #endif
 
 constexpr inline BLENDFUNCTION BlendFunctionAlpha{ AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
@@ -648,7 +648,7 @@ constexpr inline PCWSTR WCN_HITTER = WCN_DUMMY;
 constexpr inline PCWSTR MSGREG_TRAY = L"Eck.Message.Tray";
 constexpr inline PCWSTR MSGREG_BUBBLE = L"Eck.Message.Bubble";
 
-// BOOL(0, BBMSG*)  返回是否拦截
+// bool(0, BBMSG*)  返回是否拦截
 const inline UINT MessageBubble = RegisterWindowMessageW(MSGREG_BUBBLE);
 #pragma endregion Constant
 
@@ -960,8 +960,8 @@ namespace Detail
 
         template<class F>
         void EnQueueCallback(F&& fnCallback, UINT nPriority = UINT_MAX,
-            BOOL bWakeUiThread = TRUE, ULONGLONG Tag = 0ull,
-            BOOL bClearExistingTag = FALSE) noexcept
+            bool bWakeUiThread = true, ULONGLONG Tag = 0ull,
+            bool bClearExistingTag = false) noexcept
         {
             RtlAcquireSRWLockExclusive(&Lk);
             if (bClearExistingTag && !q.empty())
@@ -981,8 +981,8 @@ namespace Detail
         }
 
         void EnQueueCoroutine(void* pCoroutine, UINT nPriority = UINT_MAX,
-            BOOL bWakeUiThread = TRUE, ULONGLONG Tag = 0ull,
-            BOOL bClearExistingTag = FALSE) noexcept;
+            bool bWakeUiThread = true, ULONGLONG Tag = 0ull,
+            bool bClearExistingTag = false) noexcept;
 
         void UnlockedDeQueue() noexcept;
     };
@@ -994,7 +994,7 @@ struct ThreadContext
     struct WINDOW
     {
         CWindow* pWnd;
-        BOOLEAN bTopLevel;
+        bool bTopLevel;
         BYTE uBubbleFlags;
     };
     //-------窗口映射
@@ -1018,32 +1018,32 @@ struct ThreadContext
 
     // 是否允许暗色CBT钩子设置窗口，设为FALSE可暂停Hook。
     // 注意：务必在打开文件对话框前暂停Hook
-    BOOLEAN bEnableDarkModeHook{ TRUE };
-    BOOLEAN bAutoNcDark{ TRUE };// 自动调整非客户区暗色
-    BOOLEAN bEnterCallback{};   // 当前是否在回调中
-    BOOLEAN bAppDarkMode{};     // 当前是否处于暗色模式
+    bool bEnableDarkModeHook{ true };
+    bool bAutoNcDark{ true };// 自动调整非客户区暗色
+    bool bEnterCallback{};   // 当前是否在回调中
+    bool bAppDarkMode{};     // 当前是否处于暗色模式
     //-------回调队列
     HHOOK hhkMsgFilter{};       // 在菜单、模态对话框、拖动选择等的消息循环中保持处理UI线程的回调
     Detail::QueuedCallbackQueue Callback{};
     //
     HWND hGhost{};
 
-    void WmAdd(HWND hWnd, CWindow* pWnd, BOOL bTopLevel) noexcept;
+    void WmAdd(HWND hWnd, CWindow* pWnd, bool bTopLevel) noexcept;
     void WmRemove(HWND hWnd) noexcept;
     CWindow* WmAt(HWND hWnd) const noexcept;
     WINDOW* WmAtInternal(HWND hWnd) noexcept;
     // BBWM_*
     void WmSetBubbleFlags(HWND hWnd, BYTE uFlags) noexcept;
 
-    void TwmMarkTopLevel(HWND hWnd, BOOL bTopLevel) noexcept;
+    void TwmMarkTopLevel(HWND hWnd, bool bTopLevel) noexcept;
     WINDOW TwmAt(HWND hWnd) noexcept;
-    void TwmEnableNcDarkMode(BOOL bDark) noexcept;
+    void TwmEnableNcDarkMode(bool bDark) noexcept;
     void TwmBroadcastThemeChanged() noexcept;
 
     void UpdateDefaultColor() noexcept;
     void DoCallback() noexcept;
 
-    HWND CreateGhostWindow(BOOL bMsgOnly = FALSE) noexcept;
+    HWND CreateGhostWindow(bool bMsgOnly = false) noexcept;
 };
 
 DWORD GetThreadContextTlsSlot() noexcept;
@@ -1057,7 +1057,7 @@ void ThreadUninitialize() noexcept;
 EckInlineNd ThreadContext* PtcCurrent() noexcept { return (ThreadContext*)TlsGetValue(GetThreadContextTlsSlot()); }
 
 HHOOK BeginCbtHook(CWindow* pCurrWnd, FWindowCreating pfnCreatingProc = nullptr) noexcept;
-BOOL EndCbtHook() noexcept;
+bool EndCbtHook() noexcept;
 
 /// <summary>
 /// 过滤消息。
@@ -1065,7 +1065,7 @@ BOOL EndCbtHook() noexcept;
 /// </summary>
 /// <param name="Msg">即将处理的消息</param>
 /// <returns>若返回值为TRUE，则不应继续处理消息；否则应正常进行剩余步骤</returns>
-BOOL PreTranslateMessage(const MSG& Msg) noexcept;
+bool PreTranslateMessage(const MSG& Msg) noexcept;
 #pragma endregion Thread
 
 void InitializePrivateApi() noexcept;
@@ -1098,7 +1098,7 @@ EckInline int MessageDialog(
 
 #ifdef _DEBUG
 void Assert(PCWSTR pszMsg, PCWSTR pszFile, PCWSTR pszLine) noexcept;
-inline void DbgPrint(CcpNumberOrEnumeration auto x, BOOL bNewLine = TRUE) noexcept
+inline void DbgPrint(CcpNumberOrEnumeration auto x, bool bNewLine = true) noexcept
 {
     auto s = std::to_string((eck::UnderlyingType_T<decltype(x)>)x);
     if (bNewLine)
@@ -1107,23 +1107,23 @@ inline void DbgPrint(CcpNumberOrEnumeration auto x, BOOL bNewLine = TRUE) noexce
 }
 void DbgPrintFormat(_Printf_format_string_ PCWSTR pszFormat, ...) noexcept;
 void DbgPrintFormat(_Printf_format_string_ PCSTR pszFormat, ...) noexcept;
-EckInline void DbgPrint(PCVOID x, BOOL bNewLine = TRUE) noexcept { DbgPrintFormat(bNewLine ? L"0x%p\n" : L"0x%p", x); }
-EckInline void DbgPrint(PCWSTR psz, BOOL bNewLine = TRUE) noexcept
+EckInline void DbgPrint(PCVOID x, bool bNewLine = true) noexcept { DbgPrintFormat(bNewLine ? L"0x%p\n" : L"0x%p", x); }
+EckInline void DbgPrint(PCWSTR psz, bool bNewLine = true) noexcept
 {
     OutputDebugStringW(psz);
     if (bNewLine) OutputDebugStringW(L"\n");
 }
-EckInline void DbgPrint(PCSTR psz, BOOL bNewLine = TRUE) noexcept
+EckInline void DbgPrint(PCSTR psz, bool bNewLine = true) noexcept
 {
     OutputDebugStringA(psz);
     if (bNewLine) OutputDebugStringA("\n");
 }
 template<class T, class U, class V>
-EckInline void DbgPrint(const std::basic_string<T, U, V>& str, BOOL bNewLine = TRUE) noexcept
+EckInline void DbgPrint(const std::basic_string<T, U, V>& str, bool bNewLine = true) noexcept
 {
     DbgPrint(str.data(), bNewLine);
 }
-inline void DbgPrintFormatMessage(UINT uErrCode, BOOL bNewLine = TRUE) noexcept
+inline void DbgPrintFormatMessage(UINT uErrCode, bool bNewLine = true) noexcept
 {
     PWSTR pszInfo;
     FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
@@ -1131,7 +1131,7 @@ inline void DbgPrintFormatMessage(UINT uErrCode, BOOL bNewLine = TRUE) noexcept
     DbgPrint(pszInfo, bNewLine);
     LocalFree(pszInfo);
 }
-inline void DbgPrintLastError(BOOL bNewLine = TRUE) noexcept
+inline void DbgPrintLastError(bool bNewLine = true) noexcept
 {
     const auto u = GetLastError();
     DbgPrintFormat(L"LastError = %u", u);

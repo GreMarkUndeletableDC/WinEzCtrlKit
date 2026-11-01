@@ -36,11 +36,11 @@ namespace PixelEditor
         using TChannel = TChannel_;
 
         constexpr static bool HasAlpha = IdxA < 4;
-        static_assert(HasAlpha ? TRUE : !IsPremultiplied,
+        static_assert(HasAlpha ? true : !IsPremultiplied,
             "Premultiplied alpha is not supported when there is no alpha channel.");
 
         static_assert(IsSingleChannel ?
-            (IdxR == IdxG && IdxG == IdxB && !IdxR && IdxA >= 4) : TRUE,
+            (IdxR == IdxG && IdxG == IdxB && !IdxR && IdxA >= 4) : true,
             "For single channel formats, R, G, and B indices must be the same and A index must be invalid.");
 
         constexpr static bool IsFloat = std::floating_point<TChannel>;
@@ -637,7 +637,7 @@ public:
             // 检查上下行
             auto FnCheckLine = [&](UINT yNew)
                 {
-                    BOOL bSpan{};
+                    bool bSpan{};
                     for (UINT i = l; i <= r; ++i)
                     {
                         if (GetPixelRaw(i, yNew) == PixOldRaw)
@@ -645,11 +645,11 @@ public:
                             if (!bSpan)
                             {
                                 s.emplace_back(i, yNew);
-                                bSpan = TRUE;
+                                bSpan = true;
                             }
                         }
                         else// 断开
-                            bSpan = FALSE;
+                            bSpan = false;
                     }
                 };
 

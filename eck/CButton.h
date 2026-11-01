@@ -67,7 +67,7 @@ public:
     ECK_W_STYLE(AlignmentTop, BS_TOP);
     ECK_W_STYLE(AlignmentVCenter, BS_VCENTER);
 
-    BOOL LoGetIdealSize(LYTSIZE& size) noexcept override
+    bool LoGetIdealSize(LYTSIZE& size) noexcept override
     {
         SIZE sizeInt{ (int)size.cx };
         const auto b = GetIdealSize(&sizeInt);
@@ -75,20 +75,20 @@ public:
         return b;
     }
 
-    EckInline BOOL GetIdealSize(_Inout_ SIZE* psize) const noexcept
+    EckInline bool GetIdealSize(_Inout_ SIZE* psize) const noexcept
     {
         return (int)SendMessageW(BCM_GETIDEALSIZE, 0, (LPARAM)psize);
     }
 
-    EckInline BOOL GetImageList(_Out_ BUTTON_IMAGELIST* pbil) const noexcept
+    EckInline bool GetImageList(_Out_ BUTTON_IMAGELIST* pbil) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_GETIMAGELIST, 0, (LPARAM)pbil);
+        return (bool)SendMessageW(BCM_GETIMAGELIST, 0, (LPARAM)pbil);
     }
 
     ECK_SUPPRESS_MISSING_ZERO_TERMINATION;
-    EckInline BOOL GetNote(_Out_writes_(cchBuf) PWSTR pszBuf, _Inout_ UINT& cchBuf) const noexcept
+    EckInline bool GetNote(_Out_writes_(cchBuf) PWSTR pszBuf, _Inout_ UINT& cchBuf) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_GETNOTE, (WPARAM)&cchBuf, (LPARAM)pszBuf);
+        return (bool)SendMessageW(BCM_GETNOTE, (WPARAM)&cchBuf, (LPARAM)pszBuf);
     }
 
     EckInlineNd UINT GetNoteLength() const noexcept
@@ -96,11 +96,11 @@ public:
         return (UINT)SendMessageW(BCM_GETNOTELENGTH, 0, 0);
     }
 
-    BOOL GetNote(Eck_Append_buffer_ CStringW& rs) const noexcept
+    bool GetNote(Eck_Append_buffer_ CStringW& rs) const noexcept
     {
         auto cch = GetNoteLength();
         if (!cch)
-            return FALSE;
+            return false;
         rs.PushBack(cch);
         ++cch;
         return GetNote(rs.Data(), cch);
@@ -113,44 +113,44 @@ public:
         return rs;
     }
 
-    EckInline BOOL GetSplitInformation(_Inout_ BUTTON_SPLITINFO* pbsi) const noexcept
+    EckInline bool GetSplitInformation(_Inout_ BUTTON_SPLITINFO* pbsi) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_GETSPLITINFO, 0, (LPARAM)pbsi);
+        return (bool)SendMessageW(BCM_GETSPLITINFO, 0, (LPARAM)pbsi);
     }
 
-    EckInline BOOL GetTextMargin(_Out_ RECT* prc) const noexcept
+    EckInline bool GetTextMargin(_Out_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_GETTEXTMARGIN, 0, (LPARAM)prc);
+        return (bool)SendMessageW(BCM_GETTEXTMARGIN, 0, (LPARAM)prc);
     }
 
-    EckInline BOOL SetDropDownState(BOOL bDropDown) const noexcept
+    EckInline bool SetDropDownState(bool bDropDown) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_SETDROPDOWNSTATE, bDropDown, 0);
+        return (bool)SendMessageW(BCM_SETDROPDOWNSTATE, bDropDown, 0);
     }
 
-    EckInline BOOL SetImageList(_In_ BUTTON_IMAGELIST* pbil) const noexcept
+    EckInline bool SetImageList(_In_ BUTTON_IMAGELIST* pbil) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_SETIMAGELIST, 0, (LPARAM)pbil);
+        return (bool)SendMessageW(BCM_SETIMAGELIST, 0, (LPARAM)pbil);
     }
 
-    EckInline BOOL SetNote(_In_z_ PCWSTR pszText) const noexcept
+    EckInline bool SetNote(_In_z_ PCWSTR pszText) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_SETNOTE, 0, (LPARAM)pszText);
+        return (bool)SendMessageW(BCM_SETNOTE, 0, (LPARAM)pszText);
     }
 
-    EckInline void SetShieldIcon(BOOL bShieldIcon) const noexcept
+    EckInline void SetShieldIcon(bool bShieldIcon) const noexcept
     {
         SendMessageW(BCM_SETSHIELD, 0, bShieldIcon);
     }
 
-    EckInline BOOL SetSplitInformation(_In_ BUTTON_SPLITINFO* pbsi) const noexcept
+    EckInline bool SetSplitInformation(_In_ BUTTON_SPLITINFO* pbsi) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_SETSPLITINFO, 0, (LPARAM)pbsi);
+        return (bool)SendMessageW(BCM_SETSPLITINFO, 0, (LPARAM)pbsi);
     }
 
-    EckInline BOOL SetTextMargin(_In_ RECT* prc) const noexcept
+    EckInline bool SetTextMargin(_In_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(BCM_SETTEXTMARGIN, 0, (LPARAM)prc);
+        return (bool)SendMessageW(BCM_SETTEXTMARGIN, 0, (LPARAM)prc);
     }
 
     EckInline void Click() const noexcept { SendMessageW(BM_CLICK, 0, 0); }
@@ -166,7 +166,7 @@ public:
 
     EckInline UINT GetState() const noexcept { return (UINT)SendMessageW(BM_GETSTATE, 0, 0); }
 
-    EckInline void SetDontClick(BOOL bDontClick) const noexcept { SendMessageW(BM_SETDONTCLICK, bDontClick, 0); }
+    EckInline void SetDontClick(bool bDontClick) const noexcept { SendMessageW(BM_SETDONTCLICK, bDontClick, 0); }
 
     EckInline HANDLE SetImage(HANDLE hImage, UINT uType) const noexcept
     {
@@ -174,9 +174,9 @@ public:
     }
 
     // 该消息仅能设置按下状态
-    EckInline void SetState(BOOL bPressed) const noexcept { SendMessageW(BM_SETSTATE, bPressed, 0); }
+    EckInline void SetState(bool bPressed) const noexcept { SendMessageW(BM_SETSTATE, bPressed, 0); }
 
-    EckInline void SetButtonStyle(DWORD dwStyle, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetButtonStyle(DWORD dwStyle, bool bRedraw = true) const noexcept
     {
         SendMessageW(BM_SETSTYLE, dwStyle, bRedraw);
     }
@@ -188,13 +188,13 @@ public:
         SetStyle((GetStyle() & ~TypeMask) | (DWORD)eType);
     }
 
-    BOOL GetButtonDefault() const noexcept
+    bool GetButtonDefault() const noexcept
     {
         return !!(GetStyle() &
             (BS_DEFPUSHBUTTON | BS_DEFSPLITBUTTON | BS_DEFCOMMANDLINK));
     }
 
-    void SetButtonDefault(BOOL bDef) const noexcept
+    void SetButtonDefault(bool bDef) const noexcept
     {
         const auto dwStyle = GetStyle();
         auto iType = dwStyle & TypeMask;
@@ -210,7 +210,7 @@ public:
     }
 
     /// 指定图片和文本是否同时显示
-    void SetTextImageShowing(BOOL b) const noexcept
+    void SetTextImageShowing(bool b) const noexcept
     {
         auto dwStyle = GetStyle();
         if (b)
@@ -220,7 +220,7 @@ public:
         SetStyle(dwStyle);
     }
 
-    void SetAlignment(BOOL bHAlign, Alignment eAlign) const noexcept
+    void SetAlignment(bool bHAlign, Alignment eAlign) const noexcept
     {
         auto dwStyle = GetStyle();
         if (bHAlign)
@@ -246,7 +246,7 @@ public:
         SetStyle(dwStyle);
     }
 
-    Alignment GetAlignment(BOOL bHAlign) const noexcept
+    Alignment GetAlignment(bool bHAlign) const noexcept
     {
         auto dwStyle = GetStyle();
         if (bHAlign)
@@ -313,7 +313,7 @@ inline CWindow::HSlot DdxBindCheckBox(CButton& Ctrl, CWindow& Parent, Observable
         });
 }
 template<class T>
-inline BOOL DdxUnbindCheckBox(CButton& Ctrl, CWindow& Parent, Observable<T>& o) noexcept
+inline bool DdxUnbindCheckBox(CButton& Ctrl, CWindow& Parent, Observable<T>& o) noexcept
 {
     o.ClearCallback();
     return DdxpDisconnect<Detail::DdxFnCheckBox, MHI_DDX_CHECKBOX>(Ctrl, Parent);

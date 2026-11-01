@@ -32,7 +32,7 @@ struct WordTime
     int cchWord;
     float fTime;
     float fDuration;
-    BOOL bDurationProcessed;
+    bool bDurationProcessed;
 };
 
 struct Line
@@ -42,8 +42,8 @@ struct Line
     USHORT cchLrc{};
     USHORT cchTranslation{};
     USHORT cchWordTotal{};
-    BOOLEAN bMAlloc{};
-    BOOLEAN bDurationProcessed{};
+    bool bMAlloc{};
+    bool bDurationProcessed{};
     float fTime{};
     float fDuration{};
     std::vector<WordTime> vWordTime;
@@ -133,9 +133,9 @@ private:
     std::vector<DIV> m_vDiv{};
 
     float m_fDuration{};                // 秒
-    BOOLEAN m_bDiscardEmptyLine{};      // 丢弃空白行
-    BOOLEAN m_bDiscardEmptyWord{ TRUE };// 丢弃空白字
-    BOOLEAN m_bRawLine{};               // 不进行排序合并操作
+    bool m_bDiscardEmptyLine{};      // 丢弃空白行
+    bool m_bDiscardEmptyWord{ true };// 丢弃空白字
+    bool m_bRawLine{};               // 不进行排序合并操作
 
     WCHAR LBracketFromType(BracketType e) const noexcept
     {
@@ -170,11 +170,11 @@ private:
     /// <param name="bSquareBracketElrc">是否正在解析方括号扩展LRC</param>
     /// <param name="bSbElrcAddLine">若bSquareBracketElrc为TRUE，此参数指示是否尾插行，一般用于每行的第一个标签</param>
     Result LrcpParseLabelWorker(PCWCH& p, PCWCH pEnd,
-        BOOL* pbAddLrc, BOOL* pbAddLabel, BOOL bAngleBracket,
-        BOOL bSquareBracketElrc, BOOL bSbElrcAddLine) noexcept
+        bool* pbAddLrc, bool* pbAddLabel, bool bAngleBracket,
+        bool bSquareBracketElrc, bool bSbElrcAddLine) noexcept
     {
-        if (pbAddLrc) *pbAddLrc = FALSE;
-        if (pbAddLabel) *pbAddLabel = FALSE;
+        if (pbAddLrc) *pbAddLrc = false;
+        if (pbAddLabel) *pbAddLabel = false;
         const auto chBracketL = bAngleBracket ? L'<' : L'[';
         const auto chBracketR = bAngleBracket ? L'>' : L']';
         enum class State
@@ -205,7 +205,7 @@ private:
                         m_vLine.back().vWordTime.emplace_back().fTime = fTime;
                     else
                         m_vLine.emplace_back().fTime = fTime;
-                if (pbAddLrc) *pbAddLrc = TRUE;
+                if (pbAddLrc) *pbAddLrc = true;
             };
         while (p < pEnd)
         {
@@ -234,7 +234,7 @@ private:
                     TcvToInt(pLast, p - pLast - 1, n, 10);
                     auto& Line = m_vLine.back();
                     Line.vWordTime.emplace_back().fTime = Line.fTime + (float)n / 1000.f;
-                    if (pbAddLrc) *pbAddLrc = TRUE;
+                    if (pbAddLrc) *pbAddLrc = true;
                     return Result::Ok;
                 }
                 else if (ch == ':')
@@ -299,7 +299,7 @@ private:
                     e.cchKey = int(p - pLast - 1);
                     eState = State::Value;
                     pLast = p;
-                    if (pbAddLabel) *pbAddLabel = TRUE;
+                    if (pbAddLabel) *pbAddLabel = true;
                 }
                 else if (ch == chBracketR || ch == chBracketL ||
                     ch == '\r' || ch == '\n')
@@ -332,23 +332,23 @@ private:
     }
 
     Result LrcParseLabel(PCWCH& p, PCWCH pEnd,
-        BOOL* pbAddLrc = nullptr, BOOL* pbAddLabel = nullptr) noexcept
+        bool* pbAddLrc = nullptr, bool* pbAddLabel = nullptr) noexcept
     {
-        return LrcpParseLabelWorker(p, pEnd, pbAddLrc, pbAddLabel, FALSE, FALSE, FALSE);
+        return LrcpParseLabelWorker(p, pEnd, pbAddLrc, pbAddLabel, false, false, false);
     }
 
-    Result LrcParseWordTime(PCWCH& p, PCWCH pEnd, BOOL* pbAddLrc = nullptr) noexcept
+    Result LrcParseWordTime(PCWCH& p, PCWCH pEnd, bool* pbAddLrc = nullptr) noexcept
     {
-        return LrcpParseLabelWorker(p, pEnd, pbAddLrc, nullptr, TRUE, FALSE, FALSE);
+        return LrcpParseLabelWorker(p, pEnd, pbAddLrc, nullptr, true, false, false);
     }
 
-    Result LrcParseWordTimeSquareBracket(PCWCH& p, PCWCH pEnd, BOOL bFirstInLine,
-        BOOL* pbAddLrc = nullptr, BOOL* pbAddLabel = nullptr) noexcept
+    Result LrcParseWordTimeSquareBracket(PCWCH& p, PCWCH pEnd, bool bFirstInLine,
+        bool* pbAddLrc = nullptr, bool* pbAddLabel = nullptr) noexcept
     {
-        return LrcpParseLabelWorker(p, pEnd, pbAddLrc, pbAddLabel, FALSE, TRUE, bFirstInLine);
+        return LrcpParseLabelWorker(p, pEnd, pbAddLrc, pbAddLabel, false, true, bFirstInLine);
     }
 
-    void LrcpWordEnd(PCWCH p0, PCWCH p1, BOOL bAddLrc) noexcept
+    void LrcpWordEnd(PCWCH p0, PCWCH p1, bool bAddLrc) noexcept
     {
         auto& e = *(m_vLine.back().vWordTime.rbegin() + bAddLrc);
         e.cchWord = int(p1 - p0 - 1);
@@ -361,7 +361,7 @@ private:
             DbgCutString(e);
         }
     }
-    void LrcpWordEndEmpty(BOOL bAddLrc) noexcept
+    void LrcpWordEndEmpty(bool bAddLrc) noexcept
     {
         if (m_bDiscardEmptyWord)
             if (bAddLrc)
@@ -372,9 +372,9 @@ private:
     //---------------YRC/KRC/QRC---------------
 
     Result YkqParseLabel(PCWCH& p, PCWCH pEnd, YKQ_VAL& Val,
-        BracketType eBracketType, BOOL b3Value, BOOL* pbAddLabel = nullptr) noexcept
+        BracketType eBracketType, bool b3Value, bool* pbAddLabel = nullptr) noexcept
     {
-        if (pbAddLabel) *pbAddLabel = FALSE;
+        if (pbAddLabel) *pbAddLabel = false;
         const auto chBracketL = LBracketFromType(eBracketType);
         const auto chBracketR = RBracketFromType(eBracketType);
         enum class State
@@ -457,7 +457,7 @@ private:
                     e.cchKey = int(p - pLast - 1);
                     eState = State::Value;
                     pLast = p;
-                    if (pbAddLabel) *pbAddLabel = TRUE;
+                    if (pbAddLabel) *pbAddLabel = true;
                 }
                 else if (ch == chBracketR || ch == chBracketL ||
                     ch == '\r' || ch == '\n')
@@ -498,7 +498,7 @@ private:
         }
     }
 
-    BOOL MgpIsWordTime(const Line& x) noexcept { return !!x.vWordTime.size(); }
+    bool MgpIsWordTime(const Line& x) noexcept { return !!x.vWordTime.size(); }
 
     void MgpMerge(const std::vector<size_t>& vNeedDelIndex,
         size_t cLine, Line& TopItem) noexcept
@@ -514,7 +514,7 @@ private:
             *(p + TopItem.cchLrc) = L'\0';
             if (TopItem.bMAlloc)
                 free((void*)TopItem.pszLrc);
-            TopItem.bMAlloc = TRUE;
+            TopItem.bMAlloc = true;
             TopItem.pszLrc = p;
             return;
         }
@@ -545,7 +545,7 @@ private:
         PWCH p = pszText;
         if (TopItem.bMAlloc)
             free((void*)TopItem.pszLrc);
-        TopItem.bMAlloc = TRUE;
+        TopItem.bMAlloc = true;
         // 第一项正文
         if (bWordTime)
             MgpCopyWordAsSentence(TopItem.vWordTime, p);
@@ -641,7 +641,7 @@ private:
         }
     }
 
-    BOOL MgpScanLineDivider(const Line& Line, DIV_POS& Pos) noexcept
+    bool MgpScanLineDivider(const Line& Line, DIV_POS& Pos) noexcept
     {
         Pos.idxDiv = Pos.pos1 = Pos.pos2 = -1;
         EckCounter(m_vDiv.size(), i)
@@ -657,7 +657,7 @@ private:
                 {
                     Pos.idxDiv = (int)i;
                     Pos.pos1 = int(p - Line.pszLrc);
-                    return TRUE;
+                    return true;
                 }
             }
             else
@@ -673,19 +673,19 @@ private:
                         Pos.idxDiv = (int)i;
                         Pos.pos1 = pos1;
                         Pos.pos2 = pos2;
-                        return TRUE;
+                        return true;
                     }
                 }
             }
         }
-        return FALSE;
+        return false;
     }
 
     // 若当前文件被认为是分隔符歌词则返回TRUE
-    BOOL MgpScanDivider(std::vector<DIV_POS>& vPos) noexcept
+    bool MgpScanDivider(std::vector<DIV_POS>& vPos) noexcept
     {
         if (m_vLine.empty())
-            return FALSE;
+            return false;
         size_t cDivLine{}, cValidLine{};
         EckCounter(m_vLine.size(), i)
         {
@@ -759,13 +759,13 @@ private:
                 auto& f = vWord[j];
                 if (!f.bDurationProcessed)
                 {
-                    f.bDurationProcessed = TRUE;
+                    f.bDurationProcessed = true;
                     f.fDuration = vWord[j + 1].fTime - f.fTime;
                 }
             }
             if (!vWord.back().bDurationProcessed)// 最后一个字词
             {
-                vWord.back().bDurationProcessed = TRUE;
+                vWord.back().bDurationProcessed = true;
                 vWord.back().fDuration = e.fTime + e.fDuration - vWord.back().fTime;
             }
         }
@@ -825,7 +825,7 @@ public:
         return nts;
     }
 
-    EckInlineNdCe BOOL IsTextEmpty() const noexcept { return m_rsLyric.IsEmpty(); }
+    EckInlineNdCe bool IsTextEmpty() const noexcept { return m_rsLyric.IsEmpty(); }
 
     // 解析标准LRC、尖括号逐字LRC、TRC
     // 支持压缩LRC和无换行LRC
@@ -844,7 +844,7 @@ public:
         PCWCH p{ m_rsLyric.Data() };
         const auto pEnd = p + m_rsLyric.Size();
         PCWCH pLast{};
-        BOOL bAddLrc, bAddLabel;
+        bool bAddLrc, bAddLabel;
 
         int cLabelContinues{};
         while (p < pEnd)
@@ -953,12 +953,12 @@ public:
                         cLabelContinues = 1;
                         if (*p == '[')
                         {
-                            LrcpWordEndEmpty(FALSE);// 立即结束当前标签
+                            LrcpWordEndEmpty(false);// 立即结束当前标签
                             eState = State::Label;
                         }
                         else if (*p == '<')
                         {
-                            LrcpWordEndEmpty(FALSE);// 立即结束当前标签
+                            LrcpWordEndEmpty(false);// 立即结束当前标签
                             eState = State::WordTime;
                         }
                         else if (bAddLabel)
@@ -985,12 +985,12 @@ public:
                         cLabelContinues = 1;
                         if (*p == '[')
                         {
-                            LrcpWordEndEmpty(FALSE);
+                            LrcpWordEndEmpty(false);
                             eState = State::Label;
                         }
                         else if (*p == '<')
                         {
-                            LrcpWordEndEmpty(FALSE);
+                            LrcpWordEndEmpty(false);
                             eState = State::WordTime;
                         }
                         else
@@ -1005,7 +1005,7 @@ public:
                 }
                 else if (ch == '\r' || ch == '\n' || p == pEnd)
                 {
-                    LrcpWordEnd(pLast, p, FALSE);
+                    LrcpWordEnd(pLast, p, false);
                     eState = State::Normal;
                     cLabelContinues = 0;
                 }
@@ -1031,7 +1031,7 @@ public:
         PCWCH p{ m_rsLyric.Data() };
         const auto pEnd = p + m_rsLyric.Size();
         PCWCH pLast{ p };
-        BOOL bAddLrc, bAddLabel, bNewLine{ TRUE };
+        bool bAddLrc, bAddLabel, bNewLine{ true };
 
         while (p < pEnd)
         {
@@ -1063,13 +1063,13 @@ public:
                 if (ch == '[')// 尝试解析标签
                 {
                     const auto pOld = p;
-                    r = LrcParseWordTimeSquareBracket(p, pEnd, FALSE, &bAddLrc, &bAddLabel);
+                    r = LrcParseWordTimeSquareBracket(p, pEnd, false, &bAddLrc, &bAddLabel);
                     if (r == Result::Ok)// 成功，文本结束
                     {
-                        LrcpWordEnd(pLast, pOld, TRUE);
+                        LrcpWordEnd(pLast, pOld, true);
                         if (*p == '[')
                         {
-                            LrcpWordEndEmpty(FALSE);
+                            LrcpWordEndEmpty(false);
                             eState = State::Label;
                         }
                         else
@@ -1086,8 +1086,8 @@ public:
                 }
                 else if (ch == '\r' || ch == '\n' || p == pEnd)
                 {
-                    bNewLine = TRUE;
-                    LrcpWordEnd(pLast, p, FALSE);
+                    bNewLine = true;
+                    LrcpWordEnd(pLast, p, false);
                     eState = State::Normal;
                 }
                 break;
@@ -1113,7 +1113,7 @@ public:
         PCWCH p{ m_rsLyric.Data() };
         const auto pEnd = p + m_rsLyric.Size();
         YKQ_VAL Val;
-        BOOL bAddLabel;
+        bool bAddLabel;
         PCWCH pLast{};
 
         while (p < pEnd)
@@ -1129,7 +1129,7 @@ public:
                 }
                 break;
             case State::Label:
-                r = YkqParseLabel(p, pEnd, Val, BracketType::Square, FALSE, &bAddLabel);
+                r = YkqParseLabel(p, pEnd, Val, BracketType::Square, false, &bAddLabel);
                 if (r != Result::Ok)
                     return r;
                 if (*p == '[')
@@ -1148,13 +1148,13 @@ public:
                 break;
             case State::WordTime:
             {
-                r = YkqParseLabel(p, pEnd, Val, BracketType::Parenthesis, TRUE);
+                r = YkqParseLabel(p, pEnd, Val, BracketType::Parenthesis, true);
                 if (r != Result::Ok)
                     return r;
                 auto& e = m_vLine.back().vWordTime.emplace_back();
                 e.fTime = Val.f1;
                 e.fDuration = Val.f2;
-                e.bDurationProcessed = TRUE;
+                e.bDurationProcessed = true;
                 if (*p == '(')
                     eState = State::WordTime;
                 else
@@ -1168,13 +1168,13 @@ public:
                 if (ch == '(')
                 {
                     const auto pOld = p;
-                    r = YkqParseLabel(p, pEnd, Val, BracketType::Parenthesis, TRUE);
+                    r = YkqParseLabel(p, pEnd, Val, BracketType::Parenthesis, true);
                     if (r == Result::Ok)
                     {
-                        LrcpWordEnd(pLast, pOld, FALSE);
+                        LrcpWordEnd(pLast, pOld, false);
                         if (*p == '(')
                         {
-                            LrcpWordEndEmpty(FALSE);
+                            LrcpWordEndEmpty(false);
                             eState = State::WordTime;
                         }
                         else
@@ -1182,14 +1182,14 @@ public:
                         auto& e = m_vLine.back().vWordTime.emplace_back();
                         e.fTime = Val.f1;
                         e.fDuration = Val.f2;
-                        e.bDurationProcessed = TRUE;
+                        e.bDurationProcessed = true;
                     }
                     else
                         p = pOld;
                 }
                 else if (ch == '\r' || ch == '\n' || p == pEnd)
                 {
-                    LrcpWordEnd(pLast, p, FALSE);
+                    LrcpWordEnd(pLast, p, false);
                     eState = State::Normal;
                 }
                 break;
@@ -1214,7 +1214,7 @@ public:
         PCWCH p{ m_rsLyric.Data() };
         const auto pEnd = p + m_rsLyric.Size();
         YKQ_VAL Val;
-        BOOL bAddLabel;
+        bool bAddLabel;
         PCWCH pLast{};
 
         while (p < pEnd)
@@ -1230,7 +1230,7 @@ public:
                 }
                 break;
             case State::Label:
-                r = YkqParseLabel(p, pEnd, Val, BracketType::Square, FALSE, &bAddLabel);
+                r = YkqParseLabel(p, pEnd, Val, BracketType::Square, false, &bAddLabel);
                 if (r != Result::Ok)
                     return r;
                 if (*p == '[')
@@ -1249,13 +1249,13 @@ public:
                 break;
             case State::WordTime:
             {
-                r = YkqParseLabel(p, pEnd, Val, BracketType::Angle, TRUE);
+                r = YkqParseLabel(p, pEnd, Val, BracketType::Angle, true);
                 if (r != Result::Ok)
                     return r;
                 auto& e = m_vLine.back().vWordTime.emplace_back();
                 e.fTime = m_vLine.back().fTime + Val.f1;
                 e.fDuration = Val.f2;
-                e.bDurationProcessed = TRUE;
+                e.bDurationProcessed = true;
                 if (*p == '<')
                     eState = State::WordTime;
                 else
@@ -1269,13 +1269,13 @@ public:
                 if (ch == '<')
                 {
                     const auto pOld = p;
-                    r = YkqParseLabel(p, pEnd, Val, BracketType::Angle, TRUE);
+                    r = YkqParseLabel(p, pEnd, Val, BracketType::Angle, true);
                     if (r == Result::Ok)
                     {
-                        LrcpWordEnd(pLast, pOld, FALSE);
+                        LrcpWordEnd(pLast, pOld, false);
                         if (*p == '<')
                         {
-                            LrcpWordEndEmpty(FALSE);
+                            LrcpWordEndEmpty(false);
                             eState = State::WordTime;
                         }
                         else
@@ -1283,14 +1283,14 @@ public:
                         auto& e = m_vLine.back().vWordTime.emplace_back();
                         e.fTime = m_vLine.back().fTime + Val.f1;
                         e.fDuration = Val.f2;
-                        e.bDurationProcessed = TRUE;
+                        e.bDurationProcessed = true;
                     }
                     else
                         p = pOld;
                 }
                 else if (ch == '\r' || ch == '\n' || p == pEnd)
                 {
-                    LrcpWordEnd(pLast, p, FALSE);
+                    LrcpWordEnd(pLast, p, false);
                     eState = State::Normal;
                 }
                 break;
@@ -1315,7 +1315,7 @@ public:
         PCWCH p{ m_rsLyric.Data() };
         const auto pEnd = p + m_rsLyric.Size();
         YKQ_VAL Val;
-        BOOL bAddLabel;
+        bool bAddLabel;
         PCWCH pLast{};
 
         while (p < pEnd)
@@ -1331,7 +1331,7 @@ public:
                 }
                 break;
             case State::Label:
-                r = YkqParseLabel(p, pEnd, Val, BracketType::Square, FALSE, &bAddLabel);
+                r = YkqParseLabel(p, pEnd, Val, BracketType::Square, false, &bAddLabel);
                 if (r != Result::Ok)
                     return r;
                 if (*p == '[')
@@ -1352,14 +1352,14 @@ public:
                 if (ch == '(')
                 {
                     const auto pOld = p;
-                    r = YkqParseLabel(p, pEnd, Val, BracketType::Parenthesis, FALSE);
+                    r = YkqParseLabel(p, pEnd, Val, BracketType::Parenthesis, false);
                     if (r == Result::Ok)// 字词结束
                     {
                         auto& e = m_vLine.back().vWordTime.emplace_back();
                         e.fTime = Val.f1;
                         e.fDuration = Val.f2;
-                        e.bDurationProcessed = TRUE;
-                        LrcpWordEnd(pLast, pOld, FALSE);
+                        e.bDurationProcessed = true;
+                        LrcpWordEnd(pLast, pOld, false);
                         pLast = p;
                     }
                     else

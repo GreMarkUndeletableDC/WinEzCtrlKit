@@ -43,12 +43,12 @@ public:
 
     EckInline int GetMinimum() const noexcept
     {
-        return (int)SendMessageW(PBM_GETRANGE, TRUE, 0);
+        return (int)SendMessageW(PBM_GETRANGE, true, 0);
     }
 
     EckInline int GetMaximum() const noexcept
     {
-        return (int)SendMessageW(PBM_GETRANGE, FALSE, 0);
+        return (int)SendMessageW(PBM_GETRANGE, false, 0);
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public:
         return (COLORREF)SendMessageW(PBM_SETBKCOLOR, 0, cr);
     }
 
-    EckInline void SetMarquee(BOOL bEnable, int msAnimation = 0) const noexcept
+    EckInline void SetMarquee(bool bEnable, int msAnimation = 0) const noexcept
     {
         SendMessageW(PBM_SETMARQUEE, bEnable, msAnimation);
     }

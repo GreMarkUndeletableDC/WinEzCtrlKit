@@ -17,8 +17,8 @@ protected:
 
     USHORT m_msCurrInterval{};
 
-    BOOLEAN m_bValid{};
-    BOOLEAN m_bStop{ TRUE };
+    bool m_bValid{};
+    bool m_bStop{ true };
 
     FCallback m_pfnCallback{};
     void* m_pUser{};
@@ -32,7 +32,7 @@ public:
         m_fSustain += ms;
         const float f = Easing::OutCubic(m_fSustain, m_fStart, m_fDistance, m_fDuration);
         if (SetPosition(f))
-            m_bStop = TRUE;
+            m_bStop = true;
         else
             m_bStop = (m_fDistance > 0.f ?
                 (f >= m_fStart + m_fDistance) : (f <= m_fStart + m_fDistance));
@@ -40,14 +40,14 @@ public:
         if (m_bStop)
             InterruptAnimation();
     }
-    EckInline BOOL TlIsValid() noexcept override { return m_bValid; }
+    EckInline bool TlIsValid() noexcept override { return m_bValid; }
     EckInline int TlGetCurrentInterval() const noexcept override { return m_msCurrInterval; }
     // 
     EckInline void OnMouseWheel2(float dWheel) noexcept { SmoothScrollDelta(m_fDelta * dWheel); }
 
     EckInlineCe void InterruptAnimation() noexcept
     {
-        m_bValid = FALSE;
+        m_bValid = false;
         m_fSustain = 0.f;
         m_fDistance = 0.f;
     }
@@ -67,7 +67,7 @@ public:
             m_fDistance = GetMinimum() - m_fStart;
         m_fSustain = 0.f;
 
-        m_bValid = TRUE;
+        m_bValid = true;
     }
 
     EckInlineCe void SetCallback(FCallback pfnCallBack, void* pUser) noexcept
@@ -84,6 +84,6 @@ public:
 
     EckInlineNdCe float GetCurrentTime() const noexcept { return m_fSustain; }
 
-    EckInlineNdCe BOOL IsStop() const noexcept { return m_bStop; }
+    EckInlineNdCe bool IsStop() const noexcept { return m_bStop; }
 };
 ECK_NAMESPACE_END

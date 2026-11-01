@@ -81,8 +81,8 @@ private:
     ComPtr<IMFSimpleAudioVolume> m_pAudioVolume{};
 
     State m_eState{ State::Empty };
-    BOOLEAN m_bHasAudio{};
-    BOOLEAN m_bHasVideo{};
+    bool m_bHasAudio{};
+    bool m_bHasVideo{};
     ULONGLONG m_msDuration{};
 
     FEventCallback m_pfnEventCallback{};
@@ -114,7 +114,7 @@ private:
         if (FAILED(hr))
             return hr;
         hr = pNode->SetObject(pActivate);
-        pNode->SetUINT32(MF_TOPONODE_NOSHUTDOWN_ON_REMOVE, FALSE);
+        pNode->SetUINT32(MF_TOPONODE_NOSHUTDOWN_ON_REMOVE, false);
         return hr;
     }
 
@@ -332,12 +332,12 @@ public:
             if (guidMajorType == MFMediaType_Audio)
             {
                 hr = MFCreateAudioRendererActivate(pActivate.AtClear());
-                m_bHasAudio = TRUE;
+                m_bHasAudio = true;
             }
             else if (hWndVideo)
             {
                 hr = MFCreateVideoRendererActivate(hWndVideo, pActivate.AtClear());
-                m_bHasVideo = TRUE;
+                m_bHasVideo = true;
             }
             else
                 continue;
@@ -432,8 +432,8 @@ public:
         m_pRateControl.Clear();
         m_pAudioVolume.Clear();
         m_eState = State::Empty;
-        m_bHasAudio = FALSE;
-        m_bHasVideo = FALSE;
+        m_bHasAudio = false;
+        m_bHasVideo = false;
         m_msDuration = 0ull;
     }
 
@@ -556,55 +556,57 @@ public:
                 Support.fMinReverseThin = Support.fMaxReverseThin = 1.0f;
             return hr;
         }
-        hr = pRateSupport->GetSlowestRate(MFRATE_FORWARD, FALSE, &Support.fMin);
+        hr = pRateSupport->GetSlowestRate(MFRATE_FORWARD, false, &Support.fMin);
         if (FAILED(hr))
             Support.fMin = 1.0f;
-        hr = pRateSupport->GetFastestRate(MFRATE_FORWARD, FALSE, &Support.fMax);
+        hr = pRateSupport->GetFastestRate(MFRATE_FORWARD, false, &Support.fMax);
         if (FAILED(hr))
             Support.fMax = 1.0f;
 
-        hr = pRateSupport->GetSlowestRate(MFRATE_REVERSE, FALSE, &Support.fMinReverse);
+        hr = pRateSupport->GetSlowestRate(MFRATE_REVERSE, false, &Support.fMinReverse);
         if (FAILED(hr))
             Support.fMinReverse = 1.0f;
-        hr = pRateSupport->GetFastestRate(MFRATE_REVERSE, FALSE, &Support.fMaxReverse);
+        hr = pRateSupport->GetFastestRate(MFRATE_REVERSE, false, &Support.fMaxReverse);
         if (FAILED(hr))
             Support.fMaxReverse = 1.0f;
 
-        hr = pRateSupport->GetSlowestRate(MFRATE_FORWARD, TRUE, &Support.fMinThin);
+        hr = pRateSupport->GetSlowestRate(MFRATE_FORWARD, true, &Support.fMinThin);
         if (FAILED(hr))
             Support.fMinThin = 1.0f;
-        hr = pRateSupport->GetFastestRate(MFRATE_FORWARD, TRUE, &Support.fMaxThin);
+        hr = pRateSupport->GetFastestRate(MFRATE_FORWARD, true, &Support.fMaxThin);
         if (FAILED(hr))
             Support.fMaxThin = 1.0f;
 
-        hr = pRateSupport->GetSlowestRate(MFRATE_REVERSE, TRUE, &Support.fMinReverseThin);
+        hr = pRateSupport->GetSlowestRate(MFRATE_REVERSE, true, &Support.fMinReverseThin);
         if (FAILED(hr))
             Support.fMinReverseThin = 1.0f;
-        hr = pRateSupport->GetFastestRate(MFRATE_REVERSE, TRUE, &Support.fMaxReverseThin);
+        hr = pRateSupport->GetFastestRate(MFRATE_REVERSE, true, &Support.fMaxReverseThin);
         if (FAILED(hr))
             Support.fMaxReverseThin = 1.0f;
         return S_OK;
     }
 
-    HRESULT GetRate(_Out_ float& fRate, _Out_opt_ BOOL* pbThin = nullptr) noexcept
+    HRESULT GetRate(_Out_ float& fRate, _Out_opt_ bool* pbThin = nullptr) noexcept
     {
         if (!m_pRateControl.Get())
             return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         fRate = 1.0f;
+        BOOL b{};
+        const auto hr = m_pRateControl->GetRate(&b, &fRate);
         if (pbThin)
-            *pbThin = FALSE;
-        return m_pRateControl->GetRate(pbThin, &fRate);
+            *pbThin = !!b;
+        return hr;
     }
 
-    HRESULT SetRate(float fRate, BOOL bThin = FALSE) noexcept
+    HRESULT SetRate(float fRate, bool bThin = false) noexcept
     {
         if (!m_pRateControl.Get())
             return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         return m_pRateControl->SetRate(bThin, fRate);
     }
 
-    EckInlineNdCe BOOL HasAudio() const noexcept { return m_bHasAudio; }
-    EckInlineNdCe BOOL HasVideo() const noexcept { return m_bHasVideo; }
+    EckInlineNdCe bool HasAudio() const noexcept { return m_bHasAudio; }
+    EckInlineNdCe bool HasVideo() const noexcept { return m_bHasVideo; }
 
     /// <summary>
     /// 设置事件回调
@@ -656,13 +658,16 @@ public:
             return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         return m_pAudioVolume->SetMasterVolume(fVolume);
     }
-    HRESULT GetMute(_Out_ BOOL& bMute) noexcept
+    HRESULT GetMute(_Out_ bool& bMute) noexcept
     {
         if (!m_pAudioVolume.Get())
             return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
-        return m_pAudioVolume->GetMute(&bMute);
+        BOOL b{};
+        const auto hr = m_pAudioVolume->GetMute(&b);
+        bMute = !!b;
+        return hr;
     }
-    HRESULT SetMute(BOOL bMute) noexcept
+    HRESULT SetMute(bool bMute) noexcept
     {
         if (!m_pAudioVolume.Get())
             return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);

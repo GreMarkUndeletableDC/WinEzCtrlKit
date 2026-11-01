@@ -420,11 +420,11 @@ inline void CalculateBezierControlPoints(
 }
 
 template<std::floating_point T>
-inline BOOL RadianInArc(T ag, T agStart, T agSweep) noexcept
+inline bool RadianInArc(T ag, T agStart, T agSweep) noexcept
 {
     constexpr auto TwoPi = T(Pi * 2.);
     if (agSweep >= TwoPi || agSweep <= -TwoPi)
-        return TRUE;
+        return true;
     if (agSweep < 0)
     {
         agStart += agSweep;

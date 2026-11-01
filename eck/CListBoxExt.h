@@ -150,7 +150,7 @@ private:
         WIN32_FIND_DATAW wfd;
         HANDLE hFind;
         PWSTR pszDivPos, pszOld = pszFilePattern;
-        while (TRUE)
+        while (true)
         {
             pszDivPos = wcsstr(pszFilePattern, L"|");
             if (pszDivPos != pszOld && pszDivPos)// 常规情况
@@ -201,21 +201,20 @@ private:
     {
         POINT ptScr = pt;
         ClientToScreen(m_hWnd, &ptScr);
-        int idx = LBItemFromPt(m_hWnd, ptScr, FALSE);
+        int idx = LBItemFromPt(m_hWnd, ptScr, false);
         if (pidxItem)
             *pidxItem = idx;
         if (idx < 0)
             return -1;
 
         RECT rcItem;
-        if (GetItemRect(idx, &rcItem) == LB_ERR)
+        if (!GetItemRect(idx, &rcItem))
             return -1;
         rcItem.left += c_LBPadding;
         rcItem.right = rcItem.left + m_cxCheckBox;
         if (PointInRect(rcItem, pt))
             return idx;
-        else
-            return -1;
+        return -1;
     }
 
     /*
@@ -225,13 +224,13 @@ private:
         elibstl::NotifySys(NRS_EVENT_NOTIFY2, (DWORD)&evt, 0);
     }
 
-    EckInline BOOL OnBeginDrag(POINT pt)
+    EckInline bool OnBeginDrag(POINT pt)
     {
-        m_idxDraggingBegin = LBItemFromPt(m_hWnd, pt, FALSE);
+        m_idxDraggingBegin = LBItemFromPt(m_hWnd, pt, false);
         if (m_idxDraggingBegin >= 0)
         {
             if (m_ItemsInfo[m_idxDraggingBegin].Info.bDisabled)
-                return FALSE;
+                return false;
         }
 
         EVENT_NOTIFY2 evt(m_dwWinFormID, m_dwUnitID, 1);
@@ -245,7 +244,7 @@ private:
         if (evt.m_blHasRetVal)
             return evt.m_infRetData.m_bool;
         else
-            return TRUE;
+            return true;
     }
 
     EckInline void OnCancelDrag(POINT pt)
@@ -260,7 +259,7 @@ private:
 
     EckInline int OnDragging(POINT pt)
     {
-        int idx = LBItemFromPt(m_hWnd, pt, TRUE);
+        int idx = LBItemFromPt(m_hWnd, pt, true);
 
         EVENT_NOTIFY2 evt(m_dwWinFormID, m_dwUnitID, 3);
         evt.m_nArgCount = 4;
@@ -281,7 +280,7 @@ private:
 
     EckInline void OnDropped(POINT pt)
     {
-        int idx = LBItemFromPt(m_hWnd, pt, FALSE);
+        int idx = LBItemFromPt(m_hWnd, pt, false);
         DrawInsert(m_hParent, m_hWnd, -1);
 
         EVENT_NOTIFY2 evt(m_dwWinFormID, m_dwUnitID, 4);
@@ -294,7 +293,7 @@ private:
         evt.m_arg[3].m_inf.m_int = m_idxDraggingBegin;
         elibstl::NotifySys(NRS_EVENT_NOTIFY2, (DWORD)&evt, 0);
 
-        BOOL bSwapItem = (evt.m_blHasRetVal ? evt.m_infRetData.m_bool : TRUE);
+        bool bSwapItem = (evt.m_blHasRetVal ? evt.m_infRetData.m_bool : true);
         if (!bSwapItem || m_idxDraggingBegin < 0 || idx < 0 || m_idxDraggingBegin == idx)
             return;
 
@@ -330,7 +329,7 @@ public:
     }
 
     LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept override
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept override
     {
         switch (uMsg)
         {
@@ -338,18 +337,18 @@ public:
         {
             if (m_InfoEx.cyItem <= 0)
                 break;
-            bProcessed = TRUE;
+            bProcessed = true;
             auto pmis = (MEASUREITEMSTRUCT*)lParam;
             pmis->itemHeight = m_InfoEx.cyItem;
         }
-        return TRUE;
+        return true;
 
         case WM_DRAWITEM:
         {
             auto pdis = (DRAWITEMSTRUCT*)lParam;
             if (pdis->itemID == -1)
                 break;
-            bProcessed = TRUE;
+            bProcessed = true;
             auto& Item = m_ItemsInfo[pdis->itemID];
 
             HDC hDC = pdis->hDC;
@@ -452,7 +451,7 @@ public:
             SetBkMode(hDC, TRANSPARENT);
             DrawTextW(hDC, Item.rsCaption.Data(), -1, &rc, uDTFlags);
         }
-        return TRUE;
+        return true;
         }
 
         return __super::OnNotifyMessage(hParent, uMsg, wParam, lParam, bProcessed);
@@ -521,24 +520,24 @@ public:
         {
             if (!m_InfoEx.bToolTip)
                 break;
-            ::SendMessageW(m_hToolTip, TTM_TRACKACTIVATE, FALSE, (LPARAM)&m_ti);
+            ::SendMessageW(m_hToolTip, TTM_TRACKACTIVATE, false, (LPARAM)&m_ti);
             POINT ptScr{ GET_X_LPARAM(lParam),GET_Y_LPARAM(lParam) };
             ClientToScreen(Handle, &ptScr);
-            int idx = LBItemFromPt(Handle, ptScr, FALSE);
+            int idx = LBItemFromPt(Handle, ptScr, false);
             if (idx < 0)
                 break;
             ::SendMessageW(m_hToolTip, TTM_GETTOOLINFOW, 0, (LPARAM)&m_ti);
             m_ti.lpszText = m_ItemsInfo[idx].rsTip.Data();
             ::SendMessageW(m_hToolTip, TTM_SETTOOLINFOW, 0, (LPARAM)&m_ti);
             ::SendMessageW(m_hToolTip, TTM_TRACKPOSITION, 0, MAKELPARAM(ptScr.x, ptScr.y));
-            ::SendMessageW(m_hToolTip, TTM_TRACKACTIVATE, TRUE, (LPARAM)&m_ti);
+            ::SendMessageW(m_hToolTip, TTM_TRACKACTIVATE, true, (LPARAM)&m_ti);
         }
         break;
 
         case WM_MOUSELEAVE:
             if (!m_InfoEx.bToolTip)
                 break;
-            ::SendMessageW(m_hToolTip, TTM_TRACKACTIVATE, FALSE, (LPARAM)&m_ti);
+            ::SendMessageW(m_hToolTip, TTM_TRACKACTIVATE, false, (LPARAM)&m_ti);
             break;
 
         case WM_THEMECHANGED:
@@ -654,7 +653,7 @@ public:
             Item.hbrSelBK = CreateSolidBrush(CommInfo.crSelBK);
     }
 
-    BOOL DeleteString(int iPos) noexcept
+    bool DeleteString(int iPos) noexcept
     {
         if (iPos < 0)
         {
@@ -669,22 +668,22 @@ public:
         else if (iPos >= 0 && iPos < (int)m_ItemsInfo.size())
         {
             if (::SendMessageW(m_hWnd, LB_DELETESTRING, iPos, 0) == LB_ERR)
-                return FALSE;
+                return false;
             auto& Item = m_ItemsInfo[iPos];
             DeleteObject(Item.hbrBK);
             DeleteObject(Item.hbrSelBK);
             m_ItemsInfo.erase(m_ItemsInfo.begin() + iPos);
         }
         Redraw();
-        return TRUE;
+        return true;
     }
 
-    BOOL InitializeStorage(int cItems) noexcept
+    bool InitializeStorage(int cItems) noexcept
     {
         if (::SendMessageW(m_hWnd, LB_INITSTORAGE, cItems, 0) == LB_ERRSPACE)
-            return FALSE;
+            return false;
         m_ItemsInfo.reserve(cItems);
-        return TRUE;
+        return true;
     }
 
     EckInline void SwapItem(int idx1, int idx2) noexcept
@@ -733,7 +732,7 @@ public:
             return m_InfoEx.crText;
     }
 
-    EckInline void SetAutoSort(BOOL bAutoSort) noexcept
+    EckInline void SetAutoSort(bool bAutoSort) noexcept
     {
         m_InfoEx.bAutoSort = bAutoSort;
         if (bAutoSort && m_ItemsInfo.size())
@@ -747,12 +746,12 @@ public:
         }
     }
 
-    EckInline void SetToolTip(BOOL bToolTip) noexcept
+    EckInline void SetToolTip(bool bToolTip) noexcept
     {
         m_InfoEx.bToolTip = bToolTip;
     }
 
-    EckInline BOOL GetToolTip() noexcept
+    EckInline bool GetToolTip() noexcept
     {
         return m_InfoEx.bToolTip;
     }
@@ -790,7 +789,7 @@ public:
         return m_InfoEx.uFileAttr;
     }
 
-    void SetFileTime(BOOL bMaxTime, DATE date) noexcept
+    void SetFileTime(bool bMaxTime, DATE date) noexcept
     {
         SYSTEMTIME st;
         FILETIME ft;
@@ -802,7 +801,7 @@ public:
             LocalFileTimeToFileTime(&ft, &m_InfoEx.ftMinTime);
     }
 
-    DATE GetFileTime(BOOL bMaxTime) noexcept
+    DATE GetFileTime(bool bMaxTime) noexcept
     {
         SYSTEMTIME st;
         FILETIME ft;
@@ -853,17 +852,17 @@ public:
             return m_InfoEx.crSelText;
     }
 
-    EckInline void SetEllipsis(BOOL bEllipsis) noexcept
+    EckInline void SetEllipsis(bool bEllipsis) noexcept
     {
         m_InfoEx.bEllipsis = bEllipsis;
     }
 
-    EckInline BOOL GetEllipsis() noexcept
+    EckInline bool GetEllipsis() noexcept
     {
         return m_InfoEx.bEllipsis;
     }
 
-    EckInline void SetAlignment(BOOL bHAlign, int iAlign) noexcept
+    EckInline void SetAlignment(bool bHAlign, int iAlign) noexcept
     {
         if (bHAlign)
             m_InfoEx.iAlignH = iAlign;
@@ -871,7 +870,7 @@ public:
             m_InfoEx.iAlignV = iAlign;
     }
 
-    EckInline int GetAlignment(BOOL bHAlign) noexcept
+    EckInline int GetAlignment(bool bHAlign) noexcept
     {
         if (bHAlign)
             return m_InfoEx.iAlignH;
@@ -890,13 +889,13 @@ public:
         return m_InfoEx.iCheckBoxMode;
     }
 
-    EckInline void SetBalloonToolTip(BOOL bBalloonToolTip) noexcept
+    EckInline void SetBalloonToolTip(bool bBalloonToolTip) noexcept
     {
         m_InfoEx.bBalloonToolTip = bBalloonToolTip;
         ModifyWindowStyle(m_hToolTip, bBalloonToolTip ? TTS_BALLOON : 0, TTS_BALLOON);
     }
 
-    EckInline BOOL GetBalloonToolTip() noexcept
+    EckInline bool GetBalloonToolTip() noexcept
     {
         return m_InfoEx.bBalloonToolTip;
     }

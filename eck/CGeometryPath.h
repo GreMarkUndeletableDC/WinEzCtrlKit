@@ -58,7 +58,7 @@ public:
         Kw::Rect rcBounds{};
         float fTolerance{};
         BYTE eFillMode{ D2D1_FILL_MODE_WINDING };
-        BOOLEAN bBoundsValid{ FALSE };
+        bool bBoundsValid{ false };
 
         void Stream(ID2D1SimplifiedGeometrySink* pSink) const noexcept
         {
@@ -74,11 +74,11 @@ private:
     // 指定贝塞尔曲线展平生成的线段以何种方式联接
     PathType m_eBezierSegFlags{ PathType::SgDefault };
     // 设为TRUE使用m_eBezierSegFlags
-    BOOLEAN m_bUseBezierSegFlags{};
-    BOOLEAN m_bHasBezier{};
-    BOOLEAN m_bTranslate{};
-    BOOLEAN m_bDbgInFigure{};
-    BOOLEAN m_bDbgClosed{};
+    bool m_bUseBezierSegFlags{};
+    bool m_bHasBezier{};
+    bool m_bTranslate{};
+    bool m_bDbgInFigure{};
+    bool m_bDbgClosed{};
 public:
     STDMETHOD_(void, SetFillMode)(D2D1_FILL_MODE eFillMode) override
     {
@@ -109,7 +109,7 @@ public:
             EckDbgBreak();
             return;
         }
-        m_bDbgInFigure = TRUE;
+        m_bDbgInFigure = true;
 
         if (m_bTranslate)
             m_vPoint.PushBack({ ptStart.x + m_ptOffset.x, ptStart.y + m_ptOffset.y });
@@ -139,7 +139,7 @@ public:
         CONST D2D1_BEZIER_SEGMENT* pBezier, UINT32 cBezier) override
     {
         EckAssert(!m_bDbgClosed);
-        m_bHasBezier = TRUE;
+        m_bHasBezier = true;
         const auto pNew = m_vPoint.PushBackSize(cBezier * 3);
         memcpy(pNew, pBezier, cBezier * sizeof(D2D1_BEZIER_SEGMENT));
         if (m_bTranslate)
@@ -158,7 +158,7 @@ public:
             EckDbgBreak();
             return;
         }
-        m_bDbgInFigure = FALSE;
+        m_bDbgInFigure = false;
 
         if (m_vPoint.Size() < 2)
             return;
@@ -176,7 +176,7 @@ public:
             EckDbgBreak();
             return E_FAIL;
         }
-        m_bDbgClosed = TRUE;
+        m_bDbgClosed = true;
         return S_OK;
     }
 
@@ -187,16 +187,16 @@ public:
         return E_NOTIMPL;
     }
 
-    STDMETHOD(GstEnableTransform)(BOOL b) override { return E_NOTIMPL; }
-    STDMETHOD(GstIsTransformEnabled)(BOOL* pIsEnabled) override { return E_NOTIMPL; }
+    STDMETHOD(GstEnableTransform)(bool b) override { return E_NOTIMPL; }
+    STDMETHOD(GstIsTransformEnabled)(bool* pIsEnabled) override { return E_NOTIMPL; }
     STDMETHOD(GstSetMatrix)(const D2D1_MATRIX_3X2_F* pMatrix) override { return E_NOTIMPL; }
 
-    STDMETHOD(GstEnableOffset)(BOOL b) override
+    STDMETHOD(GstEnableOffset)(bool b) override
     {
         m_bTranslate = b;
         return S_OK;
     }
-    STDMETHOD(GstIsOffsetEnabled)(BOOL* pIsEnabled) override
+    STDMETHOD(GstIsOffsetEnabled)(bool* pIsEnabled) override
     {
         *pIsEnabled = m_bTranslate;
         return S_OK;
@@ -327,7 +327,7 @@ public:
     {
         Data.fTolerance = fTolerance;
         Data.eFillMode = (D2D1_FILL_MODE)m_eFillMode;
-        Data.bBoundsValid = FALSE;
+        Data.bBoundsValid = false;
         if (HasBezier() && !m_vPoint.IsEmpty())
         {
             Data.vPoint.Clear();
@@ -370,10 +370,10 @@ public:
             break;
         }
     }
-    EckInlineCe void SetUseBezierFlattenSegmentFlags(BOOL b) noexcept { m_bUseBezierSegFlags = b; }
-    EckInlineNdCe BOOL GetUseBezierFlattenSegmentFlags() const noexcept { return m_bUseBezierSegFlags; }
+    EckInlineCe void SetUseBezierFlattenSegmentFlags(bool b) noexcept { m_bUseBezierSegFlags = b; }
+    EckInlineNdCe bool GetUseBezierFlattenSegmentFlags() const noexcept { return m_bUseBezierSegFlags; }
 
-    EckInlineNdCe BOOL HasBezier() const noexcept { return m_bHasBezier; }
+    EckInlineNdCe bool HasBezier() const noexcept { return m_bHasBezier; }
 
     EckInlineNdCe auto& DbgGetPointList() noexcept { return m_vPoint; }
     EckInlineNdCe auto& DbgGetTypeList() noexcept { return m_vType; }
@@ -386,7 +386,7 @@ struct CGeometryPathTessellationHost :
 {
     virtual ~CGeometryPathTessellationHost() = default;
 
-    STDMETHOD_(BOOL, PaIsEmpty)() noexcept override { return vPoint.IsEmpty(); }
+    STDMETHOD_(bool, PaIsEmpty)() noexcept override { return vPoint.IsEmpty(); }
 
     STDMETHOD_(pk::SkPathFillType, PaGetFillType)() noexcept override
     {
@@ -421,7 +421,7 @@ struct CGeometryPathTessellationHost :
                 rcBounds.right = std::max(rcBounds.right, e.x);
                 rcBounds.bottom = std::max(rcBounds.bottom, e.y);
             }
-            bBoundsValid = TRUE;
+            bBoundsValid = true;
         }
         *prc = *(pk::SkRect*)&rcBounds;
         return S_OK;
@@ -444,7 +444,7 @@ struct CGeometryPathTessellationHost :
 };
 
 EckInline void Tessellate(
-    SkiaTessellator::ITessellationHost* pHost, BOOL bAntiAlias = TRUE) noexcept
+    SkiaTessellator::ITessellationHost* pHost, bool bAntiAlias = true) noexcept
 {
     if (bAntiAlias)
         pk::GrAATriangulator::PathToAATriangles(pHost);

@@ -67,9 +67,9 @@ public:
         return (UINT)SendMessageW(DTM_GETSYSTEMTIME, 0, (LPARAM)pst);
     }
 
-    BOOL SetFormat(_In_z_ PCWSTR pszText) const noexcept
+    bool SetFormat(_In_z_ PCWSTR pszText) const noexcept
     {
-        return (BOOL)SendMessageW(DTM_SETFORMATW, 0, (LPARAM)pszText);
+        return (bool)SendMessageW(DTM_SETFORMATW, 0, (LPARAM)pszText);
     }
 
     COLORREF SetMonthCalendarColor(int iType, COLORREF cr) const noexcept
@@ -77,7 +77,7 @@ public:
         return (COLORREF)SendMessageW(DTM_SETMCCOLOR, iType, cr);
     }
 
-    void SetMonthCalendarFont(HFONT hFont, BOOL bRedraw = TRUE) const noexcept
+    void SetMonthCalendarFont(HFONT hFont, bool bRedraw = true) const noexcept
     {
         SendMessageW(DTM_SETMCFONT, (WPARAM)hFont, bRedraw);
     }
@@ -87,14 +87,14 @@ public:
         return (DWORD)SendMessageW(DTM_SETMCSTYLE, 0, dwStyle);
     }
 
-    BOOL SetRange(UINT uFlags, _In_reads_(2) const SYSTEMTIME* pst) const noexcept
+    bool SetRange(UINT uFlags, _In_reads_(2) const SYSTEMTIME* pst) const noexcept
     {
-        return (BOOL)SendMessageW(DTM_SETRANGE, uFlags, (LPARAM)pst);
+        return (bool)SendMessageW(DTM_SETRANGE, uFlags, (LPARAM)pst);
     }
 
-    BOOL SetSystemTime(UINT uFlags, _In_ SYSTEMTIME* pst) const noexcept
+    bool SetSystemTime(UINT uFlags, _In_ SYSTEMTIME* pst) const noexcept
     {
-        return (BOOL)SendMessageW(DTM_SETSYSTEMTIME, uFlags, (LPARAM)pst);
+        return (bool)SendMessageW(DTM_SETSYSTEMTIME, uFlags, (LPARAM)pst);
     }
 };
 ECK_NAMESPACE_END

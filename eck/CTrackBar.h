@@ -28,17 +28,17 @@ public:
     ECK_W_STYLE(NotifyBeforeMove, TBS_NOTIFYBEFOREMOVE);
     ECK_W_STYLE(TransparentBackground, TBS_TRANSPARENTBKGND);
 
-    EckInline void ClearSelection(BOOL bRedraw) const noexcept
+    EckInline void ClearSelection(bool bRedraw) const noexcept
     {
         SendMessageW(TBM_CLEARSEL, bRedraw, 0);
     }
 
-    EckInline void ClearTickMarks(BOOL bRedraw) const noexcept
+    EckInline void ClearTickMarks(bool bRedraw) const noexcept
     {
         SendMessageW(TBM_CLEARTICS, bRedraw, 0);
     }
 
-    EckInline HWND GetBuddy(BOOL bLeftTopOrRightBottom) const noexcept
+    EckInline HWND GetBuddy(bool bLeftTopOrRightBottom) const noexcept
     {
         return (HWND)SendMessageW(TBM_GETBUDDY, bLeftTopOrRightBottom, 0);
     }
@@ -122,7 +122,7 @@ public:
         return (HWND)SendMessageW(TBM_GETTOOLTIPS, 0, 0);
     }
 
-    EckInline HWND SetBuddy(HWND hBuddy, BOOL bLeftTopOrRightBottom) const noexcept
+    EckInline HWND SetBuddy(HWND hBuddy, bool bLeftTopOrRightBottom) const noexcept
     {
         return (HWND)SendMessageW(TBM_SETBUDDY, bLeftTopOrRightBottom, (LPARAM)hBuddy);
     }
@@ -137,7 +137,7 @@ public:
         return (int)SendMessageW(TBM_SETPAGESIZE, 0, nSize);
     }
 
-    EckInline void SetPosition(int nPos, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetPosition(int nPos, bool bRedraw = true) const noexcept
     {
         SendMessageW(TBM_SETPOS, bRedraw, nPos);
     }
@@ -148,38 +148,38 @@ public:
         SendMessageW(TBM_SETPOSNOTIFY, 0, nPos);
     }
 
-    EckInline void SetRange16(int nMin, int nMax, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetRange16(int nMin, int nMax, bool bRedraw = true) const noexcept
     {
         SendMessageW(TBM_SETRANGE, bRedraw, MAKELPARAM(nMin, nMax));
     }
 
-    EckInline void SetRangeMaximum(int nMax, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetRangeMaximum(int nMax, bool bRedraw = true) const noexcept
     {
         SendMessageW(TBM_SETRANGEMAX, bRedraw, nMax);
     }
 
-    EckInline void SetRangeMinimum(int nMin, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetRangeMinimum(int nMin, bool bRedraw = true) const noexcept
     {
         SendMessageW(TBM_SETRANGEMIN, bRedraw, nMin);
     }
 
-    EckInline void SetRange(int nMin, int nMax, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetRange(int nMin, int nMax, bool bRedraw = true) const noexcept
     {
-        SetRangeMinimum(nMin, FALSE);
+        SetRangeMinimum(nMin, false);
         SetRangeMaximum(nMax, bRedraw);
     }
 
-    EckInline void SetSelection(int nStart, int nEnd, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetSelection(int nStart, int nEnd, bool bRedraw = true) const noexcept
     {
         SendMessageW(TBM_SETSEL, bRedraw, MAKELPARAM(nStart, nEnd));
     }
 
-    EckInline void SetSelectionEnd(int nEnd, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetSelectionEnd(int nEnd, bool bRedraw = true) const noexcept
     {
         SendMessageW(TBM_SETSELEND, bRedraw, nEnd);
     }
 
-    EckInline void SetSelectionBegin(int nStart, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetSelectionBegin(int nStart, bool bRedraw = true) const noexcept
     {
         SendMessageW(TBM_SETSELSTART, bRedraw, nStart);
     }
@@ -189,9 +189,9 @@ public:
         SendMessageW(TBM_SETTHUMBLENGTH, nLength, 0);
     }
 
-    EckInline BOOL SetTickMark(int nLogPos) const noexcept
+    EckInline bool SetTickMark(int nLogPos) const noexcept
     {
-        return (BOOL)SendMessageW(TBM_SETTIC, 0, nLogPos);
+        return (bool)SendMessageW(TBM_SETTIC, 0, nLogPos);
     }
 
     EckInline void SetTickMarkFrequency(int nFreq) const noexcept

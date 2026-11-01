@@ -44,7 +44,7 @@ private:
     BITBOOL m_bThumbHot : 1{};
 
     BITBOOL m_bVertical : 1{};
-    BITBOOL m_bTransparentSpace : 1{ TRUE };
+    BITBOOL m_bTransparentSpace : 1{ true };
 
     USHORT m_msLastDuration{};
 
@@ -131,11 +131,11 @@ private:
             &ps.rcClip);
     }
 public:
-    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(bool bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(bool bDark) noexcept
     {
-        static auto p1{ TmMakeDefaultTheme(TRUE) };
-        static auto p2{ TmMakeDefaultTheme(FALSE) };
+        static auto p1{ TmMakeDefaultTheme(true) };
+        static auto p2{ TmMakeDefaultTheme(false) };
         return bDark ? p1 : p2;
     }
 
@@ -179,7 +179,7 @@ public:
             {
                 TmState() |= SaHot;
                 m_ec.Start(0.f, 1.f, m_bAnActive);
-                m_bAnActive = TRUE;
+                m_bAnActive = true;
                 GetWindow().KctWake();
             }
             if (m_bDragThumb)
@@ -208,7 +208,7 @@ public:
             {
                 TmState() &= ~SaHot;
                 m_ec.Start(1.f, 0.f, m_bAnActive);
-                m_bAnActive = TRUE;
+                m_bAnActive = true;
                 GetWindow().KctWake();
             }
         }
@@ -224,7 +224,7 @@ public:
             GetPartRect(rc, Part::Thumb);
             if (PointInRect(rc, pt))
             {
-                m_bDragThumb = TRUE;
+                m_bDragThumb = true;
                 // 减去Cap
                 m_sv.OnLButtonDown(m_bVertical ?
                     pt.y - GetWidth() : pt.x - GetHeight());
@@ -267,7 +267,7 @@ public:
             ReleaseCapture();
             if (m_bDragThumb)
             {
-                m_bDragThumb = FALSE;
+                m_bDragThumb = false;
                 m_sv.OnLButtonUp();
                 EvtScroll();
             }
@@ -307,7 +307,7 @@ public:
                     EVT_SCROLL nm{};
                     nm.fPos = fPos;
                     nm.fPrevPos = fPrevPos;
-                    nm.bAnimating = TRUE;
+                    nm.bAnimating = true;
                     nm.bEndAnimation = p->m_sv.IsStop();
                     p->EvtScroll(nm);
                 }, this);
@@ -328,9 +328,9 @@ public:
     {
         m_msLastDuration = (USHORT)ms;
         m_bAnActive = m_ec.Tick((float)ms, 200);
-        Invalidate(FALSE);
+        Invalidate(false);
     }
-    BOOL TlIsValid() noexcept override { return m_bAnActive; }
+    bool TlIsValid() noexcept override { return m_bAnActive; }
     int TlGetCurrentInterval() const noexcept override { return (int)m_msLastDuration; }
 
     // 外部不得对视图调用SetCallback，滚动条统一管理动画和非动画滚动事件，
@@ -388,11 +388,11 @@ public:
     EckInlineCe void SetTrackPosition(float fPos) noexcept { m_sv.SetPosition(fPos); }
     EckInlineNdCe float GetTrackPosition() const noexcept { return m_sv.GetPosition(); }
 
-    EckInlineCe void SetVertical(BOOL b) noexcept { m_bVertical = b; }
-    EckInlineNdCe BOOL GetVertical() const noexcept { return m_bVertical; }
+    EckInlineCe void SetVertical(bool b) noexcept { m_bVertical = b; }
+    EckInlineNdCe bool GetVertical() const noexcept { return m_bVertical; }
 
-    EckInlineCe void SetTransparentSpace(BOOL b) noexcept { m_bTransparentSpace = b; }
-    EckInlineNdCe BOOL GetTransparentSpace() const noexcept { return m_bTransparentSpace; }
+    EckInlineCe void SetTransparentSpace(bool b) noexcept { m_bTransparentSpace = b; }
+    EckInlineNdCe bool GetTransparentSpace() const noexcept { return m_bTransparentSpace; }
 
     EckInlineCe void SetSmallDelta(float f) noexcept { m_fSmallDelta = f; }
     EckInlineNdCe float GetSmallDelta() const noexcept { return m_fSmallDelta; }
@@ -438,11 +438,11 @@ public:
     float SccGetMaximum() const noexcept override { return m_sv.GetMaximum(); }
     void SccSetMaximum(float x) noexcept override { m_sv.SetMaximum(x); }
     void SccSetRange(float Min, float Max) noexcept override { m_sv.SetRange(Min, Max); }
-    void SccSetVisible(BOOL b) noexcept override { SetVisible(b); }
+    void SccSetVisible(bool b) noexcept override { SetVisible(b); }
     void SccRedraw() noexcept override { Invalidate(); }
 
     void SccMouseWheel(float d) noexcept override { m_sv.OnMouseWheel2(d); }
-    void SccScrollDelta(float d, BOOL bSmooth) noexcept override
+    void SccScrollDelta(float d, bool bSmooth) noexcept override
     {
         if (bSmooth)
             m_sv.SmoothScrollDelta(d);
@@ -475,7 +475,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CTheme> CScrollBar::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CScrollBar::TmMakeDefaultTheme(bool bDark) noexcept
 {
     return TmMakeTheme<CTmScrollBar>(bDark);
 }
@@ -526,7 +526,7 @@ class CUiaScrollBar : public CUnknownAppend<CUiaBase, IRangeValueProvider>
     {
         if (!GetElement())
             return UIA_E_ELEMENTNOTAVAILABLE;
-        *pRetVal = FALSE;
+        *pRetVal = false;
         return S_OK;
     }
     STDMETHODIMP get_Maximum(double* pRetVal) override

@@ -77,7 +77,7 @@ public:
             .cy = 30
         };
         
-        BOOL result = packer.AllocateBottomLeft(rect);
+        bool result = packer.AllocateBottomLeft(rect);
 
         Assert::IsTrue(result);
         Assert::AreEqual(0u, rect.x);
@@ -615,7 +615,7 @@ public:
         packer.AllocateBottomLeft(rect);
 
         rect.cx = 2; rect.cy = 51;
-        BOOL result = packer.AllocateBottomLeft(rect);
+        bool result = packer.AllocateBottomLeft(rect);
         Assert::IsTrue(result);
     }
 
@@ -656,7 +656,7 @@ public:
 
         // 尝试插入大矩形
         rect.cx = 50; rect.cy = 50;
-        BOOL result = packer.AllocateMinimumWaste(rect);
+        bool result = packer.AllocateMinimumWaste(rect);
 
         if (result)
         {

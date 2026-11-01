@@ -17,7 +17,7 @@ struct LunarDate
         x.wYear < LunarDateLib::iEndYearReal &&             \
         x.byMonth >= 0 &&   \
         (x.bLeapMonth ? (x.byMonth <= 13) : (x.byMonth <= 12)) &&       \
-        x.bLeapMonth ? (LnGetLeapMonth(x.wYear) == x.byMonth) : TRUE && \
+        x.bLeapMonth ? (LnGetLeapMonth(x.wYear) == x.byMonth) : true && \
         x.byDay >= 1 &&     \
         x.byDay <= 30)
 #else
@@ -64,7 +64,7 @@ EckInlineNdCe int LnGetLeapMonth(int iYear) noexcept
     return (LunarDateLib::byMonthInfo[idx + 1] >> 5) | ((LunarDateLib::byMonthInfo[idx] & 1) << 3);
 }
 
-EckInlineNdCe BOOL LnIsMonth30Days(LunarDate LunarDate) noexcept
+EckInlineNdCe bool LnIsMonth30Days(LunarDate LunarDate) noexcept
 {
     EckVerifyLnDate(LunarDate);
     const int idx = (LunarDate.wYear - LunarDateLib::iStartYear) * 3;
@@ -89,12 +89,12 @@ EckInlineNdCe int LnGetYearDays(int iYear) noexcept
 {
     int c = 0;
     const int iLeapMonth = LnGetLeapMonth(iYear);
-    LunarDate Date{ .wYear = (WORD)iYear,.bLeapMonth = FALSE };
+    LunarDate Date{ .wYear = (WORD)iYear,.bLeapMonth = false };
     for (Date.byMonth = 1; Date.byMonth <= 12; ++Date.byMonth)
         c += LnGetMonthDays(Date);
     if (iLeapMonth)
     {
-        Date.bLeapMonth = TRUE;
+        Date.bLeapMonth = true;
         Date.byMonth = iLeapMonth;
         c += LnGetMonthDays(Date);
     }
@@ -112,19 +112,19 @@ EckNfInlineNdCe LunarDate CeToLunar(CEDate CeDate) noexcept
     if (iCeDays < iChuYi)// 需要到上一年寻找
     {
         Date.wYear = CeDate.wYear - 1;
-        Date.bLeapMonth = FALSE;
+        Date.bLeapMonth = false;
         const int iLeapMonth = LnGetLeapMonth(Date.wYear);
         for (Date.byMonth = 12; Date.byMonth >= 1; --Date.byMonth)
         {
             if (Date.byMonth == iLeapMonth)
             {
-                Date.bLeapMonth = TRUE;
+                Date.bLeapMonth = true;
                 iDays = LnGetMonthDays(Date);
                 if (c - iDays > iCeDays)
                     c -= iDays;
                 else
                     break;
-                Date.bLeapMonth = FALSE;
+                Date.bLeapMonth = false;
             }
             iDays = LnGetMonthDays(Date);
             if (c - iDays > iCeDays)
@@ -142,7 +142,7 @@ EckNfInlineNdCe LunarDate CeToLunar(CEDate CeDate) noexcept
         const int iLeapMonth = LnGetLeapMonth(CeDate.wYear);
         for (Date.byMonth = 1; Date.byMonth <= 12; ++Date.byMonth)
         {
-            Date.bLeapMonth = FALSE;
+            Date.bLeapMonth = false;
             iDays = LnGetMonthDays(Date);
             if (c + iDays <= iCeDays)
                 c += iDays;
@@ -150,7 +150,7 @@ EckNfInlineNdCe LunarDate CeToLunar(CEDate CeDate) noexcept
                 break;
             if (Date.byMonth != iLeapMonth)
                 continue;
-            Date.bLeapMonth = TRUE;
+            Date.bLeapMonth = true;
             iDays = LnGetMonthDays(Date);
             if (c + iDays <= iCeDays)
                 c += iDays;

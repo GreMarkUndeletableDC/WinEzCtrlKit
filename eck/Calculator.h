@@ -118,13 +118,13 @@ namespace Detail
     }
 
     template<class TChar>
-    BOOL DoOperation(std::vector<double>& vNum, std::vector<TChar>& vOp) noexcept
+    bool DoOperation(std::vector<double>& vNum, std::vector<TChar>& vOp) noexcept
     {
         if (vOp.empty() || vNum.empty())
-            return FALSE;
+            return false;
         const auto bBinary = (vOp.back() >= (TChar)Function::Max);
-        if (bBinary ? (vNum.size() < 2) : FALSE)
-            return FALSE;
+        if (bBinary ? (vNum.size() < 2) : false)
+            return false;
         const auto chOp = vOp.back();
         vOp.pop_back();
         const auto n2 = vNum.back();
@@ -166,9 +166,9 @@ namespace Detail
         case (TChar)Function::Ceil:    vNum.push_back(ceil(n2));       break;
         case (TChar)Function::Floor:   vNum.push_back(floor(n2));      break;
         case (TChar)Function::Round:   vNum.push_back(round(n2));      break;
-        default:return FALSE;
+        default:return false;
         }
-        return TRUE;
+        return true;
     }
 
     template<class TChar>
@@ -177,8 +177,8 @@ namespace Detail
     template<>
     struct CharTraits<CHAR>
     {
-        static BOOL IsDigit(char ch) noexcept { return isdigit(ch); }
-        static BOOL IsAlpha(char ch) noexcept { return isalpha(ch); }
+        static bool IsDigit(char ch) noexcept { return isdigit(ch); }
+        static bool IsAlpha(char ch) noexcept { return isalpha(ch); }
         static double ToDouble(const char* p, const char** ppEnd) noexcept { return strtod(p, (char**)ppEnd); }
         static PCSTR GetFuntionName(const FUNC_NAME& e) noexcept { return e.szNameA; }
         static PCSTR GetConstName(const CONST_NAME& e) noexcept { return e.szNameA; }
@@ -187,8 +187,8 @@ namespace Detail
     template<>
     struct CharTraits<WCHAR>
     {
-        static BOOL IsDigit(WCHAR ch) noexcept { return iswdigit(ch); }
-        static BOOL IsAlpha(WCHAR ch) noexcept { return iswalpha(ch); }
+        static bool IsDigit(WCHAR ch) noexcept { return iswdigit(ch); }
+        static bool IsAlpha(WCHAR ch) noexcept { return iswalpha(ch); }
         static double ToDouble(const WCHAR* p, const WCHAR** ppEnd) noexcept { return wcstod(p, (WCHAR**)ppEnd); }
         static PCWSTR GetFuntionName(const FUNC_NAME& e) noexcept { return e.szNameW; }
         static PCWSTR GetConstName(const CONST_NAME& e) noexcept { return e.szNameW; }
@@ -209,7 +209,7 @@ inline Result CalculateExpression(
         cchExp = (int)TcsLength(pszExp);
     std::vector<double> vNum{};
     std::vector<TChar> vOp{};
-    BOOL bNumberBegin = TRUE;// TRUE = 期待数字
+    bool bNumberBegin = true;// true = 期待数字
     for (auto p = pszExp; p < pszExp + cchExp; ++p)
     {
         const auto ch = *p;
@@ -217,20 +217,20 @@ inline Result CalculateExpression(
             continue;
         if (TTraits::IsDigit(ch))
         {
-            bNumberBegin = FALSE;
+            bNumberBegin = false;
             vNum.push_back(TTraits::ToDouble(p, &p));
             --p;
             continue;
         }
         else if (ch == '(')
         {
-            bNumberBegin = TRUE;
+            bNumberBegin = true;
             vOp.push_back(ch);
             continue;
         }
         else if (ch == ')')
         {
-            bNumberBegin = FALSE;
+            bNumberBegin = false;
             while (!vOp.empty() && vOp.back() != '(')
                 if (!Detail::DoOperation(vNum, vOp))
                     return Result::OpError;
@@ -246,7 +246,7 @@ inline Result CalculateExpression(
                 else if (ch == '-')
                 {
                     vNum.push_back(0.);
-                    bNumberBegin = FALSE;
+                    bNumberBegin = false;
                 }
                 else
                     return Result::AdjacentOp;
@@ -274,7 +274,7 @@ inline Result CalculateExpression(
                 {
                     vNum.push_back(e.lfVal);
                     p += (e.cchName - 1);
-                    bNumberBegin = FALSE;
+                    bNumberBegin = false;
                     goto ExitSearchSym;
                 }
             for (const auto& e : Detail::CalcExpFuncList)
@@ -282,7 +282,7 @@ inline Result CalculateExpression(
                 {
                     vOp.push_back((TChar)e.eOp);
                     p += (e.cchName - 1);
-                    bNumberBegin = TRUE;
+                    bNumberBegin = true;
                     goto ExitSearchSym;
                 }
             return Result::InvalidChar;

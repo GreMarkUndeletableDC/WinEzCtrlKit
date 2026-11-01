@@ -42,7 +42,7 @@ using FSnapshotFetch = HRESULT(*)(size_t cOutput, const RCWH& rcBound, const SNP
 /// <returns>HRESULT</returns>
 template<class F1, class F2>
 inline HRESULT IntSnapshot(F1 fnPreFetch, F2 fnFetch,
-    const RCWH& rc, BOOL bCursor, UINT msTimeout = 500) noexcept
+    const RCWH& rc, bool bCursor, UINT msTimeout = 500) noexcept
 {
     HRESULT hr;
 
@@ -56,7 +56,7 @@ inline HRESULT IntSnapshot(F1 fnPreFetch, F2 fnFetch,
     RCWH rcBound{};
     size_t cOutput{};// Optimize for single output
 
-    const BOOL bEmpty = IsRectEmpty(rc);
+    const bool bEmpty = IsRectEmpty(rc);
     while (SUCCEEDED(g_pDxgiFactory->EnumAdapters(idxAdapter, &pAdapter)))
     {
         auto& e = vAdapter.emplace_back(idxAdapter, pAdapter);
@@ -182,7 +182,7 @@ inline HRESULT IntSnapshot(F1 fnPreFetch, F2 fnFetch,
 /// <param name="msTimeout">帧超时</param>
 /// <returns>HRESULT</returns>
 inline HRESULT Snapshot(IWICBitmap*& pBmp, const RCWH& rc,
-    BOOL bCursor = FALSE, UINT msTimeout = 500) noexcept
+    bool bCursor = false, UINT msTimeout = 500) noexcept
 {
     pBmp = nullptr;
     ComPtr<IWICBitmap> pBitmap;

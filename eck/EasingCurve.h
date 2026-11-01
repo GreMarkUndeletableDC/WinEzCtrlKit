@@ -550,15 +550,15 @@ struct EasingCurve
     /// <param name="fBegin">开始位置，若当前曲线正在运行，则以当前位置作为起始位置并忽略此参数</param>
     /// <param name="fEnd">结束位置</param>
     /// <param name="bActive">当前曲线是否正在运行</param>
-    EckInlineCe void Start(float fBegin, float fEnd, BOOLEAN bActive = FALSE) noexcept
+    EckInlineCe void Start(float fBegin, float fEnd, bool bActive = false) noexcept
     {
         Begin = bActive ? K : fBegin;
         Dist = fEnd - Begin;
         Time = 0.f;
     }
 
-    // 返回曲线是否正在运行（TRUE = 正在运行，FALSE = 已结束）
-    EckInline BOOLEAN Tick(float fElapse, float fDuration) noexcept
+    // 返回曲线是否正在运行（true = 正在运行，false = 已结束）
+    EckInline bool Tick(float fElapse, float fDuration) noexcept
     {
         Time += fElapse;
         K = FAn{}(Time, Begin, Dist, fDuration);

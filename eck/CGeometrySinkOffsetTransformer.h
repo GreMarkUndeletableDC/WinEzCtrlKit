@@ -12,7 +12,7 @@ class CGeometrySinkOffsetTransformer final : public CUnknown<CGeometrySinkOffset
 private:
     ComPtr<ID2D1SimplifiedGeometrySink> m_pSink{};
     float m_ox{}, m_oy{};
-    BOOL m_bOffsetEnabled{};
+    bool m_bOffsetEnabled{};
     CTrivialBuffer<D2D1_POINT_2F> m_vTemp{};
 public:
     STDMETHOD_(void, SetFillMode)(D2D1_FILL_MODE e) override { m_pSink->SetFillMode(e); }
@@ -78,16 +78,16 @@ public:
         return S_OK;
     }
 
-    STDMETHOD(GstEnableTransform)(BOOL b) override { return E_NOTIMPL; }
-    STDMETHOD(GstIsTransformEnabled)(BOOL* pIsEnabled) override { return E_NOTIMPL; }
+    STDMETHOD(GstEnableTransform)(bool b) override { return E_NOTIMPL; }
+    STDMETHOD(GstIsTransformEnabled)(bool* pIsEnabled) override { return E_NOTIMPL; }
     STDMETHOD(GstSetMatrix)(const D2D1_MATRIX_3X2_F* pMatrix) override { return E_NOTIMPL; }
 
-    STDMETHOD(GstEnableOffset)(BOOL b) override
+    STDMETHOD(GstEnableOffset)(bool b) override
     {
         m_bOffsetEnabled = b;
         return S_OK;
     }
-    STDMETHOD(GstIsOffsetEnabled)(BOOL* pIsEnabled) override
+    STDMETHOD(GstIsOffsetEnabled)(bool* pIsEnabled) override
     {
         *pIsEnabled = m_bOffsetEnabled;
         return S_OK;

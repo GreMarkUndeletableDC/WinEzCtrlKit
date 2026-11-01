@@ -11,8 +11,8 @@ private:
     HCURSOR m_hCursor{};
     int m_htTracking{};
     float cxBorder{ 3.f };
-    BOOLEAN m_bAllowMove{ TRUE };
-    BOOLEAN m_bAllowSize{ TRUE };
+    bool m_bAllowMove{ true };
+    bool m_bAllowSize{ true };
     Kw::Vec2 m_ptStart{};
     Kw::Rect m_rcStart{};
 public:
@@ -103,7 +103,7 @@ public:
         case WM_SETCURSOR:
             Ctx.Processed();
             SetCursor(m_hCursor);
-            return TRUE;
+            return true;
         case WM_MOUSEMOVE:
         {
             if (m_htTracking == HTNOWHERE)
@@ -118,7 +118,7 @@ public:
                 break;
             }
             auto rcCurr{ m_rcStart };
-            BOOL bChangeR{}, bChangeB{};
+            bool bChangeR{}, bChangeB{};
             switch (m_htTracking)
             {
             case HTTOP:
@@ -126,14 +126,14 @@ public:
                 break;
             case HTBOTTOM:
                 rcCurr.bottom += dy;
-                bChangeB = TRUE;
+                bChangeB = true;
                 break;
             case HTLEFT:
                 rcCurr.left += dx;
                 break;
             case HTRIGHT:
                 rcCurr.right += dx;
-                bChangeR = TRUE;
+                bChangeR = true;
                 break;
             case HTTOPLEFT:
                 rcCurr.top += dy;
@@ -142,17 +142,17 @@ public:
             case HTTOPRIGHT:
                 rcCurr.top += dy;
                 rcCurr.right += dx;
-                bChangeR = TRUE;
+                bChangeR = true;
                 break;
             case HTBOTTOMLEFT:
                 rcCurr.bottom += dy;
                 rcCurr.left += dx;
-                bChangeB = TRUE;
+                bChangeB = true;
                 break;
             case HTBOTTOMRIGHT:
                 rcCurr.bottom += dy;
                 rcCurr.right += dx;
-                bChangeR = bChangeB = TRUE;
+                bChangeR = bChangeB = true;
                 break;
             }
             if (rcCurr.right - rcCurr.left < cxBorder * 2)
@@ -216,10 +216,10 @@ public:
         }
     }
 
-    EckInlineCe void SetAllowMove(BOOLEAN bAllow) noexcept { m_bAllowMove = bAllow; }
-    EckInlineNdCe BOOLEAN GetAllowMove() const noexcept { return m_bAllowMove; }
-    EckInlineCe void SetAllowSize(BOOLEAN bAllow) noexcept { m_bAllowSize = bAllow; }
-    EckInlineNdCe BOOLEAN GetAllowSize() const noexcept { return m_bAllowSize; }
+    EckInlineCe void SetAllowMove(bool bAllow) noexcept { m_bAllowMove = bAllow; }
+    EckInlineNdCe bool GetAllowMove() const noexcept { return m_bAllowMove; }
+    EckInlineCe void SetAllowSize(bool bAllow) noexcept { m_bAllowSize = bAllow; }
+    EckInlineNdCe bool GetAllowSize() const noexcept { return m_bAllowSize; }
     EckInlineCe void SetBorderWidth(float cx) noexcept { cxBorder = cx; }
     EckInlineNdCe float GetBorderWidth() const noexcept { return cxBorder; }
 };

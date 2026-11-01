@@ -94,7 +94,7 @@ public:
     };
 private:
     ComPtr<ID2D1DrawInfo> m_pDrawInfo{};
-    BOOL m_bHorizontal{ TRUE };
+    bool m_bHorizontal{ true };
     Constant m_Constants{};
 
     void UpdateBlurDirection() noexcept
@@ -105,7 +105,7 @@ private:
             m_Constants.BlurDirection = { 0.0f, 1.0f };
     }
 public:
-    explicit CGradientBlurTransform(BOOL bHorizontal) noexcept
+    explicit CGradientBlurTransform(bool bHorizontal) noexcept
         : m_bHorizontal{ bHorizontal }
     {
         UpdateBlurDirection();
@@ -296,8 +296,8 @@ public:
         if (FAILED(hr))
             return hr;
 
-        m_pTransformH.Attach(new CGradientBlurTransform{ TRUE });
-        m_pTransformV.Attach(new CGradientBlurTransform{ FALSE });
+        m_pTransformH.Attach(new CGradientBlurTransform{ true });
+        m_pTransformV.Attach(new CGradientBlurTransform{ false });
         UpdateConstant();
 
         ComPtr<ID2D1BorderTransform> pBorderTransform;

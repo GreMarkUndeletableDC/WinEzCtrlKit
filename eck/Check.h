@@ -55,11 +55,11 @@ enum : UINT
     p = szParam;
     EckCopyConstStringW(p, TipC1);
     p += (ARRAYSIZE(TipC1) - 1);
-    p = TcvFromInt(p, std::end(szParam) - p, C1, 16, TRUE, FillTo).pEnd;
+    p = TcvFromInt(p, std::end(szParam) - p, C1, 16, true, FillTo).pEnd;
 
     EckCopyConstStringW(p, TipC2);
     p += (ARRAYSIZE(TipC2) - 1);
-    TcvFromInt(p, std::end(szParam) - p, C2, 16, TRUE, FillTo);
+    TcvFromInt(p, std::end(szParam) - p, C2, 16, true, FillTo);
 
     PCWSTR pszMsg[]
     {
@@ -96,7 +96,7 @@ enum : UINT
 
 namespace Detail
 {
-    EckInlineNdCe BOOL CheckNtHandle(HANDLE h) noexcept
+    EckInlineNdCe bool CheckNtHandle(HANDLE h) noexcept
     {
         return h != nullptr && h != INVALID_HANDLE_VALUE;
     }

@@ -127,7 +127,7 @@ public:
         return (int)SendMessageW(LB_GETITEMHEIGHT, idx, 0);
     }
 
-    EckInline BOOL GetItemRect(int idx, _Out_ RECT* prc) const noexcept
+    EckInline bool GetItemRect(int idx, _Out_ RECT* prc) const noexcept
     {
         return (SendMessageW(LB_GETITEMRECT, idx, (LPARAM)prc) != LB_ERR);
     }
@@ -167,13 +167,13 @@ public:
         return (int)SendMessageW(LB_GETSELITEMS, c, (LPARAM)piSelItems);
     }
 
-    BOOL GetItemText(int idx, Eck_Append_buffer_ CStringW& rs) const noexcept
+    bool GetItemText(int idx, Eck_Append_buffer_ CStringW& rs) const noexcept
     {
         auto cch = GetItemTextLength(idx);
         if (cch < 0)
-            return FALSE;
+            return false;
         if (!cch)
-            return TRUE;
+            return true;
         return GetItemText(idx, rs.PushBackNoExtra(cch)) >= 0;
     }
 
@@ -231,7 +231,7 @@ public:
         return (int)SendMessageW(LB_INSERTSTRING, idxPos, lParam);
     }
 
-    EckInline int ItemFromPoint(POINT pt, BOOL bAutoScroll = FALSE) const noexcept
+    EckInline int ItemFromPoint(POINT pt, bool bAutoScroll = false) const noexcept
     {
         ClientToScreen(m_hWnd, &pt);
         return LBItemFromPt(m_hWnd, pt, bAutoScroll);
@@ -254,19 +254,19 @@ public:
         return (int)SendMessageW(LB_SELECTSTRING, idxStart, (LPARAM)pszText);
     }
 
-    EckInline BOOL SelectItemRange(int idxStart, int idxEnd, BOOL bSel) const noexcept
+    EckInline bool SelectItemRange(int idxStart, int idxEnd, bool bSel) const noexcept
     {
         if (!bSel)
             std::swap(idxStart, idxEnd);
         return (SendMessageW(LB_SELITEMRANGEEX, idxStart, idxEnd) != LB_ERR);
     }
 
-    EckInline BOOL SetAnchorIndex(int idx) const noexcept
+    EckInline bool SetAnchorIndex(int idx) const noexcept
     {
         return (SendMessageW(LB_SETANCHORINDEX, idx, 0) != LB_ERR);
     }
 
-    EckInline BOOL SetCaretIndex(int idx, BOOL bNoFullVisible = FALSE) const noexcept
+    EckInline bool SetCaretIndex(int idx, bool bNoFullVisible = false) const noexcept
     {
         return (SendMessageW(LB_SETCARETINDEX, idx, bNoFullVisible) != LB_ERR);
     }
@@ -281,11 +281,11 @@ public:
         return (int)SendMessageW(LB_SETCOUNT, cItems, 0);
     }
 
-    EckInline BOOL SetCurrentSelection(int idxSel = -1) const noexcept
+    EckInline bool SetCurrentSelection(int idxSel = -1) const noexcept
     {
         int iRet = (int)SendMessageW(LB_SETCURSEL, idxSel, 0);
         if (idxSel < 0)
-            return TRUE;
+            return true;
         else
             return (iRet != LB_ERR);
     }
@@ -295,7 +295,7 @@ public:
         SendMessageW(LB_SETHORIZONTALEXTENT, iHorizontalExtent, 0);
     }
 
-    EckInline BOOL SetItemData(int idx, LPARAM lParam) const noexcept
+    EckInline bool SetItemData(int idx, LPARAM lParam) const noexcept
     {
         return (SendMessageW(LB_SETITEMDATA, idx, lParam) != LB_ERR);
     }
@@ -306,7 +306,7 @@ public:
     /// <param name="idx">若列表框具有LBS_OWNERDRAWVARIABLE，则该参数指示项目索引，否则则必须设置为0</param>
     /// <param name="cy"></param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SetItemHeight(int idx, int cy) const noexcept
+    EckInline bool SetItemHeight(int idx, int cy) const noexcept
     {
         return (SendMessageW(LB_SETITEMHEIGHT, idx, cy) != LB_ERR);
     }
@@ -328,17 +328,17 @@ public:
     /// <param name="idx">索引，若设为-1则操作所有项目</param>
     /// <param name="bSel"></param>
     /// <returns></returns>
-    EckInline BOOL SetSelection(int idx, BOOL bSel) const noexcept
+    EckInline bool SetSelection(int idx, bool bSel) const noexcept
     {
         return (SendMessageW(LB_SETSEL, bSel, idx) != LB_ERR);
     }
 
-    EckInline BOOL SetTabStop(_In_reads_(c) const int* piTabStop, int c) const noexcept
+    EckInline bool SetTabStop(_In_reads_(c) const int* piTabStop, int c) const noexcept
     {
-        return (BOOL)SendMessageW(LB_SETTABSTOPS, c, (LPARAM)piTabStop);
+        return (bool)SendMessageW(LB_SETTABSTOPS, c, (LPARAM)piTabStop);
     }
 
-    EckInline BOOL SetTopIndex(int idx) const noexcept
+    EckInline bool SetTopIndex(int idx) const noexcept
     {
         return (SendMessageW(LB_SETTOPINDEX, idx, 0) != LB_ERR);
     }
@@ -346,9 +346,8 @@ public:
     EckInline void RedrawItem(int idx) const noexcept
     {
         RECT rcItem;
-        if (GetItemRect(idx, &rcItem) == LB_ERR)
-            return;
-        InvalidateRect(Handle, &rcItem, TRUE);
+        if (GetItemRect(idx, &rcItem))
+            InvalidateRect(Handle, &rcItem, true);
     }
 };
 ECK_NAMESPACE_END

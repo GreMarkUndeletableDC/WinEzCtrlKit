@@ -105,12 +105,12 @@ struct CoroPromiseBase
             e, State::HasNext, std::memory_order_release);
     }
 
-    EckInline BOOL IsCompleted() const noexcept
+    EckInline bool IsCompleted() const noexcept
     {
         return m_eState.load(std::memory_order_relaxed) == State::Completed;
     }
 
-    BOOL TryCancel() noexcept
+    bool TryCancel() noexcept
     {
         auto e{ State::Initial };
         m_eState.compare_exchange_strong(e, State::Cancelled, std::memory_order_acq_rel);
@@ -121,7 +121,7 @@ struct CoroPromiseBase
         m_eState.compare_exchange_strong(e, State::Cancelled, std::memory_order_acq_rel);
         if (e == State::HasNext)
             goto Success;
-        return FALSE;
+        return false;
     Success:;
         m_Lk.EnterWrite();
         const auto pfnCanceller{ m_pfnCanceller };
@@ -132,10 +132,10 @@ struct CoroPromiseBase
             pfnCanceller(pCancellerCtx);
         if (fnOnCancel)
             fnOnCancel();
-        return TRUE;
+        return true;
     }
 
-    EckInline BOOL IsCanceled() const noexcept
+    EckInline bool IsCanceled() const noexcept
     {
         return m_eState.load(std::memory_order_relaxed) == State::Cancelled;
     }
@@ -317,7 +317,7 @@ struct CoroTask
 
     void Wait() const
     {
-        CEvent Event({}, FALSE, FALSE);
+        CEvent Event({}, false, false);
 
         [this, &Event]() -> CoroTask<> {
             co_await *this;
@@ -332,9 +332,9 @@ struct CoroTask
     EckInline auto& GetPromise() const noexcept { return hCoroutine.promise(); }
     EckInline auto& GetReturnValue() const noexcept { return GetPromise().GetReturnValue(); }
     EckInline auto& GetReturnValue() noexcept { return GetPromise().GetReturnValue(); }
-    EckInline BOOL IsCompleted() const noexcept { return GetPromise().IsCompleted(); }
-    EckInline BOOL TryCancel() noexcept { return GetPromise().TryCancel(); }
-    EckInline BOOL IsCanceled() const noexcept { return GetPromise().IsCanceled(); }
+    EckInline bool IsCompleted() const noexcept { return GetPromise().IsCompleted(); }
+    EckInline bool TryCancel() noexcept { return GetPromise().TryCancel(); }
+    EckInline bool IsCanceled() const noexcept { return GetPromise().IsCanceled(); }
 };
 
 // 发后不理
@@ -487,7 +487,7 @@ EckInline auto CoroCaptureUiThread(ThreadContext* ptc = nullptr)
         Detail::QueuedCallbackQueue* m_pCallback{};
     public:
         UINT Priority{ UINT_MAX };
-        BOOL IsWakeUiThread{ FALSE };
+        bool IsWakeUiThread{ false };
 
         constexpr Context(ThreadContext* ptc) noexcept : m_pCallback{ &ptc->Callback } {}
 

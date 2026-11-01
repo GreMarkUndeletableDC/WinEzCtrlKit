@@ -41,7 +41,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
     const auto iDpi = eck::GetMonitorDpi(hMon);
     auto size = SIZE{ 640,480 };
     DpiScale(size, iDpi);
-    const auto pt = eck::CalculateCenterWindowPosition(nullptr, size.cx, size.cy, FALSE);
+    const auto pt = eck::CalculateCenterWindowPosition(nullptr, size.cx, size.cy, false);
     pWnd->SetUserDpi(iDpi);
     pWnd->SetPresentMode(Dui::PresentMode::DCompositionSurface);
     pWnd->Create(L"示例Win32程序", WS_OVERLAPPEDWINDOW, 0,

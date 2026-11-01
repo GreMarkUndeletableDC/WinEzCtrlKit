@@ -11,7 +11,7 @@ private:
     UINT m_msInterval : 31{};
     UINT m_bExit : 1{};
     CWaitableTimer m_Timer{};
-    CEvent m_Event{ {}, TRUE/*Notification*/, TRUE/*Signal*/ };
+    CEvent m_Event{ {}, true/*Notification*/, true/*Signal*/ };
     CWaitableObject m_Thread{};
 public:
     EckInlineCe void SetTargetWindow(HWND hWnd) noexcept { m_hWnd = hWnd; }
@@ -32,7 +32,7 @@ public:
                     const auto ms = (long)p->m_msInterval;
                     p->m_Timer.SetDueTimeAndPeriodMs(ms, ms);
                     NtWaitForMultipleObjects(2, (HANDLE*)&p->m_Timer,
-                        WaitAll, FALSE, nullptr);
+                        WaitAll, false, nullptr);
                     SendNotifyMessageW(p->m_hWnd, p->m_uMsg, 0, 0);
                 }
                 return 0u;
@@ -44,12 +44,12 @@ public:
 
     void Stop() noexcept
     {
-        m_bExit = TRUE;
+        m_bExit = true;
         m_Event.Signal();
         WaitObject(m_Thread);
         m_Thread.Clear();
     }
 
-    EckInlineNdCe BOOL IsRunning() const noexcept { return !!m_Thread.Get(); }
+    EckInlineNdCe bool IsRunning() const noexcept { return !!m_Thread.Get(); }
 };
 ECK_NAMESPACE_END

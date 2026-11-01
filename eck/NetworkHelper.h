@@ -33,7 +33,7 @@ inline std::wstring_view HeaderQueryKeyValue(
     return { pszValue, size_t(posEnd + pos - (pszValue - svHeader.data())) };
 }
 
-inline BOOL HeaderComplete(
+inline bool HeaderComplete(
     CStringW& rsHeader,
     std::wstring_view svHeader,
     std::wstring_view svMethod,
@@ -68,12 +68,12 @@ inline BOOL HeaderComplete(
             pos0 += 7;
             const auto ch = rsHeader[pos0];
             if (ch == L'\0')
-                return FALSE;
+                return false;
             if (ch != L'\r')
                 rsHeader[pos0++] = L' ';
             const auto pos1 = rsHeader.FindI(L"\r\n"sv, pos0);
             if (pos1 < 0)
-                return FALSE;
+                return false;
             rsHeader.Replace(pos0, pos1 - pos0, svCookies);
         }
         else
@@ -83,12 +83,12 @@ inline BOOL HeaderComplete(
             rsHeader.PushBack(L"\r\n");
         }
     }
-    return TRUE;
+    return true;
 #undef ECK_TEMP_HIT
 }
 
 EckInline HWhSession WhOpenSession(
-    BOOL bAsync = TRUE,
+    bool bAsync = true,
     _In_opt_z_ PCWSTR pszUserAgent = nullptr,
     _In_opt_z_ PCWSTR pszProxy = nullptr) noexcept
 {
@@ -145,8 +145,8 @@ struct CHttpRequestAsync
     std::wstring_view Header{};
     std::span<const BYTE> Data{};
     std::wstring_view Cookies{};
-    BITBOOL AutoAddHeader : 1{ TRUE };
-    BITBOOL AutoDecompress : 1{ TRUE };
+    BITBOOL AutoAddHeader : 1{ true };
+    BITBOOL AutoDecompress : 1{ true };
 
     int ResponseCode{};
     CStringW ResponseHeader{};
@@ -193,7 +193,7 @@ struct CHttpRequestAsync
             // 下列字段由回调和调用方共享
 
             HRESULT hr;                 // 因失败而取消
-            CEvent EvtSafeExit{ {}, FALSE, FALSE }; // 安全退出事件
+            CEvent EvtSafeExit{ {}, false, false }; // 安全退出事件
 
             void Cancel(HRESULT hr)
             {
@@ -293,10 +293,10 @@ struct CHttpRequestAsync
                         if (!WinHttpReadData(
                             pCtx->hRequest, std::get<CByteBuffer>(pCtx->pThis->Response).PushBack(cbData),
                             cbData, nullptr))
-                            pCtx->Cancel(FALSE);
+                            pCtx->Cancel(false);
                     }
                     else// 读取完毕
-                        pCtx->Cancel(FALSE);
+                        pCtx->Cancel(false);
                 }
                 break;
 
@@ -354,7 +354,7 @@ struct CHttpRequestAsync
                     const auto hClosed{ *(HINTERNET*)lpvStatusInformation };
                     if (hClosed == pCtx->hRequest)
                     {
-                        pCtx->bRequestClosed = TRUE;
+                        pCtx->bRequestClosed = true;
                         pCtx->hRequest = nullptr;
                         pCtx->EvtSafeExit.Signal();
                     }
@@ -463,8 +463,8 @@ struct CHttpRequestAsync
 
     void Reset() noexcept
     {
-        AutoAddHeader = TRUE;
-        AutoDecompress = TRUE;
+        AutoAddHeader = true;
+        AutoDecompress = true;
         Header = {};
         Data = {};
         Cookies = {};

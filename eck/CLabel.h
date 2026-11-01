@@ -65,7 +65,7 @@ private:
     BITBOOL m_bImgAlpha : 1{};      // 图片需要Alpha混合
     BITBOOL m_bBkImgAlpha : 1{};    // 底图需要Alpha混合
 
-    BITBOOL m_bPartMetricsDirty : 1{ TRUE };// 部件矩形需要重新计算
+    BITBOOL m_bPartMetricsDirty : 1{ true };// 部件矩形需要重新计算
 
     COLORREF m_crText{ CLR_DEFAULT };   // 文本颜色
     COLORREF m_crTextBk{ CLR_DEFAULT }; // 文本背景颜色
@@ -114,7 +114,7 @@ private:
     {
         if (m_bPartMetricsDirty)
         {
-            m_bPartMetricsDirty = FALSE;
+            m_bPartMetricsDirty = false;
             CalculatePartsRect();
         }
         const auto hCDC = (m_hbmImg || m_hbmBkImg) ?
@@ -278,18 +278,18 @@ private:
         }
     }
 public:
-    BOOL LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept override
+    bool LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept override
     {
         if (m_bPartMetricsDirty)
         {
-            m_bPartMetricsDirty = FALSE;
+            m_bPartMetricsDirty = false;
             CalculatePartsRect();
         }
         Size.cx = TLytCoord((m_rcPartImg.right - m_rcPartImg.left) +
             (m_rcPartText.right - m_rcPartText.left));
         Size.cy = (TLytCoord)std::max(m_rcPartImg.bottom - m_rcPartImg.top,
             m_rcPartText.bottom - m_rcPartText.top);
-        return TRUE;
+        return true;
     }
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
@@ -368,7 +368,7 @@ public:
             m_rsText = (PWSTR)lParam;
             CalculatePartsRect();
             Redraw();
-            return TRUE;
+            return true;
         case WM_GETTEXTLENGTH:
             return m_rsText.Size();
         case WM_GETTEXT:
@@ -412,8 +412,8 @@ public:
             m_ePrefixMode = Prefix::Normal;
             m_eMouseOption = MouseOption::None;
             m_bAutoWrap = m_bTransparent =
-                m_bImgAlpha = m_bBkImgAlpha = FALSE;
-            m_bPartMetricsDirty = TRUE;
+                m_bImgAlpha = m_bBkImgAlpha = false;
+            m_bPartMetricsDirty = true;
             m_crText = m_crTextBk = m_crBk = CLR_DEFAULT;
             m_crGradient = DefaultGradient;
         }
@@ -437,7 +437,7 @@ public:
         }
         else
         {
-            InvalidateRect(m_hWnd, nullptr, FALSE);
+            InvalidateRect(m_hWnd, nullptr, false);
             UpdateWindow(m_hWnd);
         }
     }
@@ -462,40 +462,40 @@ public:
 
     HBITMAP SetImage(HBITMAP hBitmap) noexcept
     {
-        m_bPartMetricsDirty = TRUE;
+        m_bPartMetricsDirty = true;
         std::swap(m_hbmImg, hBitmap);
         return hBitmap;
     }
     EckInlineNdCe HBITMAP GetImage() const noexcept { return m_hbmImg; }
 
-    EckInlineCe void SetAlignment(BOOL bHAlign, Alignment eAlign) noexcept
+    EckInlineCe void SetAlignment(bool bHAlign, Alignment eAlign) noexcept
     {
         (bHAlign ? m_eAlignH : m_eAlignV) = eAlign;
-        m_bPartMetricsDirty = TRUE;
+        m_bPartMetricsDirty = true;
     }
-    EckInlineNdCe Alignment GetAlignment(BOOL bHAlign) const noexcept
+    EckInlineNdCe Alignment GetAlignment(bool bHAlign) const noexcept
     {
         return (bHAlign ? m_eAlignH : m_eAlignV);
     }
 
-    EckInlineCe void SetAutoWrap(BOOL bAutoWrap) noexcept
+    EckInlineCe void SetAutoWrap(bool bAutoWrap) noexcept
     {
         m_bAutoWrap = bAutoWrap;
-        m_bPartMetricsDirty = TRUE;
+        m_bPartMetricsDirty = true;
     }
-    EckInlineNdCe BOOL GetAutoWrap() const noexcept { return m_bAutoWrap; }
+    EckInlineNdCe bool GetAutoWrap() const noexcept { return m_bAutoWrap; }
 
     EckInlineCe void SetEllipsisMode(Ellipsis eEllipsisMode) noexcept
     {
         m_eEllipsisMode = eEllipsisMode;
-        m_bPartMetricsDirty = TRUE;
+        m_bPartMetricsDirty = true;
     }
     EckInlineNdCe Ellipsis GetEllipsisMode() const noexcept { return m_eEllipsisMode; }
 
     EckInlineCe void SetPrefixMode(Prefix ePrefixMode) noexcept
     {
         m_ePrefixMode = ePrefixMode;
-        m_bPartMetricsDirty = TRUE;
+        m_bPartMetricsDirty = true;
     }
     EckInlineNdCe Prefix GetPrefixMode() const noexcept { return m_ePrefixMode; }
 
@@ -552,33 +552,33 @@ public:
         return m_crGradient[idx];
     }
 
-    EckInline void SetTransparent(BOOL bTransparent) noexcept
+    EckInline void SetTransparent(bool bTransparent) noexcept
     {
         m_bTransparent = bTransparent;
         ModifyStyle(bTransparent ? WS_EX_TRANSPARENT : 0, WS_EX_TRANSPARENT, GWL_EXSTYLE);
     }
-    EckInlineNdCe BOOL GetTransparent() const noexcept { return m_bTransparent; }
+    EckInlineNdCe bool GetTransparent() const noexcept { return m_bTransparent; }
 
     EckInlineCe void SetMouseOption(MouseOption eOption) noexcept { m_eMouseOption = eOption; }
     EckInlineNdCe MouseOption GetMouseOption() const noexcept { return m_eMouseOption; }
 
-    BOOL HitTest(POINT pt, _Out_ LA_HITTEST& laht) noexcept
+    bool HitTest(POINT pt, _Out_ LA_HITTEST& laht) noexcept
     {
-        laht.bHit = FALSE;
-        laht.bHitImg = FALSE;
-        laht.bHitText = FALSE;
+        laht.bHit = false;
+        laht.bHitImg = false;
+        laht.bHitText = false;
         if (PointInRect(RECT{ 0,0,m_cxClient,m_cyClient }, pt))
         {
-            laht.bHit = TRUE;
+            laht.bHit = true;
             if (m_bPartMetricsDirty)
                 CalculatePartsRect();
             if (PointInRect(m_rcPartImg, pt))
-                laht.bHitImg = TRUE;
+                laht.bHitImg = true;
             else if (PointInRect(m_rcPartText, pt))
-                laht.bHitText = TRUE;
-            return TRUE;
+                laht.bHitText = true;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 };
 ECK_NAMESPACE_END

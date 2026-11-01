@@ -79,9 +79,9 @@ public:
     EckInline void ReleaseCapture() const noexcept;
     EckInline void SetFocus() noexcept;
     EckInlineNdCe CElement* GetFocus() const noexcept;
-    EckInline BOOL SetTimer(UINT_PTR uId, UINT uElapse) noexcept;
-    EckInline BOOL KillTimer(UINT_PTR uId) noexcept;
-    EckInlineNdCe BOOL IsShowingFocus() const noexcept;
+    EckInline bool SetTimer(UINT_PTR uId, UINT uElapse) noexcept;
+    EckInline bool KillTimer(UINT_PTR uId) noexcept;
+    EckInlineNdCe bool IsShowingFocus() const noexcept;
 
     EckInlineNdCe auto& GetWindow() const noexcept { return *(CEuiWindow*)GetContainer(); }
     EckInlineNdCe HDC GetDC() const noexcept;
@@ -105,27 +105,27 @@ public:
         GpPtr<GpSolidFill> pBrush{};
         GpPtr<GpPen> pPen{};
         GpPtr<GpStringFormat> pStrFmt{};
-        BOOLEAN bStrFmtSingleLine{ TRUE };
-        BOOLEAN bStrFmtNoClip{ TRUE };
+        bool bStrFmtSingleLine{ true };
+        bool bStrFmtNoClip{ true };
         BYTE eAlign{};
         BYTE eLineAlign{};
 
         void SetStringFormatFromDtFlags(UINT uDt) noexcept
         {
-            BOOL bSetFlags{};
+            bool bSetFlags{};
             int uNewFlags{};
-            const BOOLEAN bNoClip = !!(uDt & DT_NOCLIP);
+            const bool bNoClip = !!(uDt & DT_NOCLIP);
             if (bNoClip != bStrFmtNoClip)
             {
-                bSetFlags = TRUE;
+                bSetFlags = true;
                 bStrFmtNoClip = bNoClip;
                 if (bNoClip)
                     uNewFlags |= Gdiplus::StringFormatFlagsNoClip;
             }
-            const BOOLEAN bSingleLine = !!(uDt & DT_SINGLELINE);
+            const bool bSingleLine = !!(uDt & DT_SINGLELINE);
             if (bSingleLine != bStrFmtSingleLine)
             {
-                bSetFlags = TRUE;
+                bSetFlags = true;
                 bStrFmtSingleLine = bSingleLine;
                 if (bSingleLine)
                     uNewFlags |= Gdiplus::StringFormatFlagsNoWrap;
@@ -336,9 +336,9 @@ EckInlineNdCe CElement* CElement::GetCapture() const noexcept { return GetWindow
 EckInline void CElement::ReleaseCapture() const noexcept { GetWindow().EleReleaseCapture(); }
 EckInline void CElement::SetFocus() noexcept { GetWindow().EleSetFocus(this); }
 EckInlineNdCe CElement* CElement::GetFocus() const noexcept { return GetWindow().EleGetFocus(); }
-EckInline BOOL CElement::SetTimer(UINT_PTR uId, UINT uElapse) noexcept { return GetWindow().EleSetTimer(this, uId, uElapse); }
-EckInline BOOL CElement::KillTimer(UINT_PTR uId) noexcept { return GetWindow().EleKillTimer(this, uId); }
-EckInlineNdCe BOOL CElement::IsShowingFocus() const noexcept { return GetWindow().EleIsShowingFocus(); }
+EckInline bool CElement::SetTimer(UINT_PTR uId, UINT uElapse) noexcept { return GetWindow().EleSetTimer(this, uId, uElapse); }
+EckInline bool CElement::KillTimer(UINT_PTR uId) noexcept { return GetWindow().EleKillTimer(this, uId); }
+EckInlineNdCe bool CElement::IsShowingFocus() const noexcept { return GetWindow().EleIsShowingFocus(); }
 
 class CUiaBase : public CElement::CUiaElement
 {
@@ -387,7 +387,7 @@ inline TmResult TmGenericDrawBackground(
                 const auto hOld = SelectObject(Stock.hCDC, pImg->GdiGet());
                 const RECT rcSrc{ 0, 0, pImg->GdiGetWidth(), pImg->GdiGetHeight() };
                 DrawBackgroundImage(hDC, Stock.hCDC, pStyle->eImgModeBack,
-                    rc, &rcSrc, TRUE);
+                    rc, &rcSrc, true);
                 SelectObject(Stock.hCDC, hOld);
             }
             SetDCBrushColor(hDC, ArgbToColorref(pStyle->argbBorder));

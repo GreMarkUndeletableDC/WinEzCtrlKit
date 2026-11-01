@@ -66,7 +66,7 @@ inline void FlattenSpirograph(std::vector<TPt>& vPt,
 /// <param name="iOffsetPtPen">描绘点距内圆圆心的偏移</param>
 /// <param name="fStep">步长</param>
 /// <returns>Polyline返回值</returns>
-EckInline BOOL DrawSpirograph(HDC hDC, int xCenter, int yCenter,
+EckInline bool DrawSpirograph(HDC hDC, int xCenter, int yCenter,
     int rOut, int rInt, int iOffsetPtPen, float fStep = 0.1f) noexcept
 {
     std::vector<POINT> vPt{};
@@ -181,7 +181,7 @@ EckInline void FlattenButterflyCurve(std::vector<TPt>& vPt,
 /// <param name="fScaleX">X方向缩放</param>
 /// <param name="fScaleY">Y方向缩放</param>
 /// <param name="fStep">步长</param>
-EckInline BOOL DrawButterflyCurve(HDC hDC, int xCenter, int yCenter,
+EckInline bool DrawButterflyCurve(HDC hDC, int xCenter, int yCenter,
     float fDeformationCoefficient = 4.f,
     float fScaleX = 100.f, float fScaleY = 100.f, float fStep = 0.01f) noexcept
 {
@@ -297,7 +297,7 @@ EckInline void FlattenRoseCurve(std::vector<TPt>& vPt,
 /// <param name="n">花瓣数量参数</param>
 /// <param name="fStep">步长</param>
 /// <returns>Polyline返回值</returns>
-EckInline BOOL DrawRoseCurve(HDC hDC, int xCenter, int yCenter,
+EckInline bool DrawRoseCurve(HDC hDC, int xCenter, int yCenter,
     float a = 300.f, float n = 10.f, float fStep = 0.01f) noexcept
 {
     std::vector<POINT> vPt{};
@@ -387,7 +387,7 @@ inline HRESULT DrawRoseCurve(const DRAW_ROSECURVE_D2D_PARAM& Info,
 /// <param name="bLinkStar">是否连接为星形</param>
 template<class TVal = int, class TPt>
 inline void CalculateRegularStar(std::vector<TPt>& vPt, TVal r,
-    int n, float fAngle = DegreeToRadian(90.f), BOOL bLinkStar = TRUE) noexcept
+    int n, float fAngle = DegreeToRadian(90.f), bool bLinkStar = true) noexcept
 {
     vPt.clear();
     const float fAngleUnit = PiF * 2.f / n;
@@ -444,8 +444,8 @@ inline void CalculateRegularStar(std::vector<TPt>& vPt, TVal r,
 /// <param name="fAngle">起始点相对X轴正方向的旋转角度</param>
 /// <param name="bLinkStar">是否连接为星形</param>
 /// <returns>Polyline返回值</returns>
-inline BOOL DrawRegularStar(HDC hDC, int xCenter, int yCenter,
-    int r, int n, float fAngle = DegreeToRadian(90.f), BOOL bLinkStar = TRUE) noexcept
+inline bool DrawRegularStar(HDC hDC, int xCenter, int yCenter,
+    int r, int n, float fAngle = DegreeToRadian(90.f), bool bLinkStar = true) noexcept
 {
     std::vector<POINT> vPt{};
     CalculateRegularStar(vPt, r, n, fAngle, bLinkStar);
@@ -475,7 +475,7 @@ inline BOOL DrawRegularStar(HDC hDC, int xCenter, int yCenter,
 /// <returns>GdipDrawLines返回值</returns>
 inline Gdiplus::GpStatus DrawRegularStar(GpGraphics* pGraphics, GpPen* pPen,
     float xCenter, float yCenter,
-    float r, int n, float fAngle = DegreeToRadian(90.f), BOOL bLinkStar = TRUE) noexcept
+    float r, int n, float fAngle = DegreeToRadian(90.f), bool bLinkStar = true) noexcept
 {
     std::vector<GpPointF> vPt{};
     CalculateRegularStar(vPt, r, n, fAngle, bLinkStar);
@@ -505,7 +505,7 @@ struct DRAW_REGULARSTAR_D2D_PARAM
     float r = 300;// 外接圆半径
     int n = 5;// 边数或角数
     float fAngle = DegreeToRadian(90.f);// 起始点相对X轴正方向的旋转角度
-    BOOL bLinkStar = TRUE;// 是否连接为星形
+    bool bLinkStar = true;// 是否连接为星形
 };
 
 /// <summary>

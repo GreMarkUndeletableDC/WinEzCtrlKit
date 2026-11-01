@@ -10,8 +10,8 @@ private:
     WCHAR m_szLineBreak[3]{ L'\r',L'\n',L'\0' };
     short m_cchLineBreak = 2;
 
-    BITBOOL m_bParseEscape : 1 = FALSE;//          \[  \]  \=  \r  \n  \\  \;  \"
-    BITBOOL m_bParseComment : 1 = FALSE;
+    BITBOOL m_bParseEscape : 1 = false;//          \[  \]  \=  \r  \n  \\  \;  \"
+    BITBOOL m_bParseComment : 1 = false;
 
     int FindValuePosition(PCWSTR pszSection, PCWSTR pszKey,
         int* pposSectionEnd = nullptr, int* pposKeyBegin = nullptr) const noexcept
@@ -109,8 +109,8 @@ private:
         return posEnd;
     }
 
-    BOOL WriteValue(PCWSTR pszSection, PCWSTR pszKey, PCWSTR pszValue,
-        BOOL bMustExist = FALSE, BOOL bUnEscapeChar = TRUE) noexcept
+    bool WriteValue(PCWSTR pszSection, PCWSTR pszKey, PCWSTR pszValue,
+        bool bMustExist = false, bool bUnEscapeChar = true) noexcept
     {
         int pos1, posSectionEnd;
         CStringW rsNew{}, rsUnescaping{};
@@ -118,7 +118,7 @@ private:
         if (pos0 == StrNPos)
         {
             if (bMustExist)
-                return FALSE;
+                return false;
             else if (posSectionEnd == StrNPos)// 没有节
             {
                 //-----------制节
@@ -159,7 +159,7 @@ private:
                 rsNew.PushBack(m_szLineBreak, m_cchLineBreak);
                 //-----------添加
                 m_rsText.PushBack(rsNew);
-                return TRUE;
+                return true;
             }
             else// 没有键
             {
@@ -201,12 +201,12 @@ private:
                     m_rsText.PushBack(rsNew);
                 else
                     m_rsText.Insert(posNextSection, rsNew);
-                return TRUE;
+                return true;
             }
         }
         pos1 = FindValueEndPosition(pos0);
         m_rsText.Replace(pos0, pos1 - pos0, pszValue, (int)wcslen(pszValue));
-        return TRUE;
+        return true;
     }
 public:
     static void Escape(CStringW& rsText, int posBegin = 0) noexcept
@@ -302,8 +302,8 @@ public:
         return _wtof(m_rsText.Data() + pos);
     }
 
-    BOOL ReadBool(PCWSTR pszSection, PCWSTR pszKey,
-        BOOL Default = FALSE) noexcept
+    bool ReadBool(PCWSTR pszSection, PCWSTR pszKey,
+        bool Default = false) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
         if (pos0 == StrNPos)
@@ -311,9 +311,9 @@ public:
         const int pos1 = FindValueEndPosition(pos0);
         const int cch = pos1 - pos0;
         if (cch == 4 && wcsnicmp(m_rsText.Data() + pos0, L"True", 4) == 0)
-            return TRUE;
+            return true;
         else if (cch == 5 && wcsnicmp(m_rsText.Data() + pos0, L"False", 5) == 0)
-            return FALSE;
+            return false;
         else
             return !!_wtoi(m_rsText.Data() + pos0);
     }
@@ -331,44 +331,44 @@ public:
         return rs;
     }
 
-    BOOL ReadIntArray(std::vector<int>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
+    bool ReadIntArray(std::vector<int>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
         if (pos0 == StrNPos)
-            return FALSE;
+            return false;
         const int pos1 = FindValueEndPosition(pos0);
         const int cch = pos1 - pos0;
         SplitString(m_rsText.Data() + pos0, L",", 0, cch, 1,
             [&v](PCWSTR pszStart, int cchSub)
             {
                 v.emplace_back(_wtoi(pszStart));
-                return FALSE;
+                return false;
             });
-        return TRUE;
+        return true;
     }
 
-    BOOL ReadDoubleArray(std::vector<double>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
+    bool ReadDoubleArray(std::vector<double>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
         if (pos0 == StrNPos)
-            return FALSE;
+            return false;
         const int pos1 = FindValueEndPosition(pos0);
         const int cch = pos1 - pos0;
         SplitString(m_rsText.Data() + pos0, L",", 0, cch, 1,
             [&v](PCWSTR pszStart, int cchSub)
             {
                 v.emplace_back(_wtof(pszStart));
-                return FALSE;
+                return false;
             });
-        return TRUE;
+        return true;
     }
 
-    template<class TBool = BOOL>
-    BOOL ReadBoolArray(std::vector<TBool>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
+    template<class TBool = bool>
+    bool ReadBoolArray(std::vector<TBool>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
         if (pos0 == StrNPos)
-            return FALSE;
+            return false;
         const int pos1 = FindValueEndPosition(pos0);
         const int cch = pos1 - pos0;
         SplitString(m_rsText.Data() + pos0, L",", 0, cch, 1,
@@ -380,28 +380,28 @@ public:
                     v.emplace_back(0);
                 else
                     v.emplace_back(!!_wtoi(pszStart));
-                return FALSE;
+                return false;
             });
-        return TRUE;
+        return true;
     }
 
-    BOOL ReadStringArray(std::vector<CStringW>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
+    bool ReadStringArray(std::vector<CStringW>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
         if (pos0 == StrNPos)
-            return FALSE;
+            return false;
         const int pos1 = FindValueEndPosition(pos0);
         if (pos1 <= pos0)
-            return TRUE;
+            return true;
         if (!m_bParseEscape)
         {
             SplitString(m_rsText.Data() + pos0, L",", 0, pos1 - pos0, 1,
                 [&v](PCWSTR pszStart, int cchSub)
                 {
                     v.emplace_back(pszStart, cchSub);
-                    return FALSE;
+                    return false;
                 });
-            return TRUE;
+            return true;
         }
 
         int posElem = pos0;
@@ -418,61 +418,61 @@ public:
                 ++pos;
         }
         Escape(v.emplace_back(m_rsText.Data() + posElem, pos1 - posElem));
-        return TRUE;
+        return true;
     }
 
-    EckInline BOOL WriteInt(PCWSTR pszSection, PCWSTR pszKey,
-        int Value, BOOL bMustExist = FALSE) noexcept
+    EckInline bool WriteInt(PCWSTR pszSection, PCWSTR pszKey,
+        int Value, bool bMustExist = false) noexcept
     {
         WCHAR szValue[Int32StringBufferSize];
         _itow(Value, szValue, 10);
-        return WriteValue(pszSection, pszKey, szValue, bMustExist, FALSE);
+        return WriteValue(pszSection, pszKey, szValue, bMustExist, false);
     }
 
-    EckInline BOOL WriteDouble(PCWSTR pszSection, PCWSTR pszKey,
-        double Value, BOOL bMustExist = FALSE) noexcept
+    EckInline bool WriteDouble(PCWSTR pszSection, PCWSTR pszKey,
+        double Value, bool bMustExist = false) noexcept
     {
         auto rsValue = ToString(Value, 15);
-        return WriteValue(pszSection, pszKey, rsValue.Data(), bMustExist, FALSE);
+        return WriteValue(pszSection, pszKey, rsValue.Data(), bMustExist, false);
     }
 
-    EckInline BOOL WriteBool(PCWSTR pszSection, PCWSTR pszKey,
-        BOOL Value, BOOL bMustExist = FALSE) noexcept
+    EckInline bool WriteBool(PCWSTR pszSection, PCWSTR pszKey,
+        bool Value, bool bMustExist = false) noexcept
     {
-        return WriteValue(pszSection, pszKey, Value ? L"True" : L"False", bMustExist, FALSE);
+        return WriteValue(pszSection, pszKey, Value ? L"True" : L"False", bMustExist, false);
     }
 
-    EckInline BOOL WriteString(PCWSTR pszSection, PCWSTR pszKey,
-        PCWSTR pszValue, BOOL bMustExist = FALSE) noexcept
+    EckInline bool WriteString(PCWSTR pszSection, PCWSTR pszKey,
+        PCWSTR pszValue, bool bMustExist = false) noexcept
     {
         return WriteValue(pszSection, pszKey, pszValue, bMustExist);
     }
 
-    BOOL WriteIntArray(PCWSTR pszSection, PCWSTR pszKey,
-        const int* Value, int cValue, BOOL bMustExist = FALSE) noexcept
+    bool WriteIntArray(PCWSTR pszSection, PCWSTR pszKey,
+        const int* Value, int cValue, bool bMustExist = false) noexcept
     {
         CStringW rs{};
         EckCounter(cValue, i)
             rs.PushBackFormat(L"%d,", Value[i]);
         if (cValue)
             rs.PopBack();
-        return WriteValue(pszSection, pszKey, rs.Data(), bMustExist, FALSE);
+        return WriteValue(pszSection, pszKey, rs.Data(), bMustExist, false);
     }
 
-    BOOL WriteDoubleArray(PCWSTR pszSection, PCWSTR pszKey,
-        const double* Value, int cValue, BOOL bMustExist = FALSE) noexcept
+    bool WriteDoubleArray(PCWSTR pszSection, PCWSTR pszKey,
+        const double* Value, int cValue, bool bMustExist = false) noexcept
     {
         CStringW rs{};
         EckCounter(cValue, i)
             rs.PushBackFormat(L"%f,", Value[i]);
         if (cValue)
             rs.PopBack();
-        return WriteValue(pszSection, pszKey, rs.Data(), bMustExist, FALSE);
+        return WriteValue(pszSection, pszKey, rs.Data(), bMustExist, false);
     }
 
-    template<class TBool = BOOL>
-    BOOL WriteIntArray(PCWSTR pszSection, PCWSTR pszKey,
-        const TBool* Value, int cValue, BOOL bMustExist = FALSE) noexcept
+    template<class TBool = bool>
+    bool WriteIntArray(PCWSTR pszSection, PCWSTR pszKey,
+        const TBool* Value, int cValue, bool bMustExist = false) noexcept
     {
         CStringW rs{};
         rs.Reserve(6 * cValue);
@@ -485,11 +485,11 @@ public:
         }
         if (cValue)
             rs.PopBack();
-        return WriteValue(pszSection, pszKey, rs.Data(), bMustExist, FALSE);
+        return WriteValue(pszSection, pszKey, rs.Data(), bMustExist, false);
     }
 
-    BOOL WriteStringArray(PCWSTR pszSection, PCWSTR pszKey,
-        const CStringW* Value, int cValue, BOOL bMustExist = FALSE) noexcept
+    bool WriteStringArray(PCWSTR pszSection, PCWSTR pszKey,
+        const CStringW* Value, int cValue, bool bMustExist = false) noexcept
     {
         CStringW rs{};
         EckCounter(cValue, i)
@@ -507,10 +507,10 @@ public:
         }
         if (cValue)
             rs.PopBack();
-        return WriteValue(pszSection, pszKey, rs.Data(), bMustExist, FALSE);
+        return WriteValue(pszSection, pszKey, rs.Data(), bMustExist, false);
     }
 
-    BOOL DeleteSection(PCWSTR pszSection) noexcept
+    bool DeleteSection(PCWSTR pszSection) noexcept
     {
         int pos0;
         CStringW rsUnescaping{};
@@ -527,14 +527,14 @@ public:
         rsSection.PushBack(pszSection);
         rsSection.PushBackChar(L']');
         if (m_rsText.Size() < rsSection.Size() - m_cchLineBreak)
-            return FALSE;
+            return false;
         if (wcscmp(m_rsText.Data(), rsSection.Data() + m_cchLineBreak) == 0)
             pos0 = 0;
         else
         {
             pos0 = m_rsText.Find(rsSection);
             if (pos0 == StrNPos)
-                return FALSE;
+                return false;
         }
 
         //-----------寻找下一个节
@@ -546,25 +546,25 @@ public:
             m_rsText.PopBack(m_rsText.Size() - pos0);
         else
             m_rsText.Erase(pos0, pos1 - pos0);
-        return TRUE;
+        return true;
     }
 
-    BOOL DeleteKey(PCWSTR pszSection, PCWSTR pszKey) noexcept
+    bool DeleteKey(PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         int posKeyBegin;
         const int pos0 = FindValuePosition(pszSection, pszKey, nullptr, &posKeyBegin);
         if (pos0 == StrNPos)
-            return FALSE;
+            return false;
         const int pos1 = FindValueEndPosition(pos0);
         m_rsText.Erase(posKeyBegin, pos1 - posKeyBegin);
-        return TRUE;
+        return true;
     }
 
-    BOOL Load(PCWSTR pszFileName, UINT uCp = CP_UTF8) noexcept
+    bool Load(PCWSTR pszFileName, UINT uCp = CP_UTF8) noexcept
     {
         auto rbFile = ReadInFile(pszFileName);
         if (rbFile.IsEmpty())
-            return FALSE;
+            return false;
 
         if (uCp == CP_UTF16LE)
             m_rsText.Assign((PCWCH)rbFile.Data(), int(rbFile.Size() / sizeof(WCHAR)));
@@ -575,10 +575,10 @@ public:
         }
         else
             m_rsText = EcdMultiByteToWide((PCSTR)rbFile.Data(), (int)rbFile.Size(), uCp);
-        return TRUE;
+        return true;
     }
 
-    BOOL Save(PCWSTR pszFileName, UINT uCp = CP_UTF8, BOOL bAddBom = TRUE) noexcept
+    bool Save(PCWSTR pszFileName, UINT uCp = CP_UTF8, bool bAddBom = true) noexcept
     {
         CByteBuffer rb{};
         if (uCp == CP_UTF16LE)
@@ -586,12 +586,12 @@ public:
             const HANDLE hFile = CreateFileW(pszFileName, GENERIC_WRITE, FILE_SHARE_READ, nullptr,
                 CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
             if (hFile == INVALID_HANDLE_VALUE)
-                return FALSE;
+                return false;
 
             DWORD cbWritten;
             if (bAddBom)
                 WriteFile(hFile, BOM_UTF16LE, ARRAYSIZE(BOM_UTF16LE), &cbWritten, nullptr);
-            const BOOL b = WriteFile(hFile, m_rsText.Data(), (DWORD)m_rsText.ByteSize(), &cbWritten, nullptr);
+            const bool b = WriteFile(hFile, m_rsText.Data(), (DWORD)m_rsText.ByteSize(), &cbWritten, nullptr);
             CloseHandle(hFile);
             return b;
         }
@@ -600,7 +600,7 @@ public:
             const int cchBuf = LCMapStringEx(LOCALE_NAME_INVARIANT, LCMAP_BYTEREV,
                 m_rsText.Data(), m_rsText.Size(), nullptr, 0, nullptr, nullptr, 0);
             if (cchBuf == 0)
-                return FALSE;
+                return false;
             rb.ReSize((cchBuf + 1) * sizeof(WCHAR));
             int cbSkip = (bAddBom ? 2 : 0);
             memcpy(rb.Data(), BOM_UTF16BE, cbSkip);
@@ -612,7 +612,7 @@ public:
             const int cchBuf = WideCharToMultiByte(uCp, 0, m_rsText.Data(), m_rsText.Size(),
                 nullptr, 0, nullptr, nullptr);
             if (cchBuf == 0)
-                return FALSE;
+                return false;
             rb.ReSize(cchBuf + 3);
             int cbSkip = ((bAddBom && uCp == CP_UTF8) ? 3 : 0);
             memcpy(rb.Data(), BOM_UTF8, cbSkip);
@@ -624,18 +624,18 @@ public:
 
     EckInline const CStringW& GetText() const noexcept { return m_rsText; }
 
-    void SetParseEscape(BOOL bParseEscapeChar) noexcept { m_bParseEscape = bParseEscapeChar; }
+    void SetParseEscape(bool bParseEscapeChar) noexcept { m_bParseEscape = bParseEscapeChar; }
 
-    void SetParseComment(BOOL bParseComment) noexcept { m_bParseComment = bParseComment; }
+    void SetParseComment(bool bParseComment) noexcept { m_bParseComment = bParseComment; }
 
-    BOOL SetLineBreak(PCWSTR pszLineBreak) noexcept
+    bool SetLineBreak(PCWSTR pszLineBreak) noexcept
     {
         const int cch = (int)wcslen(pszLineBreak);
         if (cch > 2)
-            return FALSE;
+            return false;
         m_cchLineBreak = cch;
         wcscpy(m_szLineBreak, pszLineBreak);
-        return TRUE;
+        return true;
     }
 
     EckInline void SetText(PCWSTR pszText) noexcept { m_rsText = pszText; }

@@ -11,7 +11,7 @@ class CEditTextHost : public ITextHost2
 {
 private:
     ULONG m_cRef{ 1 };
-    BOOL m_bActive{};
+    bool m_bActive{};
     CEdit* m_pEdit{};
 public:
     ULONG STDMETHODCALLTYPE AddRef() override { return _InterlockedIncrement(&m_cRef); }
@@ -120,11 +120,11 @@ public:
         SsMax
     };
 public:
-    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(bool bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(bool bDark) noexcept
     {
-        static auto p1{ TmMakeDefaultTheme(TRUE) };
-        static auto p2{ TmMakeDefaultTheme(FALSE) };
+        static auto p1{ TmMakeDefaultTheme(true) };
+        static auto p2{ TmMakeDefaultTheme(false) };
         return bDark ? p1 : p2;
     }
 private:
@@ -150,13 +150,13 @@ private:
     BITBOOL m_bCaretShow : 1{};
 
     // 收到WM_SETFONT时是否同步文本格式
-    BITBOOL m_bAutoSyncTextFmt : 1{ TRUE };
+    BITBOOL m_bAutoSyncTextFmt : 1{ true };
     // 指示使用RichEdit内部自带滚动机制
     BITBOOL m_bREScrollAn : 1{};
     // 单行模式下按m_eSingleLineAlignV字段垂直对齐
-    BITBOOL m_bSlAutoAlignV : 1{ TRUE };
+    BITBOOL m_bSlAutoAlignV : 1{ true };
     // 使用内置滚动条，FALSE指示使用了外部的滚动控制器
-    BITBOOL m_bUseBuiltInScrollBar : 1{ TRUE };
+    BITBOOL m_bUseBuiltInScrollBar : 1{ true };
 
     SimpleStyle m_Style[SsMax]
     {
@@ -268,7 +268,7 @@ private:
             m_pSccH->SccSetPage(GetWidth() - m_mgTextAera.left - m_mgTextAera.right);
     }
 
-    EckInline void ScbpScrollCallback(BOOL bHorz, float fPos) noexcept
+    EckInline void ScbpScrollCallback(bool bHorz, float fPos) noexcept
     {
         GetWindow().RdLockUpdate();
         Scroll(bHorz, fPos);
@@ -283,7 +283,7 @@ private:
                 {
                     if ((int)Data.fPos == (int)Data.fPrevPos)
                         return;
-                    ((CEdit*)Data.pUser)->ScbpScrollCallback(FALSE, Data.fPos);
+                    ((CEdit*)Data.pUser)->ScbpScrollCallback(false, Data.fPos);
                 }, this);
         if (m_pSccH)
             m_pSccH->SccSetCallback(
@@ -291,7 +291,7 @@ private:
                 {
                     if ((int)Data.fPos == (int)Data.fPrevPos)
                         return;
-                    ((CEdit*)Data.pUser)->ScbpScrollCallback(TRUE, Data.fPos);
+                    ((CEdit*)Data.pUser)->ScbpScrollCallback(true, Data.fPos);
                 }, this);
     }
     void ScbDisconnectEvent() noexcept
@@ -311,7 +311,7 @@ public:
             if (!(GetStyle() & DES_DISABLE))
             {
                 SetCursor(LoadCursorW(nullptr, IDC_IBEAM));
-                return TRUE;
+                return true;
             }
         }
         break;
@@ -331,16 +331,16 @@ public:
             GetTheme()->Draw(this, &Ss, IdPtNormal, rcF, nullptr);
 
             D2D1_RECT_F rcClipF{ ps.rcClip };
-            BOOL bNewClip{};
+            bool bNewClip{};
             if (rcClipF.top - rcF.top < m_mgTextAera.top)
             {
                 rcClipF.top = rcF.top + m_mgTextAera.top;
-                bNewClip = TRUE;
+                bNewClip = true;
             }
             if (rcF.bottom - rcClipF.bottom < m_mgTextAera.bottom)
             {
                 rcClipF.bottom = rcF.bottom - m_mgTextAera.bottom;
-                bNewClip = TRUE;
+                bNewClip = true;
             }
             if (!IsRectEmpty(rcClipF))
             {
@@ -367,7 +367,7 @@ public:
             DbgDrawFrame();
             EndPaint(ps);
 
-            GetWindow().RdUnlockUpdate(FALSE);
+            GetWindow().RdUnlockUpdate(false);
         }
         return 0;
 
@@ -414,7 +414,7 @@ public:
 
             m_pSrv->OnTxUIDeactivate();
             m_pSrv->TxSendMessage(WM_KILLFOCUS, 0, 0, nullptr);
-            m_bCaretShow = FALSE;
+            m_bCaretShow = false;
             Invalidate();
             return 0;
 
@@ -562,7 +562,7 @@ public:
         m_pSccH = pSccH;
         ScbConnectEvent();
     }
-    void ScbCreateElement(BOOL bVert, BOOL bHorz) noexcept
+    void ScbCreateElement(bool bVert, bool bHorz) noexcept
     {
         if (!m_bUseBuiltInScrollBar)
             return;
@@ -579,7 +579,7 @@ public:
                     DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | TmDarkStyle(),
                     0,
                     0, 0, 0, 0, this);
-                m_pSBVert->SetVertical(TRUE);
+                m_pSBVert->SetVertical(true);
             }
         }
         if (bHorz)
@@ -598,7 +598,7 @@ public:
         ScbConnectEvent();
     }
 
-    void ShowScrollBar(int nBar, BOOL bShow)
+    void ShowScrollBar(int nBar, bool bShow)
     {
         if (nBar == SB_HORZ || nBar == SB_BOTH)
             if (m_pSccH)
@@ -608,7 +608,7 @@ public:
                 m_pSccV->SccSetVisible(bShow);
     }
 
-    void Scroll(BOOL bHorz, float fPos, BOOL bRedraw = TRUE)
+    void Scroll(bool bHorz, float fPos, bool bRedraw = true)
     {
         POINT pt;
         GetScrollPosition(&pt);
@@ -637,7 +637,7 @@ public:
         HRESULT hr;
         ComPtr<IStream> pStream;
         hr = SHCreateStreamOnFileEx(pszFile, STGM_READ | STGM_SHARE_DENY_WRITE,
-            0, FALSE, nullptr, &pStream);
+            0, false, nullptr, &pStream);
         if (FAILED(hr))
             return hr;
         return LoadRtf(pStream.Get());
@@ -685,7 +685,7 @@ public:
     }
 
     EckInlineCe void TxSetProperty(DWORD dwProp) noexcept { m_dwTxProp = dwProp; }
-    void TxSetProperty(DWORD dwMask, DWORD dwBits, BOOL bUpdate = TRUE) noexcept
+    void TxSetProperty(DWORD dwMask, DWORD dwBits, bool bUpdate = true) noexcept
     {
         m_dwTxProp = (m_dwTxProp & ~dwMask) | dwBits;
         if (bUpdate)
@@ -723,9 +723,9 @@ public:
         return (HRESULT)TxSendMessage(EM_CANREDO, 0, 0);
     }
 
-    EckInline BOOL DisplayBand(RECT* prc) const
+    EckInline bool DisplayBand(RECT* prc) const
     {
-        return (BOOL)TxSendMessage(EM_DISPLAYBAND, 0, (LPARAM)prc);
+        return (bool)TxSendMessage(EM_DISPLAYBAND, 0, (LPARAM)prc);
     }
 
     EckInline void GetSelection(CHARRANGE* pchrg) const
@@ -763,7 +763,7 @@ public:
         return (int)TxSendMessage(EM_FINDWORDBREAK, uFlags, idxChar);
     }
 
-    EckInline int FormatRange(BOOL bInPlace, FORMATRANGE* pfr) const
+    EckInline int FormatRange(bool bInPlace, FORMATRANGE* pfr) const
     {
         return (int)TxSendMessage(EM_FORMATRANGE, bInPlace, (LPARAM)pfr);
     }
@@ -773,9 +773,9 @@ public:
         return (AutoCorrectProc)TxSendMessage(EM_GETAUTOCORRECTPROC, 0, 0);
     }
 
-    EckInline BOOL GetAutoUrlDetect() const
+    EckInline bool GetAutoUrlDetect() const
     {
-        return (BOOL)TxSendMessage(EM_GETAUTOURLDETECT, 0, 0);
+        return (bool)TxSendMessage(EM_GETAUTOURLDETECT, 0, 0);
     }
 
     EckInline void GetBidiOptions(BIDIOPTIONS* pbidio) const
@@ -793,9 +793,9 @@ public:
         return (int)TxSendMessage(EM_GETCTFMODEBIAS, 0, 0);
     }
 
-    EckInline BOOL GetCtfOpenStatus() const
+    EckInline bool GetCtfOpenStatus() const
     {
-        return (BOOL)TxSendMessage(EM_GETCTFOPENSTATUS, 0, 0);
+        return (bool)TxSendMessage(EM_GETCTFOPENSTATUS, 0, 0);
     }
 
     EckInline UINT GetEditStyle() const
@@ -815,9 +815,9 @@ public:
         return dw;
     }
 
-    EckInline BOOL GetEllipsisState() const
+    EckInline bool GetEllipsisState() const
     {
-        return (BOOL)TxSendMessage(EM_GETELLIPSISSTATE, 0, 0);
+        return (bool)TxSendMessage(EM_GETELLIPSISSTATE, 0, 0);
     }
 
     EckInline UINT GetEventMask() const
@@ -920,9 +920,9 @@ public:
         return (int)TxSendMessage(EM_GETTEXTRANGE, 0, (LPARAM)pTextRange);
     }
 
-    EckInline BOOL GetTouchOptions() const
+    EckInline bool GetTouchOptions() const
     {
-        return (BOOL)TxSendMessage(EM_GETTOUCHOPTIONS, RTO_SHOWHANDLES, 0);
+        return (bool)TxSendMessage(EM_GETTOUCHOPTIONS, RTO_SHOWHANDLES, 0);
     }
 
     EckInline UINT GetTypographyOptions() const
@@ -940,12 +940,12 @@ public:
         return (EDITWORDBREAKPROCEX)TxSendMessage(EM_GETWORDBREAKPROCEX, 0, 0);
     }
 
-    EckInline BOOL GetZoom(int* pnZoomNumerator, int* pnZoomDenominator) const
+    EckInline bool GetZoom(int* pnZoomNumerator, int* pnZoomDenominator) const
     {
-        return (BOOL)TxSendMessage(EM_GETZOOM, (WPARAM)pnZoomNumerator, (LPARAM)pnZoomDenominator);
+        return (bool)TxSendMessage(EM_GETZOOM, (WPARAM)pnZoomNumerator, (LPARAM)pnZoomDenominator);
     }
 
-    EckInline void HideSelection(BOOL bHide) const
+    EckInline void HideSelection(bool bHide) const
     {
         TxSendMessage(EM_HIDESELECTION, bHide, 0);
     }
@@ -960,9 +960,9 @@ public:
         return (HRESULT)TxSendMessage(EM_INSERTTABLE, (WPARAM)ptrp, (LPARAM)ptcp);
     }
 
-    EckInline BOOL IsIme() const
+    EckInline bool IsIme() const
     {
-        return (BOOL)TxSendMessage(EM_ISIME, 0, 0);
+        return (bool)TxSendMessage(EM_ISIME, 0, 0);
     }
 
     EckInline void PasteSpecial(UINT uClipFormat, REPASTESPECIAL* prps) const
@@ -975,9 +975,9 @@ public:
         TxSendMessage(EM_RECONVERSION, 0, 0);
     }
 
-    EckInline BOOL Redo() const
+    EckInline bool Redo() const
     {
-        return (BOOL)TxSendMessage(EM_REDO, 0, 0);
+        return (bool)TxSendMessage(EM_REDO, 0, 0);
     }
 
     EckInline void RequestResize() const
@@ -990,9 +990,9 @@ public:
         return (UINT)TxSendMessage(EM_SELECTIONTYPE, 0, 0);
     }
 
-    EckInline BOOL SetAutoCorrectProcedure(AutoCorrectProc pfnNewProc) const
+    EckInline bool SetAutoCorrectProcedure(AutoCorrectProc pfnNewProc) const
     {
-        return (BOOL)TxSendMessage(EM_SETAUTOCORRECTPROC, (WPARAM)pfnNewProc, 0);
+        return (bool)TxSendMessage(EM_SETAUTOCORRECTPROC, (WPARAM)pfnNewProc, 0);
     }
 
     EckInline void SetBidiOptions(BIDIOPTIONS* pbidio) const
@@ -1000,14 +1000,14 @@ public:
         TxSendMessage(EM_SETBIDIOPTIONS, 0, (LPARAM)pbidio);
     }
 
-    EckInline COLORREF SetBackgroundColor(BOOL bSysColor, COLORREF cr) const
+    EckInline COLORREF SetBackgroundColor(bool bSysColor, COLORREF cr) const
     {
         return (COLORREF)TxSendMessage(EM_SETBKGNDCOLOR, bSysColor, cr);
     }
 
-    EckInline BOOL SetCharFormat(int iFmt, CHARFORMAT2W* pcf) const
+    EckInline bool SetCharFormat(int iFmt, CHARFORMAT2W* pcf) const
     {
-        return (BOOL)TxSendMessage(EM_SETCHARFORMAT, iFmt, (LPARAM)pcf);
+        return (bool)TxSendMessage(EM_SETCHARFORMAT, iFmt, (LPARAM)pcf);
     }
 
     EckInline int SetCtfModeBias(int iModeBias) const
@@ -1015,14 +1015,14 @@ public:
         return (int)TxSendMessage(EM_SETCTFMODEBIAS, iModeBias, 0);
     }
 
-    EckInline BOOL SetCtfOpenStatus(BOOL bOpen) const
+    EckInline bool SetCtfOpenStatus(bool bOpen) const
     {
-        return (BOOL)TxSendMessage(EM_SETCTFOPENSTATUS, bOpen, 0);
+        return (bool)TxSendMessage(EM_SETCTFOPENSTATUS, bOpen, 0);
     }
 
-    EckInline BOOL SetDisableOleLinkConversion(BOOL bDisable) const
+    EckInline bool SetDisableOleLinkConversion(bool bDisable) const
     {
-        return (BOOL)TxSendMessage(EM_SETDISABLEOLELINKCONVERSION, 0, bDisable);
+        return (bool)TxSendMessage(EM_SETDISABLEOLELINKCONVERSION, 0, bDisable);
     }
 
     EckInline UINT SetEditStyle(UINT dwStyle, UINT uMask) const
@@ -1035,9 +1035,9 @@ public:
         return (UINT)TxSendMessage(EM_SETEDITSTYLEEX, dwStyleEx, dwMask);
     }
 
-    EckInline BOOL SetEllipsisMode(UINT uEllipsisMode) const
+    EckInline bool SetEllipsisMode(UINT uEllipsisMode) const
     {
-        return (BOOL)TxSendMessage(EM_SETELLIPSISMODE, 0, uEllipsisMode);
+        return (bool)TxSendMessage(EM_SETELLIPSISMODE, 0, uEllipsisMode);
     }
 
     EckInline UINT SetEventMask(UINT dwEventMask) const
@@ -1045,9 +1045,9 @@ public:
         return (UINT)TxSendMessage(EM_SETEVENTMASK, 0, dwEventMask);
     }
 
-    EckInline BOOL SetFontSize(int iSize) const
+    EckInline bool SetFontSize(int iSize) const
     {
-        return (BOOL)TxSendMessage(EM_SETFONTSIZE, iSize, 0);
+        return (bool)TxSendMessage(EM_SETFONTSIZE, iSize, 0);
     }
 
     EckInline void SetHyphenateInformation(HYPHENATEINFO* phr) const
@@ -1065,9 +1065,9 @@ public:
         TxSendMessage(EM_SETLANGOPTIONS, 0, dwOptions);
     }
 
-    EckInline BOOL SetOleCallback(IRichEditOleCallback* pCallback) const
+    EckInline bool SetOleCallback(IRichEditOleCallback* pCallback) const
     {
-        return (BOOL)TxSendMessage(EM_SETOLECALLBACK, 0, (LPARAM)pCallback);
+        return (bool)TxSendMessage(EM_SETOLECALLBACK, 0, (LPARAM)pCallback);
     }
 
     EckInline UINT SetOptions(int iType, UINT dwOptions) const
@@ -1075,9 +1075,9 @@ public:
         return (UINT)TxSendMessage(EM_SETOPTIONS, iType, dwOptions);
     }
 
-    EckInline BOOL SetParagraphFormat(PARAFORMAT2* ppf) const
+    EckInline bool SetParagraphFormat(PARAFORMAT2* ppf) const
     {
-        return (BOOL)TxSendMessage(EM_SETPARAFORMAT, 0, (LPARAM)ppf);
+        return (bool)TxSendMessage(EM_SETPARAFORMAT, 0, (LPARAM)ppf);
     }
 
     EckInline int SetPageRotate(int iRotate) const
@@ -1129,24 +1129,24 @@ public:
         return (int)TxSendMessage(EM_SETTEXTEX, (WPARAM)pst, (LPARAM)pszText);
     }
 
-    EckInline BOOL SetTextMode(TEXTMODE tm) const
+    EckInline bool SetTextMode(TEXTMODE tm) const
     {
-        return (BOOL)TxSendMessage(EM_SETTEXTMODE, tm, 0);
+        return (bool)TxSendMessage(EM_SETTEXTMODE, tm, 0);
     }
 
-    EckInline void SetTouchOptions(BOOL bShowHandles) const
+    EckInline void SetTouchOptions(bool bShowHandles) const
     {
         TxSendMessage(EM_SETTOUCHOPTIONS, RTO_SHOWHANDLES, bShowHandles);
     }
 
-    EckInline BOOL SetTypographyOptions(UINT dwOptions, UINT dwMask) const
+    EckInline bool SetTypographyOptions(UINT dwOptions, UINT dwMask) const
     {
-        return (BOOL)TxSendMessage(EM_SETTYPOGRAPHYOPTIONS, dwOptions, dwMask);
+        return (bool)TxSendMessage(EM_SETTYPOGRAPHYOPTIONS, dwOptions, dwMask);
     }
 
-    EckInline BOOL SetUiAutomationName(PCWSTR pszText) const
+    EckInline bool SetUiAutomationName(PCWSTR pszText) const
     {
-        return (BOOL)TxSendMessage(EM_SETUIANAME, 0, (LPARAM)pszText);
+        return (bool)TxSendMessage(EM_SETUIANAME, 0, (LPARAM)pszText);
     }
 
     EckInline int SetUndoLimit(int cLimit) const
@@ -1159,12 +1159,12 @@ public:
         return (EDITWORDBREAKPROCEX)TxSendMessage(EM_SETWORDBREAKPROCEX, 0, (LPARAM)pfnNewProc);
     }
 
-    EckInline BOOL SetZoom(int iZoomNumerator, int iZoomDenominator) const
+    EckInline bool SetZoom(int iZoomNumerator, int iZoomDenominator) const
     {
-        return (BOOL)TxSendMessage(EM_SETZOOM, iZoomNumerator, iZoomDenominator);
+        return (bool)TxSendMessage(EM_SETZOOM, iZoomNumerator, iZoomDenominator);
     }
 
-    EckInline void ShowScrollBar(int iBar, BOOL bShow) const
+    EckInline void ShowScrollBar(int iBar, bool bShow) const
     {
         TxSendMessage(EM_SHOWSCROLLBAR, iBar, bShow);
     }
@@ -1200,7 +1200,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CTheme> CEdit::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CEdit::TmMakeDefaultTheme(bool bDark) noexcept
 {
     return TmMakeTheme<CTmEdit>(bDark);
 }
@@ -1211,7 +1211,7 @@ inline INT CEditTextHost::TxReleaseDC(HDC hdc) { return ReleaseDC(m_pEdit->GetWi
 inline BOOL CEditTextHost::TxShowScrollBar(INT fnBar, BOOL fShow)
 {
     m_pEdit->ShowScrollBar(fnBar, fShow);
-    return TRUE;
+    return true;
 }
 
 inline BOOL CEditTextHost::TxEnableScrollBar(INT fuSBFlags, INT fuArrowflags)
@@ -1244,7 +1244,7 @@ inline BOOL CEditTextHost::TxSetScrollRange(INT fnBar, LONG nMinPos, INT nMaxPos
                 pScc->SccRedraw();
         }
     }
-    return TRUE;
+    return true;
 }
 
 inline BOOL CEditTextHost::TxSetScrollPos(INT fnBar, INT nPos, BOOL fRedraw)
@@ -1270,7 +1270,7 @@ inline BOOL CEditTextHost::TxSetScrollPos(INT fnBar, INT nPos, BOOL fRedraw)
                 pScc->SccRedraw();
         }
     }
-    return TRUE;
+    return true;
 }
 
 inline void CEditTextHost::TxInvalidateRect(LPCRECT prc, BOOL fMode)
@@ -1295,7 +1295,7 @@ inline void CEditTextHost::TxViewChange(BOOL fUpdate)
 inline BOOL CEditTextHost::TxCreateCaret(HBITMAP hbmp, INT xWidth, INT yHeight)
 {
     m_pEdit->m_rcCaret = { 0.f, 0.f, (float)xWidth, (float)yHeight };
-    return TRUE;
+    return true;
 }
 
 inline BOOL CEditTextHost::TxShowCaret(BOOL fShow)
@@ -1303,7 +1303,7 @@ inline BOOL CEditTextHost::TxShowCaret(BOOL fShow)
     m_pEdit->m_bCaretShow = fShow;
     auto rc{ m_pEdit->m_rcCaret };
     m_pEdit->Invalidate(rc);
-    return TRUE;
+    return true;
 }
 
 inline BOOL CEditTextHost::TxSetCaretPos(INT x, INT y)
@@ -1319,7 +1319,7 @@ inline BOOL CEditTextHost::TxSetCaretPos(INT x, INT y)
         rc.right = rc.left + 1.f;
     m_pEdit->ClientToElement(rc);
     m_pEdit->Invalidate(rc);
-    return TRUE;
+    return true;
 }
 
 inline BOOL CEditTextHost::TxSetTimer(UINT idTimer, UINT uTimeout)
@@ -1363,7 +1363,7 @@ inline BOOL CEditTextHost::TxClientToScreen(LPPOINT lppt)
 inline HRESULT CEditTextHost::TxActivate(LONG* plOldState)
 {
     *plOldState = m_bActive;
-    m_bActive = TRUE;
+    m_bActive = true;
     return S_OK;
 }
 

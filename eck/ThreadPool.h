@@ -145,7 +145,7 @@ public:
 
     EckInline void Submit() noexcept { TpPostWork(m_pWork); }
 
-    EckInline void Wait(BOOL bCancelPending = FALSE) noexcept
+    EckInline void Wait(bool bCancelPending = false) noexcept
     {
         TpWaitForWork(m_pWork, (LOGICAL)bCancelPending);
     }
@@ -234,22 +234,22 @@ public:
         TpSetWait(m_pWait, hObj, nullptr);
     }
 #if NTDDI_VERSION >= NTDDI_WIN8
-    EckInline BOOL SetWaitEx(HANDLE hObj, LONGLONG llTimeout) noexcept
+    EckInline bool SetWaitEx(HANDLE hObj, LONGLONG llTimeout) noexcept
     {
         return SetThreadpoolWaitEx(m_pWait, hObj, (FILETIME*)&llTimeout, nullptr);
     }
 
-    EckInline BOOL SetWaitEx(HANDLE hObj, LARGE_INTEGER liTimeout) noexcept
+    EckInline bool SetWaitEx(HANDLE hObj, LARGE_INTEGER liTimeout) noexcept
     {
         return SetThreadpoolWaitEx(m_pWait, hObj, (FILETIME*)&liTimeout, nullptr);
     }
 
-    EckInline BOOL SetWaitEx(HANDLE hObj) noexcept
+    EckInline bool SetWaitEx(HANDLE hObj) noexcept
     {
         return SetThreadpoolWaitEx(m_pWait, hObj, nullptr, nullptr);
     }
 #endif // NTDDI_VERSION >= NTDDI_WIN8
-    EckInline void Wait(BOOL bCancelPending = FALSE) noexcept
+    EckInline void Wait(bool bCancelPending = false) noexcept
     {
         TpWaitForWait(m_pWait, (LOGICAL)bCancelPending);
     }
@@ -333,9 +333,9 @@ public:
         SetTimer2((LARGE_INTEGER*)&llDueTime, msPeriod, msAdjust);
     }
 
-    EckInline BOOL IsSet() const noexcept { return TpIsTimerSet(m_pTimer); }
+    EckInline bool IsSet() const noexcept { return TpIsTimerSet(m_pTimer); }
 
-    EckInline void Wait(BOOL bCancelPending = FALSE) noexcept
+    EckInline void Wait(bool bCancelPending = false) noexcept
     {
         TpWaitForTimer(m_pTimer, (LOGICAL)bCancelPending);
     }

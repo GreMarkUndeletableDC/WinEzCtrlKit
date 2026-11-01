@@ -7,7 +7,7 @@ ECK_NAMESPACE_BEGIN
 class CFile : public CNtObject
 {
 public:
-    BOOL CreateWin32(
+    bool CreateWin32(
         _In_z_ PCWSTR pszFile,
         DWORD dwMode = OPEN_EXISTING,
         DWORD dwAccess = FILE_GENERIC_READ,
@@ -15,8 +15,9 @@ public:
         DWORD dwAttr = FILE_ATTRIBUTE_NORMAL) noexcept
     {
         Clear();
-        return !!(m_hObject = CreateFileW(pszFile, dwAccess,
-            dwShareMode, nullptr, dwMode, dwAttr, nullptr));
+        m_hObject = CreateFileW(pszFile, dwAccess,
+            dwShareMode, nullptr, dwMode, dwAttr, nullptr);
+        return IsValid();
     }
     NTSTATUS Create(
         _In_z_ PCWSTR pszFile,
@@ -78,7 +79,7 @@ public:
         auto nts = NtReadFile(m_hObject, nullptr, nullptr, nullptr,
             &iosb, pBuf, cbBuf, nullptr, nullptr);
         if (nts == STATUS_PENDING)
-            nts = NtWaitForSingleObject(m_hObject, FALSE, nullptr);
+            nts = NtWaitForSingleObject(m_hObject, false, nullptr);
         if (pcbRead)
             *pcbRead = (DWORD)iosb.Information;
         if (pnts) *pnts = nts;
@@ -101,7 +102,7 @@ public:
         auto nts = NtWriteFile(m_hObject, nullptr, nullptr, nullptr,
             &iosb, (void*)pBuf, cbBuf, nullptr, nullptr);
         if (nts == STATUS_PENDING)
-            nts = NtWaitForSingleObject(m_hObject, FALSE, nullptr);
+            nts = NtWaitForSingleObject(m_hObject, false, nullptr);
         if (pcbWritten)
             *pcbWritten = (DWORD)iosb.Information;
         if (pnts) *pnts = nts;
@@ -208,7 +209,7 @@ public:
         return nts;
     }
 
-    NTSTATUS Delete(BOOLEAN bDelete = TRUE) noexcept
+    NTSTATUS Delete(bool bDelete = true) noexcept
     {
         const FILE_DISPOSITION_INFORMATION Info{ bDelete };
         return SetInformation(Info, FileDispositionInformation);

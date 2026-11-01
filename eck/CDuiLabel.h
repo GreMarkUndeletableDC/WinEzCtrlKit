@@ -16,7 +16,7 @@ private:
 
     BITBOOL m_bOnlyBitmap : 1{};
     BITBOOL m_bFade : 1{};
-    BITBOOL m_bAutoScale : 1{ TRUE };
+    BITBOOL m_bAutoScale : 1{ true };
 
     BYTE m_eInterMode{ D2D1_INTERPOLATION_MODE_LINEAR };
 
@@ -78,11 +78,11 @@ private:
         GetDC()->CreateLinearGradientBrush(Prop, pStopCollection.Get(), m_pBrushFade.AtClear());
     }
 public:
-    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(bool bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(bool bDark) noexcept
     {
-        static auto p1{ TmMakeDefaultTheme(TRUE) };
-        static auto p2{ TmMakeDefaultTheme(FALSE) };
+        static auto p1{ TmMakeDefaultTheme(true) };
+        static auto p2{ TmMakeDefaultTheme(false) };
         return bDark ? p1 : p2;
     }
 
@@ -213,7 +213,7 @@ public:
     void SetBackgroundBitmap(const CBitmap& Bmp) noexcept { m_BitmapBack = Bmp; }
     EckInlineNdCe auto& GetBackgroundBitmap() const noexcept { return m_BitmapBack; }
 
-    void SetFade(BOOL b) noexcept
+    void SetFade(bool b) noexcept
     {
         if (!!m_bFade == !!b)
             return;
@@ -223,10 +223,10 @@ public:
         else
             m_pBrushFade.Clear();
     }
-    EckInlineNdCe BOOL GetFade() const noexcept { return m_bFade; }
+    EckInlineNdCe bool GetFade() const noexcept { return m_bFade; }
 
-    EckInlineCe void SetOnlyBitmap(BOOL b) noexcept { m_bOnlyBitmap = b; }
-    EckInlineNdCe BOOL GetOnlyBitmap() const noexcept { return m_bOnlyBitmap; }
+    EckInlineCe void SetOnlyBitmap(bool b) noexcept { m_bOnlyBitmap = b; }
+    EckInlineNdCe bool GetOnlyBitmap() const noexcept { return m_bOnlyBitmap; }
 
     EckInlineCe void SetBackgroundMode(ImageMode e) noexcept { m_eBkImgMode = e; }
     EckInlineNdCe ImageMode GetBackgroundMode() const noexcept { return m_eBkImgMode; }
@@ -247,8 +247,8 @@ public:
     }
     EckInlineNdCe float GetFadeWidth() const noexcept { return m_cxFade; }
 
-    EckInlineCe void SetAutoScale(BOOL b) noexcept { m_bAutoScale = b; }
-    EckInlineNdCe BOOL GetAutoScale() const noexcept { return m_bAutoScale; }
+    EckInlineCe void SetAutoScale(bool b) noexcept { m_bAutoScale = b; }
+    EckInlineNdCe bool GetAutoScale() const noexcept { return m_bAutoScale; }
 };
 
 
@@ -265,7 +265,7 @@ public:
         return TmResult::NotSupport;
     }
 };
-inline RcPtr<CTheme> CLabel::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CLabel::TmMakeDefaultTheme(bool bDark) noexcept
 {
     return TmMakeTheme<CTmLabel>(bDark);
 }

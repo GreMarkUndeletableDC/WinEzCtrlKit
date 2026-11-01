@@ -26,7 +26,7 @@ private:
     struct ITEM
     {
         USHORT uId;
-        BOOLEAN bUseStdTip;
+        bool bUseStdTip;
         DWORD dwState;
         HICON hIcon;
         CStringW rsTip;
@@ -36,17 +36,17 @@ private:
     CWindow* m_pWnd{};
     CWindow::HSlot m_hSlot{};
 
-    EckInlineNd BOOL Add(NOTIFYICONDATAW& nid) noexcept
+    EckInlineNd bool Add(NOTIFYICONDATAW& nid) noexcept
     {
         EckAssert(nid.uVersion == NOTIFYICON_VERSION_4);
         if (!Shell_NotifyIconW(NIM_ADD, &nid))
-            return FALSE;
+            return false;
         if (!Shell_NotifyIconW(NIM_SETVERSION, &nid))
         {
             Shell_NotifyIconW(NIM_DELETE, &nid);
-            return FALSE;
+            return false;
         }
-        return TRUE;
+        return true;
     }
 
     LRESULT OnMessage(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot& Ctx) noexcept
@@ -110,12 +110,12 @@ public:
     }
 
     // bUseStdTip指示是否使用标准工具提示，若为TRUE则设置NIF_SHOWTIP
-    BOOL Add(
+    bool Add(
         USHORT uId,
         HICON hIcon,
         std::wstring_view svTip = {},
         DWORD dwState = 0u,
-        BOOL bUseStdTip = TRUE) noexcept
+        bool bUseStdTip = true) noexcept
     {
         NOTIFYICONDATAW nid;
         nid.cbSize = sizeof(nid);
@@ -137,27 +137,27 @@ public:
                 std::min(svTip.size(), ARRAYSIZE(nid.szTip) - 1));
         }
         if (!Add(nid))
-            return FALSE;
+            return false;
         m_vItem.emplace_back(uId, bUseStdTip, dwState, hIcon, svTip);
-        return TRUE;
+        return true;
     }
 
     // 仅处理NIF_ICON、NIF_TIP、NIF_STATE，其余标志被忽略
-    BOOL Modify(
+    bool Modify(
         USHORT uId,
         UINT uFlags,
         HICON hIcon = nullptr,
         std::wstring_view svTip = {},
         DWORD dwState = 0u,
         DWORD dwStateMask = 0u,
-        BOOL bUseStdTip = TRUE) noexcept
+        bool bUseStdTip = true) noexcept
     {
         const auto it = std::find_if(m_vItem.begin(), m_vItem.end(),
             [uId](const ITEM& x) { return x.uId == uId; });
         if (it == m_vItem.end())
         {
             EckDbgBreak();
-            return FALSE;
+            return false;
         }
         uFlags &= (NIF_ICON | NIF_TIP | NIF_STATE);
         if (bUseStdTip)
@@ -185,7 +185,7 @@ public:
         }
 
         if (!Shell_NotifyIconW(NIM_MODIFY, &nid))
-            return FALSE;
+            return false;
 
         it->bUseStdTip = bUseStdTip;
         if (uFlags & NIF_ICON)
@@ -194,17 +194,17 @@ public:
             it->rsTip = svTip;
         if (uFlags & NIF_STATE)
             it->dwState = (it->dwState & ~dwStateMask) | (dwState & dwStateMask);
-        return TRUE;
+        return true;
     }
 
-    BOOL Delete(USHORT uId) noexcept
+    bool Delete(USHORT uId) noexcept
     {
         const auto it = std::find_if(m_vItem.begin(), m_vItem.end(),
             [uId](const ITEM& x) { return x.uId == uId; });
         if (it == m_vItem.end())
         {
             EckDbgBreak();
-            return FALSE;
+            return false;
         }
         m_vItem.erase(it);
         NOTIFYICONDATAW nid;
@@ -229,7 +229,7 @@ public:
         m_vItem.clear();
     }
 
-    BOOL SetFocus(USHORT uId) noexcept
+    bool SetFocus(USHORT uId) noexcept
     {
         NOTIFYICONDATAW nid;
         nid.cbSize = sizeof(nid);
@@ -239,13 +239,13 @@ public:
         return Shell_NotifyIconW(NIM_SETFOCUS, &nid);
     }
 
-    BOOL PopBalloon(
+    bool PopBalloon(
         USHORT uId,
         std::wstring_view svContent,
         std::wstring_view svTitle = {},
         DWORD dwInfoFlags = 0u,
         HICON hBalloonIcon = nullptr,
-        BOOL bRealTime = FALSE) noexcept
+        bool bRealTime = false) noexcept
     {
         NOTIFYICONDATAW nid;
         nid.cbSize = sizeof(nid);
@@ -270,7 +270,7 @@ public:
         return Shell_NotifyIconW(NIM_MODIFY, &nid);
     }
 
-    BOOL DismissBalloon(USHORT uId) noexcept
+    bool DismissBalloon(USHORT uId) noexcept
     {
         NOTIFYICONDATAW nid;
         nid.cbSize = sizeof(nid);

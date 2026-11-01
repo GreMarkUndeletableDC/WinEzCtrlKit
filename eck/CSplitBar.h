@@ -30,8 +30,8 @@ private:
     COLORREF m_crMark = 0xFFCC66;
     BYTE m_byMarkAlpha = 0xA0;
 
-    BITBOOL m_bLBtnDown : 1 = FALSE;
-    BITBOOL m_bHorizontal : 1 = FALSE;
+    BITBOOL m_bLBtnDown : 1 = false;
+    BITBOOL m_bHorizontal : 1 = false;
 
     LRESULT OnMarkMessage(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot& Ctx) noexcept
     {
@@ -184,7 +184,7 @@ public:
         {
             SetFocus(Handle);
             SetCapture(Handle);
-            m_bLBtnDown = TRUE;
+            m_bLBtnDown = true;
             RECT rc;
             GetWindowRect(Handle, &rc);
 
@@ -208,7 +208,7 @@ public:
             if (m_bLBtnDown)
             {
                 ReleaseCapture();
-                m_bLBtnDown = FALSE;
+                m_bLBtnDown = false;
                 HideMark();
                 const int xyPos = CursorPointToSqlitPosition(ECK_GET_PT_LPARAM(lParam));
                 NMSPBDRAGGED nm;
@@ -223,7 +223,7 @@ public:
             if (m_bLBtnDown && wParam == VK_ESCAPE)
             {
                 ReleaseCapture();
-                m_bLBtnDown = FALSE;
+                m_bLBtnDown = false;
                 HideMark();
             }
         }
@@ -297,8 +297,8 @@ public:
         xyMax = m_xyMax;
     }
 
-    EckInline constexpr void SetDirection(BOOL bHorizontal) noexcept { m_bHorizontal = bHorizontal; }
-    // TRUE - 水平方向，FALSE - 垂直方向
-    EckInline constexpr BOOL GetDirection() const noexcept { return m_bHorizontal; }
+    EckInline constexpr void SetDirection(bool bHorizontal) noexcept { m_bHorizontal = bHorizontal; }
+    // true - 水平方向，false - 垂直方向
+    EckInline constexpr bool GetDirection() const noexcept { return m_bHorizontal; }
 };
 ECK_NAMESPACE_END

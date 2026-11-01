@@ -19,14 +19,14 @@ struct __declspec(uuid("6ABD0903-4980-48A0-A7D4-2A9C36363D14"))
 
     // 以下函数控制由3x2矩阵指定的变换，若实现不支持，则应返回E_NOTIMPL
 
-    STDMETHOD(GstEnableTransform)(BOOL b) = 0;
-    STDMETHOD(GstIsTransformEnabled)(BOOL* pIsEnabled) = 0;
+    STDMETHOD(GstEnableTransform)(bool b) = 0;
+    STDMETHOD(GstIsTransformEnabled)(bool* pIsEnabled) = 0;
     STDMETHOD(GstSetMatrix)(const D2D1_MATRIX_3X2_F* pMatrix) = 0;
 
     // 以下函数控制平移变换，若实现不支持，则应返回E_NOTIMPL
 
-    STDMETHOD(GstEnableOffset)(BOOL b) = 0;
-    STDMETHOD(GstIsOffsetEnabled)(BOOL* pIsEnabled) = 0;
+    STDMETHOD(GstEnableOffset)(bool b) = 0;
+    STDMETHOD(GstIsOffsetEnabled)(bool* pIsEnabled) = 0;
     STDMETHOD(GstSetOffset)(float dx, float dy) = 0;
 };
 ECK_NAMESPACE_END

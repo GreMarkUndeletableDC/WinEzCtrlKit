@@ -15,7 +15,7 @@ enum class GradientMode :BYTE
     TR2BL   // 从右上到左下↙
 };
 
-inline BOOL FillGradientRect(
+inline bool FillGradientRect(
     HDC hDC,
     const RECT& rc,
     _In_reads_(3) const COLORREF* crGradient,
@@ -80,7 +80,7 @@ inline BOOL FillGradientRect(
             }
         }
         break;
-        default: return FALSE;
+        default: return false;
         }
 
         tv[0].Red = GetRValue(cr1) << 8;
@@ -203,20 +203,20 @@ inline BOOL FillGradientRect(
             tv[2].Alpha = 0xFF << 8;
         }
         break;
-        default: return FALSE;
+        default: return false;
         }
         return GradientFill(hDC, tv, ARRAYSIZE(tv),
             gt, ARRAYSIZE(gt), GRADIENT_FILL_TRIANGLE);
     }
-    return FALSE;
+    return false;
 }
 
-inline BOOL FillGradientRect(
+inline bool FillGradientRect(
     HDC hDC,
     const RECT& rc,
     COLORREF cr1,
     COLORREF cr2,
-    BOOL bVertical) noexcept
+    bool bVertical) noexcept
 {
     TRIVERTEX tv[2];
     tv[0].x = rc.left;
@@ -239,13 +239,13 @@ inline BOOL FillGradientRect(
         bVertical ? GRADIENT_FILL_RECT_V : GRADIENT_FILL_RECT_H);
 }
 
-inline BOOL DrawBackgroundImage(
+inline bool DrawBackgroundImage(
     _In_ HDC hDC,
     _In_ HDC hdcBitmap,
     ImageMode eMode,
     const RECT& rc,
     _In_opt_ const RECT* prcSrc = nullptr,
-    BOOL bAlphaBlend = FALSE,
+    bool bAlphaBlend = false,
     BYTE byAlpha = 255) noexcept
 {
     const BLENDFUNCTION bf{ AC_SRC_OVER, 0, byAlpha, AC_SRC_ALPHA };
@@ -261,7 +261,7 @@ inline BOOL DrawBackgroundImage(
     {
         BITMAP bm;
         if (!GetObjectW(GetCurrentObject(hdcBitmap, OBJ_BITMAP), sizeof(bm), &bm))
-            return FALSE;
+            return false;
         rcSrc = { 0, 0, bm.bmWidth, bm.bmHeight };
     }
 
@@ -314,15 +314,15 @@ inline BOOL DrawBackgroundImage(
                 if (!ECK_BLIT(
                     rc.left + i * rcSrc.cx,
                     rc.top + j * rcSrc.cy, rcSrc.cx, rcSrc.cy))
-                    return FALSE;
+                    return false;
         }
-        return TRUE;
+        return true;
     }
     ECK_UNREACHABLE;
     case ImageMode::Stretch:// 缩放
         return ECK_BLIT(rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top);
     }
-    return FALSE;
+    return false;
 #undef ECK_BLIT
 }
 
@@ -530,7 +530,7 @@ EckInline SAVE_DC_CLIP SaveDcClip(HDC hDC) noexcept
     }
 }
 
-EckInline BOOL RestoreDcClip(HDC hDC, SAVE_DC_CLIP sdc) noexcept
+EckInline bool RestoreDcClip(HDC hDC, SAVE_DC_CLIP sdc) noexcept
 {
     const auto b = (SelectClipRgn(hDC, sdc.hRgn) == ERROR);
     if (sdc.hRgn)

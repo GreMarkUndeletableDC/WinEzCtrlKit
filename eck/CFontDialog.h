@@ -40,13 +40,13 @@ public:
                 const auto cch = (int)::SendMessageW(pdis->hwndItem,
                     CB_GETLBTEXTLEN, pdis->itemID, 0);
                 if (cch == CB_ERR)
-                    return TRUE;
+                    return true;
                 const auto pszBuf = (PWSTR)_malloca((cch + 1) * sizeof(WCHAR));
                 ::SendMessageW(pdis->hwndItem, CB_GETLBTEXT,
                     pdis->itemID, (LPARAM)pszBuf);
                 const auto* const ptc = PtcCurrent();
 
-                BOOL bDelFont{};
+                bool bDelFont{};
                 HFONT hFont{};
                 if (pdis->CtlID == 0x470)
                 {
@@ -60,7 +60,7 @@ public:
                         lf.lfWidth = 0;
                         hFont = CreateFontIndirectW(&lf);
                         if (hFont)
-                            bDelFont = TRUE;
+                            bDelFont = true;
 #ifdef _DEBUG
                         else
                             EckDbgPrintFormat(L"CFontDialog::OnMessage: %s not found", pszBuf);
@@ -111,7 +111,7 @@ public:
                 if (bDelFont)
                     DeleteObject(hFont);
             }
-            return TRUE;
+            return true;
             }
         }
         break;

@@ -167,7 +167,7 @@ Tidyup:;
     return nts;
 }
 
-inline BOOL ImportPublicKeyFromPEM(PCSTR pszKey, int cchKey, BCRYPT_KEY_HANDLE& hKey) noexcept
+inline bool ImportPublicKeyFromPEM(PCSTR pszKey, int cchKey, BCRYPT_KEY_HANDLE& hKey) noexcept
 {
     hKey = 0;
     const auto rb = Base64Decode(pszKey, cchKey);
@@ -183,10 +183,10 @@ inline BOOL ImportPublicKeyFromPEM(PCSTR pszKey, int cchKey, BCRYPT_KEY_HANDLE& 
         LocalFree(ppki);
         return b;
     }
-    return FALSE;
+    return false;
 }
 
-inline BOOL GetExponentAndModulusFromPEM(PCSTR pszKey, int cchKey,
+inline bool GetExponentAndModulusFromPEM(PCSTR pszKey, int cchKey,
     CByteBuffer& rbExponent, CByteBuffer& rbModulus) noexcept
 {
     const auto rb = Base64Decode(pszKey, cchKey);
@@ -201,27 +201,27 @@ inline BOOL GetExponentAndModulusFromPEM(PCSTR pszKey, int cchKey,
     else if (us == 0x8230)
         r += 2;
     else
-        return FALSE;
+        return false;
     r >> by;
     if (memcmp(by, ByMagic, sizeof(ByMagic)) != 0)
-        return FALSE;
+        return false;
     r >> us;
     if (us == 0x8103)
         r += 1;
     else if (us == 0x8203)
         r += 2;
     else
-        return FALSE;
+        return false;
     r >> by[0];
     if (by[0] != 0)
-        return FALSE;
+        return false;
     r >> us;
     if (us == 0x8130)
         r += 1;
     else if (us == 0x8230)
         r += 2;
     else
-        return FALSE;
+        return false;
     r >> us;
     USHORT cbModulus;
     if (us == 0x8102)
@@ -235,7 +235,7 @@ inline BOOL GetExponentAndModulusFromPEM(PCSTR pszKey, int cchKey,
         cbModulus = ReverseInteger(cbModulus);
     }
     else
-        return FALSE;
+        return false;
 
     if (*(r.Data() + 1) == 0)
     {
@@ -246,15 +246,15 @@ inline BOOL GetExponentAndModulusFromPEM(PCSTR pszKey, int cchKey,
     r.Read(rbModulus.Data(), cbModulus);
     r >> by[0];
     if (by[0] != 2)
-        return FALSE;
+        return false;
     BYTE cbExponent;
     r >> cbExponent;
     rbExponent.PushBackNoExtra(cbExponent);
     r.Read(rbExponent.Data(), cbExponent);
-    return TRUE;
+    return true;
 }
 
-inline BOOL MakeBCryptRsaKeyBlob(PCVOID pKey, size_t cbKey, UCHAR*& pBlob, ULONG& cbBlob) noexcept
+inline bool MakeBCryptRsaKeyBlob(PCVOID pKey, size_t cbKey, UCHAR*& pBlob, ULONG& cbBlob) noexcept
 {
     BYTE* pKeyBlob;
     CByteBuffer rbExp{}, rbMod{};
@@ -262,7 +262,7 @@ inline BOOL MakeBCryptRsaKeyBlob(PCVOID pKey, size_t cbKey, UCHAR*& pBlob, ULONG
     {
         pBlob = nullptr;
         cbBlob = 0;
-        return FALSE;
+        return false;
     }
     cbBlob = ULONG(sizeof(BCRYPT_RSAKEY_BLOB) + rbExp.Size() + rbMod.Size());
     pKeyBlob = (BYTE*)malloc(cbBlob);
@@ -276,7 +276,7 @@ inline BOOL MakeBCryptRsaKeyBlob(PCVOID pKey, size_t cbKey, UCHAR*& pBlob, ULONG
     memcpy(pKeyBlob + sizeof(BCRYPT_RSAKEY_BLOB), rbExp.Data(), rbExp.Size());
     memcpy(pKeyBlob + sizeof(BCRYPT_RSAKEY_BLOB) + rbExp.Size(), rbMod.Data(), rbMod.Size());
     pBlob = pKeyBlob;
-    return TRUE;
+    return true;
 }
 
 inline NTSTATUS RsaEncrypt(PCVOID pKey, size_t cbKey,

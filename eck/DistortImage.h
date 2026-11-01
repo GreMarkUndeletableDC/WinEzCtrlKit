@@ -147,12 +147,12 @@ public:
 /// <param name="pptOffset">输出偏移量</param>
 /// <returns></returns>
 template<class TBmpHandler, class TCoord>
-inline BOOL MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
+inline bool MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
     const TCoord* pptSrc, const TCoord* pptDst, int cPt, POINT* pptOffset = nullptr)
 {
     static_assert(std::is_same_v<TCoord, typename TBmpHandler::TCoord>);
     if (cPt < 3)
-        return FALSE;
+        return false;
     const auto [itMinY, itMaxY] = std::minmax_element(pptDst, pptDst + cPt, [](const TCoord& pt1, const TCoord& pt2)->bool
         {
             return TBmpHandler::GetY(pt1) < TBmpHandler::GetY(pt2);
@@ -164,7 +164,7 @@ inline BOOL MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
     const int cyPolygon = TBmpHandler::GetY(*itMaxY) - TBmpHandler::GetY(*itMinY) + 1;
     const int cxPolygon = TBmpHandler::GetX(*itMaxX) - TBmpHandler::GetX(*itMinX) + 1;
     if (cxPolygon <= 0 || cyPolygon <= 0)
-        return FALSE;
+        return false;
     if (pptOffset)
     {
         pptOffset->x = TBmpHandler::GetX(*itMinX);
@@ -314,25 +314,25 @@ inline BOOL MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
 
                 // 当前高度对应左边或右边线段的边界，必须四舍五入以处理边界情况
                 float xL, xL1, xR, xR1;
-                BOOL bYAAL, bYAAR, bSampleDirectionL, bSampleDirectionR;// TRUE = 下面为外部
+                bool bYAAL, bYAAR, bSampleDirectionL, bSampleDirectionR;// true = 下面为外部
                 if (kL == 0.f || kL == INFINITY ||
                     (kL <= -1.f || kL >= 1.f) ||
                     y == 0)// 水平或垂直线，或斜率不匹配，无需反走样
                 {
-                    bYAAL = FALSE;
+                    bYAAL = false;
                 }
                 else
                 {
-                    bYAAL = TRUE;
+                    bYAAL = true;
                     if (kL < 0.f)
                     {
-                        bSampleDirectionL = FALSE;
+                        bSampleDirectionL = false;
                         xL = roundf((y - bL) / kL);
                         xL1 = roundf((y - 1 - bL) / kL);
                     }
                     else
                     {
-                        bSampleDirectionL = TRUE;
+                        bSampleDirectionL = true;
                         xL = roundf((y - bL) / kL);
                         xL1 = roundf((y + 1 - bL) / kL);
                     }
@@ -342,20 +342,20 @@ inline BOOL MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
                     (kR <= -1.f || kR >= 1.f) ||
                     y == 0)// 水平或垂直线，或斜率不匹配，无需反走样
                 {
-                    bYAAR = FALSE;
+                    bYAAR = false;
                 }
                 else
                 {
-                    bYAAR = TRUE;
+                    bYAAR = true;
                     if (kR < 0.f)
                     {
-                        bSampleDirectionR = TRUE;
+                        bSampleDirectionR = true;
                         xR = roundf((y + 1 - bR) / kR);
                         xR1 = roundf((y - bR) / kR);
                     }
                     else
                     {
-                        bSampleDirectionR = FALSE;
+                        bSampleDirectionR = false;
                         xR = roundf((y - 1 - bR) / kR);
                         xR1 = roundf((y - bR) / kR);
                     }
@@ -481,6 +481,6 @@ inline BOOL MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
     for (auto& x : ET)
         for (auto p : x.second)
             delete p;
-    return TRUE;
+    return true;
 }
 ECK_NAMESPACE_END

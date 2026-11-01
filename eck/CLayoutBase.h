@@ -82,7 +82,7 @@ protected:
     TLytCoord m_x{}, m_y{}, m_cx{}, m_cy{};
     TLytCoord m_cxIdeal{}, m_cyIdeal{};
     int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
-    BOOL m_bUseDwp{ TRUE };
+    bool m_bUseDwp{ true };
     HDWP m_hDwpCurrent{};
 
     static void ArgCalculateRect(const ITEMBASE& e,
@@ -258,7 +258,7 @@ public:
     EckInlineNdCe static UINT Lf9Align(UINT u) noexcept { return BitsLowN(u, 4); }
     EckInlineNdCe static UINT LfLineAlign(UINT u) noexcept { return BitsLowN(u, 2); }
     // 互斥验证，若标志无效则返回FALSE
-    EckInlineNdCe static BOOL LfValidateFlags(UINT u) noexcept
+    EckInlineNdCe static bool LfValidateFlags(UINT u) noexcept
     {
         constexpr UINT WIDTH_EXCLUSIVE_MASK =
             LF_FILL_WIDTH | LF_FIX_WIDTH | LF_IDEAL_WIDTH | LF_SCALE;
@@ -266,18 +266,18 @@ public:
             LF_FILL_HEIGHT | LF_FIX_HEIGHT | LF_IDEAL_HEIGHT | LF_SCALE;
         const auto u1 = u & WIDTH_EXCLUSIVE_MASK;
         if (u1 && (u1 & (u1 - 1)))
-            return FALSE;
+            return false;
         const auto u2 = u & HEIGHT_EXCLUSIVE_MASK;
         if (u2 && (u2 & (u2 - 1)))
-            return FALSE;
-        return TRUE;
+            return false;
+        return true;
     }
 
-    BOOL LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept override
+    bool LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept override
     {
         Size.cx = m_cxIdeal;
         Size.cy = m_cyIdeal;
-        return TRUE;
+        return true;
     }
 
     void LoSetPosition(LYTPOINT pt) noexcept override
@@ -303,10 +303,10 @@ public:
     LYTPOINT LoGetPosition() noexcept override { return { m_x, m_y }; }
     LYTSIZE LoGetSize() noexcept override { return { m_cx, m_cy }; }
 
-    BOOL LoDwpAttach(HDWP hDwp) noexcept override
+    bool LoDwpAttach(HDWP hDwp) noexcept override
     {
         if (!m_bUseDwp)
-            return FALSE;
+            return false;
         if (m_hDwpCurrent)
         {
             EckDbgBreak();
@@ -326,7 +326,7 @@ public:
     virtual void LobClear() noexcept
     {
         m_x = m_y = m_cx = m_cy = 0;
-        m_bUseDwp = TRUE;
+        m_bUseDwp = true;
     }
 
     // 若调用方已通过操作底层数据结构的方式修改了对象列表，则必须调用此函数刷新
@@ -346,8 +346,8 @@ public:
 
     EckInline void Arrange(TLytCoord cx, TLytCoord cy) noexcept { Arrange(0, 0, cx, cy); }
 
-    EckInlineCe void SetUseDwp(BOOL b) noexcept { m_bUseDwp = b; }
-    EckInlineNdCe BOOL GetUseDwp() const noexcept { return m_bUseDwp; }
+    EckInlineCe void SetUseDwp(bool b) noexcept { m_bUseDwp = b; }
+    EckInlineNdCe bool GetUseDwp() const noexcept { return m_bUseDwp; }
 
     EckInlineNdCe int GetDpi() const noexcept { return m_iDpi; }
 };

@@ -17,17 +17,17 @@ IID_ITextHost{ 0x13e670f4,0x1a5a,0x11cf,{ 0xab,0xeb,0x00,0xaa,0x00,0xb6,0x5e,0xa
 IID_ITextHost2{ 0x13e670f5,0x1a5a,0x11cf,{ 0xab,0xeb,0x00,0xaa,0x00,0xb6,0x5e,0xa1 } };
 
 
-EckInline BOOL TsiInit() noexcept
+EckInline bool TsiInit() noexcept
 {
     const auto hMod = LoadLibraryW(L"Msftedit.dll");
     if (!hMod)
-        return FALSE;
+        return false;
     g_pfnCreateTextServices = GetProcAddress(hMod, "CreateTextServices");
     g_pfnShutdownTextServices = GetProcAddress(hMod, "ShutdownTextServices");
-    return TRUE;
+    return true;
 }
 
-EckInlineNdCe BOOL TsiIsAvailable() noexcept
+EckInlineNdCe bool TsiIsAvailable() noexcept
 {
     return g_pfnCreateTextServices && g_pfnShutdownTextServices;
 }
@@ -43,17 +43,17 @@ EckInline HRESULT TsiShutdownTextServices(IUnknown* pSrv) noexcept
     return PShutdownTextServices(g_pfnShutdownTextServices)(pSrv);
 }
 
-inline BOOL Tsi20Init() noexcept
+inline bool Tsi20Init() noexcept
 {
     const auto hMod = LoadLibraryW(L"Riched20.dll");
     if (!hMod)
-        return FALSE;
+        return false;
     g_pfnCreateTextServices20 = GetProcAddress(hMod, "CreateTextServices");
     g_pfnShutdownTextServices20 = GetProcAddress(hMod, "ShutdownTextServices");
-    return TRUE;
+    return true;
 }
 
-EckInlineNdCe BOOL Tsi20IsAvailable() noexcept
+EckInlineNdCe bool Tsi20IsAvailable() noexcept
 {
     return g_pfnCreateTextServices20 && g_pfnShutdownTextServices20;
 }

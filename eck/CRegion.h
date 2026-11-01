@@ -71,7 +71,7 @@ private:
     RECT m_rc{ InfMin,InfMin,InfMin,InfMin };
     std::unique_ptr<ComplexRegion> m_pComplex{};
 #ifdef _DEBUG
-    BOOL m_bRecordingPoint{};
+    bool m_bRecordingPoint{};
 #endif
 
     void AllocComplexRegion() noexcept
@@ -305,10 +305,10 @@ private:
                     }
                     else
                     {
-                        BOOL bEnd{};
+                        bool bEnd{};
                         ++xPair1;
                         if (xPair1 == xPairEnd1)
-                            bEnd = TRUE;
+                            bEnd = true;
                         else
                             xMin1 = xPair1->xMin;
                         ++xPair2;
@@ -352,10 +352,10 @@ private:
                     }
                     else
                     {
-                        BOOL bEnd{};
+                        bool bEnd{};
                         ++xPair1;
                         if (xPair1 == xPairEnd1)
-                            bEnd = TRUE;
+                            bEnd = true;
                         else
                             xMin1 = xPair1->xMin;
                         ++xPair2;
@@ -387,10 +387,10 @@ private:
                 }
                 else
                 {
-                    BOOL bEnd{};
+                    bool bEnd{};
                     ++xPair1;
                     if (xPair1 == xPairEnd1)
-                        bEnd = TRUE;
+                        bEnd = true;
                     else
                         xMin1 = xPair1->xMin;
                     ++xPair2;
@@ -607,18 +607,18 @@ public:
         m_rc.right = m_rc.bottom = InfMax;
     }
 
-    BOOL SetHRgn(HRGN hRgn) noexcept
+    bool SetHRgn(HRGN hRgn) noexcept
     {
         EckAssert(!m_bRecordingPoint);
         const auto cbBuf = GetRegionData(hRgn, 0, nullptr);
         if (!cbBuf)
-            return FALSE;
+            return false;
         UniquePtr<DelMA<RGNDATAHEADER>>
             pBuf((RGNDATAHEADER*)malloc(cbBuf));
         if (!GetRegionData(hRgn, cbBuf, (RGNDATA*)pBuf.get()))
-            return FALSE;
+            return false;
         SetRect((RECT*)(pBuf.get() + 1), (int)pBuf->nCount);
-        return TRUE;
+        return true;
     }
 
     GpStatus SetGpRegion(GpRegion* pRegion) noexcept
@@ -651,7 +651,7 @@ public:
         return Gdiplus::Ok;
     }
 
-    BOOL IsEmpty() const noexcept
+    bool IsEmpty() const noexcept
     {
         EckAssert(!m_bRecordingPoint);
         if (m_pComplex)
@@ -659,11 +659,11 @@ public:
         return m_rc.left >= m_rc.right || m_rc.top >= m_rc.bottom;
     }
 
-    BOOL IsInfinite() const noexcept
+    bool IsInfinite() const noexcept
     {
         EckAssert(!m_bRecordingPoint);
         if (m_pComplex)
-            return FALSE;
+            return false;
         return m_rc.left == InfMin && m_rc.top == InfMin &&
             m_rc.right == InfMax && m_rc.bottom == InfMax;
     }
@@ -1000,11 +1000,11 @@ public:
                 {
                     RgnResult.m_pComplex->AddYCategory(yMin1, yCat1->yMax,
                         vXPairWork.data(), (int)vXPairWork.size(), RgnResult.m_rc);
-                    BOOL bEnd{};
+                    bool bEnd{};
                     xPair1 += yCat1->cXPair;
                     ++yCat1;
                     if (yCat1 == yCatEnd1)
-                        bEnd = TRUE;
+                        bEnd = true;
                     else
                     {
                         yMin1 = yCat1->yMin;
@@ -1328,11 +1328,11 @@ public:
                 {
                     RgnResult.m_pComplex->AddYCategory(yMin1, yCat1->yMax,
                         vXPairWork.data(), (int)vXPairWork.size(), RgnResult.m_rc);
-                    BOOL bEnd{};
+                    bool bEnd{};
                     xPair1 += yCat1->cXPair;
                     ++yCat1;
                     if (yCat1 == yCatEnd1)
-                        bEnd = TRUE;
+                        bEnd = true;
                     else
                     {
                         yMin1 = yCat1->yMin;
@@ -1385,7 +1385,7 @@ public:
     {
 #ifdef _DEBUG
         EckAssert(!m_bRecordingPoint && L"Recording point already started.");
-        m_bRecordingPoint = TRUE;
+        m_bRecordingPoint = true;
 #endif
         if (!m_pComplex)
             AllocComplexRegion();
@@ -1399,7 +1399,7 @@ public:
     {
 #ifdef _DEBUG
         EckAssert(m_bRecordingPoint && L"Recording point not started.");
-        m_bRecordingPoint = FALSE;
+        m_bRecordingPoint = false;
 #endif
     }
 

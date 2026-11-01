@@ -21,7 +21,7 @@ private:
     CSrwLock m_Lk{};
 public:
     [[nodiscard]] void* Allocate(size_t cbSize,
-        size_t cbAlign = sizeof(void*), BOOL bOnlySearchTop = TRUE) noexcept
+        size_t cbAlign = sizeof(void*), bool bOnlySearchTop = true) noexcept
     {
         if (cbSize == 0)
             return nullptr;

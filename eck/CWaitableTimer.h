@@ -12,8 +12,8 @@ public:
 
     CWaitableTimer(
         std::wstring_view svName,
-        BOOL bManualReset = FALSE,
-        BOOL bInheritHandle = FALSE) noexcept
+        bool bManualReset = false,
+        bool bInheritHandle = false) noexcept
     {
         Create(svName, bManualReset, bInheritHandle);
     }
@@ -29,8 +29,8 @@ public:
 
     NTSTATUS Create(
         std::wstring_view svName,
-        BOOL bManualReset = FALSE,
-        BOOL bInheritHandle = FALSE) noexcept
+        bool bManualReset = false,
+        bool bInheritHandle = false) noexcept
     {
         const auto us{ StringViewToNtString(svName) };
         OBJECT_ATTRIBUTES oa;
@@ -54,7 +54,7 @@ public:
             (LARGE_INTEGER*)pliDueTime,
             nullptr,
             nullptr,
-            FALSE,
+            false,
             0,
             nullptr);
     }
@@ -68,7 +68,7 @@ public:
             (LARGE_INTEGER*)pliDueTime,
             nullptr,
             nullptr,
-            FALSE,
+            false,
             msPeriod,
             nullptr);
     }
@@ -85,13 +85,13 @@ public:
         return SetDueTimeAndPeriod(&liDueTime, msPeriod);
     }
 
-    EckInline NTSTATUS Cancel(_Out_opt_ BOOLEAN* pbPrevState = nullptr) noexcept
+    EckInline NTSTATUS Cancel(_Out_opt_ bool* pbPrevState = nullptr) noexcept
     {
-        return NtCancelTimer(m_hObject, pbPrevState);
+        return NtCancelTimer(m_hObject, (BOOLEAN*)pbPrevState);
     }
 
     NTSTATUS QueryState(
-        _Out_ BOOLEAN& bState,
+        _Out_ bool& bState,
         _Out_ LONGLONG& llRemainingTime) noexcept
     {
         TIMER_BASIC_INFORMATION tbi;
@@ -105,7 +105,7 @@ public:
         }
         else
         {
-            bState = FALSE;
+            bState = false;
             llRemainingTime = 0;
         }
         return nts;

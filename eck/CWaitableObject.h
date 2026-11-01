@@ -9,13 +9,13 @@ EckInline NTSTATUS WaitObjectMs(
     LONGLONG ms) noexcept
 {
     ms *= -10000ll;
-    return NtWaitForSingleObject(Object.Get(), FALSE, (LARGE_INTEGER*)&ms);
+    return NtWaitForSingleObject(Object.Get(), false, (LARGE_INTEGER*)&ms);
 }
 
 EckInline NTSTATUS WaitObject(
     const CWaitableObject& Object,
     const LARGE_INTEGER* pli = nullptr) noexcept
 {
-    return NtWaitForSingleObject(Object.Get(), FALSE, (LARGE_INTEGER*)pli);
+    return NtWaitForSingleObject(Object.Get(), false, (LARGE_INTEGER*)pli);
 }
 ECK_NAMESPACE_END

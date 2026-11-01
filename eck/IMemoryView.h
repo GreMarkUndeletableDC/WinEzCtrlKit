@@ -15,6 +15,6 @@ struct __declspec(uuid("B23501EB-3F09-4A54-94D4-F2054F17A381"))
     // 获取对象关联的内存地址和大小，当修改对象后返回的信息可能失效
     STDMETHOD(MemGetPointer)(void** ppData, size_t* pSize) = 0;
     // 是否已锁定
-    STDMETHOD(MemIsLocked)(BOOL* pIsLocked) = 0;
+    STDMETHOD(MemIsLocked)(bool* pIsLocked) = 0;
 };
 ECK_NAMESPACE_END

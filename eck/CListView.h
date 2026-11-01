@@ -6,15 +6,15 @@ using FLvItemCompare = int(CALLBACK*)(LPARAM lParam1, LPARAM lParam2, LPARAM lPa
 using FLvItemCompareEx = int(CALLBACK*)(int idx1, int idx2, LPARAM lParamSort);
 
 #define ECK_W_LVE_STYLE(Name, Style)                    \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-    BOOL StyleGet##Name() const                         \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;  \
+    bool StyleGet##Name() const                         \
     {                                                   \
         if constexpr (Style == 0)                       \
             return !GetLVExtendStyle();                 \
         else                                            \
             return IsBitSet(GetLVExtendStyle(), Style); \
     }                                                   \
-    void StyleSet##Name(BOOL b) const                   \
+    void StyleSet##Name(bool b) const                   \
     {                                                   \
         SetLVExtendStyle(b ? Style : 0, Style);         \
     }
@@ -74,9 +74,9 @@ public:
     ECK_W_LVE_STYLE(UnderlineCold, LVS_EX_UNDERLINECOLD);
     ECK_W_LVE_STYLE(UnderlineHot, LVS_EX_UNDERLINEHOT);
 protected:
-    BOOL m_bAutoDarkMode{ TRUE };
+    bool m_bAutoDarkMode{ true };
 public:
-    EckInlineCe void SetAutoDarkMode(BOOL b) { m_bAutoDarkMode = b; }
+    EckInlineCe void SetAutoDarkMode(bool b) { m_bAutoDarkMode = b; }
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {
@@ -146,18 +146,18 @@ public:
     /// <param name="uFlag">排列选项，LVA_常量。
     /// 注：当指定LVA_ALIGNLEFT或LVA_ALIGNTOP时会分别添加LVS_ALIGNLEFT和LVS_ALIGNTOP样式</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL Arrange(UINT uFlag) const noexcept
+    EckInline bool Arrange(UINT uFlag) const noexcept
     {
         switch (uFlag)
         {
         case LVA_ALIGNLEFT:
             ModifyStyle(LVS_ALIGNLEFT, LVS_ALIGNLEFT);
-            return TRUE;
+            return true;
         case LVA_ALIGNTOP:
             ModifyStyle(LVS_ALIGNTOP, LVS_ALIGNTOP);
-            return TRUE;
+            return true;
         default:
-            return (BOOL)SendMessageW(LVM_ARRANGE, uFlag, 0);
+            return (bool)SendMessageW(LVM_ARRANGE, uFlag, 0);
         }
     }
 
@@ -177,19 +177,19 @@ public:
         return (HIMAGELIST)SendMessageW(LVM_CREATEDRAGIMAGE, idx, (LPARAM)&ptOrg);
     }
 
-    EckInline BOOL DeleteAllItems() const noexcept
+    EckInline bool DeleteAllItems() const noexcept
     {
-        return (BOOL)SendMessageW(LVM_DELETEALLITEMS, 0, 0);
+        return (bool)SendMessageW(LVM_DELETEALLITEMS, 0, 0);
     }
 
-    EckInline BOOL DeleteColumn(int idx) const noexcept
+    EckInline bool DeleteColumn(int idx) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_DELETECOLUMN, idx, 0);
+        return (bool)SendMessageW(LVM_DELETECOLUMN, idx, 0);
     }
 
-    EckInline BOOL DeleteItem(int idx) const noexcept
+    EckInline bool DeleteItem(int idx) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_DELETEITEM, idx, 0);
+        return (bool)SendMessageW(LVM_DELETEITEM, idx, 0);
     }
 
     /// <summary>
@@ -207,7 +207,7 @@ public:
     /// </summary>
     /// <param name="bEnable">是否启用</param>
     /// <returns>0 - 成功  1 - 控件状态已更改  -1 - 失败</returns>
-    EckInline int EnableGroupView(BOOL bEnable) const noexcept
+    EckInline int EnableGroupView(bool bEnable) const noexcept
     {
         return (int)SendMessageW(LVM_ENABLEGROUPVIEW, bEnable, 0);
     }
@@ -218,9 +218,9 @@ public:
     /// <param name="idx">项目</param>
     /// <param name="bFullVisible">是否保证完全可见</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL EnsureVisible(int idx, BOOL bFullVisible = TRUE) const noexcept
+    EckInline bool EnsureVisible(int idx, bool bFullVisible = true) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_ENSUREVISIBLE, idx, bFullVisible);
+        return (bool)SendMessageW(LVM_ENSUREVISIBLE, idx, bFullVisible);
     }
 
     /// <summary>
@@ -239,24 +239,24 @@ public:
         return (COLORREF)SendMessageW(LVM_GETBKCOLOR, 0, 0);
     }
 
-    EckInline BOOL GetBackgroundImage(LVBKIMAGEW* plvbki) const
+    EckInline bool GetBackgroundImage(LVBKIMAGEW* plvbki) const
     {
-        return (BOOL)SendMessageW(LVM_GETBKIMAGEW, 0, (LPARAM)plvbki);
+        return (bool)SendMessageW(LVM_GETBKIMAGEW, 0, (LPARAM)plvbki);
     }
 
-    EckInline BOOL GetCallbackMask() const noexcept
+    EckInline bool GetCallbackMask() const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETCALLBACKMASK, 0, 0);
+        return (bool)SendMessageW(LVM_GETCALLBACKMASK, 0, 0);
     }
 
-    EckInline BOOL GetColumn(int idx, _Inout_ LVCOLUMNW* plvc) const noexcept
+    EckInline bool GetColumn(int idx, _Inout_ LVCOLUMNW* plvc) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETCOLUMNW, idx, (LPARAM)plvc);
+        return (bool)SendMessageW(LVM_GETCOLUMNW, idx, (LPARAM)plvc);
     }
 
-    EckInline BOOL GetColumnOrderArray(_Out_writes_(cColumn) int* piOrder, int cColumn) const noexcept
+    EckInline bool GetColumnOrderArray(_Out_writes_(cColumn) int* piOrder, int cColumn) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETCOLUMNORDERARRAY, cColumn, (LPARAM)piOrder);
+        return (bool)SendMessageW(LVM_GETCOLUMNORDERARRAY, cColumn, (LPARAM)piOrder);
     }
 
     /// <summary>
@@ -290,9 +290,9 @@ public:
         return (HWND)SendMessageW(LVM_GETEDITCONTROL, 0, 0);
     }
 
-    EckInline BOOL GetEmptyText(PWSTR pszBuf, int cchBuf) const noexcept
+    EckInline bool GetEmptyText(PWSTR pszBuf, int cchBuf) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETEMPTYTEXT, cchBuf, (LPARAM)pszBuf);
+        return (bool)SendMessageW(LVM_GETEMPTYTEXT, cchBuf, (LPARAM)pszBuf);
     }
 
     EckInline DWORD GetLVExtendStyle() const noexcept
@@ -312,19 +312,19 @@ public:
         return lvfi.cItems;
     }
 
-    EckInline BOOL GetFooterItem(int idx, LVFOOTERITEM* plvfi) const noexcept
+    EckInline bool GetFooterItem(int idx, LVFOOTERITEM* plvfi) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETFOOTERITEM, idx, (LPARAM)plvfi);
+        return (bool)SendMessageW(LVM_GETFOOTERITEM, idx, (LPARAM)plvfi);
     }
 
-    EckInline BOOL GetFooterItemRect(int idx, RECT* prc) const noexcept
+    EckInline bool GetFooterItemRect(int idx, RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETFOOTERITEMRECT, idx, (LPARAM)prc);
+        return (bool)SendMessageW(LVM_GETFOOTERITEMRECT, idx, (LPARAM)prc);
     }
 
-    EckInline BOOL GetFooterRect(RECT* prc) const noexcept
+    EckInline bool GetFooterRect(RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETFOOTERRECT, 0, (LPARAM)prc);
+        return (bool)SendMessageW(LVM_GETFOOTERRECT, 0, (LPARAM)prc);
     }
 
     EckInline int GetGroupCount() const noexcept
@@ -354,10 +354,10 @@ public:
     /// <param name="prc">接收矩形</param>
     /// <param name="uType">类型，LVGGR_常量，默认LVGGR_GROUP</param>
     /// <returns></returns>
-    EckInline BOOL GetGroupRect(int iGroupID, RECT* prc, UINT uType = LVGGR_GROUP) const noexcept
+    EckInline bool GetGroupRect(int iGroupID, RECT* prc, UINT uType = LVGGR_GROUP) const noexcept
     {
         prc->top = uType;
-        return (BOOL)SendMessageW(LVM_GETGROUPRECT, iGroupID, (LPARAM)prc);
+        return (bool)SendMessageW(LVM_GETGROUPRECT, iGroupID, (LPARAM)prc);
     }
 
     /// <summary>
@@ -401,13 +401,13 @@ public:
         return (HIMAGELIST)SendMessageW(LVM_GETIMAGELIST, uType, 0);
     }
 
-    EckInline int GetInsertMark(_Out_opt_ BOOL* pbAfterItem) const noexcept
+    EckInline int GetInsertMark(_Out_opt_ bool* pbAfterItem) const noexcept
     {
         LVINSERTMARK lvim{ sizeof(LVINSERTMARK) };
         if (!SendMessageW(LVM_GETINSERTMARK, 0, (LPARAM)&lvim))
         {
             if (pbAfterItem)
-                *pbAfterItem = FALSE;
+                *pbAfterItem = false;
             return -1;
         }
         if (pbAfterItem)
@@ -420,9 +420,9 @@ public:
         return (COLORREF)SendMessageW(LVM_GETINSERTMARKCOLOR, 0, 0);
     }
 
-    EckInline BOOL GetInsertMarkRect(RECT* prc) const noexcept
+    EckInline bool GetInsertMarkRect(RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETINSERTMARKRECT, 0, (LPARAM)prc);
+        return (bool)SendMessageW(LVM_GETINSERTMARKRECT, 0, (LPARAM)prc);
     }
 
     EckInline int GetIncrementalSearchString(PWSTR pszBuf) const noexcept
@@ -430,9 +430,9 @@ public:
         return (int)SendMessageW(LVM_GETISEARCHSTRINGW, 0, (LPARAM)pszBuf);
     }
 
-    EckInline BOOL GetItem(LVITEMW* pli) const noexcept
+    EckInline bool GetItem(LVITEMW* pli) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETITEMW, 0, (LPARAM)pli);
+        return (bool)SendMessageW(LVM_GETITEMW, 0, (LPARAM)pli);
     }
 
     EckInline int GetItemCount() const noexcept
@@ -440,28 +440,28 @@ public:
         return (int)SendMessageW(LVM_GETITEMCOUNT, 0, 0);
     }
 
-    EckInline BOOL GetItemRect(int idx, int idxGroup,
+    EckInline bool GetItemRect(int idx, int idxGroup,
         _Out_ RECT* prc, UINT uType = LVIR_BOUNDS) const noexcept
     {
         LVITEMINDEX lvii;
         lvii.iItem = idx;
         lvii.iGroup = idxGroup;
         prc->left = uType;
-        return (BOOL)SendMessageW(LVM_GETITEMINDEXRECT, (WPARAM)&lvii, (LPARAM)prc);
+        return (bool)SendMessageW(LVM_GETITEMINDEXRECT, (WPARAM)&lvii, (LPARAM)prc);
     }
 
-    EckInline BOOL GetItemRect(int idx, RECT* prc, UINT uType = LVIR_BOUNDS) const noexcept
+    EckInline bool GetItemRect(int idx, RECT* prc, UINT uType = LVIR_BOUNDS) const noexcept
     {
         prc->left = uType;
-        return (BOOL)SendMessageW(LVM_GETITEMRECT, idx, (LPARAM)prc);
+        return (bool)SendMessageW(LVM_GETITEMRECT, idx, (LPARAM)prc);
     }
 
-    EckInline BOOL GetItemPosition(int idx, POINT* ppt) const noexcept
+    EckInline bool GetItemPosition(int idx, POINT* ppt) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETITEMPOSITION, idx, (LPARAM)ppt);
+        return (bool)SendMessageW(LVM_GETITEMPOSITION, idx, (LPARAM)ppt);
     }
 
-    EckInline void GetItemSpacing(BOOL bSmallIconView,
+    EckInline void GetItemSpacing(bool bSmallIconView,
         _Out_opt_ int* pxSpacing = nullptr,
         _Out_opt_ int* pySpacing = nullptr) const noexcept
     {
@@ -558,9 +558,9 @@ public:
         return u;
     }
 
-    EckInline BOOL GetOrigin(_Out_ POINT* ppt) const noexcept
+    EckInline bool GetOrigin(_Out_ POINT* ppt) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETORIGIN, 0, (LPARAM)ppt);
+        return (bool)SendMessageW(LVM_GETORIGIN, 0, (LPARAM)ppt);
     }
 
     EckInline COLORREF GetOutLineColor() const noexcept
@@ -626,9 +626,9 @@ public:
         return (int)SendMessageW(LVM_GETTOPINDEX, 0, 0);
     }
 
-    EckInline BOOL GetUnicodeFormat() const noexcept
+    EckInline bool GetUnicodeFormat() const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETUNICODEFORMAT, 0, 0);
+        return (bool)SendMessageW(LVM_GETUNICODEFORMAT, 0, 0);
     }
 
     /// <summary>
@@ -640,9 +640,9 @@ public:
         return (UINT)SendMessageW(LVM_GETVIEW, 0, 0);
     }
 
-    EckInline BOOL GetViewRect(_Out_ RECT* prc) const noexcept
+    EckInline bool GetViewRect(_Out_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_GETVIEWRECT, 0, (LPARAM)prc);
+        return (bool)SendMessageW(LVM_GETVIEWRECT, 0, (LPARAM)prc);
     }
 
     EckInline std::vector<RECT> GetWorkAreas() const noexcept
@@ -661,13 +661,13 @@ public:
         SendMessageW(LVM_GETWORKAREAS, c, (LPARAM)prc);
     }
 
-    EckInline BOOL HasGroup(int iGroupID) const noexcept
+    EckInline bool HasGroup(int iGroupID) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_HASGROUP, iGroupID, 0);
+        return (bool)SendMessageW(LVM_HASGROUP, iGroupID, 0);
     }
 
     EckInline int HitTest(_Inout_ LVHITTESTINFO* plvhti,
-        BOOL bTestGroup = FALSE) const noexcept
+        bool bTestGroup = false) const noexcept
     {
         return (int)SendMessageW(LVM_HITTEST, bTestGroup ? -1 : 0, (LPARAM)plvhti);
     }
@@ -729,7 +729,7 @@ public:
         return InsertItem(&lvi);
     }
 
-    EckInline int InsertMarkHitTest(POINT pt, BOOL bAfterItem = FALSE) const noexcept
+    EckInline int InsertMarkHitTest(POINT pt, bool bAfterItem = false) const noexcept
     {
         LVINSERTMARK lvim{ sizeof(LVINSERTMARK) };
         lvim.iItem = -1;
@@ -739,14 +739,14 @@ public:
         return lvim.iItem;
     }
 
-    EckInline BOOL IsGroupViewEnabled() const noexcept
+    EckInline bool IsGroupViewEnabled() const noexcept
     {
-        return (BOOL)SendMessageW(LVM_ISGROUPVIEWENABLED, 0, 0);
+        return (bool)SendMessageW(LVM_ISGROUPVIEWENABLED, 0, 0);
     }
 
-    EckInline BOOL IsItemVisible(int idx) const noexcept
+    EckInline bool IsItemVisible(int idx) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_ISITEMVISIBLE, idx, 0);
+        return (bool)SendMessageW(LVM_ISITEMVISIBLE, idx, 0);
     }
 
     EckInline UINT MapIdToIndex(int idx) const noexcept
@@ -759,12 +759,12 @@ public:
         return (int)SendMessageW(LVM_MAPINDEXTOID, uId, 0);
     }
 
-    EckInline BOOL RedrawItems(int idxStart, int idxEnd) const noexcept
+    EckInline bool RedrawItems(int idxStart, int idxEnd) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_REDRAWITEMS, idxStart, idxEnd);
+        return (bool)SendMessageW(LVM_REDRAWITEMS, idxStart, idxEnd);
     }
 
-    EckInline BOOL RedrawItem(int idx) const noexcept
+    EckInline bool RedrawItem(int idx) const noexcept
     {
         return RedrawItems(idx, idx);
     }
@@ -784,9 +784,9 @@ public:
         return (int)SendMessageW(LVM_REMOVEGROUP, iGroupID, 0);
     }
 
-    EckInline BOOL Scroll(int deltaH = 0, int deltaV = 0) const noexcept
+    EckInline bool Scroll(int deltaH = 0, int deltaV = 0) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SCROLL, deltaH, deltaV);
+        return (bool)SendMessageW(LVM_SCROLL, deltaH, deltaV);
     }
 
     /// <summary>
@@ -794,14 +794,14 @@ public:
     /// </summary>
     /// <param name="cr">颜色，或CLR_NONE指定无背景色</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SetBackgroundColor(COLORREF cr) const noexcept
+    EckInline bool SetBackgroundColor(COLORREF cr) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETBKCOLOR, 0, cr);
+        return (bool)SendMessageW(LVM_SETBKCOLOR, 0, cr);
     }
 
-    EckInline BOOL SetBackgroundImage(LVBKIMAGEW* plvbki) const noexcept
+    EckInline bool SetBackgroundImage(LVBKIMAGEW* plvbki) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETBKIMAGEW, 0, (LPARAM)plvbki);
+        return (bool)SendMessageW(LVM_SETBKIMAGEW, 0, (LPARAM)plvbki);
     }
 
     /// <summary>
@@ -809,19 +809,19 @@ public:
     /// </summary>
     /// <param name="uMask">掩码，LVIS_常量</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SetCallbackMask(UINT uMask) const noexcept
+    EckInline bool SetCallbackMask(UINT uMask) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETCALLBACKMASK, uMask, 0);
+        return (bool)SendMessageW(LVM_SETCALLBACKMASK, uMask, 0);
     }
 
-    EckInline BOOL SetColumn(int idx, LVCOLUMNW* plvc) const noexcept
+    EckInline bool SetColumn(int idx, LVCOLUMNW* plvc) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETCOLUMNW, idx, (LPARAM)plvc);
+        return (bool)SendMessageW(LVM_SETCOLUMNW, idx, (LPARAM)plvc);
     }
 
-    EckInline BOOL SetColumnOrderArray(_In_reads_(c) const int* piOrder, int c) const noexcept
+    EckInline bool SetColumnOrderArray(_In_reads_(c) const int* piOrder, int c) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETCOLUMNORDERARRAY, c, (LPARAM)piOrder);
+        return (bool)SendMessageW(LVM_SETCOLUMNORDERARRAY, c, (LPARAM)piOrder);
     }
 
     /// <summary>
@@ -830,9 +830,9 @@ public:
     /// <param name="idx">索引，对于列表模式此参数必须设置为0</param>
     /// <param name="cx">宽度，或LVSCW_AUTOSIZE指定自动调整大小，或LVSCW_AUTOSIZE_USEHEADER指定适应标题文本</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SetColumnWidth(int idx, int cx) const noexcept
+    EckInline bool SetColumnWidth(int idx, int cx) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETCOLUMNWIDTH, idx, cx);
+        return (bool)SendMessageW(LVM_SETCOLUMNWIDTH, idx, cx);
     }
 
     /// <summary>
@@ -894,21 +894,21 @@ public:
         return (HIMAGELIST)SendMessageW(LVM_SETIMAGELIST, uType, (LPARAM)hImageList);
     }
 
-    EckInline BOOL SetInformationTip(LVSETINFOTIP* plvsit) const noexcept
+    EckInline bool SetInformationTip(LVSETINFOTIP* plvsit) const noexcept
     {
         plvsit->cbSize = sizeof(LVSETINFOTIP);
-        return (BOOL)SendMessageW(LVM_SETINFOTIP, 0, (LPARAM)plvsit);
+        return (bool)SendMessageW(LVM_SETINFOTIP, 0, (LPARAM)plvsit);
     }
 
-    EckInline BOOL SetInsertMark(int idx, BOOL bAfterItem = FALSE) const noexcept
+    EckInline bool SetInsertMark(int idx, bool bAfterItem = false) const noexcept
     {
         LVINSERTMARK lvim{ sizeof(LVINSERTMARK), DWORD(bAfterItem ? LVIM_AFTER : 0), idx };
-        return (BOOL)SendMessageW(LVM_SETINSERTMARK, 0, (LPARAM)&lvim);
+        return (bool)SendMessageW(LVM_SETINSERTMARK, 0, (LPARAM)&lvim);
     }
 
-    EckInline BOOL SetInsertMark(_In_ const LVINSERTMARK* plvim) const noexcept
+    EckInline bool SetInsertMark(_In_ const LVINSERTMARK* plvim) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETINSERTMARK, 0, (LPARAM)plvim);
+        return (bool)SendMessageW(LVM_SETINSERTMARK, 0, (LPARAM)plvim);
     }
 
     EckInline COLORREF SetInsertMarkColor(COLORREF cr) const noexcept
@@ -916,9 +916,9 @@ public:
         return (COLORREF)SendMessageW(LVM_SETINSERTMARKCOLOR, 0, cr);
     }
 
-    EckInline BOOL SetItem(_In_ const LVITEMW* plvi) const noexcept
+    EckInline bool SetItem(_In_ const LVITEMW* plvi) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETITEMW, 0, (LPARAM)plvi);
+        return (bool)SendMessageW(LVM_SETITEMW, 0, (LPARAM)plvi);
     }
 
     /// <summary>
@@ -928,12 +928,12 @@ public:
     /// <param name="iCount">项目数</param>
     /// <param name="uFlags">标志，LVSICF_常量</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SetItemCount(int iCount, UINT uFlags = 0) const noexcept
+    EckInline bool SetItemCount(int iCount, UINT uFlags = 0) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETITEMCOUNT, iCount, uFlags);
+        return (bool)SendMessageW(LVM_SETITEMCOUNT, iCount, uFlags);
     }
 
-    EckInline BOOL SetItemState(int idx, int idxGroup, UINT uState, UINT uMask) const noexcept
+    EckInline bool SetItemState(int idx, int idxGroup, UINT uState, UINT uMask) const noexcept
     {
         LVITEMW li;
         li.state = uState;
@@ -941,25 +941,25 @@ public:
         LVITEMINDEX lvii;
         lvii.iItem = idx;
         lvii.iGroup = idxGroup;
-        return (BOOL)SendMessageW(LVM_SETITEMINDEXSTATE, (WPARAM)&lvii, (LPARAM)&li);
+        return (bool)SendMessageW(LVM_SETITEMINDEXSTATE, (WPARAM)&lvii, (LPARAM)&li);
     }
 
-    EckInline BOOL SetItemState(_In_ const LVITEMINDEX* plvii, _In_ const LVITEMW* plvi) const noexcept
+    EckInline bool SetItemState(_In_ const LVITEMINDEX* plvii, _In_ const LVITEMW* plvi) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETITEMINDEXSTATE, (WPARAM)plvii, (LPARAM)plvi);
+        return (bool)SendMessageW(LVM_SETITEMINDEXSTATE, (WPARAM)plvii, (LPARAM)plvi);
     }
 
-    EckInline BOOL SetItemState(int idx, UINT uState, UINT uMask) const noexcept
+    EckInline bool SetItemState(int idx, UINT uState, UINT uMask) const noexcept
     {
         LVITEMW lvi;
         lvi.state = uState;
         lvi.stateMask = uMask;
-        return (BOOL)SendMessageW(LVM_SETITEMSTATE, idx, (LPARAM)&lvi);
+        return (bool)SendMessageW(LVM_SETITEMSTATE, idx, (LPARAM)&lvi);
     }
 
-    EckInline BOOL SetItemState(int idx, _In_ const LVITEMW* plvi) const noexcept
+    EckInline bool SetItemState(int idx, _In_ const LVITEMW* plvi) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETITEMSTATE, idx, (LPARAM)plvi);
+        return (bool)SendMessageW(LVM_SETITEMSTATE, idx, (LPARAM)plvi);
     }
 
     EckInline void SetItemPosition(int idx, POINT pt) const noexcept
@@ -967,7 +967,7 @@ public:
         SendMessageW(LVM_SETITEMPOSITION32, idx, (LPARAM)&pt);
     }
 
-    EckInline BOOL SetItemText(int idx, int idxSubItem, PCWSTR pszText) const noexcept
+    EckInline bool SetItemText(int idx, int idxSubItem, PCWSTR pszText) const noexcept
     {
         LVITEMW li;
         li.iSubItem = idxSubItem;
@@ -975,7 +975,7 @@ public:
         return SetItemText(idx, &li);
     }
 
-    EckInline BOOL SetItemText(int idx, PCWSTR pszText) const noexcept
+    EckInline bool SetItemText(int idx, PCWSTR pszText) const noexcept
     {
         LVITEMW li;
         li.iSubItem = 0;
@@ -983,9 +983,9 @@ public:
         return SetItemText(idx, &li);
     }
 
-    EckInline BOOL SetItemText(int idx, _In_ const LVITEMW* pli) const noexcept
+    EckInline bool SetItemText(int idx, _In_ const LVITEMW* pli) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETITEMTEXTW, idx, (LPARAM)pli);
+        return (bool)SendMessageW(LVM_SETITEMTEXTW, idx, (LPARAM)pli);
     }
 
     EckInline COLORREF SetOutLineColor(COLORREF cr) const noexcept
@@ -1013,22 +1013,22 @@ public:
         return (COLORREF)SendMessageW(LVM_SETTEXTCOLOR, 0, cr);
     }
 
-    EckInline BOOL SetTileInformation(int idx, UINT cColumn,
+    EckInline bool SetTileInformation(int idx, UINT cColumn,
         _In_reads_(cColumn) const UINT* piColumn,
         _In_reads_(cColumn) const int* piFmt) const noexcept
     {
         LVTILEINFO lvti{ sizeof(LVTILEINFO), idx, cColumn, (UINT*)piColumn, (int*)piFmt };
-        return (BOOL)SendMessageW(LVM_SETTILEINFO, 0, (LPARAM)&lvti);
+        return (bool)SendMessageW(LVM_SETTILEINFO, 0, (LPARAM)&lvti);
     }
 
-    EckInline BOOL SetTileInformation(_In_ const LVTILEINFO* plvti) const noexcept
+    EckInline bool SetTileInformation(_In_ const LVTILEINFO* plvti) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETTILEINFO, 0, (LPARAM)plvti);
+        return (bool)SendMessageW(LVM_SETTILEINFO, 0, (LPARAM)plvti);
     }
 
-    EckInline BOOL SetTileViewInfo(_In_ const LVTILEVIEWINFO* plvtvi) const noexcept
+    EckInline bool SetTileViewInfo(_In_ const LVTILEVIEWINFO* plvtvi) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETTILEVIEWINFO, 0, (LPARAM)plvtvi);
+        return (bool)SendMessageW(LVM_SETTILEVIEWINFO, 0, (LPARAM)plvtvi);
     }
 
     EckInline HWND SetToolTips(HWND hToolTip) const noexcept
@@ -1036,12 +1036,12 @@ public:
         return (HWND)SendMessageW(LVM_SETTOOLTIPS, (WPARAM)hToolTip, 0);
     }
 
-    EckInline BOOL SetUnicodeFormat(BOOL bUnicode) const noexcept
+    EckInline bool SetUnicodeFormat(bool bUnicode) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SETUNICODEFORMAT, bUnicode, 0);
+        return (bool)SendMessageW(LVM_SETUNICODEFORMAT, bUnicode, 0);
     }
 
-    EckInline BOOL SetView(UINT uView) const noexcept
+    EckInline bool SetView(UINT uView) const noexcept
     {
         return (SendMessageW(LVM_SETVIEW, uView, 0) > 0);
     }
@@ -1057,9 +1057,9 @@ public:
     /// <param name="pfnCmp">排序函数。第一、二个参数为两组的ID，若组1大于组2则返回正值，若小于则返回负值，若等于则返回0</param>
     /// <param name="pData">自定义数据</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SortGroups(PFNLVGROUPCOMPARE pfnCmp, void* pData) const noexcept
+    EckInline bool SortGroups(PFNLVGROUPCOMPARE pfnCmp, void* pData) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SORTGROUPS, (WPARAM)pfnCmp, (LPARAM)pData);
+        return (bool)SendMessageW(LVM_SORTGROUPS, (WPARAM)pfnCmp, (LPARAM)pData);
     }
 
     /// <summary>
@@ -1068,9 +1068,9 @@ public:
     /// <param name="pfnCmp">排序函数。第一、二个参数为两项目的lParam，若项目1在项目2之后则返回正值，若在之前则返回负值，若相等则返回0</param>
     /// <param name="pData"></param>
     /// <returns></returns>
-    EckInline BOOL SortItemslParam(FLvItemCompare pfnCmp, LPARAM lParam) const noexcept
+    EckInline bool SortItemslParam(FLvItemCompare pfnCmp, LPARAM lParam) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SORTITEMS, lParam, (LPARAM)pfnCmp);
+        return (bool)SendMessageW(LVM_SORTITEMS, lParam, (LPARAM)pfnCmp);
     }
 
     /// <summary>
@@ -1079,19 +1079,19 @@ public:
     /// <param name="pfnCmp">排序函数。第一、二个参数为两项目的索引，若项目1在项目2之后则返回正值，若在之前则返回负值，若相等则返回0</param>
     /// <param name="pData"></param>
     /// <returns></returns>
-    EckInline BOOL SortItemsIndex(FLvItemCompareEx pfnCmp, LPARAM lParam) const noexcept
+    EckInline bool SortItemsIndex(FLvItemCompareEx pfnCmp, LPARAM lParam) const noexcept
     {
-        return (BOOL)SendMessageW(LVM_SORTITEMSEX, lParam, (LPARAM)pfnCmp);
+        return (bool)SendMessageW(LVM_SORTITEMSEX, lParam, (LPARAM)pfnCmp);
     }
 
-    EckInline int SubItemHitTest(_Inout_ LVHITTESTINFO* plvhti, BOOL bTestGroup = FALSE) const noexcept
+    EckInline int SubItemHitTest(_Inout_ LVHITTESTINFO* plvhti, bool bTestGroup = false) const noexcept
     {
         return (int)SendMessageW(LVM_SUBITEMHITTEST, bTestGroup ? -1 : 0, (LPARAM)plvhti);
     }
 
-    EckInline BOOL Update() const noexcept
+    EckInline bool Update() const noexcept
     {
-        return (BOOL)SendMessageW(LVM_UPDATE, 0, 0);
+        return (bool)SendMessageW(LVM_UPDATE, 0, 0);
     }
 
     EckInline int GetCurrentSelection() const noexcept
@@ -1104,11 +1104,11 @@ public:
         return -1;
     }
 
-    BOOL SetRowHeight(int cy, BOOL bSetOrAdd = TRUE) const noexcept
+    bool SetRowHeight(int cy, bool bSetOrAdd = true) const noexcept
     {
         const auto pParent = CWindowFromHandle(GetParent(Handle));
         if (!pParent)
-            return FALSE;
+            return false;
         const auto hSlot = pParent->GetEventChain().Connect(
             [cy, bSetOrAdd](CWindow*, UINT uMsg, WPARAM, LPARAM lParam, Slot& Ctx)->LRESULT
             {
@@ -1120,7 +1120,7 @@ public:
                         pmis->itemHeight = cy;
                     else
                         pmis->itemHeight += cy;
-                    return TRUE;
+                    return true;
                 }
                 return 0;
             }, MHI_LISTVIEW_ROWHEIGHT);
@@ -1134,15 +1134,15 @@ public:
         SendMessageW(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
         SetStyle(GetStyle() & ~LVS_OWNERDRAWFIXED);
         pParent->GetEventChain().Disconnect(hSlot);
-        return TRUE;
+        return true;
     }
 
-    BOOL MakePretty_RowHeight() const noexcept
+    bool MakePretty_RowHeight() const noexcept
     {
-        return SetRowHeight(DpiScale(6, GetDpi(Handle)), FALSE);
+        return SetRowHeight(DpiScale(6, GetDpi(Handle)), false);
     }
 
-    BOOL MakePretty() const noexcept
+    bool MakePretty() const noexcept
     {
         constexpr DWORD dwStyle = LVS_EX_FULLROWSELECT | LVS_EX_DOUBLEBUFFER;
         SetLVExtendStyle(dwStyle, dwStyle);
@@ -1154,7 +1154,7 @@ public:
         return (GetItemState(idx, LVIS_STATEIMAGEMASK) >> 12) - 1;
     }
 
-    BOOL SetItemCheckState(int idx, int iCheck) const noexcept
+    bool SetItemCheckState(int idx, int iCheck) const noexcept
     {
         return SetItemState(idx, INDEXTOSTATEIMAGEMASK(iCheck + 1), LVIS_STATEIMAGEMASK);
     }
@@ -1171,7 +1171,7 @@ public:
         return SendMessageW(LVM_QUERYINTERFACE, (WPARAM)&riid, (LPARAM)ppv);
     }
 
-    EckInline void EnableSpacePartSelect(BOOL bEnable) const noexcept
+    EckInline void EnableSpacePartSelect(bool bEnable) const noexcept
     {
         const auto pLv = GetLvObject();
         pLv->SetSelectionFlags(1, bEnable ? 1 : 0);

@@ -28,7 +28,7 @@ private:
 
     BITBOOL m_bSpacePressed : 1{};
 
-    BITBOOL m_bAutoScale : 1{ TRUE };
+    BITBOOL m_bAutoScale : 1{ true };
     BITBOOL m_bUserSize : 1{};
 
     SimpleStyle m_Style[SsMax]
@@ -97,11 +97,11 @@ private:
         return SsNormal;
     }
 public:
-    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(bool bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(bool bDark) noexcept
     {
-        static auto p1{ TmMakeDefaultTheme(TRUE) };
-        static auto p2{ TmMakeDefaultTheme(FALSE) };
+        static auto p1{ TmMakeDefaultTheme(true) };
+        static auto p2{ TmMakeDefaultTheme(false) };
         return bDark ? p1 : p2;
     }
 
@@ -228,7 +228,7 @@ public:
         {
             if (wParam != VK_SPACE || m_bSpacePressed)
                 break;
-            m_bSpacePressed = TRUE;
+            m_bSpacePressed = true;
             if (!(TmState() & SaPressed))
             {
                 TmState() |= SaPressed;
@@ -240,7 +240,7 @@ public:
         {
             if (wParam != VK_SPACE || !m_bSpacePressed)
                 break;
-            m_bSpacePressed = FALSE;
+            m_bSpacePressed = false;
             if (TmState() & SaPressed)
             {
                 TmState() &= ~SaPressed;
@@ -319,8 +319,8 @@ public:
     EckInlineNdCe auto& TmSimpleStyle(UINT ss) noexcept { return m_Style[ss]; }
     EckInlineNdCe auto& TmSimpleStyle() noexcept { return m_Style; }
 
-    EckInlineCe void SetAutoScale(BOOL b) noexcept { m_bAutoScale = b; }
-    EckInlineNdCe BOOL GetAutoScale() const noexcept { return m_bAutoScale; }
+    EckInlineCe void SetAutoScale(bool b) noexcept { m_bAutoScale = b; }
+    EckInlineNdCe bool GetAutoScale() const noexcept { return m_bAutoScale; }
 
     EckInlineCe void SetHorizontalAlignment(Alignment e) noexcept { m_eAlignH = e; }
     EckInlineNdCe Alignment GetHorizontalAlignment() const noexcept { return m_eAlignH; }
@@ -336,8 +336,8 @@ public:
     EckInlineCe void SetIconSize(const Kw::Vec2& sz) noexcept { m_IconSize = sz; }
     EckInlineNdCe auto& GetIconSize() const noexcept { return m_IconSize; }
 
-    EckInlineCe void SetUserIconSize(BOOL b) noexcept { m_bUserSize = b; }
-    EckInlineNdCe BOOL GetUserIconSize() const noexcept { return m_bUserSize; }
+    EckInlineCe void SetUserIconSize(bool b) noexcept { m_bUserSize = b; }
+    EckInlineNdCe bool GetUserIconSize() const noexcept { return m_bUserSize; }
 };
 
 class CTmButton : public CTheme
@@ -355,7 +355,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CTheme> CButton::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CButton::TmMakeDefaultTheme(bool bDark) noexcept
 {
     return TmMakeTheme<CTmButton>(bDark);
 }

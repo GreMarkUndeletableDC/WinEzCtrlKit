@@ -46,11 +46,11 @@ public:
     using Selection = TController::Selection;
     using View = TController::View;
 public:
-    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(bool bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(bool bDark) noexcept
     {
-        static auto p1{ TmMakeDefaultTheme(TRUE) };
-        static auto p2{ TmMakeDefaultTheme(FALSE) };
+        static auto p1{ TmMakeDefaultTheme(true) };
+        static auto p2{ TmMakeDefaultTheme(false) };
         return bDark ? p1 : p2;
     }
 private:
@@ -319,8 +319,8 @@ protected:
                     const auto p = (CListView*)Data.pUser;
                     p->GetWindow().RdLockUpdate();
                     p->m_Controller.ReCalculateTopItem();
-                    p->EvtScroll(Data, TRUE);
-                    p->Invalidate(FALSE);
+                    p->EvtScroll(Data, true);
+                    p->Invalidate(false);
                     p->GetWindow().RdUnlockUpdate();
                 }, this);
         if (m_pSccH)
@@ -330,8 +330,8 @@ protected:
                     const auto p = (CListView*)Data.pUser;
                     p->GetWindow().RdLockUpdate();
                     p->HdrLayout();
-                    p->Invalidate(FALSE);
-                    p->EvtScroll(Data, FALSE);
+                    p->Invalidate(false);
+                    p->EvtScroll(Data, false);
                     p->GetWindow().RdUnlockUpdate();
                 }, this);
     }
@@ -396,7 +396,7 @@ protected:
 
     void EvtScroll(
         const IScrollController::SCC_CALLBACK_DATA& Data,
-        BOOL bVertical) noexcept
+        bool bVertical) noexcept
     {
         if (!m_bBubbleScrollEvent)
             return;
@@ -405,7 +405,7 @@ protected:
             .fPos = Data.fPos,
             .fPrevPos = Data.fPrevPos,
             .bAnimating = Data.bAnimating,
-            .bVertical = (BOOLEAN)bVertical,
+            .bVertical = (bool)bVertical,
             .bEndAnimation = Data.bEndAnimation,
         };
         e.uNotify = ENC_SCROLL;
@@ -431,7 +431,7 @@ public:
                     [&](const TController::FOR_GROUP& e) noexcept
                     {
                         PaintGroup({ .Group = e.idxGroup }, ps.rcClip);
-                    }, Kw::MakeRect(ps.rcClipInEle), TRUE);
+                    }, Kw::MakeRect(ps.rcClipInEle), true);
 
                 if (m_Controller.IsDraggingSelect())
                 {
@@ -475,7 +475,7 @@ public:
         return 0;
         case WM_LBUTTONDOWN:
         {
-            m_bCapturedMouse = TRUE;
+            m_bCapturedMouse = true;
             SetCapture();
             const auto& pt = LpPoint(lParam);
             GetWindow().RdLockUpdate();
@@ -487,7 +487,7 @@ public:
         {
             if (m_bCapturedMouse)
             {
-                m_bCapturedMouse = FALSE;
+                m_bCapturedMouse = false;
                 ReleaseCapture();
                 const auto& pt = LpPoint(lParam);
                 GetWindow().RdLockUpdate();
@@ -507,7 +507,7 @@ public:
         {
             if (m_bCapturedMouse)
             {
-                m_bCapturedMouse = FALSE;
+                m_bCapturedMouse = false;
                 GetWindow().RdLockUpdate();
                 m_Controller.OnCaptureChanged();
                 GetWindow().RdUnlockUpdate();
@@ -595,7 +595,7 @@ public:
 
         case WM_CREATE:
             SetTheme(TmDefaultTheme(TmIsDarkMode()).Get());
-            ScbCreateElement(TRUE, FALSE);
+            ScbCreateElement(true, false);
             break;
         case WM_DESTROY:
             ScbDisconnectEvent();
@@ -604,20 +604,20 @@ public:
         return __super::OnEvent(uMsg, wParam, lParam);
     }
 
-    float LchSccGetPosition(BOOL bVert) const noexcept override
+    float LchSccGetPosition(bool bVert) const noexcept override
     {
         const auto pScc = (bVert ? m_pSccV : m_pSccH);
         if (pScc)
             return pScc->SccGetPosition();
         return 0.f;
     }
-    void LchSccSetRange(BOOL bVert, TCoord Min, TCoord Max) noexcept override
+    void LchSccSetRange(bool bVert, TCoord Min, TCoord Max) noexcept override
     {
         const auto pScc = (bVert ? m_pSccV : m_pSccH);
         if (pScc)
             pScc->SccSetRange(Min, Max);
     }
-    void LchSccScrollDelta(BOOL bVert, TCoord d, BOOL bSmooth) noexcept override
+    void LchSccScrollDelta(bool bVert, TCoord d, bool bSmooth) noexcept override
     {
         const auto pScc = (bVert ? m_pSccV : m_pSccH);
         if (pScc)
@@ -664,7 +664,7 @@ public:
     EckInlineNdCe auto& GetController() const noexcept { return m_Controller; }
     EckInlineNdCe auto& GetController() noexcept { return m_Controller; }
 
-    void ScbCreateElement(BOOL bVert, BOOL bHorz) noexcept
+    void ScbCreateElement(bool bVert, bool bHorz) noexcept
     {
         const DWORD Style = TmDarkStyle() |
             DES_NO_FOCUSABLE | DES_VISIBLE | DES_NO_CLIP | DES_NOTIFY_PARENT;
@@ -677,7 +677,7 @@ public:
             if (!m_pSBVert->IsValid())
             {
                 m_pSBVert->Create({}, Style, 0, 0, 0, 0, 0, this);
-                m_pSBVert->SetVertical(TRUE);
+                m_pSBVert->SetVertical(true);
             }
         }
         if (bHorz)
@@ -688,14 +688,14 @@ public:
             if (!m_pSBHorz->IsValid())
             {
                 m_pSBHorz->Create({}, Style, 0, 0, 0, 0, 0, this);
-                m_pSBHorz->SetVertical(FALSE);
+                m_pSBHorz->SetVertical(false);
             }
         }
         ScbConnectEvent();
     }
 
-    EckInlineNd BOOL HdrIsEnabled() const noexcept { return m_pHeader && m_pHeader->IsValid(); }
-    void HdrEnable(BOOL b) noexcept
+    EckInlineNd bool HdrIsEnabled() const noexcept { return m_pHeader && m_pHeader->IsValid(); }
+    void HdrEnable(bool b) noexcept
     {
         m_Controller.SetUseHeader(b);
         if (b)
@@ -721,14 +721,14 @@ public:
     EckInline void SetImageList(RefPtr<CD2DImageList> pil) noexcept { m_pImgList = std::move(pil); }
     EckInlineNdCe const RefPtr<CD2DImageList>& GetImageList() const noexcept { return m_pImgList; }
 
-    EckInline void SetBubbleScrollEvent(BOOL b) noexcept { m_bBubbleScrollEvent = b; }
-    EckInlineNdCe BOOL GetBubbleScrollEvent() const noexcept { return m_bBubbleScrollEvent; }
+    EckInline void SetBubbleScrollEvent(bool b) noexcept { m_bBubbleScrollEvent = b; }
+    EckInlineNdCe bool GetBubbleScrollEvent() const noexcept { return m_bBubbleScrollEvent; }
 
-    EckInline void SetNonImageListIcon(BOOL b) noexcept { m_bNonImageListIcon = b; }
-    EckInlineNdCe BOOL GetNonImageListIcon() const noexcept { return m_bNonImageListIcon; }
+    EckInline void SetNonImageListIcon(bool b) noexcept { m_bNonImageListIcon = b; }
+    EckInlineNdCe bool GetNonImageListIcon() const noexcept { return m_bNonImageListIcon; }
 
-    EckInline void SetFitImage(BOOL b) noexcept { m_bFitImage = b; }
-    EckInlineNdCe BOOL GetFitImage() const noexcept { return m_bFitImage; }
+    EckInline void SetFitImage(bool b) noexcept { m_bFitImage = b; }
+    EckInlineNdCe bool GetFitImage() const noexcept { return m_bFitImage; }
 };
 
 
@@ -750,7 +750,7 @@ public:
         return pEle->TmGenericDrawBackground(pStyle, rc);
     }
 };
-inline RcPtr<CTheme> CListView::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CListView::TmMakeDefaultTheme(bool bDark) noexcept
 {
     return TmMakeTheme<CTmListView>(bDark);
 }

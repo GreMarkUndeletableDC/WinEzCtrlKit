@@ -22,7 +22,7 @@ public:
     }
     EckInline NTSTATUS Sleep(
         _In_ RTL_SRWLOCK* psrw,
-        BOOL bReadLock,
+        bool bReadLock,
         _In_opt_ const LARGE_INTEGER* pli) noexcept
     {
         return RtlSleepConditionVariableSRW(
@@ -37,7 +37,7 @@ public:
         const LARGE_INTEGER li{ .QuadPart = ms * -10000ll };
         return Sleep(pcs, &li);
     }
-    EckInline NTSTATUS SleepMs(_In_ RTL_SRWLOCK* psrw, BOOL bReadLock, LONGLONG ms) noexcept
+    EckInline NTSTATUS SleepMs(_In_ RTL_SRWLOCK* psrw, bool bReadLock, LONGLONG ms) noexcept
     {
         const LARGE_INTEGER li{ .QuadPart = ms * -10000ll };
         return Sleep(psrw, bReadLock, &li);

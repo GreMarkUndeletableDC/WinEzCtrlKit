@@ -11,7 +11,7 @@ IllegalPathCharWithDotA{ R"(\/:*?"<>|.)" };
 
 template<CcpCharPointer TPointer>
 void PazLegalize(_In_z_ TPointer pszPath,
-    CharFromPointer_T<TPointer> chReplace = '_', BOOL bReplaceDot = FALSE) noexcept
+    CharFromPointer_T<TPointer> chReplace = '_', bool bReplaceDot = false) noexcept
 {
     if constexpr (std::is_same_v<CharFromPointer_T<TPointer>, char>)
     {
@@ -30,7 +30,7 @@ void PazLegalize(_In_z_ TPointer pszPath,
 }
 template<CcpCharPointer TPointer>
 void PazLegalizeLength(_In_reads_(cchPath) TPointer pszPath, int cchPath,
-    CharFromPointer_T<TPointer> chReplace = '_', BOOL bReplaceDot = FALSE) noexcept
+    CharFromPointer_T<TPointer> chReplace = '_', bool bReplaceDot = false) noexcept
 {
     if constexpr (std::is_same_v<CharFromPointer_T<TPointer>, char>)
     {
@@ -66,7 +66,7 @@ HRESULT PazParseCommandLine(
         return S_FALSE;
     }
     pszFile = pszCmdLine;
-    BOOL bQuote = (*pszCmdLine == '\"');
+    bool bQuote = (*pszCmdLine == '\"');
     if (bQuote)
         ++pszFile;
     const auto pEnd = pszCmdLine + cchCmdLine;
@@ -186,13 +186,13 @@ HRESULT PazParseCommandLineAndCut(
     return S_OK;
 }
 
-EckNfInlineNd BOOL PazIsDotFileName(_In_reads_z_(3) CcpCharPointer auto pszFileName) noexcept
+EckNfInlineNd bool PazIsDotFileName(_In_reads_z_(3) CcpCharPointer auto pszFileName) noexcept
 {
     return pszFileName[0] == '.' && (pszFileName[1] == '\0' ||
         (pszFileName[1] == '.' && pszFileName[2] == '\0'));
 }
 
-EckNfInlineNd BOOL PazIsDotFileName(
+EckNfInlineNd bool PazIsDotFileName(
     _In_reads_bytes_(cbFileName) PCWCH pszFileName,
     ULONG cbFileName) noexcept
 {

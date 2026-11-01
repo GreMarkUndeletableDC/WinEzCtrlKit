@@ -89,37 +89,37 @@ enum class ScrollType
 // Style Get/Set =================================================
 
 #define ECK_W_STYLE_GETSET(Name, Style)                   \
-    BOOL StyleGet##Name() const                           \
+    bool StyleGet##Name() const                           \
     {                                                     \
         if constexpr (Style == 0)                         \
             return !GetStyle();                           \
         else                                              \
             return IsBitSet(GetStyle(), Style);           \
     }                                                     \
-    void StyleSet##Name(BOOL b) const                     \
+    void StyleSet##Name(bool b) const                     \
     {                                                     \
         ModifyStyle((b ? Style : 0), Style, GWL_STYLE);   \
     }
 
 #define ECK_W_STYLE_GETSET_MASK(Name, Style, Mask)        \
-    BOOL StyleGet##Name() const                           \
+    bool StyleGet##Name() const                           \
     {                                                     \
         if constexpr (Style == 0)                         \
             return !(GetStyle() & Mask);                  \
         else                                              \
             return IsBitSet(GetStyle(), Style);           \
     }                                                     \
-    void StyleSet##Name(BOOL b) const                     \
+    void StyleSet##Name(bool b) const                     \
     {                                                     \
         SetStyle((GetStyle() & ~Mask) | (b ? Style : 0)); \
     }
 
 #define ECK_W_STYLE(Name, Style)                          \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;    \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;    \
     ECK_W_STYLE_GETSET(Name, Style)
 
 #define ECK_W_STYLE_MASK(Name, Style, Mask)               \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;    \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;    \
     ECK_W_STYLE_GETSET_MASK(Name, Style, Mask)
 
 class CWindow;
@@ -198,7 +198,7 @@ public:
         EckAssert(e);
 
         CWindow* pChild{};
-        BOOL bProcessed{};
+        bool bProcessed{};
         switch (uMsg)
         {
         case WM_NOTIFY:
@@ -255,14 +255,14 @@ public:
                     (pss->styleOld & WS_CHILD))
                 {
                     EckAssert(!pCtx->TwmAt(hWnd).bTopLevel);
-                    pCtx->TwmMarkTopLevel(hWnd, TRUE);
+                    pCtx->TwmMarkTopLevel(hWnd, true);
                 }
 
                 if ((pss->styleNew & WS_CHILD) &&
                     !(pss->styleOld & WS_CHILD))
                 {
                     EckAssert(pCtx->TwmAt(hWnd).bTopLevel);
-                    pCtx->TwmMarkTopLevel(hWnd, FALSE);
+                    pCtx->TwmMarkTopLevel(hWnd, false);
                 }
             }
         }
@@ -304,7 +304,7 @@ public:
 #ifdef _DEBUG
         // 对于已添加进映射的窗口，CWindow的生命周期必须在窗口生命周期之内
         if (m_hWnd)
-            EckAssert(((PtcCurrent()->WmAt(m_hWnd) == this) ? (!m_hWnd) : TRUE));
+            EckAssert(((PtcCurrent()->WmAt(m_hWnd) == this) ? (!m_hWnd) : true));
 #endif // _DEBUG
     }
 
@@ -368,9 +368,9 @@ public:
     }
 
     // 返回TRUE禁止派发该消息
-    virtual BOOL PreTranslateMessage(const MSG& Msg) noexcept
+    virtual bool PreTranslateMessage(const MSG& Msg) noexcept
     {
-        return FALSE;
+        return false;
     }
 
     // 所有者项目系列（WM_XxxITEM）
@@ -378,15 +378,15 @@ public:
     // 着色系列（WM_CTLCOLORXxx）
     // 滚动条系列（WM_VSCROLL、WM_HSCROLL）
     virtual LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept
     {
         return 0;
     }
 
     LRESULT BubbleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
-        _Out_ BOOL& bProcessed) noexcept
+        _Out_ bool& bProcessed) noexcept
     {
-        bProcessed = FALSE;
+        bProcessed = false;
         auto hParent = GetParent(Handle);
         if (!hParent)
             return 0;
@@ -397,7 +397,7 @@ public:
             const auto pWnd = pCtx->WmAt(hParent);
             if (pWnd && pWnd->SendMessageW(MessageBubble, 0, (LPARAM)&Msg))
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 return Msg.lResult;
             }
             hParent = GetParent(hParent);
@@ -430,7 +430,7 @@ public:
         const auto size{ GetSize() };
         return { TLytCoord(size.cx), TLytCoord(size.cy) };
     }
-    void LoShow(BOOL bShow) noexcept override { Show(bShow ? SW_SHOW : SW_HIDE); }
+    void LoShow(bool bShow) noexcept override { Show(bShow ? SW_SHOW : SW_HIDE); }
     HWND LoGetWindowHandle() noexcept override { return GetHandle(); }
 
     EckInlineNdCe HWND GetHandle() const noexcept { return m_hWnd; }
@@ -441,16 +441,16 @@ public:
             SWP_NOZORDER | SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_FRAMECHANGED);
     }
 
-    EckInline void SetRedraw(BOOL bRedraw) const noexcept
+    EckInline void SetRedraw(bool bRedraw) const noexcept
     {
         SendMessageW(WM_SETREDRAW, bRedraw, 0);
     }
 
-    EckInline BOOL Redraw(BOOL bErase = FALSE) const noexcept
+    EckInline bool Redraw(bool bErase = false) const noexcept
     {
         return InvalidateRect(m_hWnd, nullptr, bErase);
     }
-    EckInline BOOL Redraw(const RECT& rc, BOOL bErase = FALSE) const noexcept
+    EckInline bool Redraw(const RECT& rc, bool bErase = false) const noexcept
     {
         return InvalidateRect(m_hWnd, &rc, bErase);
     }
@@ -500,27 +500,27 @@ public:
         switch (eType)
         {
         case ScrollType::None:
-            ShowScrollBar(m_hWnd, SB_VERT, FALSE);
-            ShowScrollBar(m_hWnd, SB_HORZ, FALSE);
+            ShowScrollBar(m_hWnd, SB_VERT, false);
+            ShowScrollBar(m_hWnd, SB_HORZ, false);
             break;
         case ScrollType::Horizontal:
-            ShowScrollBar(m_hWnd, SB_VERT, FALSE);
-            ShowScrollBar(m_hWnd, SB_HORZ, TRUE);
+            ShowScrollBar(m_hWnd, SB_VERT, false);
+            ShowScrollBar(m_hWnd, SB_HORZ, true);
             break;
         case ScrollType::Vertical:
-            ShowScrollBar(m_hWnd, SB_VERT, TRUE);
-            ShowScrollBar(m_hWnd, SB_HORZ, FALSE);
+            ShowScrollBar(m_hWnd, SB_VERT, true);
+            ShowScrollBar(m_hWnd, SB_HORZ, false);
             break;
         case ScrollType::Both:
-            ShowScrollBar(m_hWnd, SB_VERT, TRUE);
-            ShowScrollBar(m_hWnd, SB_HORZ, TRUE);
+            ShowScrollBar(m_hWnd, SB_VERT, true);
+            ShowScrollBar(m_hWnd, SB_HORZ, true);
             break;
         }
     }
     [[nodiscard]] ScrollType GetScrollBar() const noexcept
     {
-        const BOOL bVSB = IsBitSet(GetWindowLongPtrW(m_hWnd, GWL_STYLE), WS_VSCROLL);
-        const BOOL bHSB = IsBitSet(GetWindowLongPtrW(m_hWnd, GWL_STYLE), WS_HSCROLL);
+        const bool bVSB = IsBitSet(GetWindowLongPtrW(m_hWnd, GWL_STYLE), WS_VSCROLL);
+        const bool bHSB = IsBitSet(GetWindowLongPtrW(m_hWnd, GWL_STYLE), WS_HSCROLL);
         if (bVSB)
             return bHSB ? ScrollType::Both : ScrollType::Vertical;
         if (bHSB)
@@ -586,7 +586,7 @@ public:
     {
         return GetWindowTextW(m_hWnd, pszBuf, cchBuf);
     }
-    EckInline BOOL SetText(PCWSTR pszText) const noexcept
+    EckInline bool SetText(PCWSTR pszText) const noexcept
     {
         return SetWindowTextW(m_hWnd, pszText);
     }
@@ -604,19 +604,19 @@ public:
         return SetWindowTheme(m_hWnd, pszAppName, pszSubList);
     }
 
-    EckInline BOOL Move(int x, int y, int cx, int cy, BOOL bNoActive = TRUE) const noexcept
+    EckInline bool Move(int x, int y, int cx, int cy, bool bNoActive = true) const noexcept
     {
         return SetWindowPos(m_hWnd, nullptr, x, y, cx, cy,
             SWP_NOZORDER | (bNoActive ? SWP_NOACTIVATE : 0));
     }
 
-    EckInline BOOL Destroy() const noexcept
+    EckInline bool Destroy() const noexcept
     {
         EckAssert(IsWindow(m_hWnd));
         return DestroyWindow(m_hWnd);
     }
 
-    EckInline void SetFont(HFONT hFont, BOOL bRedraw = FALSE) const noexcept
+    EckInline void SetFont(HFONT hFont, bool bRedraw = false) const noexcept
     {
         SendMessageW(WM_SETFONT, (WPARAM)hFont, bRedraw);
     }
@@ -625,24 +625,24 @@ public:
         return (HFONT)SendMessageW(WM_GETFONT, 0, 0);
     }
 
-    EckInline BOOL Show(int nCmdShow) const noexcept
+    EckInline bool Show(int nCmdShow) const noexcept
     {
         return ShowWindow(m_hWnd, nCmdShow);
     }
-    EckInline void SetVisibility(BOOL bVisible) const noexcept
+    EckInline void SetVisibility(bool bVisible) const noexcept
     {
         Show(bVisible ? SW_SHOW : SW_HIDE);
     }
-    EckInlineNd BOOL IsVisible() const noexcept
+    EckInlineNd bool IsVisible() const noexcept
     {
         return IsWindowVisible(m_hWnd);
     }
 
-    EckInline BOOL Enable(BOOL bEnable) const noexcept
+    EckInline bool Enable(bool bEnable) const noexcept
     {
         return EnableWindow(m_hWnd, bEnable);
     }
-    EckInlineNd BOOL IsEnabled() const noexcept
+    EckInlineNd bool IsEnabled() const noexcept
     {
         return IsWindowEnabled(m_hWnd);
     }
@@ -743,7 +743,7 @@ public:
         return { rc.right - rc.left, rc.bottom - rc.top };
     }
 
-    EckInline BOOL ScbEnableArrows(int iOp, int iBarType) const noexcept
+    EckInline bool ScbEnableArrows(int iOp, int iBarType) const noexcept
     {
         return EnableScrollBar(m_hWnd, iBarType, iOp);
     }
@@ -763,12 +763,12 @@ public:
         GetScrollInfo(m_hWnd, iType, &si);
         return si.nTrackPos;
     }
-    BOOL ScbGetRange(int iType, int* piMin = nullptr, int* piMax = nullptr) const noexcept
+    bool ScbGetRange(int iType, int* piMin = nullptr, int* piMax = nullptr) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
         si.fMask = SIF_RANGE;
-        BOOL b = GetScrollInfo(m_hWnd, iType, &si);
+        bool b = GetScrollInfo(m_hWnd, iType, &si);
         if (piMin)
             *piMin = si.nMin;
         if (piMax)
@@ -783,12 +783,12 @@ public:
         GetScrollInfo(m_hWnd, iType, &si);
         return si.nPage;
     }
-    EckInline BOOL ScbGetInformation(int iType, SCROLLINFO* psi) const noexcept
+    EckInline bool ScbGetInformation(int iType, SCROLLINFO* psi) const noexcept
     {
         psi->cbSize = sizeof(SCROLLINFO);
         return GetScrollInfo(m_hWnd, iType, psi);
     }
-    void ScbSetPosition(int iType, int iPos, BOOL bRedraw = TRUE) const noexcept
+    void ScbSetPosition(int iType, int iPos, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -796,7 +796,7 @@ public:
         si.nPos = iPos;
         SetScrollInfo(m_hWnd, iType, &si, bRedraw);
     }
-    void ScbSetRange(int iType, int iMin, int iMax, BOOL bRedraw = TRUE) const noexcept
+    void ScbSetRange(int iType, int iMin, int iMax, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -805,7 +805,7 @@ public:
         si.nMin = iMin;
         si.nMax = iMax;
     }
-    void ScbSetMinimum(int iType, int iMin, BOOL bRedraw = TRUE) const noexcept
+    void ScbSetMinimum(int iType, int iMin, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -814,7 +814,7 @@ public:
         si.nMin = iMin;
         SetScrollInfo(m_hWnd, iType, &si, bRedraw);
     }
-    void ScbSetMaximum(int iType, int iMax, BOOL bRedraw = TRUE) const noexcept
+    void ScbSetMaximum(int iType, int iMax, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -823,7 +823,7 @@ public:
         si.nMax = iMax;
         SetScrollInfo(m_hWnd, iType, &si, bRedraw);
     }
-    void ScbSetPage(int iType, int iPage, BOOL bRedraw = TRUE) const noexcept
+    void ScbSetPage(int iType, int iPage, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -831,7 +831,7 @@ public:
         si.nPage = iPage;
         SetScrollInfo(m_hWnd, iType, &si, bRedraw);
     }
-    void ScbSetInformation(int iType, const SCROLLINFO* psi, BOOL bRedraw = TRUE) const noexcept
+    void ScbSetInformation(int iType, const SCROLLINFO* psi, bool bRedraw = true) const noexcept
     {
         SetScrollInfo(m_hWnd, iType, psi, bRedraw);
     }
@@ -845,7 +845,7 @@ public:
     EckInlineNd int GetClientWidth() const noexcept { return GetClientSize().cx; }
     EckInlineNd int GetClientHeight() const noexcept { return GetClientSize().cy; }
 
-    EckInlineNd BOOL IsValid() const noexcept
+    EckInlineNd bool IsValid() const noexcept
     {
 #ifdef _DEBUG
         if (!IsWindow(m_hWnd))
@@ -860,7 +860,7 @@ public:
         return pfnWndProc;
     }
 
-    EckInline void SetTopMost(BOOL bTopMost) const noexcept
+    EckInline void SetTopMost(bool bTopMost) const noexcept
     {
         SetWindowPos(m_hWnd, bTopMost ? HWND_TOPMOST : HWND_NOTOPMOST,
             0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);

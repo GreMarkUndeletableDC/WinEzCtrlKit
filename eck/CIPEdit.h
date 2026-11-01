@@ -19,9 +19,9 @@ public:
         return (int)SendMessageW(IPM_GETADDRESS, 0, (LPARAM)puAddress);
     }
 
-    EckInline BOOL IsBlank() const noexcept
+    EckInline bool IsBlank() const noexcept
     {
-        return (BOOL)SendMessageW(IPM_ISBLANK, 0, 0);
+        return (bool)SendMessageW(IPM_ISBLANK, 0, 0);
     }
 
     EckInline void SetAddress(UINT uAddress) const noexcept

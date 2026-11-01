@@ -5,21 +5,21 @@
 ECK_NAMESPACE_BEGIN
 struct CClipboardGuard { ~CClipboardGuard() { CloseClipboard(); } };
 
-inline BOOL GetClipboardString(HWND hWnd, CStringW& rs) noexcept
+inline bool GetClipboardString(HWND hWnd, CStringW& rs) noexcept
 {
     if (!OpenClipboard(hWnd))
     {
         EckDbgPrintFormat(L"OpenClipboard failed, Owner = %p", GetClipboardOwner());
-        return FALSE;
+        return false;
     }
     CClipboardGuard _{};
 
     const HGLOBAL hData = GetClipboardData(CF_UNICODETEXT);
     if (!hData)
-        return FALSE;
+        return false;
     const PCVOID pData = GlobalLock(hData);
     if (!pData)
-        return FALSE;
+        return false;
     auto cch = int(GlobalSize(hData) / sizeof(WCHAR));
     if (cch)
     {
@@ -30,15 +30,15 @@ inline BOOL GetClipboardString(HWND hWnd, CStringW& rs) noexcept
             --cch;
         }
     }
-    return TRUE;
+    return true;
 }
-inline BOOL SetClipboardString(HWND hWnd,
+inline bool SetClipboardString(HWND hWnd,
     _In_reads_or_z_(cch) PCWSTR pszText, int cch = -1) noexcept
 {
     if (!OpenClipboard(hWnd))
     {
         EckDbgPrintFormat(L"OpenClipboard failed, Owner = %p", GetClipboardOwner());
-        return FALSE;
+        return false;
     }
     CClipboardGuard _{};
 
@@ -46,23 +46,23 @@ inline BOOL SetClipboardString(HWND hWnd,
         cch = (int)TcsLength(pszText);
     const auto hData = GlobalAlloc(GMEM_MOVEABLE, CchToCbW(cch));
     if (!hData)
-        return FALSE;
+        return false;
     void* const pData = GlobalLock(hData);
     if (!pData)
     {
         GlobalFree(hData);
-        return FALSE;
+        return false;
     }
     TcsCopyLengthEnd((PWCH)pData, pszText, cch);
     GlobalUnlock(hData);
 
     EmptyClipboard();
     if (SetClipboardData(CF_UNICODETEXT, hData))
-        return TRUE;
+        return true;
     else
     {
         GlobalFree(hData);
-        return FALSE;
+        return false;
     }
 }
 

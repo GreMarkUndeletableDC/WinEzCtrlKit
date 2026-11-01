@@ -200,11 +200,11 @@ namespace Detail
         {
             const T UNALIGNED* p = (const T*)Data();
             const T UNALIGNED* const pEnd = p + GetRemainingSize() / sizeof(T);
-            BOOL bFoundNull{};
+            bool bFoundNull{};
             for (; p < pEnd; ++p)
                 if (*p == T{})
                 {
-                    bFoundNull = TRUE;
+                    bFoundNull = true;
                     break;
                 }
             if (!bFoundNull)
@@ -269,7 +269,7 @@ namespace Detail
         {
             return this->m_pBase + this->m_cbMax - this->m_pMem;
         }
-        EckInlineCe BOOL IsEnd() const noexcept
+        EckInlineCe bool IsEnd() const noexcept
         {
             return this->m_pMem >= this->m_pBase + this->m_cbMax;
         }
@@ -278,7 +278,7 @@ namespace Detail
             return this->m_pMem - this->m_pBase;
         }
 
-        EckInlineNdCe BOOL CheckDataLengthSafe(size_t pos, size_t cb) const noexcept
+        EckInlineNdCe bool CheckDataLengthSafe(size_t pos, size_t cb) const noexcept
         {
             return (pos <= this->m_cbMax) && (cb <= this->m_cbMax - pos);
         }
@@ -288,7 +288,7 @@ namespace Detail
                 throw XptDataLength{ pos, cb };
         }
 
-        EckInlineNdCe BOOL CheckDataLengthSafe(size_t cb) const noexcept
+        EckInlineNdCe bool CheckDataLengthSafe(size_t cb) const noexcept
         {
             return cb <= this->m_cbMax - GetPosition();
         }

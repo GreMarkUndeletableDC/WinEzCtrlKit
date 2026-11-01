@@ -158,7 +158,7 @@ public:
         }
     }
 
-    HGDIOBJ Attach(HDC hDC, HBITMAP hBmp, BOOL bSelect = FALSE) noexcept
+    HGDIOBJ Attach(HDC hDC, HBITMAP hBmp, bool bSelect = false) noexcept
     {
         Destroy();
         m_hCDC = hDC;

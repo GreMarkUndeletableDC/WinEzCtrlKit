@@ -21,31 +21,31 @@ struct CWindowPlacementStore
 
     const int iVer = 0;
     int x{}, y{}, cx{}, cy{};
-    BOOL bMaximized{};
+    bool bMaximized{};
 
-    BOOL FromWindow(HWND hWnd) noexcept
+    bool FromWindow(HWND hWnd) noexcept
     {
         WINDOWPLACEMENT wp;
         wp.length = sizeof(wp);
         if (!GetWindowPlacement(hWnd, &wp))
-            return FALSE;
+            return false;
         x = wp.rcNormalPosition.left;
         y = wp.rcNormalPosition.top;
         cx = wp.rcNormalPosition.right - wp.rcNormalPosition.left;
         cy = wp.rcNormalPosition.bottom - wp.rcNormalPosition.top;
         bMaximized = !!(wp.flags & WPF_RESTORETOMAXIMIZED);
-        return TRUE;
+        return true;
     }
 
-    BOOL FromString(PCWSTR psz) noexcept
+    bool FromString(PCWSTR psz) noexcept
     {
         if (!TcsEqualMaxLengthI(psz, Version, VersionLength))
-            return FALSE;
+            return false;
         return swscanf(psz + VersionLength, L",%d,%d,%d,%d,%d",
             &x, &y, &cx, &cy, &bMaximized) == 5;
     }
 
-    BOOL ToWindow(HWND hWnd) noexcept
+    bool ToWindow(HWND hWnd) noexcept
     {
         if (bMaximized)
             return ShowWindow(hWnd, SW_SHOWMAXIMIZED);

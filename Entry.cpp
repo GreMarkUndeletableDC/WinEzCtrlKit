@@ -10,6 +10,6 @@ int APIENTRY wWinMain(
     const auto r = eck::Initialize(hInstance);
     EckAssert(r == eck::StartupStatus::Ok);
 
-    NtWaitForSingleObject(NtCurrentProcess(), FALSE, nullptr);
+    NtWaitForSingleObject(NtCurrentProcess(), false, nullptr);
     return 0;
 }

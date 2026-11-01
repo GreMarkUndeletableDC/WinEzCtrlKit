@@ -3,15 +3,15 @@
 
 ECK_NAMESPACE_BEGIN
 #define ECK_W_CBE_STYLE(Name, Style)                    \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-    BOOL StyleGet##Name() const                         \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;  \
+    bool StyleGet##Name() const                         \
     {                                                   \
         if constexpr (Style == 0)                       \
             return !GetExtendedStyle();                 \
         else                                            \
             return IsBitSet(GetExtendedStyle(), Style); \
     }                                                   \
-    void StyleSet##Name(BOOL b) const                   \
+    void StyleSet##Name(bool b) const                   \
     {                                                   \
         SetExtendedStyle(b ? Style : 0, Style);         \
     }
@@ -60,12 +60,12 @@ public:
         return (HIMAGELIST)SendMessageW(CBEM_GETIMAGELIST, 0, 0);
     }
 
-    EckInline BOOL GetItem(_Inout_ COMBOBOXEXITEMW* pcbei) const noexcept
+    EckInline bool GetItem(_Inout_ COMBOBOXEXITEMW* pcbei) const noexcept
     {
-        return (BOOL)SendMessageW(CBEM_GETITEMW, 0, (LPARAM)pcbei);
+        return (bool)SendMessageW(CBEM_GETITEMW, 0, (LPARAM)pcbei);
     }
 
-    EckInline BOOL GetItemText(
+    EckInline bool GetItemText(
         int idx,
         Eck_Append_buffer_ CStringW& rs,
         int cchBuf = MAX_PATH) const noexcept
@@ -100,9 +100,9 @@ public:
         return rs;
     }
 
-    EckInline BOOL HasEditChanged() const noexcept
+    EckInline bool HasEditChanged() const noexcept
     {
-        return (BOOL)SendMessageW(CBEM_HASEDITCHANGED, 0, 0);
+        return (bool)SendMessageW(CBEM_HASEDITCHANGED, 0, 0);
     }
 
     EckInline int InsertItem(_In_ COMBOBOXEXITEMW* pcbei) const noexcept
@@ -144,12 +144,12 @@ public:
         return (IImageList*)SetImageList((HIMAGELIST)pImageList);
     }
 
-    EckInline BOOL SetItem(_In_ COMBOBOXEXITEMW* pcbei) const noexcept
+    EckInline bool SetItem(_In_ COMBOBOXEXITEMW* pcbei) const noexcept
     {
-        return (BOOL)SendMessageW(CBEM_SETITEMW, 0, (LPARAM)pcbei);
+        return (bool)SendMessageW(CBEM_SETITEMW, 0, (LPARAM)pcbei);
     }
 
-    EckInline BOOL SetItemText(int idx, _In_z_ PCWSTR pszText) const noexcept
+    EckInline bool SetItemText(int idx, _In_z_ PCWSTR pszText) const noexcept
     {
         COMBOBOXEXITEMW cbei;
         cbei.iItem = idx;
