@@ -42,7 +42,7 @@ public:
 #endif
     }
 
-    EckInline void CheckReference(LONG l) noexcept
+    void CheckReference(ULONG l) noexcept
     {
         if (m_cRef != l)
             EckBugCheck(BccReferenceCount);
