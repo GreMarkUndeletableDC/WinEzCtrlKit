@@ -203,6 +203,19 @@ _Ret_maybenull_ EckInlineNd TPtr TcsCharLength(_In_reads_(Len) TPtr Str, size_t 
     else
         return (TPtr)wmemchr((WCHAR*)Str, (WCHAR)c, Len);
 }
+template<CcpCharPointer TPtr>
+_Ret_maybenull_ EckInlineNd TPtr TcsCharLengthI(_In_reads_(Len) TPtr Str, size_t Len,
+    CharFromPointer_T<TPtr> c) noexcept
+{
+    const auto pEnd = Str + Len;
+    for (; Str < pEnd; ++Str)
+    {
+        if (TchEqualI(*Str, c))
+            return Str;
+    }
+    return nullptr;
+}
+
 
 template<CcpCharPointer TPtr>
 _Ret_maybenull_ EckInlineNd TPtr TcsRChar(_In_z_ TPtr Str, CharFromPointer_T<TPtr> c) noexcept
@@ -216,9 +229,24 @@ template<CcpCharPointer TPtr>
 _Ret_maybenull_ EckInlineNd TPtr TcsRCharLength(_In_reads_(Len) TPtr Str, size_t Len,
     CharFromPointer_T<TPtr> c) noexcept
 {
+    if (!Len)
+        return nullptr;
     for (auto p = Str + Len - 1; p >= Str; --p)
     {
         if (*p == c)
+            return p;
+    }
+    return nullptr;
+}
+template<CcpCharPointer TPtr>
+_Ret_maybenull_ EckInlineNd TPtr TcsRCharLengthI(_In_reads_(Len) TPtr Str, size_t Len,
+    CharFromPointer_T<TPtr> c) noexcept
+{
+    if (!Len)
+        return nullptr;
+    for (auto p = Str + Len - 1; p >= Str; --p)
+    {
+        if (TchEqualI(*p, c))
             return p;
     }
     return nullptr;
@@ -269,7 +297,8 @@ _Ret_maybenull_ EckInlineNd TPtr TcsStringLength(_In_reads_(Len) TPtr Str, size_
             return nullptr;
         if (TcsEqualLength(pFind, SubStr, SubLen))
             return pFind;
-        p = pFind + 1;
+        // 回退一个字符，循环自增后从匹配位置的下一个字符继续
+        p = pFind;
     }
     return nullptr;
 }
@@ -355,7 +384,8 @@ template<CcpCharPointer TPtr>
 _Ret_maybenull_ EckInlineNd TPtr TcsCharLastOf(_In_reads_(Len) TPtr Str, size_t Len,
     _In_reads_(CharsLen) ConstCharPointer_T<TPtr> Chars, size_t CharsLen, size_t posStart = MaxSizeT) noexcept
 {
-    EckAssert(Len);
+    if (!Len)
+        return nullptr;
 #if defined(_MSC_VER) && _USE_STD_VECTOR_ALGORITHMS && 0
     TPtr r;
     if constexpr (std::is_same_v<CharFromPointer_T<TPtr>, char>)
@@ -378,7 +408,8 @@ template<CcpCharPointer TPtr>
 _Ret_maybenull_ EckInlineNd TPtr TcsCharLastNotOf(_In_reads_(Len) TPtr Str, size_t Len,
     _In_reads_(CharsLen) ConstCharPointer_T<TPtr> Chars, size_t CharsLen, size_t posStart = MaxSizeT) noexcept
 {
-    EckAssert(Len);
+    if (!Len)
+        return nullptr;
     for (auto p = Str + std::min(posStart, Len - 1); p >= Str; --p)
     {
         if (!TcsCharLength(Chars, CharsLen, *p))
@@ -606,6 +637,8 @@ template<CcpCharPointer TPtr>
 EckInlineNd int RFindCharLength(_In_reads_(cchText) TPtr pszText, int cchText,
     CharFromPointer_T<TPtr> ch, int posStart = -1) noexcept
 {
+    if (cchText <= 0)
+        return StrNPos;
     if (posStart < 0)
         posStart = cchText - 1;
     EckAssert(posStart >= 0 && posStart <= cchText);
@@ -614,28 +647,28 @@ EckInlineNd int RFindCharLength(_In_reads_(cchText) TPtr pszText, int cchText,
 }
 
 template<CcpCharPointer TPtr>
-EckInlineNd int FindCharFirstOf(_In_z_ TPtr pszText, int cchText,
+EckInlineNd int FindCharFirstOf(_In_reads_(cchText) TPtr pszText, int cchText,
     _In_reads_(cchChars) ConstCharPointer_T<TPtr> pszChars, int cchChars, int posStart = 0) noexcept
 {
-    const auto pszFind = TcsCharFirstOf(pszText + posStart, pszChars, cchChars);
+    const auto pszFind = TcsCharFirstOf(pszText + posStart, cchText - posStart, pszChars, cchChars);
     return pszFind ? int(pszFind - pszText) : StrNPos;
 }
 template<CcpCharPointer TPtr>
-EckInlineNd int FindCharFirstNotOf(_In_z_ TPtr pszText, int cchText,
+EckInlineNd int FindCharFirstNotOf(_In_reads_(cchText) TPtr pszText, int cchText,
     _In_reads_(cchChars) ConstCharPointer_T<TPtr> pszChars, int cchChars, int posStart = 0) noexcept
 {
     const auto pszFind = TcsCharFirstNotOf(pszText + posStart, cchText - posStart, pszChars, cchChars);
     return pszFind ? int(pszFind - pszText) : StrNPos;
 }
 template<CcpCharPointer TPtr>
-EckInlineNd int FindCharLastOf(_In_z_ TPtr pszText, int cchText,
+EckInlineNd int FindCharLastOf(_In_reads_(cchText) TPtr pszText, int cchText,
     _In_reads_(cchChars) ConstCharPointer_T<TPtr> pszChars, int cchChars, int posStart = -1) noexcept
 {
     const auto pszFind = TcsCharLastOf(pszText, cchText, pszChars, cchChars, posStart);
     return pszFind ? int(pszFind - pszText) : StrNPos;
 }
 template<CcpCharPointer TPtr>
-EckInlineNd int FindCharLastNotOf(_In_z_ TPtr pszText, int cchText,
+EckInlineNd int FindCharLastNotOf(_In_reads_(cchText) TPtr pszText, int cchText,
     _In_reads_(cchChars) ConstCharPointer_T<TPtr> pszChars, int cchChars, int posStart = -1) noexcept
 {
     const auto pszFind = TcsCharLastNotOf(pszText, cchText, pszChars, cchChars, posStart);
@@ -686,8 +719,11 @@ template<CcpCharPointer TPtr>
 EckInlineNdCe std::basic_string_view<CharFromPointer_T<TPtr>> TrimString(
     _In_reads_(cchText) TPtr pszText, int cchText) noexcept
 {
-    auto pStart = TrimStringLeft(pszText, cchText);
-    auto pEnd = TrimStringRight(pStart, cchText);
+    if (cchText < 0)
+        cchText = (int)TcsLength(pszText);
+    const auto pStart = TrimStringLeft(pszText, cchText);
+    // 右侧裁剪必须使用剩余长度，否则会越过缓冲区末尾
+    const auto pEnd = TrimStringRight(pStart, cchText - int(pStart - pszText));
     if (pStart >= pEnd)
         return {};
     else

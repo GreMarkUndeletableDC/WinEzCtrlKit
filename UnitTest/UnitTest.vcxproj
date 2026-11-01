@@ -194,6 +194,7 @@
     <ClCompile Include="TsCompress.cpp" />
     <ClCompile Include="TsCRectPackSkyline.cpp" />
     <ClCompile Include="TsCString.cpp" />
+    <ClCompile Include="TsCStringReader.cpp" />
     <ClCompile Include="TsCSelectionRange.cpp" />
     <ClCompile Include="TsDateTimeHelper.cpp" />
     <ClCompile Include="TsGpPtr.cpp" />
@@ -204,6 +205,7 @@
     <ClCompile Include="TsRectOp.cpp" />
     <ClCompile Include="TsRefPtr.cpp" />
     <ClCompile Include="TsStringConvert.cpp" />
+    <ClCompile Include="TsStringUtility.cpp" />
     <ClCompile Include="TsTrivialBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>

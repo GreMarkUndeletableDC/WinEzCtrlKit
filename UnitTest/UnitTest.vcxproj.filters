@@ -42,6 +42,9 @@
     <ClCompile Include="TsStringConvert.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TsStringUtility.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="TsCompress.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -49,6 +52,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TsCString.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TsCStringReader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TsCRectPackSkyline.cpp">
