@@ -9,7 +9,7 @@ constexpr inline ALPC_PORT_ATTRIBUTES AlpcDefaultPortAttributes
         .Length = sizeof(SECURITY_QUALITY_OF_SERVICE),
         .ImpersonationLevel = SecurityAnonymous,
         .ContextTrackingMode = SECURITY_DYNAMIC_TRACKING,
-        .EffectiveOnly = FALSE,
+        .EffectiveOnly = false,
     },
     .MaxMessageLength = 256,
     .MemoryBandwidth = 0,

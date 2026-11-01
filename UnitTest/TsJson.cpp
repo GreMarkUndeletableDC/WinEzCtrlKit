@@ -826,7 +826,7 @@ public:
     TEST_METHOD(SetStringPoolSize_Succeeds)
     {
         CMutableDocument doc;
-        BOOL ok = doc.SetStringPoolSize(4096);
+        bool ok = doc.SetStringPoolSize(4096);
         Assert::IsTrue(ok);
     }
 
@@ -1796,7 +1796,7 @@ public:
     {
         const char json[] = "[\n  1,\n  2\n]";
         size_t nLine, nCol, nChar;
-        BOOL ok = YyLocateStringPosition(json, sizeof(json) - 1, 5, nLine, nCol, nChar);
+        bool ok = YyLocateStringPosition(json, sizeof(json) - 1, 5, nLine, nCol, nChar);
         Assert::IsTrue(ok);
         Assert::IsTrue(nLine >= 1);
     }

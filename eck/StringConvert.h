@@ -82,10 +82,10 @@ inline TcvReturn<TPointer> TcvToInt(
     if (!cch)
         return { TcvResult::Nothing, p };
     const auto pEnd = p + cch;
-    BOOL bNeg = FALSE;
+    bool bNeg = false;
     // 识别符号
     if (*p == '-')
-        bNeg = TRUE, ++p;
+        bNeg = true, ++p;
     else if (*p == '+')
         ++p;
     if (p == pEnd)
@@ -167,7 +167,7 @@ inline TcvReturn<TPointer> TcvFromInt(
     size_t cch,
     TInt i,
     int iRadix = 10,
-    BOOL bUpperCase = TRUE,
+    bool bUpperCase = true,
     int cchFillTo = 0,
     CharFromPointer_T<TPointer> chFill = '0') noexcept
 {
@@ -177,12 +177,12 @@ inline TcvReturn<TPointer> TcvFromInt(
     const auto pEnd = p + cch;
     using TUnsigned = std::make_unsigned_t<TInt>;
     auto Val = (TUnsigned)i;
-    BOOL bNeg{};
+    bool bNeg{};
     if constexpr (std::is_signed_v<TInt>)
     {
         if (i < 0)
         {
-            bNeg = TRUE;
+            bNeg = true;
             Val = TUnsigned(0 - i);
         }
     }

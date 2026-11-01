@@ -67,14 +67,14 @@ private:
     int m_cySubTask = 0;
 
     int m_idxHot = -1;
-    BOOL m_bSectionTitleHot = FALSE;
+    bool m_bSectionTitleHot = false;
     int m_idxHotSubTask = -1;
 
     int m_idxPressed = -1;
-    BOOL m_bSectionTitlePressed = FALSE;
+    bool m_bSectionTitlePressed = false;
     int m_idxPressedSubTask = -1;
 
-    BOOL m_bLBtnDown = FALSE;
+    bool m_bLBtnDown = false;
 
     void UpdateThemeInformation() noexcept
     {
@@ -96,7 +96,7 @@ private:
     }
 public:
     LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept override
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept override
     {
         switch (uMsg)
         {
@@ -106,7 +106,7 @@ public:
             {
             case NM_CUSTOMDRAW:
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto* const pnmlcd = (NMLVCUSTOMDRAW*)lParam;
 
                 switch (pnmlcd->nmcd.dwDrawStage)
@@ -193,9 +193,9 @@ public:
             POINT pt ECK_GET_PT_LPARAM(lParam);
             LRESULT lResult = __super::OnMessage(uMsg, wParam, lParam);
             int idxHot = GetHotItem();
-            BOOL bRedraw = FALSE, bHotChanged = FALSE;
+            bool bRedraw = false, bHotChanged = false;
             if (m_idxHot != idxHot)
-                bHotChanged = TRUE;
+                bHotChanged = true;
             m_idxHot = idxHot;
             if (idxHot >= 0)
             {
@@ -206,24 +206,24 @@ public:
                 if (uPart == TGLP_SECTIONTITLE)
                 {
                     if (!m_bSectionTitleHot)
-                        bRedraw = TRUE;
-                    m_bSectionTitleHot = TRUE;
+                        bRedraw = true;
+                    m_bSectionTitleHot = true;
                 }
                 else
                 {
                     if (m_bSectionTitleHot)
-                        bRedraw = TRUE;
-                    m_bSectionTitleHot = FALSE;
+                        bRedraw = true;
+                    m_bSectionTitleHot = false;
                     if (uPart == TGLP_SUBTASK)
                     {
                         if (m_idxHotSubTask != idxHotSubTask)
-                            bRedraw = TRUE;
+                            bRedraw = true;
                         m_idxHotSubTask = idxHotSubTask;
                     }
                     else
                     {
                         if (m_idxHotSubTask != -1)
-                            bRedraw = TRUE;
+                            bRedraw = true;
                         m_idxHotSubTask = -1;
                     }
                 }
@@ -249,7 +249,7 @@ public:
         {
             m_idxHot = -1;
             m_idxHotSubTask = -1;
-            m_bSectionTitleHot = FALSE;
+            m_bSectionTitleHot = false;
         }
         break;
 
@@ -270,7 +270,7 @@ public:
                 m_idxPressedSubTask = idxSubTask;
                 if (uPart == TGLP_SECTIONTITLE || uPart == TGLP_SUBTASK)
                 {
-                    m_bLBtnDown = TRUE;
+                    m_bLBtnDown = true;
                     SetCapture(Handle);
                     RedrawItems(lvhti.iItem, lvhti.iItem);
                     return 0;
@@ -278,7 +278,7 @@ public:
             }
             else
             {
-                m_bSectionTitlePressed = FALSE;
+                m_bSectionTitlePressed = false;
                 m_idxPressedSubTask = -1;
             }
         }
@@ -288,7 +288,7 @@ public:
         {
             if (!m_bLBtnDown)
                 break;
-            m_bLBtnDown = FALSE;
+            m_bLBtnDown = false;
             ReleaseCapture();
 
             LVHITTESTINFO lvhti;
@@ -315,7 +315,7 @@ public:
 
             int idxOld = m_idxPressed;
             m_idxPressed = -1;
-            m_bSectionTitlePressed = FALSE;
+            m_bSectionTitlePressed = false;
             m_idxHotSubTask = -1;
             RedrawItems(idxOld, idxOld);
         }

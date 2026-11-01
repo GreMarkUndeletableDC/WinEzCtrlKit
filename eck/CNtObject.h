@@ -53,7 +53,7 @@ public:
             m_hObject = nullptr;
         }
     }
-    EckInlineNdCe BOOL IsValid() const noexcept
+    EckInlineNdCe bool IsValid() const noexcept
     {
         return m_hObject && m_hObject != INVALID_HANDLE_VALUE;
     }

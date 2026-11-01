@@ -68,20 +68,20 @@ public:
         return &s_ClassInfo_CObject;
     }
 
-    EckNfInlineNdCe BOOL RttiIsKindOf(const ClassInfo* pInfo) const noexcept
+    EckNfInlineNdCe bool RttiIsKindOf(const ClassInfo* pInfo) const noexcept
     {
         auto p = RttiGetClass();
         do
         {
             if (p == pInfo)
-                return TRUE;
+                return true;
             p = p->pBaseClass;
         } while (p);
-        return FALSE;
+        return false;
     }
 
     template<class T>
-    EckInlineNdCe BOOL RttiIsKindOf() const noexcept
+    EckInlineNdCe bool RttiIsKindOf() const noexcept
     {
         return RttiIsKindOf(T::RttiThisClass());
     }

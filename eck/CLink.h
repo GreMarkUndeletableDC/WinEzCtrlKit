@@ -28,19 +28,19 @@ public:
         return (int)SendMessageW(LM_GETIDEALSIZE, cxMax, (LPARAM)psize);
     }
 
-    EckInline BOOL GetItem(_Inout_ LITEM* pli) const noexcept
+    EckInline bool GetItem(_Inout_ LITEM* pli) const noexcept
     {
-        return (BOOL)SendMessageW(LM_GETITEM, 0, (LPARAM)pli);
+        return (bool)SendMessageW(LM_GETITEM, 0, (LPARAM)pli);
     }
 
-    EckInline BOOL HitTest(_Inout_ LHITTESTINFO* plht) const noexcept
+    EckInline bool HitTest(_Inout_ LHITTESTINFO* plht) const noexcept
     {
-        return (BOOL)SendMessageW(LM_HITTEST, 0, (LPARAM)plht);
+        return (bool)SendMessageW(LM_HITTEST, 0, (LPARAM)plht);
     }
 
-    EckInline BOOL SetItem(_In_ const LITEM* pli) const noexcept
+    EckInline bool SetItem(_In_ const LITEM* pli) const noexcept
     {
-        return (BOOL)SendMessageW(LM_SETITEM, 0, (LPARAM)pli);
+        return (bool)SendMessageW(LM_SETITEM, 0, (LPARAM)pli);
     }
 };
 ECK_NAMESPACE_END

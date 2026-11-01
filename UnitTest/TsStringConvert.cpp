@@ -159,10 +159,10 @@ public:
     TEST_METHOD(TsTcsFromInt_Hexadecimal)
     {
         char buffer[128];
-        Assert::AreEqual((int)TcvResult::Ok, (int)TcvFromInt(buffer, sizeof(buffer), 255, 16, TRUE).eResult);
+        Assert::AreEqual((int)TcvResult::Ok, (int)TcvFromInt(buffer, sizeof(buffer), 255, 16, true).eResult);
         Assert::AreEqual("FF", buffer);
 
-        Assert::AreEqual((int)TcvResult::Ok, (int)TcvFromInt(buffer, sizeof(buffer), 255, 16, FALSE).eResult);
+        Assert::AreEqual((int)TcvResult::Ok, (int)TcvFromInt(buffer, sizeof(buffer), 255, 16, false).eResult);
         Assert::AreEqual("ff", buffer);
 
         Assert::AreEqual((int)TcvResult::Ok, (int)TcvFromInt(buffer, sizeof(buffer), 26, 16).eResult);
@@ -208,11 +208,11 @@ public:
     TEST_METHOD(TsTcsFromInt_Padding)
     {
         char buffer[128];
-        auto err = TcvFromInt(buffer, sizeof(buffer), 5, 10, TRUE, 3, '0');
+        auto err = TcvFromInt(buffer, sizeof(buffer), 5, 10, true, 3, '0');
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual("005", buffer);
 
-        err = TcvFromInt(buffer, sizeof(buffer), 123, 10, TRUE, 5, '0');
+        err = TcvFromInt(buffer, sizeof(buffer), 123, 10, true, 5, '0');
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual("00123", buffer);
     }
@@ -241,7 +241,7 @@ public:
     {
         char buffer[128];
         char* end;
-        auto err = TcvFromInt(buffer, sizeof(buffer), 123, 10, TRUE);
+        auto err = TcvFromInt(buffer, sizeof(buffer), 123, 10, true);
         end = err.pEnd;
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual((size_t)3, (size_t)(end - buffer));
@@ -549,17 +549,17 @@ public:
         char buffer[128];
 
         // 填充宽度等于实际宽度
-        auto err = TcvFromInt(buffer, sizeof(buffer), 123, 10, TRUE, 3);
+        auto err = TcvFromInt(buffer, sizeof(buffer), 123, 10, true, 3);
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual("123", buffer);
 
         // 填充宽度小于实际宽度（不应填充）
-        err = TcvFromInt(buffer, sizeof(buffer), 12345, 10, TRUE, 3);
+        err = TcvFromInt(buffer, sizeof(buffer), 12345, 10, true, 3);
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual("12345", buffer);
 
         // 负数的填充
-        err = TcvFromInt(buffer, sizeof(buffer), -5, 10, TRUE, 3, '0');
+        err = TcvFromInt(buffer, sizeof(buffer), -5, 10, true, 3, '0');
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual("-005", buffer);
     }
@@ -568,11 +568,11 @@ public:
     {
         char buffer[128];
 
-        auto err = TcvFromInt(buffer, sizeof(buffer), 5, 10, TRUE, 5, '_');
+        auto err = TcvFromInt(buffer, sizeof(buffer), 5, 10, true, 5, '_');
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual("____5", buffer);
 
-        err = TcvFromInt(buffer, sizeof(buffer), 42, 10, TRUE, 5, ' ');
+        err = TcvFromInt(buffer, sizeof(buffer), 42, 10, true, 5, ' ');
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual("   42", buffer);
     }
@@ -622,14 +622,14 @@ public:
         Assert::AreEqual((int)TcvResult::Ok, (int)TcvFromInt(buffer, 128, 255, 16).eResult);
         Assert::AreEqual(L"FF", buffer);
 
-        Assert::AreEqual((int)TcvResult::Ok, (int)TcvFromInt(buffer, 128, 0xABCD, 16, FALSE).eResult);
+        Assert::AreEqual((int)TcvResult::Ok, (int)TcvFromInt(buffer, 128, 0xABCD, 16, false).eResult);
         Assert::AreEqual(L"abcd", buffer);
     }
 
     TEST_METHOD(TsTcsFromInt_WideChar_Padding)
     {
         wchar_t buffer[128];
-        auto err = TcvFromInt(buffer, 128, 5, 10, TRUE, 4, L'0');
+        auto err = TcvFromInt(buffer, 128, 5, 10, true, 4, L'0');
         Assert::AreEqual((int)TcvResult::Ok, (int)err.eResult);
         Assert::AreEqual(L"0005", buffer);
     }

@@ -6,18 +6,18 @@ ECK_NAMESPACE_BEGIN
 // 将此类实例传入IDWriteTextLayout::Draw以提取字形轮廓
 // 1. 上下文参数必须为IUnknown指针，该接口必须可被QI为
 //    ID2D1SimplifiedGeometrySink和IGeometrySinkTransformer
-// 2. 调用方负责在调用Draw前对IGeometrySinkTransformer使用GstEnableOffset(TRUE)
+// 2. 调用方负责在调用Draw前对IGeometrySinkTransformer使用GstEnableOffset(true)
 class CDwFetchPathRenderer final : public IDWriteTextRenderer
 {
 private:
     float m_fDpi{};
-    BOOL m_bPixelSnappingDisabled{};
+    bool m_bPixelSnappingDisabled{};
     ComPtr<ID2D1SimplifiedGeometrySink> m_pSink{};
     ComPtr<IGeometrySinkTransformer> m_pTransformer{};
 
     void DrawLine(float x, float y, float cx, float cy)
     {
-        m_pTransformer->GstEnableOffset(FALSE);
+        m_pTransformer->GstEnableOffset(false);
         D2D1_POINT_2F pt[3];
         pt[0].x = x;
         pt[0].y = y;
@@ -29,7 +29,7 @@ private:
         pt[2].y = pt[1].y;
         m_pSink->AddLines(pt, 3);
         m_pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
-        m_pTransformer->GstEnableOffset(TRUE);
+        m_pTransformer->GstEnableOffset(true);
     }
 
     HRESULT PrepareSink(void* pClientDrawingContext)
@@ -48,7 +48,7 @@ private:
         return S_OK;
     }
 public:
-    constexpr CDwFetchPathRenderer(float fDpi = 96.f, BOOL bPixelSnappingDisabled = FALSE) noexcept
+    constexpr CDwFetchPathRenderer(float fDpi = 96.f, bool bPixelSnappingDisabled = false) noexcept
         : m_fDpi{ fDpi }, m_bPixelSnappingDisabled{ bPixelSnappingDisabled }
     {}
 
@@ -165,7 +165,7 @@ inline HRESULT GetTextLayoutPathGeometry(
     float yStart,
     _Out_ ID2D1PathGeometry1*& pPathGeometry,
     float fDpi = 96.f,
-    BOOL bPixelSnappingDisabled = FALSE,
+    bool bPixelSnappingDisabled = false,
     _In_opt_ ID2D1Factory1* pD2DFactory = nullptr) noexcept
 {
     if (!pD2DFactory)
@@ -178,7 +178,7 @@ inline HRESULT GetTextLayoutPathGeometry(
     CDwFetchPathRenderer Renderer{ fDpi,bPixelSnappingDisabled };
     CGeometrySinkOffsetTransformer Forwarder{};
     Forwarder.GstSetSink(pSink.Get());
-    Forwarder.GstEnableOffset(TRUE);
+    Forwarder.GstEnableOffset(true);
 
     DWRITE_TEXT_METRICS tm;
     HRESULT hr = S_OK;
@@ -217,7 +217,7 @@ inline HRESULT GetTextLayoutPathGeometry(
     float x, float y,
     _Out_ ID2D1PathGeometry1*& pPathGeometry,
     float fDpi = 96.f,
-    BOOL bPixelSnappingDisabled = FALSE,
+    bool bPixelSnappingDisabled = false,
     _In_opt_ ID2D1Factory1* pD2dFactory = nullptr) noexcept
 {
     constexpr float cyPadding{};

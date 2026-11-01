@@ -93,8 +93,8 @@ private:
     int m_cScrollLine{ 3 };
     int m_cCharPreScrollH{ 3 };
 
-    BITBOOL m_bLBtnDown : 1 = FALSE;
-    BITBOOL m_bFocus : 1 = FALSE;
+    BITBOOL m_bLBtnDown : 1 = false;
+    BITBOOL m_bFocus : 1 = false;
 
     int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
 
@@ -311,14 +311,14 @@ private:
                         else if (e.cbMaxChar == 2)
                         {
                             const BYTE by = *e.pNeedle;
-                            BOOL bDbcsLeadByte{};
+                            bool bDbcsLeadByte{};
                             for (int i = 0; i < 10; i += 2)
                             {
                                 if (!e.LeadByteRange[i])
                                     break;
                                 if (by >= e.LeadByteRange[i] && by < e.LeadByteRange[i + 1])
                                 {
-                                    bDbcsLeadByte = TRUE;
+                                    bDbcsLeadByte = true;
                                     break;
                                 }
                             }
@@ -415,7 +415,7 @@ public:
     CHexEdit() noexcept
     {
         D.crOddCol = D.crEvenCol = D.crAddressCol = CLR_DEFAULT;
-        D.bShowAddress = D.bShowChar = D.bShowHeader = TRUE;
+        D.bShowAddress = D.bShowChar = D.bShowHeader = true;
         D.cCol = 16;
         D.cColPerGroup = 4;
         D.cxGap = 20;
@@ -449,7 +449,7 @@ public:
 
         case WM_LBUTTONDOWN:
         {
-            m_bLBtnDown = TRUE;
+            m_bLBtnDown = true;
             SetFocus(Handle);
             SetCapture(Handle);
             HEHITTEST heht;
@@ -461,7 +461,7 @@ public:
                 m_posDragSelStart = pos;
                 D.posCaret = pos;
                 D.idxCaretCol = (heht.bHitChar ? heht.idxCharCol : -1);
-                D.bCaretInFirstNum = (heht.bHitData ? heht.bFirstNumber : FALSE);
+                D.bCaretInFirstNum = (heht.bHitData ? heht.bFirstNumber : false);
                 UpdateCaretPosition();
             }
         }
@@ -482,7 +482,7 @@ public:
                     D.posCaret = pos;
                     UpdateCaretPosition();
                     m_posDragSelEnd = pos;
-                    InvalidateRect(Handle, nullptr, FALSE);
+                    InvalidateRect(Handle, nullptr, false);
                 }
             }
         }
@@ -492,7 +492,7 @@ public:
         {
             if (m_bLBtnDown)
             {
-                m_bLBtnDown = FALSE;
+                m_bLBtnDown = false;
                 ReleaseCapture();
                 HEHITTEST heht;
                 heht.pt = ECK_GET_PT_LPARAM(lParam);
@@ -504,7 +504,7 @@ public:
                     D.bCaretInFirstNum = heht.bFirstNumber;
                     D.posCaret = pos;
                     UpdateCaretPosition();
-                    InvalidateRect(Handle, nullptr, FALSE);
+                    InvalidateRect(Handle, nullptr, false);
                 }
             }
         }
@@ -514,7 +514,7 @@ public:
         {
             if (m_bLBtnDown)
             {
-                m_bLBtnDown = FALSE;
+                m_bLBtnDown = false;
             }
         }
         break;
@@ -639,12 +639,12 @@ public:
         break;
 
         case WM_SETFOCUS:
-            m_bFocus = TRUE;
+            m_bFocus = true;
             CreateCaret(Handle, nullptr, m_cxChar, m_cyChar);
             return 0;
 
         case WM_KILLFOCUS:
-            m_bFocus = FALSE;
+            m_bFocus = false;
             DestroyCaret();
             return 0;
 
@@ -725,7 +725,7 @@ public:
 
     int InsertCharColumn(UINT uCodePage, int idx = -1) noexcept
     {
-        const BOOL bUtf16 = (uCodePage == CP_UTF16LE || uCodePage == CP_UTF16BE);
+        const bool bUtf16 = (uCodePage == CP_UTF16LE || uCodePage == CP_UTF16BE);
         CPINFOEXW cpi;
         if (!bUtf16)
             if (!GetCPInfoExW(uCodePage, 0, &cpi))
@@ -795,37 +795,37 @@ public:
             return MaxSizeT;
         if (heht.pt.y < GetHeaderHeight())
         {
-            heht.bHitHeader = TRUE;
+            heht.bHitHeader = true;
             return MaxSizeT;
         }
         heht.idxRowInView = (heht.pt.y - GetHeaderHeight() + D.cyGap / 2) / GetRowHeight();
         int x = xStart + m_cxAddress;
         if (heht.pt.x < x)// 地址
         {
-            heht.bHitAddress = TRUE;
+            heht.bHitAddress = true;
             if (heht.pt.y < GetHeaderHeight() + heht.idxRowInView * GetRowHeight() - D.cyGap)
-                heht.bHitContent = TRUE;
+                heht.bHitContent = true;
             return MaxSizeT;
         }
         else if (heht.pt.x < x + m_cxData)// 数据
         {
-            heht.bHitData = TRUE;
+            heht.bHitData = true;
             heht.idxCol = (heht.pt.x - x + D.cxGap / 2) / GetColumnWidth();
             if (heht.pt.y < GetHeaderHeight() + (heht.idxRowInView + 1) * GetRowHeight() - D.cyGap &&
                 heht.pt.x < x + GetColumnWidth() * (heht.idxCol + 1) - D.cxGap)
-                heht.bHitContent = TRUE;
+                heht.bHitContent = true;
             const int xHalf = x + heht.idxCol * GetColumnWidth() + m_cxChar;
             heht.bFirstNumber = (heht.pt.x < xHalf);
             return m_posFirstVisible + heht.idxRowInView * D.cCol + heht.idxCol;
         }
         else if (heht.pt.x < xStart + m_cxContent)// 字符
         {
-            heht.bHitChar = TRUE;
+            heht.bHitChar = true;
             heht.idxCharCol = (heht.pt.x - x - m_cxData) / GetCharColumnWidth();
             heht.idxCol = (heht.pt.x - x - m_cxData - heht.idxCharCol * GetCharColumnWidth()) / m_cxChar;
             if (heht.pt.y < GetHeaderHeight() + (heht.idxRowInView + 1) * GetRowHeight() - D.cyGap &&
                 heht.pt.x < x + m_cxData + (heht.idxCharCol + 1) * GetCharColumnWidth() - m_cxChar - D.cxGap)
-                heht.bHitContent = TRUE;
+                heht.bHitContent = true;
             return m_posFirstVisible + heht.idxRowInView * D.cCol + heht.idxCol;
         }
         else

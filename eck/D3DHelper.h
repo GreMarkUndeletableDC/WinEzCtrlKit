@@ -84,7 +84,7 @@ struct CBuffer
     }
     HRESULT CreateVertexBuffer(
         _In_opt_ ID3D11Device* pDevice,
-        BOOL bImmutable,
+        bool bImmutable,
         size_t cb,
         _In_reads_bytes_opt_(cb) PCVOID pData = nullptr) noexcept
     {
@@ -99,7 +99,7 @@ struct CBuffer
     }
     HRESULT CreateIndexBuffer(
         _In_opt_ ID3D11Device* pDevice,
-        BOOL bImmutable,
+        bool bImmutable,
         size_t cb,
         _In_reads_bytes_opt_(cb) PCVOID pData = nullptr) noexcept
     {

@@ -49,7 +49,7 @@ inline void ApiParseInt(std::string_view sv, _Inout_ int& i) noexcept
 
 // 检查枚举值v是否在(Min, Max)内
 template<CcpNumberOrEnumeration U>
-EckInlineNdCe BOOL ApiEnumerationInRange(auto v, U Min, U Max) noexcept
+EckInlineNdCe bool ApiEnumerationInRange(auto v, U Min, U Max) noexcept
 {
     using TInt = UnderlyingType_T<U>;
     return (TInt)v > (TInt)Min && (TInt)v < (TInt)Max;

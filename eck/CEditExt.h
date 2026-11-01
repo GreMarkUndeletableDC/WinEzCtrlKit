@@ -38,14 +38,14 @@ protected:
     WCHAR m_chMask{};
     InputMode m_iInputMode{ InputMode::Normal };
 
-    BITBOOL m_bAutoWrap : 1 = TRUE;             // [多行][延迟标志]自动换行，不加入ES_AUTOHSCROLL
-    BITBOOL m_bMultiLineCueBanner : 1 = TRUE;   // [多行]显示提示
-    BITBOOL m_bMultiLine : 1 = FALSE;           // [延迟标志]多行
-    BITBOOL m_bChangeCreateStyle : 1 = TRUE;    // [延迟标志]指示样式是否受上面两个延迟标志影响
-    BITBOOL m_bDisableColorOptions : 1 = FALSE; // 禁用颜色选项，启用后不处理着色通知
-    BITBOOL m_bCtrlASelectAll : 1 = TRUE;       // Ctrl+A全选
+    BITBOOL m_bAutoWrap : 1 = true;             // [多行][延迟标志]自动换行，不加入ES_AUTOHSCROLL
+    BITBOOL m_bMultiLineCueBanner : 1 = true;   // [多行]显示提示
+    BITBOOL m_bMultiLine : 1 = false;           // [延迟标志]多行
+    BITBOOL m_bChangeCreateStyle : 1 = true;    // [延迟标志]指示样式是否受上面两个延迟标志影响
+    BITBOOL m_bDisableColorOptions : 1 = false; // 禁用颜色选项，启用后不处理着色通知
+    BITBOOL m_bCtrlASelectAll : 1 = true;       // Ctrl+A全选
 
-    BITBOOL m_bEmpty : 1 = FALSE;               // 空编辑框标志
+    BITBOOL m_bEmpty : 1 = false;               // 空编辑框标志
 
     void UpdateTextInformation()
     {
@@ -80,8 +80,8 @@ protected:
     void InternalDetachNew()
     {
         m_bAutoWrap = m_bMultiLineCueBanner =
-            m_bChangeCreateStyle = m_bCtrlASelectAll = TRUE;
-        m_bMultiLine = m_bDisableColorOptions = FALSE;
+            m_bChangeCreateStyle = m_bCtrlASelectAll = true;
+        m_bMultiLine = m_bDisableColorOptions = false;
         m_iInputMode = InputMode::Normal;
         m_chMask = L'\0';
         m_crText = m_crTextBk = m_crBk = CLR_DEFAULT;
@@ -93,7 +93,7 @@ public:
         CWindow::AttachNew(hWnd);
         const auto dwStyle = GetStyle();
         m_bMultiLine = Multiline;
-        m_bAutoWrap = (m_bMultiLine ? !IsBitSet(dwStyle, ES_AUTOHSCROLL) : FALSE);
+        m_bAutoWrap = (m_bMultiLine ? !IsBitSet(dwStyle, ES_AUTOHSCROLL) : false);
         m_bEmpty = !GetWindowTextLengthW(hWnd);
         InternalAttachNew();
     }
@@ -398,7 +398,7 @@ public:
     }
 
     LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept override
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept override
     {
         switch (uMsg)
         {
@@ -407,7 +407,7 @@ public:
         {
             if (!m_bDisableColorOptions)
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto* const ptc = PtcCurrent();
                 SetTextColor((HDC)wParam, m_crText != CLR_DEFAULT ? m_crText : ptc->crDefText);
                 SetBkColor((HDC)wParam, m_crTextBk != CLR_DEFAULT ? m_crTextBk : ptc->crDefBkg);
@@ -452,16 +452,16 @@ public:
             x, y, cx, cy, hParent, hMenu, pParam);
     };
 
-    BOOL LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept override
+    bool LoGetIdealSize(_Inout_ LYTSIZE& Size) noexcept override
     {
         if (!GetMultiLine())
         {
             if (Size.cx <= 0)
                 Size.cx = (TLytCoord)m_cxWnd;
             Size.cy = TLytCoord(m_cyText + DaGetSystemMetrics(SM_CYEDGE, GetDpi(Handle)) * 2);
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
     void SetColor(ColorPart ePart, COLORREF cr) noexcept
@@ -488,11 +488,11 @@ public:
         }
     }
 
-    EckInlineCe void SetMultiLine(BOOL bMultiLine) noexcept { m_bMultiLine = bMultiLine; }
-    EckInlineNdCe BOOL GetMultiLine() const noexcept { return m_bMultiLine; }
+    EckInlineCe void SetMultiLine(bool bMultiLine) noexcept { m_bMultiLine = bMultiLine; }
+    EckInlineNdCe bool GetMultiLine() const noexcept { return m_bMultiLine; }
 
-    EckInlineCe void SetAutoWrap(BOOL bAutoWrap) noexcept { m_bAutoWrap = bAutoWrap; }
-    EckInlineNdCe BOOL GetAutoWrap() const noexcept { return m_bAutoWrap; }
+    EckInlineCe void SetAutoWrap(bool bAutoWrap) noexcept { m_bAutoWrap = bAutoWrap; }
+    EckInlineNdCe bool GetAutoWrap() const noexcept { return m_bAutoWrap; }
 
     void SetInputMode(InputMode iInputMode) noexcept
     {
@@ -510,7 +510,7 @@ public:
     }
     EckInlineNdCe WCHAR GetPasswordChar() const noexcept { return m_chMask; }
 
-    void SetMultiLineCueBanner(BOOL bMultiLineCueBanner) noexcept
+    void SetMultiLineCueBanner(bool bMultiLineCueBanner) noexcept
     {
         m_bMultiLineCueBanner = bMultiLineCueBanner;
         const auto bEmpty = !GetWindowTextLengthW(Handle);
@@ -520,12 +520,12 @@ public:
             Redraw();
         }
     }
-    EckInlineNdCe BOOL GetMultiLineCueBanner() const noexcept { return m_bMultiLineCueBanner; }
+    EckInlineNdCe bool GetMultiLineCueBanner() const noexcept { return m_bMultiLineCueBanner; }
 
-    EckInlineCe void SetChangeCreateStyle(BOOL b) noexcept { m_bChangeCreateStyle = b; }
-    EckInlineNdCe BOOL GetChangeCreateStyle() const noexcept { return m_bChangeCreateStyle; }
+    EckInlineCe void SetChangeCreateStyle(bool b) noexcept { m_bChangeCreateStyle = b; }
+    EckInlineNdCe bool GetChangeCreateStyle() const noexcept { return m_bChangeCreateStyle; }
 
-    EckInlineCe void SetDisableColorOptions(BOOL b) noexcept { m_bDisableColorOptions = b; }
-    EckInlineNdCe BOOL GetDisableColorOptions() const noexcept { return m_bDisableColorOptions; }
+    EckInlineCe void SetDisableColorOptions(bool b) noexcept { m_bDisableColorOptions = b; }
+    EckInlineNdCe bool GetDisableColorOptions() const noexcept { return m_bDisableColorOptions; }
 };
 ECK_NAMESPACE_END

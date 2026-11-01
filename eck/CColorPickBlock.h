@@ -50,7 +50,7 @@ public:
         return 0;
 
         case WM_SETTEXT:
-            return TRUE;
+            return true;
 
         case WM_CREATE:
             ((CREATESTRUCTW*)lParam)->lpszName = nullptr;
@@ -63,13 +63,13 @@ public:
     }
 
     LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept override
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept override
     {
         switch (uMsg)
         {
         case WM_CTLCOLORSTATIC:
         {
-            bProcessed = TRUE;
+            bProcessed = true;
             SetDCBrushColor((HDC)wParam, m_cr);
             return (LRESULT)GetStockBrush(DC_BRUSH);
         }

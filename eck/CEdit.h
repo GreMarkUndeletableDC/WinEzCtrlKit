@@ -6,15 +6,15 @@
 ECK_NAMESPACE_BEGIN
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5// 1809+
 #define ECK_W_EDE_STYLE(Name, Style)                    \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-    BOOL StyleGet##Name() const                         \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;  \
+    bool StyleGet##Name() const                         \
     {                                                   \
         if constexpr (Style == 0)                       \
             return !GetEDExtendStyle();                 \
         else                                            \
             return IsBitSet(GetEDExtendStyle(), Style); \
     }                                                   \
-    void StyleSet##Name(BOOL b) const                   \
+    void StyleSet##Name(bool b) const                   \
     {                                                   \
         SetEDExtendStyle(b ? Style : 0, Style);         \
     }
@@ -56,9 +56,9 @@ public:
     ECK_W_EDE_STYLE(Zoomable, ES_EX_ZOOMABLE);
 #endif// NTDDI_VERSION >= NTDDI_WIN10_RS5
 
-    EckInline BOOL CanUndo() const noexcept
+    EckInline bool CanUndo() const noexcept
     {
-        return (BOOL)SendMessageW(EM_CANUNDO, 0, 0);
+        return (bool)SendMessageW(EM_CANUNDO, 0, 0);
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ public:
         SendMessageW(EM_EMPTYUNDOBUFFER, 0, 0);
     }
 
-    EckInline void FormatLines(BOOL bSoftLineBreakChar) const noexcept
+    EckInline void FormatLines(bool bSoftLineBreakChar) const noexcept
     {
         SendMessageW(EM_FMTLINES, bSoftLineBreakChar, 0);
     }
@@ -104,12 +104,12 @@ public:
     /// <param name="pszBuf">缓冲区指针</param>
     /// <param name="cchBuf">缓冲区大小</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL GetCueBanner(_Out_writes_z_(cchBuf) PWSTR pszBuf, int cchBuf) const noexcept
+    EckInline bool GetCueBanner(_Out_writes_z_(cchBuf) PWSTR pszBuf, int cchBuf) const noexcept
     {
-        return (BOOL)SendMessageW(EM_GETCUEBANNER, (WPARAM)pszBuf, cchBuf);
+        return (bool)SendMessageW(EM_GETCUEBANNER, (WPARAM)pszBuf, cchBuf);
     }
 
-    EckInline BOOL GetCueBanner(
+    EckInline bool GetCueBanner(
         Eck_Append_buffer_ CStringW& rs,
         int cchBuf = 64) const noexcept
     {
@@ -118,7 +118,7 @@ public:
         if (!bRet)
         {
             rs.ReSize(cchOld);
-            return FALSE;
+            return false;
         }
         rs.ReCalculateLength(cchOld);
         return bRet;
@@ -286,7 +286,7 @@ public:
         return pt;
     }
 
-    EckInline void ReplaceSelection(PCWSTR pszText, BOOL bAllowUndo) const noexcept
+    EckInline void ReplaceSelection(PCWSTR pszText, bool bAllowUndo) const noexcept
     {
         SendMessageW(EM_REPLACESEL, bAllowUndo, (LPARAM)pszText);
     }
@@ -296,7 +296,7 @@ public:
     /// </summary>
     /// <param name="iOp">滚动操作，可选常量值：SB_LINEDOWN、SB_LINEUP、SB_PAGEDOWN、SB_PAGEUP</param>
     /// <returns>成功返回TRUE</returns>
-    EckInline BOOL Scroll(int iOp) const noexcept
+    EckInline bool Scroll(int iOp) const noexcept
     {
         return HIWORD(SendMessageW(EM_SCROLL, iOp, 0));
     }
@@ -306,9 +306,9 @@ public:
         SendMessageW(EM_SCROLLCARET, 0, 0);
     }
 
-    EckInline BOOL SetCueBanner(PCWSTR psz, BOOL bShowAlways = TRUE) const noexcept
+    EckInline bool SetCueBanner(PCWSTR psz, bool bShowAlways = true) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETCUEBANNER, bShowAlways, (LPARAM)psz);
+        return (bool)SendMessageW(EM_SETCUEBANNER, bShowAlways, (LPARAM)psz);
     }
 
     EckInline void SetHandle(HLOCAL hLocal) const noexcept
@@ -337,7 +337,7 @@ public:
         SendMessageW(EM_SETMARGINS, uMask, MAKELPARAM(iLeftMargin, iRightMargin));
     }
 
-    EckInline void SetModify(BOOL bModify) const noexcept
+    EckInline void SetModify(bool bModify) const noexcept
     {
         SendMessageW(EM_SETMODIFY, bModify, 0);
     }
@@ -347,9 +347,9 @@ public:
         SendMessageW(EM_SETPASSWORDCHAR, chMask, 0);
     }
 
-    EckInline BOOL SetReadOnly(BOOL bReadOnly) const noexcept
+    EckInline bool SetReadOnly(bool bReadOnly) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETREADONLY, bReadOnly, 0);
+        return (bool)SendMessageW(EM_SETREADONLY, bReadOnly, 0);
     }
 
     EckInline void SetRect(_In_opt_ const RECT* prc) const noexcept
@@ -389,7 +389,7 @@ public:
     /// <param name="pszContent">文本</param>
     /// <param name="iIcon">图标类型，TTI_常量</param>
     /// <returns>成功返回TRUE</returns>
-    EckInline BOOL ShowBalloonTip(PCWSTR pszCaption, PCWSTR pszContent, int iIcon) const noexcept
+    EckInline bool ShowBalloonTip(PCWSTR pszCaption, PCWSTR pszContent, int iIcon) const noexcept
     {
         EDITBALLOONTIP ebt;
         ebt.cbStruct = sizeof(EDITBALLOONTIP);
@@ -397,12 +397,12 @@ public:
         ebt.pszText = pszContent;
         ebt.ttiIcon = iIcon;
 
-        return (BOOL)SendMessageW(EM_SHOWBALLOONTIP, 0, (LPARAM)&ebt);
+        return (bool)SendMessageW(EM_SHOWBALLOONTIP, 0, (LPARAM)&ebt);
     }
 
-    EckInline BOOL ShowBalloonTip(const EDITBALLOONTIP* pebt) const noexcept
+    EckInline bool ShowBalloonTip(const EDITBALLOONTIP* pebt) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SHOWBALLOONTIP, 0, (LPARAM)pebt);
+        return (bool)SendMessageW(EM_SHOWBALLOONTIP, 0, (LPARAM)pebt);
     }
 
 #if NTDDI_VERSION >= NTDDI_WIN10_RS5// 1809+
@@ -416,9 +416,9 @@ public:
         return (DWORD)SendMessageW(EM_GETEXTENDEDSTYLE, 0, 0);
     }
 
-    EckInline BOOL SetEndOfLine(EC_ENDOFLINE eEol) const noexcept
+    EckInline bool SetEndOfLine(EC_ENDOFLINE eEol) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETENDOFLINE, (WPARAM)eEol, 0);
+        return (bool)SendMessageW(EM_SETENDOFLINE, (WPARAM)eEol, 0);
     }
 
     EckInline EC_ENDOFLINE GetEndOfLine() const noexcept
@@ -426,7 +426,7 @@ public:
         return (EC_ENDOFLINE)SendMessageW(EM_GETENDOFLINE, 0, 0);
     }
 
-    EckInline void EnableSearchWeb(BOOL bEnable) const noexcept
+    EckInline void EnableSearchWeb(bool bEnable) const noexcept
     {
         SendMessageW(EM_ENABLESEARCHWEB, bEnable, 0);
     }
@@ -446,14 +446,14 @@ public:
         return (int)SendMessageW(EM_GETCARETINDEX, 0, 0);
     }
 
-    EckInline BOOL SetZoom(int nZoomNumerator, int nZoomDenominator) const noexcept
+    EckInline bool SetZoom(int nZoomNumerator, int nZoomDenominator) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETZOOM, nZoomNumerator, nZoomDenominator);
+        return (bool)SendMessageW(EM_SETZOOM, nZoomNumerator, nZoomDenominator);
     }
 
-    EckInline BOOL GetZoom(int* pnZoomNumerator, int* pnZoomDenominator) const noexcept
+    EckInline bool GetZoom(int* pnZoomNumerator, int* pnZoomDenominator) const noexcept
     {
-        return (BOOL)SendMessageW(EM_GETZOOM, (WPARAM)pnZoomNumerator, (LPARAM)pnZoomDenominator);
+        return (bool)SendMessageW(EM_GETZOOM, (WPARAM)pnZoomNumerator, (LPARAM)pnZoomDenominator);
     }
 
     EckInline int FileLineFromChar(int posChar) const noexcept
@@ -488,9 +488,9 @@ public:
     }
 #endif // NTDDI_VERSION >= NTDDI_WIN10_RS5
 
-    EckInline BOOL Undo() const noexcept
+    EckInline bool Undo() const noexcept
     {
-        return (BOOL)SendMessageW(EM_UNDO, 0, 0);
+        return (bool)SendMessageW(EM_UNDO, 0, 0);
     }
 
     EckInline void Paste() const noexcept
@@ -613,7 +613,7 @@ public:
     EckInline void AddText(PCWSTR pszText) const noexcept
     {
         SetSelection(-2, -1);
-        ReplaceSelection(pszText, FALSE);
+        ReplaceSelection(pszText, false);
     }
 
     void SetTransformMode(TransMode iTransformMode) const noexcept
@@ -710,7 +710,7 @@ inline CWindow::HSlot DdxBindEdit(CEdit& Ctrl, CWindow& Parent, Observable<CStri
         }, &Ctrl);
     return DdxpConnect<Detail::DdxFnEdit, MHI_DDX_EDIT>(Ctrl, Parent, Detail::DDXE_EDIT{ &o });
 }
-inline BOOL DdxUnbindEdit(CEdit& Ctrl, CWindow& Parent, Observable<CStringW>& o) noexcept
+inline bool DdxUnbindEdit(CEdit& Ctrl, CWindow& Parent, Observable<CStringW>& o) noexcept
 {
     o.ClearCallback();
     return DdxpDisconnect<Detail::DdxFnEdit, MHI_DDX_EDIT>(Ctrl, Parent);

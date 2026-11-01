@@ -34,7 +34,7 @@ inline const LDR_DATA_TABLE_ENTRY* FindModuleEntry(
     return nullptr;
 }
 
-inline BOOL GetModuleFile(void* pBase, CStringW& rsFileName) noexcept
+inline bool GetModuleFile(void* pBase, CStringW& rsFileName) noexcept
 {
     const CLoaderLockGuard _{};
     const auto pEntry = FindModuleEntry(pBase);
@@ -42,8 +42,8 @@ inline BOOL GetModuleFile(void* pBase, CStringW& rsFileName) noexcept
     {
         rsFileName.PushBack(pEntry->FullDllName.Buffer,
             pEntry->FullDllName.Length / sizeof(WCHAR));
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 ECK_NAMESPACE_END

@@ -311,7 +311,7 @@ inline HRESULT WicCreateIcon(
     if (FAILED(hr))
         return hr;
 
-    BOOL bDeleteMask{};
+    bool bDeleteMask{};
     if (!hbmMask)
     {
         UINT cx, cy;
@@ -325,11 +325,11 @@ inline HRESULT WicCreateIcon(
             DeleteObject(hbmColor);
             return HRESULT_FROM_WIN32(NaGetLastError());
         }
-        bDeleteMask = TRUE;
+        bDeleteMask = true;
     }
     const ICONINFO ii
     {
-        .fIcon = TRUE,
+        .fIcon = true,
         .hbmMask = hbmMask,
         .hbmColor = hbmColor
     };
@@ -499,7 +499,7 @@ namespace Detail
             return Gdiplus::Ok;
         }
 
-        static BOOL EncoderFromMime(
+        static bool EncoderFromMime(
             _In_z_ PCWSTR pszType, _Out_ CLSID& clsid) noexcept
         {
             clsid = {};
@@ -508,17 +508,17 @@ namespace Detail
             {
                 s_Lock.LeaveRead();
                 if (ReloadEncoders() != Gdiplus::Ok)
-                    return FALSE;
+                    return false;
                 s_Lock.EnterRead();
             }
 
-            BOOL b{};
+            bool b{};
             EckCounter(s_cEncoders, i)
             {
                 if (!wcscmp(s_pEncoders[i].MimeType, pszType))
                 {
                     clsid = s_pEncoders[i].Clsid;
-                    b = TRUE;
+                    b = true;
                     break;
                 }
             }
@@ -637,7 +637,7 @@ namespace Detail
     }
 }
 
-inline BOOL GdiSaveDib(
+inline bool GdiSaveDib(
     CByteBuffer& rb,
     void* pBits,
     size_t cbStride,
@@ -648,7 +648,7 @@ inline BOOL GdiSaveDib(
     UINT cPaletteImportant = 0) noexcept
 {
     if (cPaletteEntry && !pPalette)
-        return FALSE;
+        return false;
     auto p = Detail::GdiSaveDibHeader(rb, cbStride, cx, cy,
         cBitPerPixel, cPaletteEntry, cPaletteImportant);
     // 制颜色表
@@ -660,14 +660,14 @@ inline BOOL GdiSaveDib(
     }
     // 制像素
     memcpy(p, pBits, cbStride * Abs(cy));
-    return TRUE;
+    return true;
 }
 
-inline BOOL GdiSaveDib(CByteBuffer& rb, HBITMAP hDib) noexcept
+inline bool GdiSaveDib(CByteBuffer& rb, HBITMAP hDib) noexcept
 {
     DIBSECTION ds;
     if (!GetObjectW(hDib, sizeof(ds), &ds))
-        return FALSE;
+        return false;
 
     auto p = Detail::GdiSaveDibHeader(
         rb, ds.dsBm.bmWidthBytes,
@@ -689,7 +689,7 @@ inline BOOL GdiSaveDib(CByteBuffer& rb, HBITMAP hDib) noexcept
         p,
         ds.dsBm.bmBits,
         ds.dsBm.bmWidthBytes * Abs(ds.dsBmih.biHeight));
-    return TRUE;
+    return true;
 }
 
 /// <summary>
@@ -701,15 +701,15 @@ inline BOOL GdiSaveDib(CByteBuffer& rb, HBITMAP hDib) noexcept
 /// <param name="hDC">DC，未传入则使用屏幕DC</param>
 /// <param name="bUnpremul">是否反预乘</param>
 /// <returns>成功返回TRUE，失败返回FALSE，已设置LastError</returns>
-inline BOOL GdiSaveDdbAs32bppDib(
+inline bool GdiSaveDdbAs32bppDib(
     CByteBuffer& rb,
     HBITMAP hDdb,
     HDC hDC = nullptr,
-    BOOL bUnpremul = FALSE) noexcept
+    bool bUnpremul = false) noexcept
 {
     BITMAP bm;
     if (!GetObjectW(hDdb, sizeof(bm), &bm))
-        return FALSE;
+        return false;
 
     auto p = Detail::GdiSaveDibHeader(
         rb, bm.bmWidth * 4,
@@ -721,11 +721,11 @@ inline BOOL GdiSaveDdbAs32bppDib(
     bi.bmiHeader.biHeight = -bm.bmHeight;
     bi.bmiHeader.biPlanes = 1;
     bi.bmiHeader.biBitCount = 32;
-    BOOL bDeleteDC{};
+    bool bDeleteDC{};
     if (!hDC)
     {
         hDC = GetDC(nullptr);
-        bDeleteDC = TRUE;
+        bDeleteDC = true;
     }
     const auto bRet = GetDIBits(hDC, hDdb, 0,
         bm.bmHeight, p, &bi, DIB_RGB_COLORS);

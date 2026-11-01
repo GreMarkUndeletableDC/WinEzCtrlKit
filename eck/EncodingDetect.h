@@ -125,7 +125,7 @@ inline UINT EcdDetectCodePage(
     if ((uFlags & ECD_DISABLE_TIS_620) &&
         TcsEqualI(pszName, "TIS-620"))
     {
-        BOOL bValid;
+        bool bValid;
         (void)LcsUtf8CountChar((PCSTR)p, (int)cb, bValid);
         if (bValid)
             cp = CP_UTF8;
@@ -140,7 +140,7 @@ inline UINT EcdDetectCodePage(
 
 // 将已知编码的字节流转换为另一种编码
 // 成功返回TRUE，失败返回FALSE
-inline BOOL EcdConvert(
+inline bool EcdConvert(
     PCVOID p, size_t cb,
     UINT cpSrc, UINT cpDst,
     CByteBuffer& rbDst, CByteBuffer& rbWork,
@@ -150,28 +150,28 @@ inline BOOL EcdConvert(
     int cchU16 = MultiByteToWideChar(cpSrc, uFlagsMb2Wc,
         (PCCH)p, (int)cb, nullptr, 0);
     if (!cchU16)
-        return FALSE;
+        return false;
     if (cpDst == CP_UTF16LE || cpDst == CP_UTF16BE)
     {
         const auto pNew = (PWCH)rbDst.PushBackNoExtra((cchU16 + 1) * sizeof(WCHAR));
         cchU16 = MultiByteToWideChar(cpSrc, uFlagsMb2Wc,
             (PCCH)p, (int)cb, pNew, cchU16);
         if (!cchU16)
-            return FALSE;
+            return false;
         *(pNew + cchU16) = 0;
         if (cpDst == CP_UTF16BE)
             LcsUtf16ReverseByteOrder(pNew, cchU16);
-        return TRUE;
+        return true;
     }
     rbWork.ReSize(cchU16 * sizeof(WCHAR));
     cchU16 = MultiByteToWideChar(cpSrc, uFlagsMb2Wc,
         (PCCH)p, (int)cb, (PWCH)rbWork.Data(), cchU16);
     if (!cchU16)
-        return FALSE;
+        return false;
     if (cpDst == CP_UTF32LE || cpDst == CP_UTF32BE)
     {
         auto pU32 = (UINT*)rbDst.PushBackNoExtra(cchU16 * sizeof(UINT));
-        BOOL bValid;
+        bool bValid;
         const auto cchU32 = LcsUtf16LeToUtf32(
             (PCWSTR)rbWork.Data(), cchU16,
             pU32, bValid, (cpDst == CP_UTF32LE));
@@ -183,40 +183,40 @@ inline BOOL EcdConvert(
     int cbMb = WideCharToMultiByte(cpDst, uFlagsWc2Mb,
         (PCWCH)rbWork.Data(), cchU16, nullptr, 0, nullptr, nullptr);
     if (!cbMb)
-        return FALSE;
+        return false;
     rbDst.ReSize(cbMb + 1);
     cbMb = WideCharToMultiByte(cpDst, uFlagsWc2Mb,
         (PCWCH)rbWork.Data(), cchU16, (PCH)rbDst.Data(), cbMb, nullptr, nullptr);
     if (!cbMb)
-        return FALSE;
+        return false;
     *((PCH)rbDst.Data() + cbMb) = 0;
-    return TRUE;
+    return true;
 }
 
 // 检查rbDst中的字节流编码，如果与目标编码不同则执行转换
 // 成功返回TRUE，失败返回FALSE
-inline BOOL EcdLoadTextStream(UINT cpDst, CByteBuffer& rbDst) noexcept
+inline bool EcdLoadTextStream(UINT cpDst, CByteBuffer& rbDst) noexcept
 {
     if (rbDst.IsEmpty())
-        return TRUE;
+        return true;
     const auto cpSrc = EcdDetectCodePage(rbDst.Data(), rbDst.Size());
     if (!cpSrc || cpSrc == cpDst)
-        return TRUE;
+        return true;
     CByteBuffer rb, rbWork;
     if (!EcdConvert(rbDst.Data(), rbDst.Size(), cpSrc, cpDst, rb, rbWork))
-        return FALSE;
+        return false;
     rbDst = std::move(rb);
-    return TRUE;
+    return true;
 }
 
 // 读入指定文件，如果文件内容编码与目标编码不同则执行转换
 // 成功返回TRUE，失败返回FALSE
-inline BOOL EcdLoadTextFile(UINT cpDst, CByteBuffer& rbDst,
+inline bool EcdLoadTextFile(UINT cpDst, CByteBuffer& rbDst,
     PCWSTR pszFile, NTSTATUS* pnts = nullptr) noexcept
 {
     rbDst = ReadInFile(pszFile, pnts);
     if (rbDst.IsEmpty())
-        return TRUE;
+        return true;
     return EcdLoadTextStream(cpDst, rbDst);
 }
 ECK_NAMESPACE_END

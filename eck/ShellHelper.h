@@ -39,7 +39,7 @@ inline HRESULT CreateShortcut(
     ComPtr<IPersistFile> pPersistFile;
     if (FAILED(hr = pShellLink.As(pPersistFile)))
         return hr;
-    return pPersistFile->Save(pszLinkFile, TRUE);
+    return pPersistFile->Save(pszLinkFile, true);
 }
 
 namespace Detail
@@ -158,7 +158,7 @@ CleanupAndRet:
     return hr;
 }
 
-inline HRESULT OpenInExplorer(PCWSTR pszFile, BOOL bDir = FALSE) noexcept
+inline HRESULT OpenInExplorer(PCWSTR pszFile, bool bDir = false) noexcept
 {
     PIDLIST_ABSOLUTE pIdlFolder;
     HRESULT hr;
@@ -186,7 +186,7 @@ enum class AutoRunType : UINT
 };
 ECK_ENUM_BIT_FLAGS(AutoRunType);
 
-inline HRESULT SetAutoRun(PCWSTR pszId, BOOL bEnable,
+inline HRESULT SetAutoRun(PCWSTR pszId, bool bEnable,
     AutoRunType eType = AutoRunType::LocalMachine,
     PCWCH pszFile = nullptr, int cchFile = -1) noexcept
 {

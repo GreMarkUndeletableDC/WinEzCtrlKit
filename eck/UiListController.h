@@ -28,7 +28,7 @@ enum class Property
     Image,
 
     SystemState,    // TState
-    SystemSelection,// BOOL
+    SystemSelection,// bool
 
     UiTextLayout,   // ComPtr<IDWriteTextLayout>
     UiPosition,     // TCoord
@@ -53,7 +53,7 @@ struct Index
     int Item{ -1 };
     int Group{ -1 };
 
-    EckInlineNdCe BOOL IsValid() const noexcept { return Item >= 0 || Group >= 0; }
+    EckInlineNdCe bool IsValid() const noexcept { return Item >= 0 || Group >= 0; }
 
     EckInlineNdCe bool operator==(const Index& x) const noexcept
     {
@@ -101,9 +101,9 @@ inline std::wstring_view AptWrapAnyText(const std::any& Data) noexcept
 template<CcpNumber TCoord>
 struct IHostT
 {
-    virtual TCoord LchSccGetPosition(BOOL bVert) const noexcept = 0;
-    virtual void LchSccSetRange(BOOL bVert, TCoord Min, TCoord Max) noexcept = 0;
-    virtual void LchSccScrollDelta(BOOL bVert, TCoord d, BOOL bSmooth) noexcept = 0;
+    virtual TCoord LchSccGetPosition(bool bVert) const noexcept = 0;
+    virtual void LchSccSetRange(bool bVert, TCoord Min, TCoord Max) noexcept = 0;
+    virtual void LchSccScrollDelta(bool bVert, TCoord d, bool bSmooth) noexcept = 0;
 
     virtual TCoord LchGetHeight() const noexcept = 0;
     virtual TCoord LchGetWidth() const noexcept = 0;
@@ -187,7 +187,7 @@ struct IAdapterT
     // 当被选择项目清除时，对该项目以值FALSE调用LcaSet
 
     virtual void LcaGet(const Index& idx, int idxCol, Property eProp, std::any& Data) const noexcept = 0;
-    virtual void LcaSet(const Index& idx, int idxCol, Property eProp, std::any& Data, BOOL bMove = FALSE) noexcept = 0;
+    virtual void LcaSet(const Index& idx, int idxCol, Property eProp, std::any& Data, bool bMove = false) noexcept = 0;
 
     // 某列宽度改变，或仅单列列表的视图宽度改变时调用此方法
     // 适配器应在此方法中清理与可用区域相关的缓存
@@ -358,35 +358,35 @@ private:
 
     BITBOOL m_bGroup : 1{};
     BITBOOL m_bGroupImage : 1{};
-    BITBOOL m_bEnableDragSel : 1{ TRUE };
+    BITBOOL m_bEnableDragSel : 1{ true };
     BITBOOL m_bVarItemHeight : 1{};
     BITBOOL m_bEnableHeader : 1{};
-    BITBOOL m_bClearSelInSpace : 1{ TRUE };
+    BITBOOL m_bClearSelInSpace : 1{ true };
 
     BITBOOL m_bDraggingSel : 1{};
     BITBOOL m_bPendingDragSel : 1{};
 
     void DragBegin(TCoord x, TCoord y, WPARAM wParam) noexcept
     {
-        m_bDraggingSel = TRUE;
-        m_bPendingDragSel = FALSE;
-        m_xDragSelStart = x + m_pHost->LchSccGetPosition(FALSE);
-        m_yDragSelStart = y + m_pHost->LchSccGetPosition(TRUE);
+        m_bDraggingSel = true;
+        m_bPendingDragSel = false;
+        m_xDragSelStart = x + m_pHost->LchSccGetPosition(false);
+        m_yDragSelStart = y + m_pHost->LchSccGetPosition(true);
         m_dCursorToItemMax = 0;
         m_rcDragSel = {};
         if (!(wParam & (MK_CONTROL | MK_SHIFT)))
-            ItmDeselectAll(TRUE);
+            ItmDeselectAll(true);
     }
     void DragEnd() noexcept
     {
         if (m_bPendingDragSel)
         {
-            m_bPendingDragSel = FALSE;
+            m_bPendingDragSel = false;
             return;
         }
         else if (!m_bDraggingSel)
             return;
-        m_bPendingDragSel = m_bDraggingSel = FALSE;
+        m_bPendingDragSel = m_bDraggingSel = false;
         const auto rc = GetDragSelectRect();
         m_pHost->LchInvalidateRect(&rc);
     }
@@ -395,8 +395,8 @@ private:
     {
         EckAssert(m_bDraggingSel);
 
-        const auto dx = m_pHost->LchSccGetPosition(FALSE);
-        const auto dy = m_pHost->LchSccGetPosition(TRUE);
+        const auto dx = m_pHost->LchSccGetPosition(false);
+        const auto dy = m_pHost->LchSccGetPosition(true);
         TRect rcOld{ m_rcDragSel }, rcJudge, rcItem;
         OffsetRect(rcOld, -dx, -dy);
         m_rcDragSel = MakeRect<TRect>(x, y, m_xDragSelStart - dx, m_yDragSelStart - dy);
@@ -407,19 +407,19 @@ private:
             [&](const FOR_ITEM& e)
             {
                 GetItemRect(e.idx, rcItem);
-                const BOOL bIntersectOld = IsRectsIntersect(rcItem, rcOld);
-                const BOOL bIntersectNew = IsRectsIntersect(rcItem, m_rcDragSel);
+                const bool bIntersectOld = IsRectsIntersect(rcItem, rcOld);
+                const bool bIntersectNew = IsRectsIntersect(rcItem, m_rcDragSel);
                 if (wParam & MK_CONTROL)
                 {
                     if (bIntersectOld != bIntersectNew)
-                        ItmpToggleSelect(e.idx, Data, TRUE);// 翻转选中状态
+                        ItmpToggleSelect(e.idx, Data, true);// 翻转选中状态
                 }
                 else
                 {
                     if (bIntersectOld && !bIntersectNew)
-                        ItmpSelect(e.idx, Data, FALSE, TRUE);// 先前选中但是现在未选中，清除选中状态
+                        ItmpSelect(e.idx, Data, false, true);// 先前选中但是现在未选中，清除选中状态
                     else if (!bIntersectOld && bIntersectNew)
-                        ItmpSelect(e.idx, Data, TRUE, TRUE);// 先前未选中但是现在选中，设置选中状态
+                        ItmpSelect(e.idx, Data, true, true);// 先前未选中但是现在选中，设置选中状态
                     // Mark设为离光标最远的选中项
                     if (bIntersectNew && !(wParam & (MK_CONTROL | MK_SHIFT)))
                     {
@@ -438,7 +438,7 @@ private:
             [&](const FOR_GROUP& e)
             {
 
-            }, rcJudge, FALSE);
+            }, rcJudge, false);
         InflateRect(rcJudge, 1.f, 1.f);
         m_pHost->LchInvalidateRect(&rcJudge);
         OffsetRect(m_rcDragSel, dx, dy);
@@ -460,7 +460,7 @@ public:
 
     void ReCalculateTopItem() noexcept
     {
-        const auto posV = m_pHost->LchSccGetPosition(TRUE);
+        const auto posV = m_pHost->LchSccGetPosition(true);
         switch (m_eView)
         {
         case View::List:
@@ -546,13 +546,13 @@ public:
             cyContent = 0;
             break;
         }
-        m_pHost->LchSccSetRange(TRUE, -MtRealTopExtra(), cyContent + m_cyBottomExtra);
+        m_pHost->LchSccSetRange(true, -MtRealTopExtra(), cyContent + m_cyBottomExtra);
     }
 
     void ReCalculateScrollH() noexcept
     {
         if (m_eView == View::List)
-            m_pHost->LchSccSetRange(FALSE, 0, m_pHost->LchGetListContentWidth());
+            m_pHost->LchSccSetRange(false, 0, m_pHost->LchGetListContentWidth());
     }
 
     void GroupFromY(
@@ -583,7 +583,7 @@ public:
         _Out_opt_ TCoord* pyItem = nullptr,
         _Out_opt_ TCoord* pyGroup = nullptr) const noexcept
     {
-        const auto posV = m_pHost->LchSccGetPosition(TRUE);
+        const auto posV = m_pHost->LchSccGetPosition(true);
         y += posV;
         Index idx{ InvalidIndex };
         if (m_bVarItemHeight)
@@ -652,7 +652,7 @@ public:
     void ForEachItem(
         std::invocable<const FOR_ITEM&> auto&& FnItem,
         std::invocable<const FOR_GROUP&> auto&& FnGroup,
-        const TRect& rc, BOOL bPaint) noexcept
+        const TRect& rc, bool bPaint) noexcept
     {
         if (m_bGroup)
         {
@@ -693,12 +693,12 @@ public:
 
     void GetItemRect(Index idx, _Out_ TRect& rc) const noexcept
     {
-        const auto posV = m_pHost->LchSccGetPosition(TRUE);
+        const auto posV = m_pHost->LchSccGetPosition(true);
         switch (m_eView)
         {
         case View::List:
         {
-            const auto posH = m_pHost->LchSccGetPosition(FALSE);
+            const auto posH = m_pHost->LchSccGetPosition(false);
             rc.left = -posH;
             rc.right = rc.left + m_pHost->LchGetListContentWidth();
             if (m_bVarItemHeight)
@@ -735,13 +735,13 @@ public:
         {
         case View::List:
         {
-            const auto posH = m_pHost->LchSccGetPosition(FALSE);
+            const auto posH = m_pHost->LchSccGetPosition(false);
             rc.left = -posH;
             rc.right = rc.left + std::max(
                 m_pHost->LchGetListContentWidth(),
                 m_pHost->LchGetWidth());
             rc.top = m_pAdapter->AptListGetGroupTop(idxGroup) -
-                m_pHost->LchSccGetPosition(TRUE);
+                m_pHost->LchSccGetPosition(true);
             rc.bottom = rc.top + m_cyGroupHeader;
         }
         break;
@@ -819,7 +819,7 @@ public:
         return InvalidIndex;
     }
 
-    void InvalidateItem(const Index& idx, BOOL bTestBounds = FALSE) noexcept
+    void InvalidateItem(const Index& idx, bool bTestBounds = false) noexcept
     {
         TRect rc;
         if (idx.Item < 0)
@@ -873,7 +873,7 @@ public:
         if (m_eSelection == Selection::Multiple &&
             m_bEnableDragSel &&
             !idx.IsValid())
-            m_bPendingDragSel = TRUE;
+            m_bPendingDragSel = true;
 
         if (!m_bClearSelInSpace && !idx.IsValid())
             return;
@@ -894,12 +894,12 @@ public:
                 const Index idxNew{ m_idxSel, m_idxSelItemGroup };
                 if (idxNew.IsValid())
                 {
-                    std::any Data{ (BOOL)TRUE };
+                    std::any Data{ true };
                     m_pAdapter->LcaSet(idxNew, 0, Property::SystemSelection, Data);
                 }
                 else if (idx.IsValid())// 选中被清除
                 {
-                    std::any Data{ (BOOL)FALSE };
+                    std::any Data{ false };
                     m_pAdapter->LcaSet(idx, 0, Property::SystemSelection, Data);
                 }
             }
@@ -911,13 +911,13 @@ public:
                 std::any Data{};
                 if (uMk & MK_CONTROL)
                 {
-                    ItmpToggleSelect(idx, Data, TRUE);
+                    ItmpToggleSelect(idx, Data, true);
                     m_idxMark = idx.Item;
                     m_idxMarkItemGroup = idx.Group;
                 }
                 else if (uMk & MK_SHIFT)
                 {
-                    ItmDeselectAll(TRUE);
+                    ItmDeselectAll(true);
                     if (m_idxMark < 0)
                         goto CommonClick;
                     if (m_bGroup)
@@ -941,7 +941,7 @@ public:
                             const auto j0 = std::min(idx0, idx1);
                             const auto j1 = std::max(idx0, idx1);
                             for (int j = j0; j <= j1; ++j)
-                                ItmpSelect({ j, idxGroup0 }, Data, TRUE, TRUE);
+                                ItmpSelect({ j, idxGroup0 }, Data, true, true);
                         }
                         else
                         {
@@ -951,7 +951,7 @@ public:
                                 const auto j1 = (i == idxGroup1) ?
                                     idx1 : (m_pAdapter->LcaGetCount(i) - 1);
                                 for (int j = j0; j <= j1; ++j)
-                                    ItmpSelect({ j, i }, Data, TRUE, TRUE);
+                                    ItmpSelect({ j, i }, Data, true, true);
                             }
                         }
                     }
@@ -960,14 +960,14 @@ public:
                         const auto idx0 = std::min(m_idxMark, idx.Item);
                         const auto idx1 = std::max(m_idxMark, idx.Item);
                         for (int i = idx0; i <= idx1; ++i)
-                            ItmpSelect({ i, -1 }, Data, TRUE, TRUE);
+                            ItmpSelect({ i, -1 }, Data, true, true);
                     }
                 }
                 else
                 {
-                    ItmDeselectAll(TRUE);
+                    ItmDeselectAll(true);
                 CommonClick:
-                    ItmpSelect(idx, Data, TRUE, TRUE);
+                    ItmpSelect(idx, Data, true, true);
                     m_idxMark = idx.Item;
                     m_idxMarkItemGroup = idx.Group;
                 }
@@ -981,7 +981,7 @@ public:
         if (m_bPendingDragSel &&
             !m_bDraggingSel &&
             !(uMk & (MK_CONTROL | MK_SHIFT)))
-            ItmDeselectAll(TRUE);
+            ItmDeselectAll(true);
         DragEnd();
     }
     void OnMouseLeave() noexcept
@@ -1059,7 +1059,7 @@ public:
         }
     }
 private:
-    BOOL ItmpSelect(Index idx, std::any& Data, BOOL bSelect, BOOL bRedraw) noexcept
+    bool ItmpSelect(Index idx, std::any& Data, bool bSelect, bool bRedraw) noexcept
     {
         m_pAdapter->LcaGet(idx, 0, Property::SystemState, Data);
         if (Data.type() == typeid(TState))
@@ -1068,23 +1068,23 @@ private:
             if (bSelect)
             {
                 if (u & LIF_SELECTED)
-                    return FALSE;
+                    return false;
                 u |= LIF_SELECTED;
             }
             else
             {
                 if (!(u & LIF_SELECTED))
-                    return FALSE;
+                    return false;
                 u &= ~LIF_SELECTED;
             }
             m_pAdapter->LcaSet(idx, 0, Property::SystemState, Data);
             if (bRedraw)
                 InvalidateItem(idx);
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
-    void ItmpToggleSelect(Index idx, std::any& Data, BOOL bRedraw) noexcept
+    void ItmpToggleSelect(Index idx, std::any& Data, bool bRedraw) noexcept
     {
         m_pAdapter->LcaGet(idx, 0, Property::SystemState, Data);
         if (Data.type() == typeid(TState))
@@ -1097,7 +1097,7 @@ private:
         }
     }
 public:
-    void ItmDeselectAll(BOOL bRedraw) noexcept
+    void ItmDeselectAll(bool bRedraw) noexcept
     {
         std::any Data{};
         if (m_eSelection == Selection::Single)
@@ -1108,7 +1108,7 @@ public:
             {
                 if (bRedraw)
                     InvalidateItem(idxOld);
-                Data = BOOL{ FALSE };
+                Data = bool{ false };
                 m_pAdapter->LcaSet(idxOld, 0, Property::SystemSelection, Data);
             }
             return;
@@ -1121,10 +1121,10 @@ public:
             for (idx.Group = 0; idx.Group < cGroup; ++idx.Group)
             {
                 idx.Item = -1;
-                ItmpSelect(idx, Data, FALSE, bRedraw);
+                ItmpSelect(idx, Data, false, bRedraw);
                 const auto cItem = m_pAdapter->LcaGetCount(idx.Group);
                 for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
-                    ItmpSelect(idx, Data, FALSE, bRedraw);
+                    ItmpSelect(idx, Data, false, bRedraw);
             }
         }
         else
@@ -1132,11 +1132,11 @@ public:
             const auto cItem = m_pAdapter->LcaGetCount().Item;
             Index idx{};
             for (idx.Item = 0; idx.Item < cItem; ++idx.Item)
-                ItmpSelect(idx, Data, FALSE, bRedraw);
+                ItmpSelect(idx, Data, false, bRedraw);
         }
     }
 
-    void ItmSelect(Index idx, BOOL bSelect = TRUE, BOOL bRedraw = TRUE) noexcept
+    void ItmSelect(Index idx, bool bSelect = true, bool bRedraw = true) noexcept
     {
         if (m_eSelection == Selection::Single)
         {
@@ -1154,12 +1154,12 @@ public:
 
             if (idxNew.IsValid() && idxNew != idxOld)
             {
-                std::any Data{ BOOL{ TRUE } };
+                std::any Data{ bool{ true } };
                 m_pAdapter->LcaSet(idxNew, 0, Property::SystemSelection, Data);
             }
             else if (idxOld.IsValid() && idxOld != idxNew)
             {
-                std::any Data{ BOOL{ FALSE } };
+                std::any Data{ bool{ false } };
                 m_pAdapter->LcaSet(idxOld, 0, Property::SystemSelection, Data);
             }
         }
@@ -1170,7 +1170,7 @@ public:
         }
     }
 
-    BOOL ItmEnsureVisible(Index idx, BOOL bSmooth) noexcept
+    bool ItmEnsureVisible(Index idx, bool bSmooth) noexcept
     {
         TRect rc;
         if (m_bGroup && idx.Item < 0)
@@ -1187,15 +1187,15 @@ public:
         else if (rc.bottom > cy - MtGetBottomExtra())
             d = rc.bottom - cy + MtGetBottomExtra();
         else
-            return FALSE;
+            return false;
 
-        m_pHost->LchSccScrollDelta(TRUE, d, bSmooth);
+        m_pHost->LchSccScrollDelta(true, d, bSmooth);
         if (!bSmooth)
         {
             ReCalculateTopItem();
             m_pHost->LchInvalidateRect(nullptr);
         }
-        return TRUE;
+        return true;
     }
 
     EckInlineNdCe TCoord MtRealTopExtra() const noexcept
@@ -1226,8 +1226,8 @@ public:
     EckInlineCe void MtSetHeaderHeight(TCoord v) noexcept { m_cyHeader = v; }
     EckInlineNdCe TCoord MtGetHeaderHeight() const noexcept { return m_cyHeader; }
 
-    EckInlineCe void SetUseHeader(BOOL b) noexcept { m_bEnableHeader = b; }
-    EckInlineNdCe BOOL GetUseHeader() const noexcept { return m_bEnableHeader; }
+    EckInlineCe void SetUseHeader(bool b) noexcept { m_bEnableHeader = b; }
+    EckInlineNdCe bool GetUseHeader() const noexcept { return m_bEnableHeader; }
 
     EckInlineNdCe View GetView() const noexcept { return m_eView; }
     void SetView(View eView) noexcept
@@ -1241,25 +1241,25 @@ public:
         m_eSelection = eSel;
     }
 
-    EckInlineNdCe BOOL IsDraggingSelect() const noexcept { return m_bDraggingSel; }
+    EckInlineNdCe bool IsDraggingSelect() const noexcept { return m_bDraggingSel; }
     // WARNING 仅当IsDraggingSelect()返回TRUE时该函数有效
     EckInlineNdCe TRect GetDragSelectRect() const noexcept
     {
         auto rc{ m_rcDragSel };
         OffsetRect(rc,
-            -m_pHost->LchSccGetPosition(FALSE),
-            -m_pHost->LchSccGetPosition(TRUE));
+            -m_pHost->LchSccGetPosition(false),
+            -m_pHost->LchSccGetPosition(true));
         return rc;
     }
 
-    EckInlineNdCe BOOL GetGroup() const noexcept { return m_bGroup; }
-    void SetGroup(BOOL bGroup) noexcept
+    EckInlineNdCe bool GetGroup() const noexcept { return m_bGroup; }
+    void SetGroup(bool bGroup) noexcept
     {
         m_bGroup = bGroup;
     }
 
-    EckInlineNdCe BOOL GetClearSelectionInSpace() const noexcept { return m_bClearSelInSpace; }
-    void SetClearSelectionInSpace(BOOL b) noexcept { m_bClearSelInSpace = b; }
+    EckInlineNdCe bool GetClearSelectionInSpace() const noexcept { return m_bClearSelInSpace; }
+    void SetClearSelectionInSpace(bool b) noexcept { m_bClearSelInSpace = b; }
 };
 ECK_LC_NAMESPACE_END
 ECK_UIBASIC_NAMESPACE_END

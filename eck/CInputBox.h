@@ -131,7 +131,7 @@ private:
 
     void OnCopy() noexcept
     {
-        const BOOL bChs = (LANGIDFROMLCID(GetThreadLocale()) ==
+        const bool bChs = (LANGIDFROMLCID(GetThreadLocale()) ==
             MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
 
         constexpr PCWSTR pszDiv = L"---------------------------\r\n";
@@ -156,7 +156,7 @@ private:
         SetClipboardString(Handle, rs.Data(), rs.Size());
     }
 public:
-    BOOL PreTranslateMessage(const MSG& Msg) noexcept override
+    bool PreTranslateMessage(const MSG& Msg) noexcept override
     {
         if (Msg.message == WM_KEYDOWN)
         {
@@ -177,7 +177,7 @@ public:
         return __super::PreTranslateMessage(Msg);
     }
 
-    BOOL OnInitializeDialog(HWND hFocus, LPARAM lParam) noexcept override
+    bool OnInitializeDialog(HWND hFocus, LPARAM lParam) noexcept override
     {
         UpdateDpi(GetDpi(Handle));
         m_hFont = DftCreate(m_iDpi);
@@ -190,7 +190,7 @@ public:
             WS_CHILD | ES_WANTRETURN;
         if (m_pOpt->uFlags & IPBF_MULTILINE)
         {
-            m_ED.SetMultiLine(TRUE);
+            m_ED.SetMultiLine(true);
             dwEDStyle |= WS_VSCROLL;
         }
         m_ED.Create(m_pOpt->pszInitContent, dwEDStyle, WS_EX_CLIENTEDGE,
@@ -198,7 +198,7 @@ public:
         if (m_pOpt->eInputMode != CEditExt::InputMode::ReadOnly)
             m_ED.SetInputMode(m_pOpt->eInputMode);
 
-        const BOOL bChs = (LANGIDFROMLCID(GetThreadLocale()) ==
+        const bool bChs = (LANGIDFROMLCID(GetThreadLocale()) ==
             MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED));
         m_BTOk.Create(bChs ? L"确认输入(&O)" : L"&OK",
             WS_TABSTOP | WS_GROUP | WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 0,
@@ -220,7 +220,7 @@ public:
                 (IsBitSet(m_pOpt->uFlags,IPBF_MULTILINE) ?
                     DpiScale(100, m_iDpi) : m_cySingleLineText)
             };
-            DaAdjustWindowRectEx(&rc, GetStyle(), FALSE, GetExStyle(), m_iDpi);
+            DaAdjustWindowRectEx(&rc, GetStyle(), false, GetExStyle(), m_iDpi);
 
             POINT pt;
             if (IsBitSet(m_pOpt->uFlags, IPBF_CENTERPARENT))
@@ -238,7 +238,7 @@ public:
         ApplyWindowFont(Handle, m_hFont);
         Show(SW_SHOW);
         SetFocus(m_ED.Handle);
-        return FALSE;
+        return false;
     }
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
@@ -309,7 +309,7 @@ public:
 
         case WM_COPY:
             OnCopy();
-            return TRUE;
+            return true;
 
         case WM_DESTROY:
         {
@@ -327,13 +327,13 @@ public:
     void OnOk(HWND hCtrl) noexcept override
     {
         m_pOpt->rsInput = m_ED.GetText();
-        EndDialog(TRUE);
+        EndDialog(true);
     }
 
     void OnCancel(HWND hCtrl) noexcept override
     {
         m_pOpt->rsInput = CStringW{};
-        EndDialog(FALSE);
+        EndDialog(false);
     }
 
     INT_PTR CreateModalDialog(HWND hParent, void* pData = nullptr) noexcept override
@@ -342,7 +342,7 @@ public:
         {
             EckDbgPrint(L"** WARNING ** CInputBox::CreateModalDialog: pData is nullptr.");
             EckDbgBreak();
-            return FALSE;
+            return false;
         }
         m_pOpt = (INPUTBOXOPT*)pData;
         const UINT uDlgFlags = (m_pOpt->uFlags & IPBF_FIXWIDTH) ?
@@ -360,8 +360,8 @@ public:
     }
 };
 
-inline BOOL InputBox(CStringW& rs, HWND hParent, PCWSTR pszMainTip, PCWSTR pszTip = nullptr,
-    PCWSTR pszInitContent = nullptr, PCWSTR pszTitle = nullptr, BOOL bMultiLine = FALSE,
+inline bool InputBox(CStringW& rs, HWND hParent, PCWSTR pszMainTip, PCWSTR pszTip = nullptr,
+    PCWSTR pszInitContent = nullptr, PCWSTR pszTitle = nullptr, bool bMultiLine = false,
     CEditExt::InputMode eInputMode = CEditExt::InputMode::Normal) noexcept
 {
     INPUTBOXOPT Opt{};
@@ -375,8 +375,8 @@ inline BOOL InputBox(CStringW& rs, HWND hParent, PCWSTR pszMainTip, PCWSTR pszTi
     if (ib.CreateModalDialog(hParent, &Opt))
     {
         rs = std::move(Opt.rsInput);
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 ECK_NAMESPACE_END

@@ -34,8 +34,8 @@ protected:
     BITBOOL m_bDisabled : 1{};
     BITBOOL m_bHasFocus : 1{};
 
-    BITBOOL m_bAutoDropSize : 1{ TRUE };    // 自动调整下拉框大小
-    BITBOOL m_bMatchEditToItem : 1{ TRUE }; // 当编辑框内容改变时，同步选中匹配的项
+    BITBOOL m_bAutoDropSize : 1{ true };    // 自动调整下拉框大小
+    BITBOOL m_bMatchEditToItem : 1{ true }; // 当编辑框内容改变时，同步选中匹配的项
 
     View m_eView{ View::DropDown };
     AnimateStyle m_eAnimate{ AnimateStyle::Blend };
@@ -50,7 +50,7 @@ protected:
         return DaGetSystemMetrics(SM_CXVSCROLL, m_iDpi);
     }
 
-    void PositionEdit(BOOL bShow = TRUE) noexcept
+    void PositionEdit(bool bShow = true) noexcept
     {
         EckAssert(m_pED && m_eView == View::DropDownEdit);
         RCWH rc;
@@ -175,7 +175,7 @@ protected:
             if (GetFocus() == pWnd->Handle)
                 break;
             Ctx.Processed();// Eat it.
-            m_bHasFocus = TRUE;
+            m_bHasFocus = true;
             SetFocus(pWnd->Handle);
             m_pED->SelectAll();
             Redraw();
@@ -184,7 +184,7 @@ protected:
         return 0;
     }
 public:
-    BOOL PreTranslateMessage(const MSG& Msg) noexcept override
+    bool PreTranslateMessage(const MSG& Msg) noexcept override
     {
         if (Msg.message == WM_MOUSEWHEEL && !m_bDrop)
         {
@@ -231,7 +231,7 @@ public:
             {
                 if (m_eView == View::DropDown)
                 {
-                    m_bHot = TRUE;
+                    m_bHot = true;
                     Redraw();
                 }
                 else
@@ -245,7 +245,7 @@ public:
                     };
                     if (PointInRect(rc, ECK_GET_PT_LPARAM(lParam)))
                     {
-                        m_bHot = TRUE;
+                        m_bHot = true;
                         Redraw();
                     }
                 }
@@ -263,7 +263,7 @@ public:
         {
             if (m_bHot)
             {
-                m_bHot = FALSE;
+                m_bHot = false;
                 Redraw();
             }
         }
@@ -352,9 +352,9 @@ public:
                     {
                         const auto rs = m_pED->GetText();
                         const auto idx = m_LB.SearchItem(rs.Data(), rs.Size(), LBN_SF_WHOLE);
-                        m_LB.SetGenerateItemNotify(FALSE);
+                        m_LB.SetGenerateItemNotify(false);
                         m_LB.SetCurrentSelection(idx);
-                        m_LB.SetGenerateItemNotify(TRUE);
+                        m_LB.SetGenerateItemNotify(true);
                         Redraw();
                     }
                     break;
@@ -365,7 +365,7 @@ public:
         case WM_SETFOCUS:
             if (!m_bHasFocus)
             {
-                m_bHasFocus = TRUE;
+                m_bHasFocus = true;
                 if (m_eView == View::DropDownEdit)
                 {
                     m_pED->SelectAll();
@@ -377,7 +377,7 @@ public:
         case WM_KILLFOCUS:
             if (m_bHasFocus)
             {
-                m_bHasFocus = FALSE;
+                m_bHasFocus = false;
                 if (m_eView == View::DropDownEdit)
                     Redraw();
             }
@@ -420,7 +420,7 @@ public:
                 0, 0, ((CREATESTRUCTW*)lParam)->cx, 500, Handle, nullptr);
             SetWindowLongPtrW(m_LB.Handle, GWLP_HWNDPARENT, (LONG_PTR)Handle);
             m_LB.SetComboBox(Handle);
-            m_LB.SetGenerateItemNotify(TRUE);
+            m_LB.SetGenerateItemNotify(true);
 
             m_hTheme = OpenThemeData(Handle, L"Combobox");
             m_DC.FromWindow(Handle);
@@ -437,8 +437,8 @@ public:
             m_hFont = nullptr;
             m_hTheme = nullptr;
             m_DC.Destroy();
-            m_bHot = m_bDrop = m_bDisabled = m_bHasFocus = FALSE;
-            m_bAutoDropSize = m_bMatchEditToItem = TRUE;
+            m_bHot = m_bDrop = m_bDisabled = m_bHasFocus = false;
+            m_bAutoDropSize = m_bMatchEditToItem = true;
             m_eView = View::DropDown;
             m_eAnimate = AnimateStyle::Blend;
             m_cxDrop = m_cyDrop = 0;
@@ -452,7 +452,7 @@ public:
     {
         if (m_bDrop)
             return;
-        m_bDrop = TRUE;
+        m_bDrop = true;
         Redraw();
         UpdateWindow(Handle);
 
@@ -460,7 +460,7 @@ public:
         GetWindowRect(Handle, &rc);
 
         int cyReal{ m_cyDrop };
-        BOOL bDown{ TRUE };
+        bool bDown{ true };
         MONITORINFO mi;
         mi.cbSize = sizeof(mi);
         if (GetMonitorInfoW(MonitorFromWindow(Handle, MONITOR_DEFAULTTONEAREST), &mi) &&
@@ -475,11 +475,11 @@ public:
                     else// 上面较大
                     {
                         cyReal = cyUpper;
-                        bDown = FALSE;
+                        bDown = false;
                     }
             }
             else// 向上有足够空间
-                bDown = FALSE;
+                bDown = false;
         }
         if (!bDown)
             rc.bottom = rc.top - cyReal;
@@ -505,7 +505,7 @@ public:
     {
         if (!m_bDrop)
             return;
-        m_bDrop = FALSE;
+        m_bDrop = false;
         Redraw();
         m_LB.CbLeaveTrack();
         m_LB.Show(SW_HIDE);
@@ -568,11 +568,11 @@ public:
     EckInlineCe void SetAnimateStyle(AnimateStyle e) noexcept { m_eAnimate = e; }
     EckInlineNdCe AnimateStyle GetAnimateStyle() const noexcept { return m_eAnimate; }
 
-    EckInlineCe void SetAutoDropSize(BOOL b) noexcept { m_bAutoDropSize = b; }
-    EckInlineNdCe BOOL GetAutoDropSize() const noexcept { return m_bAutoDropSize; }
+    EckInlineCe void SetAutoDropSize(bool b) noexcept { m_bAutoDropSize = b; }
+    EckInlineNdCe bool GetAutoDropSize() const noexcept { return m_bAutoDropSize; }
 
-    EckInlineCe void SetMatchEditToItem(BOOL b) noexcept { m_bMatchEditToItem = b; }
-    EckInlineNdCe BOOL GetMatchEditToItem() const noexcept { return m_bMatchEditToItem; }
+    EckInlineCe void SetMatchEditToItem(bool b) noexcept { m_bMatchEditToItem = b; }
+    EckInlineNdCe bool GetMatchEditToItem() const noexcept { return m_bMatchEditToItem; }
 
     EckInlineNdCe HTHEME GetThemeHandle() const noexcept { return m_hTheme; }
 };

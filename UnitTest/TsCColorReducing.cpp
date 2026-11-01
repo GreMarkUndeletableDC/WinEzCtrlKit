@@ -53,7 +53,7 @@ public:
         ComPtr<IWICPalette> pPalette;
         pFactory->CreatePalette(&pPalette);
         pPalette->InitializeCustom((WICColor*)vPal.data(), 256);
-        //pPalette->InitializeFromBitmap(pFrame.Get(), 256, FALSE);
+        //pPalette->InitializeFromBitmap(pFrame.Get(), 256, false);
 
 
         ComPtr<IWICBitmapEncoder> pEncoder;

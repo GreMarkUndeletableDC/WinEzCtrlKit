@@ -6,7 +6,7 @@ inline void UrlEncode(
     _In_reads_or_z_(cchText) PCCH pszText,
     int cchText,
     CStringA& rs,
-    BOOL bPlusForSpace = TRUE) noexcept
+    bool bPlusForSpace = true) noexcept
 {
     if (cchText < 0)
         cchText = (int)TcsLength(pszText);
@@ -32,7 +32,7 @@ EckInline void UrlEncode(
     _In_reads_or_z_(cchText) const char8_t* pszText,
     int cchText,
     CStringA& rs,
-    BOOL bPlusForSpace = TRUE) noexcept
+    bool bPlusForSpace = true) noexcept
 {
     return UrlEncode((PCCH)pszText, cchText, rs, bPlusForSpace);
 }

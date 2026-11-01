@@ -42,17 +42,17 @@ public:
         return RtlAllocateHandle(&m_HandleTable, pidxHandle);
     }
 
-    EckInline BOOL Free(RTL_HANDLE_TABLE_ENTRY* Handle) noexcept
+    EckInline bool Free(RTL_HANDLE_TABLE_ENTRY* Handle) noexcept
     {
         return RtlFreeHandle(&m_HandleTable, Handle);
     }
 
-    EckInlineNd BOOL IsValid(RTL_HANDLE_TABLE_ENTRY* Handle) noexcept
+    EckInlineNd bool IsValid(RTL_HANDLE_TABLE_ENTRY* Handle) noexcept
     {
         return RtlIsValidHandle(&m_HandleTable, Handle);
     }
 
-    EckInline BOOL IsValidIndex(ULONG idxHandle, _Out_ RTL_HANDLE_TABLE_ENTRY** pHandle) noexcept
+    EckInline bool IsValidIndex(ULONG idxHandle, _Out_ RTL_HANDLE_TABLE_ENTRY** pHandle) noexcept
     {
         return RtlIsValidIndexHandle(&m_HandleTable, idxHandle, pHandle);
     }
@@ -124,7 +124,7 @@ public:
         return Allocate(nullptr, nullptr, std::forward<TArguments>(Args)...);
     }
 
-    EckInline BOOL Free(THandle Handle) noexcept
+    EckInline bool Free(THandle Handle) noexcept
     {
         const auto p = Validate(Handle);
         std::destroy_at(p);
@@ -132,20 +132,20 @@ public:
         return m_HandleTable.Free((RTL_HANDLE_TABLE_ENTRY*)Handle);
     }
 
-    EckInlineNd BOOL IsValid(THandle Handle) noexcept
+    EckInlineNd bool IsValid(THandle Handle) noexcept
     {
         return m_HandleTable.IsValid((RTL_HANDLE_TABLE_ENTRY*)Handle);
     }
 
-    EckInlineNd BOOL IsValidIndex(ULONG idxHandle, _Out_ T** pHandle) noexcept
+    EckInlineNd bool IsValidIndex(ULONG idxHandle, _Out_ T** pHandle) noexcept
     {
         RTL_HANDLE_TABLE_ENTRY* pEntry{};
         if (m_HandleTable.IsValidIndex(idxHandle, &pEntry))
         {
             *pHandle = (T*)pEntry;
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
     EckInlineNd T* Validate(THandle Handle) noexcept

@@ -133,7 +133,7 @@ public:
         return m_pBlock->Data();
     }
 
-    EckInlineNdCe BOOL IsEmpty() const { return !m_pBlock->cbSize; }
+    EckInlineNdCe bool IsEmpty() const { return !m_pBlock->cbSize; }
 
     EckInlineNdCe size_t Size() const { return m_pBlock->cbSize; }
     EckInlineNdCe size_t Capacity() const { return m_pBlock->cbCapacity; }

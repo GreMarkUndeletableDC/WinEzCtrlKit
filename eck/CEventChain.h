@@ -11,17 +11,17 @@ struct Slot
     template<class TIntercept, class TReturn, class ...TArguments>
     friend class CEventChain;
 private:
-    BOOL m_bDeleting{};
-    BOOL m_bProcessed{};
+    bool m_bDeleting{};
+    bool m_bProcessed{};
     void* m_pCurrNode{};
 
     constexpr Slot(void* pCurrNode) noexcept : m_pCurrNode{ pCurrNode } {}
 public:
     Slot() = default;
 
-    EckInlineNdCe BOOL IsDeleting() const noexcept { return m_bDeleting; }
-    EckInlineCe void Processed(BOOL b = TRUE) noexcept { m_bProcessed = b; }
-    EckInlineNdCe BOOL IsProcessed() const noexcept { return m_bProcessed; }
+    EckInlineNdCe bool IsDeleting() const noexcept { return m_bDeleting; }
+    EckInlineCe void Processed(bool b = true) noexcept { m_bProcessed = b; }
+    EckInlineNdCe bool IsProcessed() const noexcept { return m_bProcessed; }
 };
 
 // WARNING 非线程安全
@@ -91,7 +91,7 @@ private:
         if constexpr (IsInterceptDelete)
         {
             Slot Ctx{};
-            Ctx.m_bDeleting = TRUE;
+            Ctx.m_bDeleting = true;
             pNode->Fn(TArguments{}..., Ctx);
         }
         delete pNode;
@@ -101,7 +101,7 @@ private:
     TReturn EmitStartWith(_In_ NODE* pNode, _In_opt_ NODE* pPrev,
         Slot& Ctx, TArguments... Args) noexcept
     {
-        Ctx.m_bDeleting = FALSE;
+        Ctx.m_bDeleting = false;
         EckLoop()
         {
             if (pNode->uFlags & NF_DELETED)
@@ -118,7 +118,7 @@ private:
             if constexpr (IsIntercept)
             {
                 Ctx.m_pCurrNode = pNode;
-                Ctx.m_bProcessed = FALSE;
+                Ctx.m_bProcessed = false;
                 if constexpr (IsReturnVoid)
                 {
                     pNode->Fn(Args..., Ctx);
@@ -292,15 +292,15 @@ public:
         ((NODE*)hSlot)->uFlags |= NF_DELETED;
     }
 
-    BOOL Disconnect(USHORT uId) noexcept
+    bool Disconnect(USHORT uId) noexcept
     {
         const auto p = FindSlot(uId);
         if (p)
         {
             Disconnect(p);
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
     // 立即删除所有进入计数为0且标记为删除的节点

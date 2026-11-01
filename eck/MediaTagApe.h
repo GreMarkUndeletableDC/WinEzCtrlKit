@@ -62,7 +62,7 @@ private:
         return (ItemType)BitsLowN(uFlags >> 1, 2);
     }
 
-    static BOOL IsStringItem(const CStringA& rsKey) noexcept
+    static bool IsStringItem(const CStringA& rsKey) noexcept
     {
         return
             rsKey.CompareI("TITLE"sv) == 0 ||
@@ -274,18 +274,18 @@ public:
             if (mi.nTrack >= 0)// 尝试写入音轨/总轨
             {
                 svKey = "TRACK"sv;
-                p = TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.nTrack, 10, TRUE).pEnd;
+                p = TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.nTrack, 10, true).pEnd;
                 if (mi.cTotalTrack)
                 {
                     *p++ = L'/';
                     p = TcvFromInt(p, size_t(szBuf + ARRAYSIZE(szBuf) - p),
-                        mi.cTotalTrack, 10, TRUE).pEnd;
+                        mi.cTotalTrack, 10, true).pEnd;
                 }
             }
             else if (mi.cTotalTrack > 0)// 尝试写入总轨
             {
                 svKey = "TOTALTRACKS"sv;
-                p = TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.cTotalTrack, 10, TRUE).pEnd;
+                p = TcvFromInt(szBuf, ARRAYSIZE(szBuf), mi.cTotalTrack, 10, true).pEnd;
             }
 
             if (!svKey.empty() && p != szBuf)
@@ -464,13 +464,13 @@ public:
             case ItemType::String:
             {
                 e.rsU8Cache.Clear();
-                BOOL bAppendNull{};
+                bool bAppendNull{};
                 for (auto& s : e.GetStringList())
                 {
                     if (bAppendNull)
                         e.rsU8Cache.PushBackChar('\0');
                     EcdWideToUtf8(e.rsU8Cache, s.Data(), s.Size());
-                    bAppendNull = TRUE;
+                    bAppendNull = true;
                 }
                 cbBody += e.rsU8Cache.Size();
             }
@@ -610,7 +610,7 @@ public:
     }
 
     void Reset() noexcept override { ItmClear(); }
-    BOOL IsEmpty() noexcept override { return m_vItem.empty() && m_vPicture.empty(); }
+    bool IsEmpty() noexcept override { return m_vItem.empty() && m_vPicture.empty(); }
 
     EckInlineNdCe auto& GetItemList() noexcept { return m_vItem; }
     EckInlineNdCe auto& GetItemList() const noexcept { return m_vItem; }

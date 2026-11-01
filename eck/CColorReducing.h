@@ -21,7 +21,7 @@ private:
     NODE* m_apLast[8]{ &m_Root };
     UINT m_cValid;      // 不重复的颜色数
     UINT m_cMax;        // 最大颜色数
-    BOOL m_bNotInit;    // 是否非首次运行
+    bool m_bNotInit;    // 是否非首次运行
 
     constexpr UINT ComputeColorError(NODE* p) noexcept
     {
@@ -52,7 +52,7 @@ private:
     {
         if (!p->bCut)
             return;
-        p->bCut = FALSE;
+        p->bCut = false;
         for (auto e : p->pChild)
         {
             if (e)
@@ -88,7 +88,7 @@ private:
                 m_apLast[i] = nullptr;
         }
         EckAssert(pCurr);
-        pCurr->bLeaf = TRUE;
+        pCurr->bLeaf = true;
         m_cValid -= (pCurr->cChild - 1);
         RemoveChild(pCurr);
     }
@@ -96,7 +96,7 @@ public:
     CColorReducing() noexcept
     {
         m_MemSet.SetPageSize(4096 * 30);
-        m_Root.bCut = TRUE;
+        m_Root.bCut = true;
     }
     CColorReducing(UINT cMaxColor) noexcept : CColorReducing{}
     {
@@ -108,8 +108,8 @@ public:
     {
         m_MemSet.ClearRecord();
         m_Root = {};
-        m_bNotInit = TRUE;
-        m_Root.bCut = TRUE;
+        m_bNotInit = true;
+        m_Root.bCut = true;
         ZeroMemory(m_apLast, sizeof(m_apLast));
     }
 
@@ -134,7 +134,7 @@ public:
                     ZeroMemory(p, sizeof(NODE));
                 if (nCurrLevel == 7)
                 {
-                    p->bLeaf = TRUE;
+                    p->bLeaf = true;
                     ++m_cValid;
                     while (m_cValid > m_cMax)
                         ReduceColor();
@@ -144,7 +144,7 @@ public:
                     p->pNext = m_apLast[nCurrLevel + 1];
                     m_apLast[nCurrLevel + 1] = p;
                 }
-                p->bCut = TRUE;
+                p->bCut = true;
 
                 ++pCurrNode->cChild;
             }
@@ -158,7 +158,7 @@ public:
         }
     }
 
-    BOOL GetNearestColor(UINT r, UINT g, UINT b,
+    bool GetNearestColor(UINT r, UINT g, UINT b,
         _Out_ UINT& rOut, _Out_ UINT& gOut, _Out_ UINT& bOut) noexcept
     {
         UINT nCurrLevel{}, nShift{ 7 }, idx;
@@ -168,7 +168,7 @@ public:
             rOut = p->r / p->cColor;
             gOut = p->g / p->cColor;
             bOut = p->b / p->cColor;
-            return TRUE;
+            return true;
         }
         for (; nCurrLevel < 8; ++nCurrLevel, --nShift)
         {
@@ -183,11 +183,11 @@ public:
                 rOut = p->r / p->cColor;
                 gOut = p->g / p->cColor;
                 bOut = p->b / p->cColor;
-                return TRUE;
+                return true;
             }
         }
         rOut = gOut = bOut = 0;
-        return FALSE;
+        return false;
     }
 
     // 返回实际颜色数

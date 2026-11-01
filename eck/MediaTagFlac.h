@@ -393,14 +393,14 @@ public:
             if (mi.nTrack >= 0)
             {
                 const auto p = TcvFromInt(
-                    szBuf, ARRAYSIZE(szBuf), mi.nTrack, 10, TRUE).pEnd;
+                    szBuf, ARRAYSIZE(szBuf), mi.nTrack, 10, true).pEnd;
                 if (p != szBuf)
                     m_vItem.emplace_back("TRACKNUMBER"sv, CStringW{ szBuf, int(p - szBuf) });
             }
             if (mi.cTotalTrack > 0)
             {
                 const auto p = TcvFromInt(
-                    szBuf, ARRAYSIZE(szBuf), mi.cTotalTrack, 10, TRUE).pEnd;
+                    szBuf, ARRAYSIZE(szBuf), mi.cTotalTrack, 10, true).pEnd;
                 if (p != szBuf)
                     m_vItem.emplace_back("TRACKTOTAL"sv, CStringW{ szBuf, int(p - szBuf) });
             }
@@ -635,7 +635,7 @@ public:
             cbNewVorbisAndPic += (e.rbData.Size() + 4);
         // 写入
         const auto cbAvailable = m_posFlacTagEnd - m_posStreamInfoEnd;
-        BOOL bHasEnd{};// 末尾块是否已确定
+        bool bHasEnd{};// 末尾块是否已确定
         if (cbAvailable > cbNewVorbisAndPic)
         {
             UINT cbPadding = (UINT)(cbAvailable - cbNewVorbisAndPic);
@@ -643,7 +643,7 @@ public:
                 m_Stream.Erase(m_posStreamInfoEnd + cbNewVorbisAndPic, cbPadding);
             else
             {
-                bHasEnd = TRUE;
+                bHasEnd = true;
                 cbPadding -= 4;
                 m_Stream.Seek(m_posStreamInfoEnd + cbNewVorbisAndPic)
                     // 这种情况下填充肯定为最后一个块
@@ -663,7 +663,7 @@ public:
         if (m_vBlock.empty() && !bHasEnd)
         {
             phdrVorbisComm->eType |= 0b1000'0000;
-            bHasEnd = TRUE;
+            bHasEnd = true;
         }
 
         m_Stream.Seek(m_posStreamInfoEnd);
@@ -704,7 +704,7 @@ public:
         m_posStreamInfoEnd = CMediaFile::InvalidPosition;
     }
 
-    BOOL IsEmpty() noexcept override { return m_vItem.empty() && m_vPicture.empty(); }
+    bool IsEmpty() noexcept override { return m_vItem.empty() && m_vPicture.empty(); }
 
     EckInlineNdCe auto& GetItemList() noexcept { return m_vItem; }
     EckInlineNdCe auto& GetItemList() const noexcept { return m_vItem; }

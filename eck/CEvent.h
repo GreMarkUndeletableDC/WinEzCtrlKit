@@ -12,9 +12,9 @@ public:
 
     CEvent(
         std::wstring_view svName,
-        BOOL bManualReset,
-        BOOL bInitialState,
-        BOOL bInheritHandle = FALSE) noexcept
+        bool bManualReset,
+        bool bInitialState,
+        bool bInheritHandle = false) noexcept
     {
         Create(svName, bManualReset, bInitialState, bInheritHandle);
     }
@@ -26,14 +26,14 @@ public:
             EVENT_ALL_ACCESS,
             nullptr,
             SynchronizationEvent,
-            FALSE);
+            false);
     }
 
     NTSTATUS Create(
         std::wstring_view svName,
-        BOOL bManualReset,
-        BOOL bInitialState,
-        BOOL bInheritHandle = FALSE) noexcept
+        bool bManualReset,
+        bool bInitialState,
+        bool bInheritHandle = false) noexcept
     {
         const auto us{ StringViewToNtString(svName) };
         OBJECT_ATTRIBUTES oa;

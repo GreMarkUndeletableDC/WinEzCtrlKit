@@ -70,7 +70,7 @@ private:
     constexpr static int ColorBlockWidth = 20;
 public:
     LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept override
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept override
     {
         switch (uMsg)
         {
@@ -81,7 +81,7 @@ public:
             case NM_CUSTOMDRAW:
             case NM_CBN_LBCUSTOMDRAW:
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto p = (NMCUSTOMDRAWEXT*)lParam;
                 switch (p->dwDrawStage)
                 {
@@ -145,7 +145,7 @@ public:
             return CDRF_DODEFAULT;
             case NM_LBN_ITEMCHANGED:
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto p = (NMLBNITEMCHANGED*)lParam;
                 if ((p->uFlagsNew & LBN_IF_SEL) && !(p->uFlagsOld & LBN_IF_SEL))
                 {
@@ -160,7 +160,7 @@ public:
                         if (!ChooseColorW(&cc))
                             return 0;
                         m_crCustom = cc.rgbResult;
-                        InvalidateRect((HWND)lParam, nullptr, FALSE);
+                        InvalidateRect((HWND)lParam, nullptr, false);
                         cr = m_crCustom;
                         Redraw();
                     }
@@ -205,34 +205,34 @@ public:
             return cr;
     }
 
-    BOOL SetColor(COLORREF cr) noexcept
+    bool SetColor(COLORREF cr) noexcept
     {
         if (cr == CLR_INVALID)
-            return FALSE;
+            return false;
         auto& LB = GetListBox();
-        LB.SetGenerateItemNotify(FALSE);
+        LB.SetGenerateItemNotify(false);
         for (int i{}; const auto& e : PresetColor)
         {
             if (e.cr == cr)
             {
                 LB.SetCurrentSelection(i);
-                LB.SetGenerateItemNotify(TRUE);
-                return TRUE;
+                LB.SetGenerateItemNotify(true);
+                return true;
             }
             ++i;
         }
         m_crCustom = cr;
         LB.SetCurrentSelection(1);
-        LB.SetGenerateItemNotify(TRUE);
-        return TRUE;
+        LB.SetGenerateItemNotify(true);
+        return true;
     }
 
     void SelectColor(int idx) noexcept
     {
         auto& LB = GetListBox();
-        LB.SetGenerateItemNotify(FALSE);
+        LB.SetGenerateItemNotify(false);
         LB.SetCurrentSelection(idx);
-        LB.SetGenerateItemNotify(TRUE);
+        LB.SetGenerateItemNotify(true);
     }
 };
 ECK_NAMESPACE_END

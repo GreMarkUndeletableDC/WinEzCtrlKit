@@ -100,7 +100,7 @@ namespace Detail
     }
 }
 
-using FGetDiskId = NTSTATUS(*)(PCVOID pData, size_t cbData, BOOL bIdentifyData);
+using FGetDiskId = NTSTATUS(*)(PCVOID pData, size_t cbData, bool bIdentifyData);
 
 /// <summary>
 /// 取硬盘特征字
@@ -144,7 +144,7 @@ inline NTSTATUS IntGetPhysicalDriveIdentifier(F fnProcessData, int idxDrive) noe
                 &scip, sizeof(scip) - 1/*bBuffer*/, pscop, sizeof(SENDCMDOUTPARAMS))))
             {
                 NtClose(hDevice);
-                return fnProcessData(pscop->bBuffer, sizeof(IDENTIFY_DATA), TRUE);
+                return fnProcessData(pscop->bBuffer, sizeof(IDENTIFY_DATA), true);
             }
         }
         NtClose(hDevice);
@@ -185,7 +185,7 @@ inline NTSTATUS IntGetPhysicalDriveIdentifier(F fnProcessData, int idxDrive) noe
             psrbic, cbIn, byDummy2, cbOut)))
         {
             NtClose(hDevice);
-            return fnProcessData(pscop->bBuffer, sizeof(IDENTIFY_DATA), FALSE);
+            return fnProcessData(pscop->bBuffer, sizeof(IDENTIFY_DATA), false);
         }
         NtClose(hDevice);
     }
@@ -211,7 +211,7 @@ inline NTSTATUS IntGetPhysicalDriveIdentifier(F fnProcessData, int idxDrive) noe
             if (cbRet)
             {
                 NtClose(hDevice);
-                return fnProcessData(pBuf.get(), cbRet, FALSE);
+                return fnProcessData(pBuf.get(), cbRet, false);
             }
         }
         NtClose(hDevice);
@@ -227,7 +227,7 @@ inline NTSTATUS IntGetPhysicalDriveIdentifier(F fnProcessData, int idxDrive) noe
 /// <returns>NTSTATUS</returns>
 EckInline NTSTATUS GetPhysicalDriveIdentifierCrc32(int idxDrive, UINT& uCrc32)
 {
-    return IntGetPhysicalDriveIdentifier([&uCrc32](PCVOID pData, size_t cbData, BOOL)->NTSTATUS
+    return IntGetPhysicalDriveIdentifier([&uCrc32](PCVOID pData, size_t cbData, bool)->NTSTATUS
         {
             uCrc32 = CalculateCrc32(pData, cbData);
             return STATUS_SUCCESS;
@@ -242,7 +242,7 @@ EckInline NTSTATUS GetPhysicalDriveIdentifierCrc32(int idxDrive, UINT& uCrc32)
 /// <returns>NTSTATUS</returns>
 EckInline NTSTATUS GetPhysicalDriveIdentifierMd5(int idxDrive, _Out_writes_bytes_(16) void* pMd5)
 {
-    return IntGetPhysicalDriveIdentifier([pMd5](PCVOID pData, size_t cbData, BOOL)->NTSTATUS
+    return IntGetPhysicalDriveIdentifier([pMd5](PCVOID pData, size_t cbData, bool)->NTSTATUS
         {
             return CalculateMd5(pData, cbData, pMd5);
         }, idxDrive);

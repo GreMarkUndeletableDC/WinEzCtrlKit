@@ -32,14 +32,14 @@ private:
         return f >= 0 ? f : -f;
     }
 
-    EckInlineNdCe BOOL IsFlatEnough(T Tol) const noexcept
+    EckInlineNdCe bool IsFlatEnough(T Tol) const noexcept
     {
         return std::max(
             std::max(Abs(e2.x), Abs(e2.y)),
             std::max(Abs(e3.x), Abs(e3.y))) <= Tol;
     }
 
-    EckInlineNdCe BOOL IsLastFlatEnough(T Tol) const noexcept
+    EckInlineNdCe bool IsLastFlatEnough(T Tol) const noexcept
     {
         const auto oe2 = e3;
         const auto oe3 = e2 + e2 - e3;
@@ -142,7 +142,7 @@ private:
         return v >= 0 ? v : -v;
     }
 
-    EckInlineNdCe BOOL IsFlatEnough(T Tol) const noexcept
+    EckInlineNdCe bool IsFlatEnough(T Tol) const noexcept
     {
         return std::max(Abs(e2.x), Abs(e2.y)) <= Tol;
     }
@@ -255,7 +255,7 @@ inline void FlattenEllipticalArc(
             ptCenter.y + b * fSin
         });
 
-    BOOL bExit{};
+    bool bExit{};
     EckLoop()
     {
         const auto D = B2 + A2MinusB2 * fSin * fSin;
@@ -267,7 +267,7 @@ inline void FlattenEllipticalArc(
             if (t > tEnd)
             {
                 t = tEnd;
-                bExit = TRUE;
+                bExit = true;
             }
         }
         else
@@ -276,7 +276,7 @@ inline void FlattenEllipticalArc(
             if (t < tEnd)
             {
                 t = tEnd;
-                bExit = TRUE;
+                bExit = true;
             }
         }
 

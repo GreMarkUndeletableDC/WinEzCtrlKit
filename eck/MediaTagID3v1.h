@@ -235,7 +235,7 @@ private:
     };
 
     INFO m_Info{};
-    BOOL m_bEmpty{ TRUE };
+    bool m_bEmpty{ true };
 
     static void TagpZeroTail(CStringA& rs, int cchMax) noexcept
     {
@@ -392,10 +392,10 @@ public:
         const auto& Loc = m_File.GetTagLocation();
         if (Loc.posV1 == CMediaFile::InvalidPosition)
         {
-            m_bEmpty = TRUE;
+            m_bEmpty = true;
             return Result::NoTag;
         }
-        m_bEmpty = FALSE;
+        m_bEmpty = false;
         char szTemp[61];
         szTemp[60] = '\0';// Guard
         int cchTemp;
@@ -553,7 +553,7 @@ public:
     }
 
     void Reset() noexcept override { ItmClear(); }
-    BOOL IsEmpty() noexcept override { return m_bEmpty; }
+    bool IsEmpty() noexcept override { return m_bEmpty; }
 
     auto& ItmGet() noexcept { return m_Info; }
     auto& ItmGet() const noexcept { return m_Info; }
@@ -561,7 +561,7 @@ public:
     void ItmClear() noexcept
     {
         m_Info = {};
-        m_bEmpty = TRUE;
+        m_bEmpty = true;
     }
 };
 ECK_MEDIATAG_NAMESPACE_END

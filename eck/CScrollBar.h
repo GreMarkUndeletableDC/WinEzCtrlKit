@@ -20,19 +20,19 @@ public:
     ECK_W_STYLE(AlignmentTop, SBS_TOPALIGN);
     ECK_W_STYLE(Vertical, SBS_VERT);
 private:
-    BOOL m_bDisableNoScroll{};
+    bool m_bDisableNoScroll{};
 public:
     /// <summary>
     /// 禁用启用箭头
     /// </summary>
     /// <param name="iOp">ESB_常量</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL EnableArrows(int iOp) const noexcept
+    EckInline bool EnableArrows(int iOp) const noexcept
     {
         return EnableScrollBar(m_hWnd, SB_CTL, iOp);
     }
 
-    EckInline BOOL EnableArrows(int iOp, int iBarType) const noexcept
+    EckInline bool EnableArrows(int iOp, int iBarType) const noexcept
     {
         return EnableScrollBar(m_hWnd, iBarType, iOp);
     }
@@ -55,12 +55,12 @@ public:
         return si.nTrackPos;
     }
 
-    EckInline BOOL GetRange(int* piMin = nullptr, int* piMax = nullptr) const noexcept
+    EckInline bool GetRange(int* piMin = nullptr, int* piMax = nullptr) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
         si.fMask = SIF_RANGE;
-        BOOL b = GetScrollInfo(m_hWnd, SB_CTL, &si);
+        bool b = GetScrollInfo(m_hWnd, SB_CTL, &si);
         if (piMin)
             *piMin = si.nMin;
         if (piMax)
@@ -77,12 +77,12 @@ public:
         return si.nPage;
     }
 
-    EckInline BOOL GetInformation(SCROLLINFO* psi) const noexcept
+    EckInline bool GetInformation(SCROLLINFO* psi) const noexcept
     {
         return GetScrollInfo(m_hWnd, SB_CTL, psi);
     }
 
-    EckInline void SetPosition(int iPos, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetPosition(int iPos, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -91,7 +91,7 @@ public:
         SetScrollInfo(m_hWnd, SB_CTL, &si, bRedraw);
     }
 
-    EckInline void SetRange(int iMin, int iMax, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetRange(int iMin, int iMax, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -101,7 +101,7 @@ public:
         SetScrollInfo(m_hWnd, SB_CTL, &si, bRedraw);
     }
 
-    EckInline void SetMinimum(int iMin, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetMinimum(int iMin, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -112,7 +112,7 @@ public:
         SetScrollInfo(m_hWnd, SB_CTL, &si, bRedraw);
     }
 
-    EckInline void SetMaximum(int iMax, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetMaximum(int iMax, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -123,7 +123,7 @@ public:
         SetScrollInfo(m_hWnd, SB_CTL, &si, bRedraw);
     }
 
-    EckInline void SetPage(int iPage, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetPage(int iPage, bool bRedraw = true) const noexcept
     {
         SCROLLINFO si;
         si.cbSize = sizeof(SCROLLINFO);
@@ -132,13 +132,13 @@ public:
         SetScrollInfo(m_hWnd, SB_CTL, &si, bRedraw);
     }
 
-    EckInline void SetInformation(SCROLLINFO* psi, BOOL bRedraw = TRUE) const noexcept
+    EckInline void SetInformation(SCROLLINFO* psi, bool bRedraw = true) const noexcept
     {
         psi->fMask |= (m_bDisableNoScroll ? SIF_DISABLENOSCROLL : 0);
         SetScrollInfo(m_hWnd, SB_CTL, psi, bRedraw);
     }
 
-    EckInline void SetDisableNoScroll(BOOL bDisable, BOOL bImmdSet = FALSE) noexcept
+    EckInline void SetDisableNoScroll(bool bDisable, bool bImmdSet = false) noexcept
     {
         m_bDisableNoScroll = bDisable;
         if (bImmdSet)
@@ -147,10 +147,10 @@ public:
             si.cbSize = sizeof(SCROLLINFO);
             si.fMask = SIF_ALL;
             GetInformation(&si);
-            SetInformation(&si, TRUE);
+            SetInformation(&si, true);
         }
     }
 
-    EckInline BOOL GetDisableNoScroll() const noexcept { return m_bDisableNoScroll; }
+    EckInline bool GetDisableNoScroll() const noexcept { return m_bDisableNoScroll; }
 };
 ECK_NAMESPACE_END

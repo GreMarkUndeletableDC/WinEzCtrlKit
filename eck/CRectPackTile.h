@@ -21,7 +21,7 @@ private:
     TCoord m_cxPage{}, m_cyPage{};
     TCoord m_cxPageMax{}, m_cyPageMax{};
     TId m_cTile{};
-    BOOLEAN m_bIncPageSize{ TRUE };
+    bool m_bIncPageSize{ true };
 
     // 取线性索引所在页
     constexpr TId FlatIndexToPage(TId idxFlat) const noexcept
@@ -42,7 +42,7 @@ public:
         m_cxTile{ cxTile }, m_cyTile{ cyTile },
         m_cxPage{ cxPage }, m_cyPage{ cyPage },
         m_cxPageMax{ cxPageMax }, m_cyPageMax{ cyPageMax },
-        m_bIncPageSize{ FALSE }
+        m_bIncPageSize{ false }
     {
         if (m_cxPage > m_cxPageMax)
             m_cxPage = m_cxPageMax;
@@ -54,7 +54,7 @@ public:
         TCoord cxTile, TCoord cyTile,
         TCoord cxPage, TCoord cyPage,
         TCoord cxPageMax, TCoord cyPageMax,
-        BOOLEAN bIncPageSize = TRUE) noexcept
+        bool bIncPageSize = true) noexcept
     {
         m_cxTile = cxTile;
         m_cyTile = cyTile;
@@ -142,7 +142,7 @@ public:
         cy = e.cy;
     }
 
-    EckInlineNdCe BOOL HasFreeTile() const noexcept { return !m_rgFree.IsEmpty(); }
+    EckInlineNdCe bool HasFreeTile() const noexcept { return !m_rgFree.IsEmpty(); }
     EckInlineNdCe UINT GetPageCount() const noexcept { return (UINT)m_vPage.Size(); }
     EckInlineNdCe UINT GetCount() const noexcept { return m_cTile - m_rgFree.CountIncluded(); }
 };

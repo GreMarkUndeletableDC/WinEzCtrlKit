@@ -87,7 +87,7 @@ public:
         EckAssert(n < N);
         m_Bits[n / BitsPerWord] |= (TWord{ 1 } << n % BitsPerWord);
     }
-    constexpr void Set(size_t n, BOOL b) noexcept { b ? Set(n) : Clear(n); }
+    constexpr void Set(size_t n, bool b) noexcept { b ? Set(n) : Clear(n); }
 
     constexpr void Clear(size_t n) noexcept
     {
@@ -124,8 +124,8 @@ public:
     {
         EckCounter(ARRAYSIZE(m_Bits), i)
             if (m_Bits[i] != x.m_Bits[i])
-                return FALSE;
-        return TRUE;
+                return false;
+        return true;
     }
     constexpr bool operator!=(const CBitSet& x) const noexcept { return !(*this == x); }
 
@@ -197,24 +197,24 @@ public:
         return n;
     }
 
-    constexpr [[nodiscard]] BOOL AllOne() const noexcept
+    constexpr [[nodiscard]] bool AllOne() const noexcept
     {
-        constexpr BOOL bNoPadding = N % BitsPerWord == 0;
+        constexpr bool bNoPadding = N % BitsPerWord == 0;
         for (size_t i = 0; i < NB + bNoPadding; ++i)
             if (m_Bits[i] != ~TWord{})
-                return FALSE;
+                return false;
         return bNoPadding || m_Bits[NB] == (TWord{ 1 } << (N % BitsPerWord)) - 1;
     }
-    constexpr [[nodiscard]] BOOL AnyOne() const noexcept
+    constexpr [[nodiscard]] bool AnyOne() const noexcept
     {
         for (size_t i = 0; i <= NB; ++i)
             if (m_Bits[i] != 0)
-                return TRUE;
-        return FALSE;
+                return true;
+        return false;
     }
-    EckInlineNdCe BOOL NoneOne() const noexcept { return !AnyOne(); }
+    EckInlineNdCe bool NoneOne() const noexcept { return !AnyOne(); }
 
-    constexpr [[nodiscard]] BOOL Test(size_t n) const noexcept
+    constexpr [[nodiscard]] bool Test(size_t n) const noexcept
     {
         EckAssert(n < N);
         return (m_Bits[n / BitsPerWord] & (TWord{ 1 } << n % BitsPerWord)) != 0;

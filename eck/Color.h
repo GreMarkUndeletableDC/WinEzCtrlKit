@@ -220,15 +220,15 @@ EckInlineNdCe TOut CalculateGray(TIn r, TIn g, TIn b) noexcept
         0.07218152157344333 * b);
 }
 
-EckInlineNdCe BOOL IsColorLight(BYTE r, BYTE g, BYTE b) noexcept
+EckInlineNdCe bool IsColorLight(BYTE r, BYTE g, BYTE b) noexcept
 {
     return CalculateGray<BYTE>(r, g, b) >= 128_by;
 }
-EckInlineNdCe BOOL IsColorLightArgb(ARGB argb) noexcept
+EckInlineNdCe bool IsColorLightArgb(ARGB argb) noexcept
 {
     return IsColorLight(GetArgbR(argb), GetArgbG(argb), GetArgbB(argb));
 }
-EckInlineNdCe BOOL IsColorLightColorref(COLORREF cr) noexcept
+EckInlineNdCe bool IsColorLightColorref(COLORREF cr) noexcept
 {
     return IsColorLight(GetRValue(cr), GetGValue(cr), GetBValue(cr));
 }

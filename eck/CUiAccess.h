@@ -19,14 +19,14 @@ public:
             TOKEN_ALL_ACCESS, 0, m_hTokenCurrProc.AtClear());
     }
 
-    BOOL IsAcquired() const noexcept
+    bool IsAcquired() const noexcept
     {
         UINT u;
         ULONG cbRet;
         if (NT_SUCCESS(NtQueryInformationToken(m_hTokenCurrProc.Get(),
             TokenUIAccess, &u, sizeof(u), &cbRet)))
             return !!u;
-        return FALSE;
+        return false;
     }
 
     NTSTATUS TryAcquire() noexcept
@@ -63,20 +63,20 @@ public:
         nts = EnumerateProcess([&](SYSTEM_PROCESS_INFORMATION* pspi)
             {
                 if (!pspi->ImageName.Buffer)
-                    return TRUE;
+                    return true;
                 const auto cch = pspi->ImageName.Length / sizeof(WCHAR);
                 if (ARRAYSIZE(szWinlogon) - 1 != cch ||
                     !TcsEqualLengthI(szWinlogon, pspi->ImageName.Buffer, cch))
-                    return TRUE;
+                    return true;
                 // 打开进程
                 CNtObject hProcess;
                 hProcess.Attach(NaOpenProcess(
                     PROCESS_QUERY_LIMITED_INFORMATION,
-                    FALSE,
+                    false,
                     HandleToULong(pspi->UniqueProcessId),
                     &nts));
                 if (!hProcess.Get())
-                    return TRUE;
+                    return true;
                 // 打开令牌
                 CNtObject hToken;
                 nts = NtOpenProcessTokenEx(
@@ -85,24 +85,24 @@ public:
                     0,
                     hToken.At());
                 if (!hToken.Get())
-                    return TRUE;
+                    return true;
                 // 检查
                 BOOLEAN bResult;
                 nts = NtPrivilegeCheck(hToken.Get(), &ps, &bResult);
                 if (!NT_SUCCESS(nts) || !bResult)
-                    return TRUE;
+                    return true;
                 UINT uWinlogonSid;
                 nts = NtQueryInformationToken(hToken.Get(), TokenSessionId,
                     &uWinlogonSid, sizeof(uWinlogonSid), &cbRet);
                 if (!NT_SUCCESS(nts) || uWinlogonSid != uSid)
-                    return TRUE;
+                    return true;
                 // 克隆
                 SECURITY_QUALITY_OF_SERVICE sqos
                 {
                     .Length = sizeof(SECURITY_QUALITY_OF_SERVICE),
                     .ImpersonationLevel = SecurityImpersonation,
                     .ContextTrackingMode = SECURITY_DYNAMIC_TRACKING,
-                    .EffectiveOnly = FALSE
+                    .EffectiveOnly = false
                 };
                 OBJECT_ATTRIBUTES oa
                 {
@@ -110,8 +110,8 @@ public:
                     .SecurityQualityOfService = &sqos,
                 };
                 NtDuplicateToken(hToken.Get(), TOKEN_IMPERSONATE, &oa,
-                    FALSE, TokenImpersonation, m_hTokenWinlogon.AtClear());
-                return FALSE;
+                    false, TokenImpersonation, m_hTokenWinlogon.AtClear());
+                return false;
             });
         if (!NT_SUCCESS(nts))
             return nts;
@@ -135,7 +135,7 @@ public:
             .Length = sizeof(SECURITY_QUALITY_OF_SERVICE),
             .ImpersonationLevel = SecurityAnonymous,
             .ContextTrackingMode = SECURITY_DYNAMIC_TRACKING,
-            .EffectiveOnly = FALSE
+            .EffectiveOnly = false
         };
         OBJECT_ATTRIBUTES oa
         {
@@ -148,7 +148,7 @@ public:
             m_hTokenCurrProc.Get(),
             TOKEN_ALL_ACCESS,
             &oa,
-            FALSE,
+            false,
             TokenPrimary,
             hTokenUia.At());
         if (!NT_SUCCESS(nts))
@@ -168,7 +168,7 @@ public:
         rsCmdLine.PazParseCommandLineAndCut(pszAppName, cchAppName,
             pszCmdLine, cchCmdLine);
         if (CreateProcessAsUserW(hTokenUia.Get(), pszAppName, pszCmdLine,
-            nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi))
+            nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi))
         {
             NtClose(pi.hThread);
             NtClose(pi.hProcess);

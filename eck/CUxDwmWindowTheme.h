@@ -152,7 +152,7 @@ public:
         }
     }
 
-    BOOL LoadDefaultTheme() noexcept
+    bool LoadDefaultTheme() noexcept
     {
         Clear();
         constexpr WCHAR ThemeFile[]{ LR"(\Resources\Themes\aero\aero.msstyles)" };
@@ -167,18 +167,18 @@ public:
 
         m_hInstStyle = LoadLibraryExW(pszBuf, 0, LOAD_LIBRARY_AS_DATAFILE);
         if (!m_hInstStyle)
-            return FALSE;
+            return false;
         m_hTheme = OpenThemeData(nullptr, L"DWMWINDOW");
         if (!m_hTheme)
         {
             FreeLibrary(m_hInstStyle);
             m_hInstStyle = nullptr;
-            return FALSE;
+            return false;
         }
 
         for (int i = 0; i < PartCount; ++i)
             QueryAtlasInformation(i, m_vItem[i]);
-        return TRUE;
+        return true;
     }
 
     std::span<const BYTE> GetAtlasImageData(
@@ -205,13 +205,13 @@ public:
     /// <param name="iDpi">DPI，将向上舍入到最近的DPI</param>
     /// <param name="pExtra">返回额外信息，可选</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    BOOL GetPartRect(
+    bool GetPartRect(
         _Out_ RECT& rc,
         _Out_ RECT& rcBkg,
         UdwPart ePart,
         UdwState eState,
-        BOOL bDark,
-        BOOL bActive,
+        bool bDark,
+        bool bActive,
         int iDpi,
         _Out_opt_ UDW_EXTRA* pExtra = nullptr) const noexcept
     {
@@ -225,7 +225,7 @@ public:
             rcBkg = {};
             if (pExtra)
                 *pExtra = {};
-            return FALSE;
+            return false;
         }
         //
         // 图标
@@ -284,7 +284,7 @@ public:
             pExtra->pGlyph = &Glyph;
             pExtra->pBkg = &Bkg;
         }
-        return TRUE;
+        return true;
     }
 
     EckInlineNdCe auto& AtPart(int idx) const noexcept { return m_vItem[idx]; }

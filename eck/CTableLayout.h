@@ -37,7 +37,7 @@ namespace Detail
         CTrivialBuffer<ROWCOL> m_RowCol{};// 行 | 列
         USHORT m_cRow{}, m_cCol{};
         USHORT m_uWeightSumRow{}, m_uWeightSumCol{};
-        BOOLEAN m_bHasIdeal{};
+        bool m_bHasIdeal{};
     public:
         void ReSize(USHORT cRow, USHORT cCol) noexcept
         {
@@ -50,7 +50,7 @@ namespace Detail
         void Clear() noexcept
         {
             m_cRow = m_cCol = 0;
-            m_bHasIdeal = TRUE;
+            m_bHasIdeal = true;
             m_RowCol.Clear();
         }
 
@@ -68,8 +68,8 @@ namespace Detail
         EckInlineNdCe USHORT GetRowCount() const noexcept { return m_cRow; }
         EckInlineNdCe USHORT GetColumnCount() const noexcept { return m_cCol; }
 
-        EckInlineCe void SetHasIdeal(BOOL b) noexcept { m_bHasIdeal = b; }
-        EckInlineNdCe BOOL HasIdeal() noexcept { return m_bHasIdeal; }
+        EckInlineCe void SetHasIdeal(bool b) noexcept { m_bHasIdeal = b; }
+        EckInlineNdCe bool HasIdeal() noexcept { return m_bHasIdeal; }
 
         std::span<ROWCOL> Row() noexcept { return m_RowCol.SubSpan(0, m_cRow); }
         std::span<ROWCOL> Column() noexcept { return m_RowCol.SubSpan(m_cRow, m_cCol); }
@@ -117,7 +117,7 @@ private:
         const auto bHasIdealSize =
             (e.uFlags & LF_IDEAL) ?
             e.pObject->LoGetIdealSize(sizeIdeal) :
-            FALSE;
+            false;
         if (bHasIdealSize)
         {
             if (e.uFlags & LF_IDEAL_WIDTH)
@@ -150,7 +150,7 @@ public:
         // 计算行列的理想尺寸，并从当前布局尺寸中减去已固定部分
         TLytCoord d;
         TLytCoord cxLeave = m_cx, cyLeave = m_cy;
-        BOOL bMergeCell{};
+        bool bMergeCell{};
         for (auto& e : m_vItem)
         {
             LYTSIZE sizeIdeal{};
@@ -238,7 +238,7 @@ public:
         }
     }
 
-    void LoShow(BOOL bShow) noexcept override
+    void LoShow(bool bShow) noexcept override
     {
         for (const auto& e : m_vItem)
             e.pObject->LoShow(bShow);
@@ -391,7 +391,7 @@ public:
         RefreshTableColumnWeight();
     }
 
-    EckInlineCe void SetHasIdeal(BOOL b) noexcept { m_Table.SetHasIdeal(b); }
+    EckInlineCe void SetHasIdeal(bool b) noexcept { m_Table.SetHasIdeal(b); }
 
     void CommitTableSize() noexcept
     {

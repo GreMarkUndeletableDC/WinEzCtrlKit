@@ -60,7 +60,7 @@ private:
     int m_cx{}, m_cy{};
     WICColor m_crBkg{};
     WICColor m_crTransparent{};
-    BOOLEAN m_bTransparent{};
+    bool m_bTransparent{};
     Disposal m_eDisposal{};
     BYTE m_byAlphaThreshold{ 255 };
 
@@ -108,14 +108,14 @@ public:
             return hr;
         EckAssert(cx >= 0 && cy >= 0);
 
-        BOOL bScale{};
+        bool bScale{};
         if (cx && cx != (int)cxOrg)
-            bScale = TRUE;
+            bScale = true;
         else
             cx = (int)cxOrg;
 
         if (cy && cy != (int)cyOrg)
-            bScale = TRUE;
+            bScale = true;
         else
             cy = (int)cyOrg;
 
@@ -281,7 +281,7 @@ public:
                 if (!cColor)
                     return E_FAIL;
                 BYTE idxTrans;
-                BOOLEAN bHasTrans;
+                bool bHasTrans;
                 if (m_crTransparent)
                 {
                     UINT cActualColor;
@@ -295,7 +295,7 @@ public:
                 }
                 else
                 {
-                    bHasTrans = TRUE;
+                    bHasTrans = true;
                     idxTrans = BYTE(cColor - 1);
                 }
 
@@ -337,7 +337,7 @@ public:
     HRESULT SaveAsApng(
         IStream* pStream,
         PngBlendOp eBlendOp = PngBlendOp::Source,
-        BOOL bInterlace = FALSE,
+        bool bInterlace = false,
         WICPngFilterOption eFilter = WICPngFilterUnspecified) noexcept
     {
         constexpr BYTE PngSignature[]{ 0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A };
@@ -368,7 +368,7 @@ public:
         CByteBufferStream PngStream{ rbPng };
         CHAR chChunkId[4];
         UINT cbChunkData;
-        BOOL bFirstFrame{ TRUE };
+        bool bFirstFrame{ true };
         BYTE* pChunkIdBegin;
         for (const auto& e : m_vFrame)
         {
@@ -482,7 +482,7 @@ public:
                 else
                     wt += (cbOriginalData + 4);// 跳过数据和CRC
             }
-            bFirstFrame = FALSE;
+            bFirstFrame = false;
         }
         // 写IEND
         w << 0u << IdIEND << ReverseInteger(CalculateCrc32(IdIEND, 4));
@@ -543,8 +543,8 @@ public:
     EckInlineNdCe int GetRepeatCount() const noexcept { return m_cRepeat; }
 
     // 仅影响GIF，TRUE指示应写入透明信息
-    EckInlineCe void SetTransparent(BOOL b) noexcept { m_bTransparent = b; }
-    EckInlineNdCe BOOL GetTransparent() const noexcept { return m_bTransparent; }
+    EckInlineCe void SetTransparent(bool b) noexcept { m_bTransparent = b; }
+    EckInlineNdCe bool GetTransparent() const noexcept { return m_bTransparent; }
 
     // 仅影响GIF，将指定的颜色值视为透明
     EckInlineCe void SetTransparentColor(WICColor cr) noexcept { m_crTransparent = cr; }

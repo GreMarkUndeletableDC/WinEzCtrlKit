@@ -33,7 +33,7 @@ public:
             m_rcCompInClient = m_rcRealCompInClient = rcEleInClient;
         else
         {
-            CalculateCompositedRect(m_rcCompInClient, TRUE);
+            CalculateCompositedRect(m_rcCompInClient, true);
             m_rcRealCompInClient = m_rcCompInClient;
             UnionRect(m_rcCompInClient, m_rcCompInClient, rcEleInClient);
         }
@@ -59,7 +59,7 @@ public:
     }
 
     // 坐标相对元素
-    virtual void TransformPoint(_Inout_ Kw::Vec2& pt, BOOL bNormalToComposited) noexcept {}
+    virtual void TransformPoint(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept {}
 
     /// <summary>
     /// 计算混合后矩形。
@@ -69,13 +69,13 @@ public:
     /// <param name="rc">计算结果</param>
     /// <param name="bInClientOrParent">结果相对于客户区还是相对于父元素</param>
     virtual void CalculateCompositedRect(
-        _Out_ D2D1_RECT_F& rc, BOOL bInClientOrParent) noexcept
+        _Out_ D2D1_RECT_F& rc, bool bInClientOrParent) noexcept
     {
         rc = {};
     }
 
     // 是否原地操作
-    virtual BOOL IsInPlace() const noexcept { return TRUE; }
+    virtual bool IsInPlace() const noexcept { return true; }
 
     // 若元素设置了DES_COMP_NO_REDIRECTION，则在渲染之前调用此方法，
     // 此时pBitmap和rcDst字段无效
@@ -95,11 +95,11 @@ public:
     }
 };
 /*
-    void TransformPoint(_Inout_ Kw::Vec2& pt, BOOL bNormalToComposited) noexcept override
+    void TransformPoint(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept override
     {}
-    void CalculateCompositedRect(_Out_ D2D1_RECT_F& rc, BOOL bInClientOrParent) noexcept override
+    void CalculateCompositedRect(_Out_ D2D1_RECT_F& rc, bool bInClientOrParent) noexcept override
     {}
-    BOOL IsInPlace() const noexcept override { return TRUE; }
+    bool IsInPlace() const noexcept override { return true; }
     void PostRender(COMP_RENDER_INFO& cri) noexcept override
     {}
 */

@@ -13,7 +13,7 @@ private:
     DirectX::XMFLOAT4X4A m_Matrix{};
     DirectX::XMFLOAT4X4A m_MatrixR{};
 public:
-    void TransformPoint(_Inout_ Kw::Vec2& pt, BOOL bNormalToComposited) noexcept override
+    void TransformPoint(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept override
     {
         const DirectX::XMFLOAT4A v{ pt.x, pt.y, 0.f, 1.f };
         auto p = DirectX::XMVector4Transform(
@@ -25,7 +25,7 @@ public:
         pt.y = DirectX::XMVectorGetY(p);
     }
 
-    void CalculateCompositedRect(_Out_ D2D1_RECT_F& rc, BOOL bInClientOrParent) noexcept override
+    void CalculateCompositedRect(_Out_ D2D1_RECT_F& rc, bool bInClientOrParent) noexcept override
     {
         const auto pEle = GetElement();
         const auto cx = pEle->GetWidth();
@@ -52,7 +52,7 @@ public:
             pEle->EtParent()->ClientToElement(rc);
     }
 
-    BOOL IsInPlace() const noexcept override { return FALSE; }
+    bool IsInPlace() const noexcept override { return false; }
 
     void PostRender(COMP_RENDER_INFO& cri) noexcept override
     {

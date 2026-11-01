@@ -1020,7 +1020,7 @@ public:
 
             Assert::AreEqual(
                 pos == sizeof(buffer),
-                reader.IsEnd() != FALSE);
+                reader.IsEnd() != false);
         }
     }
 
@@ -1567,7 +1567,7 @@ public:
                     cb <= sizeof(buffer) - pos;
 
                 const bool actual =
-                    reader.CheckDataLengthSafe(cb) != FALSE;
+                    reader.CheckDataLengthSafe(cb) != false;
 
                 Assert::AreEqual(
                     expected,
@@ -1594,7 +1594,7 @@ public:
                     (cb <= sizeof(buffer) - pos);
 
                 const bool actual =
-                    reader.CheckDataLengthSafe(pos, cb) != FALSE;
+                    reader.CheckDataLengthSafe(pos, cb) != false;
 
                 Assert::AreEqual(
                     expected,

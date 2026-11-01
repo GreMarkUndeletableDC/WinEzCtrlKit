@@ -10,8 +10,8 @@ protected:
     RECT m_rcBtn{};
     int m_cxBtn{};
 
-    BITBOOL m_bBtnHot : 1 = FALSE;
-    BITBOOL m_bLBtnDown : 1 = FALSE;
+    BITBOOL m_bBtnHot : 1 = false;
+    BITBOOL m_bLBtnDown : 1 = false;
 
     EckInline void FixCursorPosition(POINT& pt) noexcept
     {
@@ -28,8 +28,8 @@ protected:
     {
         m_cxBtn = 0;
         m_rcBtn = {};
-        m_bBtnHot = FALSE;
-        m_bLBtnDown = FALSE;
+        m_bBtnHot = false;
+        m_bLBtnDown = false;
     }
 public:
     void DetachNew() noexcept override
@@ -94,7 +94,7 @@ public:
             FixCursorPosition(pt);
             if (PointInRect(m_rcBtn, pt))
             {
-                m_bBtnHot = TRUE;
+                m_bBtnHot = true;
                 RedrawButton();
 
                 TRACKMOUSEEVENT tme;
@@ -106,7 +106,7 @@ public:
             }
             else if (m_bBtnHot)
             {
-                m_bBtnHot = FALSE;
+                m_bBtnHot = false;
                 RedrawButton();
             }
         }
@@ -116,7 +116,7 @@ public:
         {
             if (m_bBtnHot)
             {
-                m_bBtnHot = FALSE;
+                m_bBtnHot = false;
                 RedrawButton();
                 return 0;
             }
@@ -131,7 +131,7 @@ public:
             if (PointInRect(m_rcBtn, pt))
             {
                 SetCapture(Handle);
-                m_bLBtnDown = TRUE;
+                m_bLBtnDown = true;
                 RedrawButton();
                 return 0;
             }
@@ -142,7 +142,7 @@ public:
         {
             if (m_bLBtnDown)
             {
-                m_bLBtnDown = FALSE;
+                m_bLBtnDown = false;
                 ReleaseCapture();
                 RedrawButton();
 
@@ -161,7 +161,7 @@ public:
         {
             if (m_bLBtnDown)
             {
-                m_bLBtnDown = FALSE;
+                m_bLBtnDown = false;
                 RedrawButton();
             }
         }

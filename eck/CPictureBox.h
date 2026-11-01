@@ -32,12 +32,12 @@ private:
 
     ImageMode m_eViewMode{ ImageMode::TopLeft };
 
-    BITBOOL m_bScalable : 1 = FALSE;
-    BITBOOL m_b32BppHBitmap : 1 = FALSE;
-    BITBOOL m_bOwnerDraw : 1 = FALSE;
-    BITBOOL m_bAutoScaleToFit : 1 = TRUE;
-    BITBOOL m_bLBtnDown : 1 = TRUE;
-    BITBOOL m_bCurrFit : 1 = FALSE;
+    BITBOOL m_bScalable : 1 = false;
+    BITBOOL m_b32BppHBitmap : 1 = false;
+    BITBOOL m_bOwnerDraw : 1 = false;
+    BITBOOL m_bAutoScaleToFit : 1 = true;
+    BITBOOL m_bLBtnDown : 1 = true;
+    BITBOOL m_bCurrFit : 1 = false;
 public:
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {
@@ -98,16 +98,16 @@ public:
         return CWindow::OnMessage(uMsg, wParam, lParam);
     }
 
-    BOOL SetImage(HBITMAP hbm) noexcept
+    bool SetImage(HBITMAP hbm) noexcept
     {
         BITMAP bmp;
         if (!GetObjectW(hbm, sizeof(bmp), &bmp))
-            return FALSE;
+            return false;
         m_hBitmap = hbm;
         m_cxImage = bmp.bmWidth;
         m_cyImage = bmp.bmHeight;
         m_b32BppHBitmap = (bmp.bmBitsPixel == 32);
-        return TRUE;
+        return true;
     }
 
     GpStatus SetImage(GpImage* p) noexcept

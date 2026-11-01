@@ -127,7 +127,7 @@ namespace TypeIo
     {
         const auto cchExtra = TcvIntBufferSize<TFmtInt>(v.Radix, v.FillWidth);
         const auto p = (TChar*)c.rbDst.PushBack(cchExtra * 2);
-        const auto r = TcvFromInt(p, cchExtra, v.Num, v.Radix, TRUE, v.FillWidth, v.FillChar);
+        const auto r = TcvFromInt(p, cchExtra, v.Num, v.Radix, true, v.FillWidth, v.FillChar);
         c.rbDst.ReSize((BYTE*)r.pEnd - c.rbDst.Data());
         return Ret::Ok;
     }
@@ -237,7 +237,7 @@ private:
     USHORT m_cbMaxBuffer{ 512 };
     EolType m_eEol{ EolType::CRLF };
 
-    BOOL PushBackBuffer(auto&& Arg, auto&&... Args) noexcept
+    bool PushBackBuffer(auto&& Arg, auto&&... Args) noexcept
     {
         const auto b = (TypeIo::ToStream<TChar>(
             TO_STREAM_CTRL{ m_rbBuf, m_cp }, Arg) == TypeIo::Ret::Flush);
@@ -308,7 +308,7 @@ private:
         TypeIo::Ret r;
         while ((r = TypeIo::FromStream<TChar>(c, std::forward<T>(Arg))) == TypeIo::Ret::Continue)
         {
-            EnsureReadToEol(TRUE);
+            EnsureReadToEol(true);
             const auto pos = c.pCurr - c.pBegin;
             c.pBegin = m_rbBuf.Data();
             c.pEnd = m_rbBuf.Data() + m_rbBuf.Size();
@@ -320,7 +320,7 @@ private:
             IntScan(c, std::forward<Ts>(Args)...);
     }
 
-    void EnsureReadToEol(BOOL bEmpty) noexcept
+    void EnsureReadToEol(bool bEmpty) noexcept
     {
         NTSTATUS nts;
         DWORD cbRead;
@@ -372,11 +372,11 @@ public:
     }
 
     template<class TTrait, class TAllocator>
-    BOOL ScanLine(CStringT<TChar, TTrait, TAllocator>& rs) noexcept
+    bool ScanLine(CStringT<TChar, TTrait, TAllocator>& rs) noexcept
     {
-        EnsureReadToEol(FALSE);
+        EnsureReadToEol(false);
         if (m_posEol == MaxSizeT)
-            return FALSE;
+            return false;
         const auto p = (const TChar*)m_rbBuf.Data();
         auto cch = int(m_posEol / sizeof(TChar));
         rs.PushBack(p, cch);
@@ -385,7 +385,7 @@ public:
             ++cch;// CRLF检测
         m_rbBuf.Erase(0, (cch + 1) * sizeof(TChar));
         m_posEol = MaxSizeT;
-        return TRUE;
+        return true;
     }
 };
 ECK_CIO_NAMESPACE_END

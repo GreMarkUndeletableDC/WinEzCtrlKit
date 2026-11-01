@@ -2,7 +2,7 @@
 #include "ECK.h"
 
 ECK_NAMESPACE_BEGIN
-EckInline BOOL DaAdjustWindowRectEx(_Inout_ RECT* prc, DWORD dwStyle, BOOL bMenu,
+EckInline bool DaAdjustWindowRectEx(_Inout_ RECT* prc, DWORD dwStyle, bool bMenu,
     DWORD dwExStyle, [[maybe_unused]] UINT uDpi) noexcept
 {
 #if ECK_OPT_DYN_NF
@@ -19,7 +19,7 @@ EckInline BOOL DaAdjustWindowRectEx(_Inout_ RECT* prc, DWORD dwStyle, BOOL bMenu
 #endif// ECK_OPT_DYN_NF
 }
 
-EckInline BOOL DaSystemParametersInfo(UINT uAction, UINT uParam, PVOID pParam,
+EckInline bool DaSystemParametersInfo(UINT uAction, UINT uParam, PVOID pParam,
     UINT fWinIni, [[maybe_unused]] UINT uDpi) noexcept
 {
 #if ECK_OPT_DYN_NF

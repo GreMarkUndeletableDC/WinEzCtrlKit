@@ -152,7 +152,7 @@ enum class PictureType : BYTE
     Invalid = 0xFF,     // 任何无效的值
 };
 
-EckInlineNdCe BOOL PkIsTypeValid(CcpIntegerOrEnumeration auto e) noexcept
+EckInlineNdCe bool PkIsTypeValid(CcpIntegerOrEnumeration auto e) noexcept
 {
     return (BYTE)e < (BYTE)PictureType::Private_End;
 }
@@ -336,7 +336,7 @@ struct Picture
         return GetData();
     }
 
-    EckInlineNdCe BOOL IsLink() const noexcept { return std::holds_alternative<CStringW>(Data); }
+    EckInlineNdCe bool IsLink() const noexcept { return std::holds_alternative<CStringW>(Data); }
 
     // 从当前内容创建图片数据字节流
     // 若bLink为假，调用方必须保证在当前实例析构前销毁返回的流
@@ -345,7 +345,7 @@ struct Picture
         if (IsLink())
         {
             return SHCreateStreamOnFileEx(GetPath().Data(),
-                STGM_READ, 0, FALSE, nullptr, &pStream);
+                STGM_READ, 0, false, nullptr, &pStream);
         }
         else
         {
@@ -499,8 +499,8 @@ EckInlineCe void TagUIntToSynchronizationSafeInt(_Out_writes_bytes_(4) BYTE* p, 
     p[1] = (dw >> 14) & 0b0111'1111;
     p[0] = (dw >> 21) & 0b0111'1111;
 }
-EckNfInlineNdCe BOOL TagCheckId3v2Header(const ID3v2_HEADER& Hdr,
-    BOOL bHeaderOrFooter = TRUE) noexcept
+EckNfInlineNdCe bool TagCheckId3v2Header(const ID3v2_HEADER& Hdr,
+    bool bHeaderOrFooter = true) noexcept
 {
     return (bHeaderOrFooter ?
         memcmp(Hdr.Header, "ID3", 3) == 0 :
@@ -539,7 +539,7 @@ enum : UINT
     APE_HAS_HEADER = 1u << 31,
 };
 
-EckNfInlineNd BOOL TagCheckApeHeader(const APE_HEADER& Hdr) noexcept
+EckNfInlineNd bool TagCheckApeHeader(const APE_HEADER& Hdr) noexcept
 {
     return memcmp(Hdr.byPreamble, "APETAGEX", 8) == 0 &&
         (Hdr.dwVer == 1000u || Hdr.dwVer == 2000u) &&
@@ -549,25 +549,25 @@ EckNfInlineNd BOOL TagCheckApeHeader(const APE_HEADER& Hdr) noexcept
         *(ULONGLONG*)Hdr.byReserved == 0ull;
 }
 
-inline BOOL TagGetNumberAndTotal(std::wstring_view sv,
+inline bool TagGetNumberAndTotal(std::wstring_view sv,
     _Out_ int& nNum, _Out_ int& nTotal) noexcept
 {
     const auto r = TcvToInt(sv.data(), sv.size(), nNum, 10);
     if (r.eResult != TcvResult::Ok)
     {
         nTotal = 0;
-        return FALSE;
+        return false;
     }
     const auto posSlash = sv.find(L'/', size_t(r.pEnd - sv.data()));
     if (posSlash != std::wstring_view::npos)
     {
         if (TcvToInt(sv.data() + posSlash + 1,
             sv.size() - (posSlash + 1), nTotal).eResult != TcvResult::Ok)
-            return FALSE;
+            return false;
     }
     else
         nTotal = 0;
-    return TRUE;
+    return true;
 }
 
 class CMediaFile final
@@ -592,7 +592,7 @@ private:
         size_t posApe{ InvalidPosition };           // APE标签内容开始位置
         size_t posApeTag{ InvalidPosition };        // APE标签开始位置
         size_t cbApeTag{};  // 整个标签的大小
-        BOOL bPrependApe{}; // 是否为预置APE标签
+        bool bPrependApe{}; // 是否为预置APE标签
 
         size_t posFlac{ InvalidPosition };     // Flac标签头位置
     }  m_Loc{};
@@ -615,7 +615,7 @@ private:
                     m_Loc.posApeTag = m_Loc.posApeHdr;
                     m_Loc.cbApeTag = Hdr.cbBody + 32u;
                     m_uTagType |= TAG_APE;
-                    m_Loc.bPrependApe = TRUE;
+                    m_Loc.bPrependApe = true;
                 }
             }
             else if (m_Loc.posV2Footer != InvalidPosition &&
@@ -635,7 +635,7 @@ private:
                     else
                         m_Loc.posApeTag = m_Loc.posApe;
                     m_uTagType |= TAG_APE;
-                    m_Loc.bPrependApe = FALSE;
+                    m_Loc.bPrependApe = false;
                 }
                 else
                 {
@@ -657,7 +657,7 @@ private:
                             else
                                 m_Loc.posApeTag = m_Loc.posApe;
                             m_uTagType |= TAG_APE;
-                            m_Loc.bPrependApe = FALSE;
+                            m_Loc.bPrependApe = false;
                         }
                     }
                 }
@@ -720,7 +720,7 @@ private:
                 else
                     m_Loc.posApeTag = m_Loc.posApe;
                 m_uTagType |= TAG_APE;
-                m_Loc.bPrependApe = FALSE;
+                m_Loc.bPrependApe = false;
             }
             else
             {
@@ -732,7 +732,7 @@ private:
                     m_Loc.posApeTag = m_Loc.posApeHdr;
                     m_Loc.cbApeTag = Hdr.cbBody + 32u;
                     m_uTagType |= TAG_APE;
-                    m_Loc.bPrependApe = TRUE;
+                    m_Loc.bPrependApe = true;
                 }
             }
         }
@@ -763,7 +763,7 @@ private:
                         if (cbSize > 128u + 227u + 10u)
                         {
                             w.Seek(m_Loc.posV1Ext - 10) >> hdr;
-                            if (TagCheckId3v2Header(hdr, FALSE))
+                            if (TagCheckId3v2Header(hdr, false))
                             {
                                 cbFrames = TagSynchronizationSafeIntToUInt(hdr.Size);
                                 if (cbSize >= 128u + 227u + 10u + cbFrames)
@@ -783,7 +783,7 @@ private:
                         if (cbSize > 128u + 10u)
                         {
                             w.Seek(m_Loc.posV1 - 10) >> hdr;
-                            if (TagCheckId3v2Header(hdr, FALSE))
+                            if (TagCheckId3v2Header(hdr, false))
                             {
                                 cbFrames = TagSynchronizationSafeIntToUInt(hdr.Size);
                                 if (cbSize >= 128u + 10u + cbFrames)
@@ -802,7 +802,7 @@ private:
                     {
                         w.Seek(-10, STREAM_SEEK_END);
                         w >> hdr;
-                        if (TagCheckId3v2Header(hdr, FALSE))
+                        if (TagCheckId3v2Header(hdr, false))
                         {
                             cbFrames = TagSynchronizationSafeIntToUInt(hdr.Size);
                             if (cbSize >= 10u + cbFrames)
@@ -853,7 +853,7 @@ public:
         _In_z_ PCWSTR pszFile,
         UINT grfMode = STGM_READ,
         UINT uAttr = FILE_ATTRIBUTE_NORMAL,
-        BOOL bCreate = FALSE) noexcept
+        bool bCreate = false) noexcept
     {
         SHCreateStreamOnFileEx(pszFile, grfMode, uAttr,
             bCreate, nullptr, &m_pStream);
@@ -869,7 +869,7 @@ public:
 
     EckInlineNdCe UINT GetTagType() const noexcept { return m_uTagType; }
     EckInlineNdCe auto& GetTagLocation() const noexcept { return m_Loc; }
-    EckInlineNdCe BOOL IsValid() const noexcept { return !!GetStream(); }
+    EckInlineNdCe bool IsValid() const noexcept { return !!GetStream(); }
 
     UINT DetectTag() noexcept try
     {
@@ -905,7 +905,7 @@ public:
     virtual Result ReadTag(UINT uFlags) noexcept = 0;
     virtual Result WriteTag(UINT uFlags) noexcept = 0;
     virtual void Reset() noexcept = 0;
-    virtual BOOL IsEmpty() noexcept = 0;
+    virtual bool IsEmpty() noexcept = 0;
 };
 ECK_MEDIATAG_NAMESPACE_END
 ECK_NAMESPACE_END

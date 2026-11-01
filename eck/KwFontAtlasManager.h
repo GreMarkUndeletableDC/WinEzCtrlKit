@@ -162,7 +162,7 @@ private:
         }
 
         CMirroredAtlas::TCoord x, y;
-        id = m_pAtlas->Allocate(cx + 2, cy + 2, x, y, TRUE);
+        id = m_pAtlas->Allocate(cx + 2, cy + 2, x, y, true);
         ++x, ++y;
         auto& Tex = m_pAtlas->GetMirroredTexture();
 
@@ -197,7 +197,7 @@ private:
         }
 
         CMirroredAtlas::TCoord x, y;
-        id = m_pAtlas->Allocate(cx + 2, cy + 2, x, y, TRUE);
+        id = m_pAtlas->Allocate(cx + 2, cy + 2, x, y, true);
         ++x, ++y;
         auto& Tex = m_pAtlas->GetMirroredTexture();
 
@@ -221,7 +221,7 @@ private:
     HRESULT CreateGlyphAnalysis(
         _Out_ IDWriteGlyphRunAnalysis*& pGlyphRunAnalysis,
         _Out_ RECT& rcTexBounds,
-        _Out_ BOOL& bClearType,
+        _Out_ bool& bClearType,
         float xOrg,
         float fScale,
         UINT16 idxInRun,
@@ -243,7 +243,7 @@ private:
 #if ECK_OPT_DWRITE_V2
         if (g_pDwFactory2)
         {
-            bClearType = FALSE;
+            bClearType = false;
             hr = g_pDwFactory2->CreateGlyphRunAnalysis(
                 &SingleGlyph,
                 nullptr,
@@ -378,7 +378,7 @@ public:
 
         HRESULT hr;
         ComPtr<IDWriteGlyphRunAnalysis> pGlyphRunAnalysis;
-        BOOL bClearType;
+        bool bClearType;
         RECT rcTexBounds;
 
         hr = CreateGlyphAnalysis(

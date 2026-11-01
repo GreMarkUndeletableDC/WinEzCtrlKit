@@ -165,17 +165,17 @@ private:
     int m_cyFont{};         // 字体高度
     int m_idxEditing{ -1 };
     int m_idxEditSubItem{ -1 };
-    BITBOOL m_bOwnerData : 1 = FALSE;   // 所有者数据
-    BITBOOL m_bSubItemImg : 1 = FALSE;  // 显示子项图像
-    BITBOOL m_bFullRowSel : 1 = FALSE;  // 整行选择
-    BITBOOL m_bShowSelAlways : 1 = FALSE;   // 始终显示选择
-    BITBOOL m_bBorderSelect : 1 = FALSE;// 边框选择
-    BITBOOL m_bCheckBoxes : 1 = FALSE;  // 显示复选框
-    BITBOOL m_bGridLines : 1 = FALSE;   // 显示表格线
-    BITBOOL m_bHideLabels : 1 = FALSE;  // 隐藏标签
-    BITBOOL m_bSingleSel : 1 = FALSE;   // 单选模式
-    BITBOOL m_bHasFocus : 1 = FALSE;    // 是否有焦点
-    BITBOOL m_bEditLabel : 1 = FALSE;   // 允许编辑
+    BITBOOL m_bOwnerData : 1 = false;   // 所有者数据
+    BITBOOL m_bSubItemImg : 1 = false;  // 显示子项图像
+    BITBOOL m_bFullRowSel : 1 = false;  // 整行选择
+    BITBOOL m_bShowSelAlways : 1 = false;   // 始终显示选择
+    BITBOOL m_bBorderSelect : 1 = false;// 边框选择
+    BITBOOL m_bCheckBoxes : 1 = false;  // 显示复选框
+    BITBOOL m_bGridLines : 1 = false;   // 显示表格线
+    BITBOOL m_bHideLabels : 1 = false;  // 隐藏标签
+    BITBOOL m_bSingleSel : 1 = false;   // 单选模式
+    BITBOOL m_bHasFocus : 1 = false;    // 是否有焦点
+    BITBOOL m_bEditLabel : 1 = false;   // 允许编辑
 
     // 图形
     HTHEME m_hTheme{};      // 主题句柄
@@ -192,19 +192,19 @@ private:
     COLORREF m_crGridLineV = CLR_DEFAULT;   // 表格线垂直颜色
     COLORREF m_crHeaderText = CLR_DEFAULT;  // 表头文本颜色
 
-    BITBOOL m_bCustomDraw : 1 = TRUE;       // 是否由控件自动绘制，保留此选项以供特殊情况使用
-    BITBOOL m_bAutoDarkMode : 1 = TRUE;     // 自动处理深浅色切换
-    BITBOOL m_bAlphaClrInDark : 1 = TRUE;   // 在暗色模式下将颜色移至主题背景之上
-    BITBOOL m_bAutoColorPack : 1 = TRUE;    // 自动处理配色
-    BITBOOL m_bAddSplitterForClr : 1 = TRUE;// 若某项填充了颜色，则补全列分隔符
-    BITBOOL m_bCtrlASelectAll : 1 = TRUE;   // Ctrl+A全选
-    BITBOOL m_bImplLvOdNotify : 1 = TRUE;   // 指示控件应根据m_pfnOwnerData实现ListView标准通知
-    BITBOOL m_bInstalledHeaderHook : 1 = FALSE; // [内部标志]是否已钩住表头消息
-    BITBOOL m_bDoNotWrapInTile : 1 = FALSE; // 平铺视图下禁止第一行换行
-    BITBOOL m_bEnableExtEdit : 1 = TRUE;    // 启用扩展编辑
-    BITBOOL m_bOwnerEdit : 1 = FALSE;       // 由父窗口处理编辑
-    BITBOOL m_bPrepareEditingInfo : 1 = TRUE;   // 在父窗口处理编辑时，是否准备编辑信息
-    BITBOOL m_bWaitEditDelay : 1 = FALSE;   // [内部标志]有挂起的编辑操作
+    BITBOOL m_bCustomDraw : 1 = true;       // 是否由控件自动绘制，保留此选项以供特殊情况使用
+    BITBOOL m_bAutoDarkMode : 1 = true;     // 自动处理深浅色切换
+    BITBOOL m_bAlphaClrInDark : 1 = true;   // 在暗色模式下将颜色移至主题背景之上
+    BITBOOL m_bAutoColorPack : 1 = true;    // 自动处理配色
+    BITBOOL m_bAddSplitterForClr : 1 = true;// 若某项填充了颜色，则补全列分隔符
+    BITBOOL m_bCtrlASelectAll : 1 = true;   // Ctrl+A全选
+    BITBOOL m_bImplLvOdNotify : 1 = true;   // 指示控件应根据m_pfnOwnerData实现ListView标准通知
+    BITBOOL m_bInstalledHeaderHook : 1 = false; // [内部标志]是否已钩住表头消息
+    BITBOOL m_bDoNotWrapInTile : 1 = false; // 平铺视图下禁止第一行换行
+    BITBOOL m_bEnableExtEdit : 1 = true;    // 启用扩展编辑
+    BITBOOL m_bOwnerEdit : 1 = false;       // 由父窗口处理编辑
+    BITBOOL m_bPrepareEditingInfo : 1 = true;   // 在父窗口处理编辑时，是否准备编辑信息
+    BITBOOL m_bWaitEditDelay : 1 = false;   // [内部标志]有挂起的编辑操作
 
     BYTE m_byColorAlpha{ 70 };  // 透明度
     int m_cyHeader{};           // 表头高度，0 = 默认
@@ -230,7 +230,7 @@ private:
         }
     }
 
-    BOOL AlphaBlendColor(HDC hDC, const RECT& rcItem, COLORREF cr) noexcept
+    bool AlphaBlendColor(HDC hDC, const RECT& rcItem, COLORREF cr) noexcept
     {
         constexpr RECT rcDst{ 0,0,1,1 };
         SetDCBrushColor(m_DcAlpha.GetDC(), cr);
@@ -269,14 +269,14 @@ private:
         const auto sizeIL = m_sizeIL[idxIL];
         const auto hILState = m_hIL[LVSIL_STATE];
         const auto sizeILState = m_sizeIL[LVSIL_STATE];
-        const BOOL bSelected = (GetItemState(idx, LVIS_SELECTED) == LVIS_SELECTED);
+        const bool bSelected = (GetItemState(idx, LVIS_SELECTED) == LVIS_SELECTED);
         int* pColMetrics{};
         int cCol{ m_iViewType == LV_VIEW_DETAILS ? m_Header.GetItemCount() : 0 };
         RECT rc, rcItem;
         LVE_ITEM_EXT ie{};
         LVITEMW li;
         COLORREF crLine{ CLR_DEFAULT }, crText{ CLR_DEFAULT };
-        const BOOL bExtInfo = (m_bOwnerData && m_pfnOwnerData);
+        const bool bExtInfo = (m_bOwnerData && m_pfnOwnerData);
 
         li.mask = LVIF_IMAGE | LVIF_INDENT | LVIF_STATE | LVIF_PARAM;
         li.iItem = idx;
@@ -372,7 +372,7 @@ private:
         else
             rcItem = pnmlvcd->nmcd.rc;
 
-        const BOOL bFillClrPostTheme = (m_bAlphaClrInDark && ShouldAppsUseDarkMode() && iState);
+        const bool bFillClrPostTheme = (m_bAlphaClrInDark && ShouldAppsUseDarkMode() && iState);
         if (m_iViewType == LV_VIEW_DETAILS)
         {
             if (m_bAddSplitterForClr)
@@ -613,7 +613,7 @@ private:
                     uDtFlags |= DT_CENTER;
                 GetSubItemRect(idx, li.iSubItem, &rc, LVIR_LABEL);
                 rc.left += cxImg;
-                BOOL bRestoreTextColor = FALSE;
+                bool bRestoreTextColor = false;
                 if (bExtInfo)
                 {
                     ie.uMask = LVE_IM_COLOR_TEXT;
@@ -622,7 +622,7 @@ private:
                     if (ie.Clr.crText != CLR_DEFAULT)
                     {
                         SetTextColor(hDC, ie.Clr.crText);
-                        bRestoreTextColor = TRUE;
+                        bRestoreTextColor = true;
                     }
                 }
                 else if (pData)
@@ -631,7 +631,7 @@ private:
                     if (it != pData->CellClr.end() && it->second.crText != CLR_DEFAULT)
                     {
                         SetTextColor(hDC, it->second.crText);
-                        bRestoreTextColor = TRUE;
+                        bRestoreTextColor = true;
                     }
                 }
                 DrawTextW(hDC, li.pszText, cchText, &rc, uDtFlags);
@@ -806,10 +806,10 @@ private:
         if (GetStyle() & LVS_EDITLABELS)
         {
             SetStyle(GetStyle() & ~LVS_EDITLABELS);
-            m_bEditLabel = TRUE;
+            m_bEditLabel = true;
         }
         else
-            m_bEditLabel = FALSE;
+            m_bEditLabel = false;
         m_ptc = PtcCurrent();
         m_cxEdge = DaGetSystemMetrics(SM_CXEDGE, m_iDpi);
         m_DcAlpha.FromWindow(hWnd, 1, 1);
@@ -838,14 +838,14 @@ private:
         m_cyFont = 0;
         LveSetColorPack({});
         m_bCustomDraw = m_bAutoDarkMode = m_bAlphaClrInDark =
-            m_bAutoColorPack = m_bAddSplitterForClr = m_bCtrlASelectAll = TRUE;
+            m_bAutoColorPack = m_bAddSplitterForClr = m_bCtrlASelectAll = true;
         m_byColorAlpha = 70;
         m_cyHeader = 0;
         m_pfnOwnerData = nullptr;
         m_pOdProcData = nullptr;
     }
 
-    void CancelExtendEdit(BOOL bSave) noexcept
+    void CancelExtendEdit(bool bSave) noexcept
     {
         /*
         * 以下情况需要取消编辑：
@@ -908,7 +908,7 @@ private:
 
     void EnterEditDelay(int idx, int idxSubItemDisplay) noexcept
     {
-        m_bWaitEditDelay = TRUE;
+        m_bWaitEditDelay = true;
         m_idxEditing = idx;
         m_idxEditSubItem = idxSubItemDisplay;
         SetTimer(Handle, IDT_EDIT_DELAY, GetDoubleClickTime(), nullptr);
@@ -919,7 +919,7 @@ private:
         if (!m_bWaitEditDelay)
             return;
         KillTimer(Handle, IDT_EDIT_DELAY);
-        m_bWaitEditDelay = FALSE;
+        m_bWaitEditDelay = false;
     }
 
     LRESULT OnMessageEdit(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot& Ctx) noexcept
@@ -929,13 +929,13 @@ private:
         case WM_KILLFOCUS:
             if (InSendMessage())
                 ReplyMessage(0);
-            CancelExtendEdit(TRUE);
+            CancelExtendEdit(true);
             break;
         case WM_KEYDOWN:
             if (wParam == VK_RETURN)
-                CancelExtendEdit(TRUE);
+                CancelExtendEdit(true);
             else if (wParam == VK_ESCAPE)
-                CancelExtendEdit(FALSE);
+                CancelExtendEdit(false);
             break;
         case WM_GETDLGCODE:
             Ctx.Processed();
@@ -1147,7 +1147,7 @@ public:
                 case HDN_BEGINDRAG:
                 case HDN_BEGINFILTEREDIT:
                 case HDN_DIVIDERDBLCLICKW:
-                    CancelExtendEdit(FALSE);
+                    CancelExtendEdit(false);
                     break;
                 }
             }
@@ -1172,7 +1172,7 @@ public:
             if (m_bEditLabel && m_bEnableExtEdit && wParam == MK_LBUTTON)
             {
                 CancelEditDelay();
-                CancelExtendEdit(TRUE);
+                CancelExtendEdit(true);
                 LVHITTESTINFO lvhti;
                 lvhti.pt = ECK_GET_PT_LPARAM(lParam);
                 if (m_iViewType == LV_VIEW_DETAILS)
@@ -1203,7 +1203,7 @@ public:
         case WM_MOUSEWHEEL:
         case WM_MOUSEHWHEEL:
             if (m_bEditLabel && m_bEnableExtEdit)
-                CancelExtendEdit(TRUE);
+                CancelExtendEdit(true);
             break;
         case LVM_SORTITEMS:
         case LVM_SORTITEMSEX:
@@ -1215,7 +1215,7 @@ public:
         case WM_HSCROLL:
         case WM_VSCROLL:
             if (m_bEditLabel && m_bEnableExtEdit)
-                CancelExtendEdit(FALSE);
+                CancelExtendEdit(false);
             break;
 
         case WM_KEYDOWN:
@@ -1228,11 +1228,11 @@ public:
             break;
 
         case WM_SETFOCUS:
-            m_bHasFocus = TRUE;
+            m_bHasFocus = true;
             break;
 
         case WM_KILLFOCUS:
-            m_bHasFocus = FALSE;
+            m_bHasFocus = false;
             break;
 
         case WM_THEMECHANGED:
@@ -1264,7 +1264,7 @@ public:
             if (wParam == GWL_STYLE)
                 UpdateStyleOptions(((STYLESTRUCT*)lParam)->styleNew);
             if (m_bEditLabel && m_bEnableExtEdit)
-                CancelExtendEdit(FALSE);
+                CancelExtendEdit(false);
             break;
 
         case WM_STYLECHANGING:
@@ -1310,7 +1310,7 @@ public:
         case LVM_SETVIEW:
         {
             if (m_bEditLabel && m_bEnableExtEdit)
-                CancelExtendEdit(FALSE);
+                CancelExtendEdit(false);
             const auto lResult = CListView::OnMessage(uMsg, wParam, lParam);
             if (!m_Header.IsValid())
                 if (const auto hHeader = GetHeaderControl())
@@ -1358,7 +1358,7 @@ public:
     }
 
     LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept override
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept override
     {
         switch (uMsg)
         {
@@ -1370,7 +1370,7 @@ public:
             {
                 if (!m_bImplLvOdNotify || !m_pfnOwnerData)
                     break;
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto p = (NMLVDISPINFOW*)lParam;
                 LVE_ITEM_EXT ie;
                 ie.idxItem = p->item.iItem;
@@ -1408,7 +1408,7 @@ public:
             {
                 if (!m_bCustomDraw)
                     break;
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto pnmlvcd = (NMLVCUSTOMDRAW*)lParam;
                 switch (pnmlvcd->nmcd.dwDrawStage)
                 {
@@ -1437,9 +1437,9 @@ public:
             {
                 if (!m_bEnableExtEdit)
                     break;
-                bProcessed = TRUE;
+                bProcessed = true;
                 //OnBeginExtEdit(hParent, (NMLVDISPINFOW*)lParam);
-                return TRUE;// 取消编辑
+                return true;// 取消编辑
             }
             break;
 
@@ -1552,7 +1552,7 @@ public:
             pData->lParam = ie.lParam;
     }
 
-    BOOL LveGetItem(LVE_ITEM_EXT& ie) const noexcept
+    bool LveGetItem(LVE_ITEM_EXT& ie) const noexcept
     {
         EckAssert(ie.idxItem >= 0 && ie.idxItem < GetItemCount());
         EckAssert(ie.idxSubItem < m_Header.GetItemCount());
@@ -1563,7 +1563,7 @@ public:
         li.lParam = 0;
         GetItem(&li);
         if (!li.lParam)
-            return FALSE;
+            return false;
         const auto pData = (LVE_ITEM_DATA*)li.lParam;
         EckAssert(pData->dwMagic == LveItemDataMagic);
         if (ie.uMask & LVE_IM_COLOR_ALL)
@@ -1580,7 +1580,7 @@ public:
             {
                 const auto it = pData->CellClr.find(ie.idxSubItem);
                 if (it == pData->CellClr.end())
-                    return FALSE;
+                    return false;
                 const auto& e = it->second;
                 if (ie.uMask & LVE_IM_COLOR_BK)
                     ie.Clr.crBk = e.crBk;
@@ -1591,7 +1591,7 @@ public:
             }
         if (ie.uMask & LVE_IM_LPARAM)
             ie.lParam = pData->lParam;
-        return TRUE;
+        return true;
     }
 
     /// <summary>
@@ -1627,13 +1627,13 @@ public:
                         }
                         return 0;
                     }, MHI_LVE_HEADER_HEIGHT);
-                m_bInstalledHeaderHook = TRUE;
+                m_bInstalledHeaderHook = true;
             }
         }
         else if (m_bInstalledHeaderHook)
         {
             m_Header.GetEventChain().Disconnect(MHI_LVE_HEADER_HEIGHT);
-            m_bInstalledHeaderHook = FALSE;
+            m_bInstalledHeaderHook = false;
         }
         // force recalc it
         Update();
@@ -1644,32 +1644,32 @@ public:
 
     CHeaderExt& LveGetHeader() noexcept { return m_Header; }
 
-    EckInlineCe void LveSetCustomDraw(BOOL b) noexcept { m_bCustomDraw = b; }
-    EckInlineNdCe BOOL LveGetCustomDraw() const noexcept { return m_bCustomDraw; }
+    EckInlineCe void LveSetCustomDraw(bool b) noexcept { m_bCustomDraw = b; }
+    EckInlineNdCe bool LveGetCustomDraw() const noexcept { return m_bCustomDraw; }
 
-    EckInlineCe void LveSetAutoDarkMode(BOOL b) noexcept { m_bAutoDarkMode = b; }
-    EckInlineNdCe BOOL LveGetAutoDarkMode() const noexcept { return m_bAutoDarkMode; }
+    EckInlineCe void LveSetAutoDarkMode(bool b) noexcept { m_bAutoDarkMode = b; }
+    EckInlineNdCe bool LveGetAutoDarkMode() const noexcept { return m_bAutoDarkMode; }
 
-    EckInlineCe void LveSetAlphaColorInDark(BOOL b) noexcept { m_bAlphaClrInDark = b; }
-    EckInlineNdCe BOOL LveGetAlphaColorInDark() const noexcept { return m_bAlphaClrInDark; }
+    EckInlineCe void LveSetAlphaColorInDark(bool b) noexcept { m_bAlphaClrInDark = b; }
+    EckInlineNdCe bool LveGetAlphaColorInDark() const noexcept { return m_bAlphaClrInDark; }
 
     EckInlineCe void LveSetAlphaValue(BYTE b) noexcept { m_byColorAlpha = b; }
     EckInlineNdCe BYTE LveGetAlphaValue() const noexcept { return m_byColorAlpha; }
 
-    EckInlineCe void LveSetAutoColorPack(BOOL b) noexcept { m_bAutoColorPack = b; }
-    EckInlineNdCe BOOL LveGetAutoColorPack() const noexcept { return m_bAutoColorPack; }
+    EckInlineCe void LveSetAutoColorPack(bool b) noexcept { m_bAutoColorPack = b; }
+    EckInlineNdCe bool LveGetAutoColorPack() const noexcept { return m_bAutoColorPack; }
 
-    EckInlineCe void LveSetAddSplitterForColor(BOOL b) noexcept { m_bAddSplitterForClr = b; }
-    EckInlineNdCe BOOL LveGetAddSplitterForColor() const noexcept { return m_bAddSplitterForClr; }
+    EckInlineCe void LveSetAddSplitterForColor(bool b) noexcept { m_bAddSplitterForClr = b; }
+    EckInlineNdCe bool LveGetAddSplitterForColor() const noexcept { return m_bAddSplitterForClr; }
 
-    EckInlineCe void LveSetCtrlASelectAll(BOOL b) noexcept { m_bCtrlASelectAll = b; }
-    EckInlineNdCe BOOL LveGetCtrlASelectAll() const noexcept { return m_bCtrlASelectAll; }
+    EckInlineCe void LveSetCtrlASelectAll(bool b) noexcept { m_bCtrlASelectAll = b; }
+    EckInlineNdCe bool LveGetCtrlASelectAll() const noexcept { return m_bCtrlASelectAll; }
 
-    EckInlineCe void LveSetImplementOwnerDataNotify(BOOL b) noexcept { m_bImplLvOdNotify = b; }
-    EckInlineNdCe BOOL LveGetImplementOwnerDataNotify() const noexcept { return m_bImplLvOdNotify; }
+    EckInlineCe void LveSetImplementOwnerDataNotify(bool b) noexcept { m_bImplLvOdNotify = b; }
+    EckInlineNdCe bool LveGetImplementOwnerDataNotify() const noexcept { return m_bImplLvOdNotify; }
 
-    EckInlineCe void LveSetDoNotWrapInTile(BOOL b) noexcept { m_bDoNotWrapInTile = b; }
-    EckInlineNdCe BOOL LveGetDoNotWrapInTile() const noexcept { return m_bDoNotWrapInTile; }
+    EckInlineCe void LveSetDoNotWrapInTile(bool b) noexcept { m_bDoNotWrapInTile = b; }
+    EckInlineNdCe bool LveGetDoNotWrapInTile() const noexcept { return m_bDoNotWrapInTile; }
 
     EckInline void LveSetOwnerDataBufferSize(int cch) noexcept { m_rsTextBuf.ReSize(cch); }
     EckInlineNdCe int LveGetOwnerDataBufferSize() const noexcept { return m_rsTextBuf.Size(); }

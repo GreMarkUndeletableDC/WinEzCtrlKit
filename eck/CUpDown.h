@@ -43,7 +43,7 @@ public:
         return (HWND)SendMessageW(UDM_GETBUDDY, 0, 0);
     }
 
-    EckInline int GetPosition(_Out_opt_ BOOL* pbSuccess = nullptr) const noexcept
+    EckInline int GetPosition(_Out_opt_ bool* pbSuccess = nullptr) const noexcept
     {
         return (int)SendMessageW(UDM_GETPOS32, 0, (LPARAM)pbSuccess);
     }
@@ -55,14 +55,14 @@ public:
         SendMessageW(UDM_GETRANGE32, (WPARAM)piMin, (LPARAM)piMax);
     }
 
-    EckInline BOOL SetAcceleration(_In_reads_(c) const UDACCEL* puda, int c) const noexcept
+    EckInline bool SetAcceleration(_In_reads_(c) const UDACCEL* puda, int c) const noexcept
     {
-        return (BOOL)SendMessageW(UDM_SETACCEL, c, (LPARAM)puda);
+        return (bool)SendMessageW(UDM_SETACCEL, c, (LPARAM)puda);
     }
 
-    EckInline BOOL SetBase(int iBase) const noexcept
+    EckInline bool SetBase(int iBase) const noexcept
     {
-        return (BOOL)SendMessageW(UDM_SETBASE, iBase, 0);
+        return (bool)SendMessageW(UDM_SETBASE, iBase, 0);
     }
 
     EckInline HWND SetBuddy(HWND hBuddy) const noexcept

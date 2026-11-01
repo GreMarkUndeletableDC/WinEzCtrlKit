@@ -140,8 +140,8 @@ private:
     CStringW m_rsBuffer{};
     DWORD m_idxCurr{};
     BYTE m_idxCurrSource{};
-    BITBOOL m_bAutoCompleteAppInfo : 1{ TRUE };
-    BITBOOL m_bSkipWindowsInstaller : 1{ TRUE };
+    BITBOOL m_bAutoCompleteAppInfo : 1{ true };
+    BITBOOL m_bSkipWindowsInstaller : 1{ true };
     BITBOOL m_bEnumMsi : 1{ 1 };
 
     LSTATUS NextSource() noexcept
@@ -249,8 +249,8 @@ public:
             return ERROR_SUCCESS;
         }
 
-        BOOL AcquireBasicInformation(BOOL bSkipWindowsInstaller,
-            PCWSTR pszKeyOrId, int cchKeyOrId, BOOL bMsi) noexcept
+        bool AcquireBasicInformation(bool bSkipWindowsInstaller,
+            PCWSTR pszKeyOrId, int cchKeyOrId, bool bMsi) noexcept
         {
             DWORD dwBuf{}, cbBuf{ sizeof(dwBuf) };
             if (bMsi)
@@ -283,7 +283,7 @@ public:
                     // 若有需要，调用方使用此标志判断是否跳过Windows Installer应用
                     Flags |= AppwizFlags::WindowsInstaller;
                     if (bSkipWindowsInstaller)
-                        return TRUE;// 停止获取信息
+                        return true;// 停止获取信息
                 }
                 dwBuf = 0;
             }
@@ -329,7 +329,7 @@ public:
                 if (GetString(AppwizString::KbNumber).cch)
                     Flags |= AppwizFlags::Patch;
             }
-            return FALSE;
+            return false;
         }
 
         static DWORD VersionFromString(PCWSTR pszVer, DWORD dwType) noexcept
@@ -352,7 +352,7 @@ public:
             EckCheckPointer(pszBuf);
             TcsCopyLength(pszBuf, svCmd.data(), svCmd.size() + 1);
             const auto b = CreateProcessW(nullptr, pszBuf,
-                nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi);
+                nullptr, nullptr, false, 0, nullptr, nullptr, &si, &pi);
             _freea(pszBuf);
             if (b)
             {
@@ -363,22 +363,22 @@ public:
             return NaGetLastError();
         }
     public:
-        EckInlineNdCe BOOL TestFlag(AppwizFlags f) const noexcept
+        EckInlineNdCe bool TestFlag(AppwizFlags f) const noexcept
         {
             return (Flags & f) != AppwizFlags::None;
         }
 
-        EckInlineNdCe BOOL IsWindowsInstaller() const noexcept
+        EckInlineNdCe bool IsWindowsInstaller() const noexcept
         {
             return TestFlag(AppwizFlags::WindowsInstaller);
         }
 
         // 测试是否为一般意义上的可操作项
-        EckInlineNdCe BOOL IsValid() const noexcept
+        EckInlineNdCe bool IsValid() const noexcept
         {
             if (!Str[size_t(AppwizString::DisplayName)].cch ||
                 Str[size_t(AppwizString::KbNumber)].cch)
-                return FALSE;
+                return false;
             if (TestFlag(AppwizFlags::Msi))
                 return !TestFlag(AppwizFlags::NoRegistry);
             else
@@ -386,7 +386,7 @@ public:
         }
 
         // 提供与 控制面板/程序和功能 相似的过滤条件
-        EckInlineNdCe BOOL IsNormalApp() const noexcept
+        EckInlineNdCe bool IsNormalApp() const noexcept
         {
             return IsValid() && !TestFlag(
                 AppwizFlags::WindowsInstaller | AppwizFlags::SystemComponent);
@@ -426,7 +426,7 @@ public:
             // 某些程序填写为字符串，因此使用字符串缓冲区接收
             WCHAR szBuf[Int32StringBufferSize];
             DWORD dwType;
-            BOOL bMajorRead{}, bMinorRead{};
+            bool bMajorRead{}, bMinorRead{};
             cbBuf = sizeof(szBuf);
             if (Key.QueryValue(L"MajorVersion", szBuf, &cbBuf, &dwType) == ERROR_SUCCESS)
             {
@@ -530,7 +530,7 @@ public:
             App.StringBuffer.Reserve(MAX_PATH);
             App.Flags = GetRegistryFlags(m_idxCurrSource);
             if (App.AcquireBasicInformation(m_bSkipWindowsInstaller,
-                m_rsBuffer.Data(), cbBuf / sizeof(WCHAR), FALSE))
+                m_rsBuffer.Data(), cbBuf / sizeof(WCHAR), false))
                 return ERROR_SUCCESS;
         }
         else
@@ -540,7 +540,7 @@ public:
             // 枚举MSI
             if ((ls = MsiEnumProductsW(m_idxCurr++, m_rsBuffer.Data())) != ERROR_SUCCESS)
                 return ls;
-            App.AcquireBasicInformation(FALSE/* Not used */, m_rsBuffer.Data(), 38, TRUE);
+            App.AcquireBasicInformation(false/* Not used */, m_rsBuffer.Data(), 38, true);
         }
         if (m_bAutoCompleteAppInfo)
             App.AcquireAllInformation();
@@ -549,28 +549,28 @@ public:
 
     // 是否在获取每个应用的基本信息时自动获取所有信息，
     // 若仅需基本信息，可设置为FALSE以提高性能
-    EckInlineCe void SetAutoCompleteAppInformation(BOOL bAutoComplete) noexcept
+    EckInlineCe void SetAutoCompleteAppInformation(bool bAutoComplete) noexcept
     {
         m_bAutoCompleteAppInfo = bAutoComplete;
     }
-    EckInlineNdCe BOOL GetAutoCompleteAppInformation() const noexcept
+    EckInlineNdCe bool GetAutoCompleteAppInformation() const noexcept
     {
         return m_bAutoCompleteAppInfo;
     }
 
     // 若调用方使用MsiEnumProductsW枚举MSI应用信息，
     // 则可设为TRUE以跳过这些应用，此时仅获取WindowsInstaller标志
-    EckInlineCe void SetSkipWindowsInstaller(BOOL bSkip) noexcept
+    EckInlineCe void SetSkipWindowsInstaller(bool bSkip) noexcept
     {
         m_bSkipWindowsInstaller = bSkip;
     }
-    EckInlineNdCe BOOL GetSkipWindowsInstaller() const noexcept
+    EckInlineNdCe bool GetSkipWindowsInstaller() const noexcept
     {
         return m_bSkipWindowsInstaller;
     }
 
     // 是否使用MSIAPI枚举应用信息
-    EckInlineCe void SetEnumerateMsi(BOOL bEnum) noexcept { m_bEnumMsi = bEnum; }
-    EckInlineNdCe BOOL GetEnumerateMsi() const noexcept { return m_bEnumMsi; }
+    EckInlineCe void SetEnumerateMsi(bool bEnum) noexcept { m_bEnumMsi = bEnum; }
+    EckInlineNdCe bool GetEnumerateMsi() const noexcept { return m_bEnumMsi; }
 };
 ECK_NAMESPACE_END

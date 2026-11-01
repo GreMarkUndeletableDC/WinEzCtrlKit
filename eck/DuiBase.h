@@ -33,14 +33,14 @@ private:
 
     void InvalidateInternal(
         _In_opt_ const Kw::Rect* prcInEle,
-        BOOL bUpdateNow,
-        BOOL bClipToEle = TRUE) noexcept;
+        bool bUpdateNow,
+        bool bClipToEle = true) noexcept;
 
     void SetStyleWorker(DWORD uStyle) noexcept;
 
-    void PostMoveSize(BOOL bSize, BOOL bMove, const Kw::Rect& rcOld) noexcept;
+    void PostMoveSize(bool bSize, bool bMove, const Kw::Rect& rcOld) noexcept;
 public:
-    BOOL Create(std::wstring_view svText, DWORD uStyle, DWORD dwExStyle,
+    bool Create(std::wstring_view svText, DWORD uStyle, DWORD dwExStyle,
         float x, float y, float cx, float cy, CElement* pParent,
         CDuiWindow* pWnd = nullptr, int iId = 0, PCVOID pData = nullptr) noexcept;
 
@@ -48,18 +48,18 @@ public:
 
     HRESULT EhUiaMakeInterface() noexcept override;
 
-    BOOL EhTransform(_Inout_ Kw::Vec2& pt, BOOL bInClient) noexcept override
+    bool EhTransform(_Inout_ Kw::Vec2& pt, bool bInClient) noexcept override
     {
         if (CompIsNeedCoordinateTransform())
         {
             if (bInClient)
                 ClientToElement(pt);
-            CompTransformCoordinate(pt, TRUE);
+            CompTransformCoordinate(pt, true);
             if (bInClient)
                 ElementToClient(pt);
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
     virtual LRESULT OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -71,24 +71,24 @@ public:
     {
         const auto rcOld = GetWholeRectInClient();
         __super::SetRect(rc);
-        PostMoveSize(TRUE, TRUE, rcOld);
+        PostMoveSize(true, true, rcOld);
     }
 
     void SetPosition(float x, float y) noexcept
     {
         const auto rcOld = GetWholeRectInClient();
         __super::SetPosition(x, y);
-        PostMoveSize(FALSE, TRUE, rcOld);
+        PostMoveSize(false, true, rcOld);
     }
 
     void SetSize(float cx, float cy) noexcept
     {
         const auto rcOld = GetWholeRectInClient();
         __super::SetSize(cx, cy);
-        PostMoveSize(TRUE, FALSE, rcOld);
+        PostMoveSize(true, false, rcOld);
     }
 
-    void LoShow(BOOL bShow) noexcept override { SetVisible(bShow); }
+    void LoShow(bool bShow) noexcept override { SetVisible(bShow); }
 
     void LoSetPosition(LYTPOINT pt) noexcept override { SetPosition((float)pt.x, (float)pt.y); }
     void LoSetSize(LYTSIZE size) noexcept override { SetSize((float)size.cx, (float)size.cy); }
@@ -124,7 +124,7 @@ public:
     using TBase::GetStyle;
     using TBase::SetZOrder;
 
-    void SetVisible(BOOL b) noexcept
+    void SetVisible(bool b) noexcept
     {
         auto u = GetStyle();
         if (b)
@@ -147,7 +147,7 @@ public:
     }
     EckInlineNdCe auto& GetTheme() const noexcept { return m_pTheme; }
 
-    void SetCompositor(CCompositor* pCompositor, BOOL bAutoMarkParentComp = TRUE) noexcept
+    void SetCompositor(CCompositor* pCompositor, bool bAutoMarkParentComp = true) noexcept
     {
         if (m_pCompositor == pCompositor)
             return;
@@ -174,19 +174,19 @@ public:
 
     EckInline void Invalidate(
         const Kw::Rect& rcInEle,
-        BOOL bUpdateNow = TRUE,
-        BOOL bClipToEle = TRUE) noexcept
+        bool bUpdateNow = true,
+        bool bClipToEle = true) noexcept
     {
         InvalidateInternal(&rcInEle, bUpdateNow, bClipToEle);
     }
-    EckInline void Invalidate(BOOL bUpdateNow = TRUE) noexcept
+    EckInline void Invalidate(bool bUpdateNow = true) noexcept
     {
         InvalidateInternal(nullptr, bUpdateNow);
     }
     EckInline void Invalidate(
         const D2D1_RECT_F& rcInEle,
-        BOOL bUpdateNow = TRUE,
-        BOOL bClipToEle = TRUE) noexcept
+        bool bUpdateNow = true,
+        bool bClipToEle = true) noexcept
     {
         InvalidateInternal(&Kw::MakeRect(rcInEle), bUpdateNow, bClipToEle);
     }
@@ -204,10 +204,10 @@ public:
     EckInline void ReleaseCapture() noexcept;
     EckInline void SetFocus() noexcept;
     EckInlineNdCe CElement* GetFocus() noexcept;
-    EckInline BOOL SetTimer(UINT_PTR uId, UINT uElapse) noexcept;
-    EckInline BOOL KillTimer(UINT_PTR uId) noexcept;
+    EckInline bool SetTimer(UINT_PTR uId, UINT uElapse) noexcept;
+    EckInline bool KillTimer(UINT_PTR uId) noexcept;
 
-    EckInlineNdCe BOOL IsValid() const noexcept { return !!__super::GetContainer(); }
+    EckInlineNdCe bool IsValid() const noexcept { return !!__super::GetContainer(); }
 
     // 取完全包围元素的矩形，相对客户区
     EckInlineNdCe Kw::Rect GetWholeRectInClient() const noexcept
@@ -242,13 +242,13 @@ public:
         return m_pCompositor->EleGetRealCompositedRect();
     }
 
-    EckInlineNdCe BOOL CompIsNeedCoordinateTransform() const noexcept
+    EckInlineNdCe bool CompIsNeedCoordinateTransform() const noexcept
     {
         return m_pCompositor || (GetStyle() & DES_PARENT_COMP);
     }
 
     // 坐标相对元素
-    void CompTransformCoordinate(_Inout_ Kw::Vec2& pt, BOOL bNormalToComposited) noexcept
+    void CompTransformCoordinate(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept
     {
         if (m_pCompositor && !(GetStyle() & DES_PARENT_COMP))// OPTIMIZATION
         {
@@ -322,7 +322,7 @@ public:
             __super::SetStyle(__super::GetStyle() | DESP_COMP_CONTENT_INVALID);
     }
 
-    void CompMarkChildrenParentComposited(BOOL bAdd) noexcept
+    void CompMarkChildrenParentComposited(bool bAdd) noexcept
     {
         auto pEle = EtFirstChild();
         while (pEle)
@@ -369,8 +369,8 @@ private:
     {
         CElement* pEle;
         Kw::Rect rcExpand;
-        BOOLEAN bCombined;
-        BOOLEAN bVisible;
+        bool bCombined;
+        bool bVisible;
     };
 
 #ifdef _DEBUG
@@ -411,11 +411,11 @@ private:
 
     PresentMode m_ePresentMode{ PresentMode::FlipSwapChain };
 
-    BITBOOL m_bAutoTheme : 1{ TRUE };
-    BITBOOL m_bAutoThemeAccent : 1{ TRUE };
+    BITBOOL m_bAutoTheme : 1{ true };
+    BITBOOL m_bAutoThemeAccent : 1{ true };
     BITBOOL m_bDbgDrawCompRect : 1{};
 
-    BITBOOL m_bFullUpdate : 1{ TRUE };  // 当前是否需要完全重绘
+    BITBOOL m_bFullUpdate : 1{ true };  // 当前是否需要完全重绘
     BITBOOL m_bWaitSwapChain : 1{};
 
     void CeAdd(CElement* pEle) noexcept
@@ -436,13 +436,13 @@ private:
                 return;
             }
         }
-        EckAssert(FALSE);// 未找到匹配元素
+        EckAssert(false);// 未找到匹配元素
     }
     void CeUnion(_Inout_ Kw::Rect& rcInClient) noexcept
     {
         if (m_vCeEle.empty())
             return;
-        BOOL bChanged{};
+        bool bChanged{};
         for (auto& e : m_vCeEle)
         {
             if (!(e.bVisible = e.pEle->IsVisible()))
@@ -454,15 +454,15 @@ private:
                     UnionRect(rcInClient, rcInClient, rcElem);
                 else
                     e.pEle->CallEvent(EWM_QUERY_EXPAND_RECT, (WPARAM)&rcInClient, 0);
-                e.bCombined = bChanged = TRUE;
+                e.bCombined = bChanged = true;
             }
             else
-                e.bCombined = FALSE;
+                e.bCombined = false;
         }
         bChanged = bChanged && m_vCeEle.size() > 1;
         while (bChanged)
         {
-            bChanged = FALSE;
+            bChanged = false;
             for (auto& e : m_vCeEle)
             {
                 if (!e.bVisible)
@@ -472,11 +472,11 @@ private:
                 const auto rcElem = e.pEle->GetWholeRectInClient();
                 if (IsRectsIntersect(rcElem, rcInClient))
                 {
-                    e.bCombined = TRUE;
+                    e.bCombined = true;
                     if (e.pEle->GetStyle() & DES_CONTENT_EXPAND)
                     {
                         UnionRect(rcInClient, rcInClient, rcElem);
-                        bChanged = TRUE;
+                        bChanged = true;
                     }
                     else
                     {
@@ -838,7 +838,7 @@ private:
 
     void RdReSize() noexcept
     {
-        m_bFullUpdate = TRUE;
+        m_bFullUpdate = true;
 
         constexpr auto BitmapOptions =
             D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
@@ -895,7 +895,7 @@ private:
     void RdSetUserDpi() noexcept
     {
         CcDeleteBitmap();
-        m_bFullUpdate = TRUE;
+        m_bFullUpdate = true;
         RdGetDC()->SetDpi((float)GetUserDpi(), (float)GetUserDpi());
     }
 
@@ -937,7 +937,7 @@ private:
                 &m_D2D.m_pDC);
 
             DCompositionCreateDevice3(g_pDxgiDevice, IID_PPV_ARGS(&m_pDcDevice));
-            m_pDcDevice->CreateTargetForHwnd(Handle, TRUE, &m_pDcTarget);
+            m_pDcDevice->CreateTargetForHwnd(Handle, true, &m_pDcTarget);
             m_pDcDevice->CreateVisual(&m_pDcVisual);
             m_pDcDevice->CreateSurface(cx, cy,
                 DXGI_FORMAT_B8G8R8A8_UNORM,
@@ -1010,7 +1010,7 @@ private:
         if (m_ePresentMode != PresentMode::WindowRenderTarget)
             pDC->SetDpi((float)GetUserDpi(), (float)GetUserDpi());
 
-        m_bFullUpdate = TRUE;
+        m_bFullUpdate = true;
         m_rcInvalid = { 0, 0, GetClientWidthLogical(), GetClientHeightLogical() };
         CcCreateBrush();
     }
@@ -1051,16 +1051,16 @@ private:
     }
 
     // 若仍存在活动的时间线，返回TRUE
-    BOOL KctClockTick() noexcept
+    bool KctClockTick() noexcept
     {
         RdLockUpdate();
-        BOOL bActiveTimeLine{};
+        bool bActiveTimeLine{};
         for (const auto e : m_vTimeLine)
         {
             if (e->TlIsValid())
                 e->TlTick(TickInterval);
             if (!bActiveTimeLine && e->TlIsValid())
-                bActiveTimeLine = TRUE;
+                bActiveTimeLine = true;
         }
 
         if (!bActiveTimeLine)
@@ -1104,7 +1104,7 @@ public:
         {
         case WM_TICK:
             if (m_bWaitSwapChain)
-                NtWaitForSingleObject(m_hEvtSwapChain, FALSE, nullptr);
+                NtWaitForSingleObject(m_hEvtSwapChain, false, nullptr);
             KctClockTick();
             return 0;
 
@@ -1114,7 +1114,7 @@ public:
                 m_ePresentMode == PresentMode::WindowRenderTarget)
             {
                 RECT rcInvalid;
-                GetUpdateRect(Handle, &rcInvalid, FALSE);
+                GetUpdateRect(Handle, &rcInvalid, false);
                 ValidateRect(Handle, nullptr);
                 Kw::Rect rcF{ Kw::MakeRect(rcInvalid) };
                 PixelToLogical(rcF);
@@ -1143,7 +1143,7 @@ public:
             {
                 RdLockUpdate();
                 TmSwitchTheme(ShouldAppsUseDarkMode());
-                RdInvalidate(FALSE);
+                RdInvalidate(false);
                 RdUnlockUpdate();
             }
             break;
@@ -1153,7 +1153,7 @@ public:
             {
                 RdLockUpdate();
                 TmUpdateAccentColorFromDwm();
-                RdInvalidate(FALSE);
+                RdInvalidate(false);
                 RdUnlockUpdate();
             }
             break;
@@ -1295,16 +1295,16 @@ public:
 
     EckInlineNdCe ID2D1DeviceContext* RdGetDC() const noexcept { return m_D2D.GetDC(); }
 
-    void RdInvalidate(const Kw::Rect& rc, BOOL bUpdateNow = TRUE)
+    void RdInvalidate(const Kw::Rect& rc, bool bUpdateNow = true)
     {
         EckAssert(!IsRectEmpty(rc));
         UnionRect(m_rcInvalid, m_rcInvalid, rc);
         if (bUpdateNow)
             RdRenderAndPresent();
     }
-    void RdInvalidate(BOOL bUpdateNow = TRUE)
+    void RdInvalidate(bool bUpdateNow = true)
     {
-        m_bFullUpdate = TRUE;
+        m_bFullUpdate = true;
         if (bUpdateNow)
             RdRenderAndPresent();
     }
@@ -1313,7 +1313,7 @@ public:
     {
         if (m_cLockUpdate)
             return;
-        m_bWaitSwapChain = FALSE;
+        m_bWaitSwapChain = false;
         const Kw::Rect rcClient{ 0, 0, GetClientWidthLogical(), GetClientHeightLogical() };
         Kw::Rect rc;
         if (m_bFullUpdate)
@@ -1341,7 +1341,7 @@ public:
         switch (m_ePresentMode)
         {
         case PresentMode::FlipSwapChain:
-            m_bWaitSwapChain = TRUE;
+            m_bWaitSwapChain = true;
             [[fallthrough]];
         case PresentMode::BitBltSwapChain:
             if (m_bFullUpdate)
@@ -1351,22 +1351,22 @@ public:
             break;
         }
         m_rcInvalid = {};
-        m_bFullUpdate = FALSE;
+        m_bFullUpdate = false;
     }
 
     EckInline void RdLockUpdate() noexcept { ++m_cLockUpdate; }
-    EckInline void RdUnlockUpdate(BOOL bUpdateNow = TRUE) noexcept
+    EckInline void RdUnlockUpdate(bool bUpdateNow = true) noexcept
     {
         if (!--m_cLockUpdate && bUpdateNow)
             RdRenderAndPresent();
     }
 
-    EckInlineNdCe BOOL RdIsFullUpdate() const noexcept { return m_bFullUpdate; }
+    EckInlineNdCe bool RdIsFullUpdate() const noexcept { return m_bFullUpdate; }
 
     EckInlineNdCe ARGB RdGetBackColor() const noexcept { return m_argbBack; }
     EckInlineCe void RdSetBackColor(ARGB argb) noexcept { m_argbBack = argb; }
 
-    void TmSwitchTheme(BOOL bDark) noexcept
+    void TmSwitchTheme(bool bDark) noexcept
     {
         RdLockUpdate();
         EtForEachElement(
@@ -1396,13 +1396,13 @@ public:
 
     EckInlineCe ARGB TmGetAccentColor() const noexcept { return m_argbAccent; }
 
-    EckInlineCe void TmSetAutoTheme(BOOL b) noexcept { m_bAutoTheme = b; }
-    EckInlineCe void TmSetAutoThemeAccent(BOOL b) noexcept { m_bAutoThemeAccent = b; }
+    EckInlineCe void TmSetAutoTheme(bool b) noexcept { m_bAutoTheme = b; }
+    EckInlineCe void TmSetAutoThemeAccent(bool b) noexcept { m_bAutoThemeAccent = b; }
 
-    EckInlineCe void DbgSetDrawCompositedRect(BOOL b) noexcept { m_bDbgDrawCompRect = b; }
+    EckInlineCe void DbgSetDrawCompositedRect(bool b) noexcept { m_bDbgDrawCompRect = b; }
 };
 
-inline BOOL CElement::Create(std::wstring_view svText, DWORD uStyle, DWORD dwExStyle,
+inline bool CElement::Create(std::wstring_view svText, DWORD uStyle, DWORD dwExStyle,
     float x, float y, float cx, float cy, CElement* pParent,
     CDuiWindow* pWnd, int iId, PCVOID pData) noexcept
 {
@@ -1414,8 +1414,8 @@ inline BOOL CElement::Create(std::wstring_view svText, DWORD uStyle, DWORD dwExS
     SetStyleWorker(uStyle);
     CallEvent(WM_CREATE, 0, (LPARAM)pData);
     __super::PostCreate();
-    PostMoveSize(TRUE, TRUE, GetWholeRectInClient());
-    return TRUE;
+    PostMoveSize(true, true, GetWholeRectInClient());
+    return true;
 }
 
 inline void CElement::Destroy() noexcept
@@ -1447,7 +1447,7 @@ inline LRESULT CElement::OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexce
     case WM_ERASEBKGND:
         if ((GetCompositor() && !(GetStyle() & DES_COMP_NO_REDIRECTION)))
             GetDC()->Clear({});
-        return TRUE;
+        return true;
     case WM_SIZE:
         if (GetCompositor())
         {
@@ -1461,8 +1461,8 @@ inline LRESULT CElement::OnEvent(UINT uMsg, WPARAM wParam, LPARAM lParam) noexce
 
 inline void CElement::InvalidateInternal(
     _In_opt_ const Kw::Rect* prcInEle,
-    BOOL bUpdateNow,
-    BOOL bClipToEle) noexcept
+    bool bUpdateNow,
+    bool bClipToEle) noexcept
 {
     if (!IsVisible())
         return;
@@ -1511,15 +1511,15 @@ inline void CElement::BeginPaint(_Out_ PAINTINFO& ps, WPARAM, LPARAM lParam) noe
     ps.ox = pExtra->ox;
     ps.oy = pExtra->oy;
     if (GetStyle() & DES_NO_CLIP)
-        ps.bClip = FALSE;
+        ps.bClip = false;
     else
     {
-        ps.bClip = TRUE;
+        ps.bClip = true;
         GetDC()->PushAxisAlignedClip(pExtra->prcClipInClient, D2D1_ANTIALIAS_MODE_ALIASED);
     }
 }
 
-inline void CElement::PostMoveSize(BOOL bSize, BOOL bMove, const Kw::Rect& rcOld) noexcept
+inline void CElement::PostMoveSize(bool bSize, bool bMove, const Kw::Rect& rcOld) noexcept
 {
     if (bSize)
     {
@@ -1539,7 +1539,7 @@ inline void CElement::PostMoveSize(BOOL bSize, BOOL bMove, const Kw::Rect& rcOld
     if (!IsRectEmpty(rc))
     {
         ClientToElement(rc);
-        Invalidate(rc, TRUE, FALSE);
+        Invalidate(rc, true, false);
     }
 }
 
@@ -1672,8 +1672,8 @@ EckInlineNdCe CElement* CElement::GetCapture()     noexcept { return GetWindow()
 EckInline     void      CElement::ReleaseCapture() noexcept { GetWindow().EleReleaseCapture(); }
 EckInline     void      CElement::SetFocus()       noexcept { GetWindow().EleSetFocus(this); }
 EckInlineNdCe CElement* CElement::GetFocus()       noexcept { return GetWindow().EleGetFocus(); }
-EckInline     BOOL      CElement::SetTimer(UINT_PTR uId, UINT uElapse) noexcept { return GetWindow().EleSetTimer(this, uId, uElapse); }
-EckInline     BOOL      CElement::KillTimer(UINT_PTR uId) noexcept { return GetWindow().EleKillTimer(this, uId); }
+EckInline     bool      CElement::SetTimer(UINT_PTR uId, UINT uElapse) noexcept { return GetWindow().EleSetTimer(this, uId, uElapse); }
+EckInline     bool      CElement::KillTimer(UINT_PTR uId) noexcept { return GetWindow().EleKillTimer(this, uId); }
 
 class CUiaBase : public CElement::CUiaElement
 {

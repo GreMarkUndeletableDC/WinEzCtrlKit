@@ -7,7 +7,7 @@ class CMenu
 private:
     HMENU m_hMenu{};
 
-    EckInlineNdCe static UINT PositionFlag(BOOL bPos) noexcept
+    EckInlineNdCe static UINT PositionFlag(bool bPos) noexcept
     {
         return bPos ? MF_BYPOSITION : MF_BYCOMMAND;
     }
@@ -50,55 +50,55 @@ public:
 
     EckInlineNd HMENU GetHandle() const noexcept { return m_hMenu; }
 
-    EckInline BOOL AppendString(PCWSTR pszText, UINT uId, UINT uFlags = 0u) const noexcept
+    EckInline bool AppendString(PCWSTR pszText, UINT uId, UINT uFlags = 0u) const noexcept
     {
         return AppendMenuW(m_hMenu, uFlags | MF_STRING, uId, pszText);
     }
-    EckInline BOOL AppendString(PCWSTR pszText, HMENU hSubMenu, UINT uFlags = 0u) const noexcept
+    EckInline bool AppendString(PCWSTR pszText, HMENU hSubMenu, UINT uFlags = 0u) const noexcept
     {
         return AppendMenuW(m_hMenu, uFlags | MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, pszText);
     }
 
-    EckInline BOOL AppendBitmap(HBITMAP hBitmap, UINT uId, UINT uFlags = 0u) const noexcept
+    EckInline bool AppendBitmap(HBITMAP hBitmap, UINT uId, UINT uFlags = 0u) const noexcept
     {
         return AppendMenuW(m_hMenu, uFlags | MF_BITMAP, uId, (PCWSTR)hBitmap);
     }
-    EckInline BOOL AppendBitmap(HBITMAP hBitmap, HMENU hSubMenu, UINT uFlags = 0u) const noexcept
+    EckInline bool AppendBitmap(HBITMAP hBitmap, HMENU hSubMenu, UINT uFlags = 0u) const noexcept
     {
         return AppendMenuW(m_hMenu, uFlags | MF_BITMAP | MF_POPUP, (UINT_PTR)hSubMenu, (PCWSTR)hBitmap);
     }
 
-    EckInline BOOL AppendOwnerDraw(LPARAM lParam, UINT uId, UINT uFlags = 0u) const noexcept
+    EckInline bool AppendOwnerDraw(LPARAM lParam, UINT uId, UINT uFlags = 0u) const noexcept
     {
         return AppendMenuW(m_hMenu, uFlags | MF_OWNERDRAW, uId, (PCWSTR)lParam);
     }
-    EckInline BOOL AppendOwnerDraw(LPARAM lParam, HMENU hSubMenu, UINT uFlags = 0u) const noexcept
+    EckInline bool AppendOwnerDraw(LPARAM lParam, HMENU hSubMenu, UINT uFlags = 0u) const noexcept
     {
         return AppendMenuW(m_hMenu, uFlags | MF_OWNERDRAW | MF_POPUP, (UINT_PTR)hSubMenu, (PCWSTR)lParam);
     }
 
-    EckInline BOOL AppendItem(UINT uFlags, UINT_PTR uIDNewItem, PCWSTR pNewItem) const noexcept
+    EckInline bool AppendItem(UINT uFlags, UINT_PTR uIDNewItem, PCWSTR pNewItem) const noexcept
     {
         return AppendMenuW(m_hMenu, uFlags, uIDNewItem, pNewItem);
     }
-    EckInline BOOL AppendSeparator() const noexcept
+    EckInline bool AppendSeparator() const noexcept
     {
         return AppendMenuW(m_hMenu, MF_SEPARATOR, 0, nullptr);
     }
 
-    EckInline BOOL CheckItem(BOOL bCheck, UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline bool CheckItem(bool bCheck, UINT uPos, bool bPosition = false) const noexcept
     {
         MENUITEMINFOW mii;
         mii.cbSize = sizeof(mii);
         mii.fMask = MIIM_STATE;
         if (!GetItemInformation(&mii, uPos, bPosition))
-            return FALSE;
+            return false;
         mii.fState &= (MF_CHECKED | MF_UNCHECKED);
         mii.fState |= (bCheck ? MF_CHECKED : MF_UNCHECKED);
         return SetItemInformation(&mii, uPos, bPosition);
     }
 
-    EckInline BOOL CheckRadioItem(UINT uBegin, UINT uEnd, UINT uCheck, BOOL bPosition = FALSE) const noexcept
+    EckInline bool CheckRadioItem(UINT uBegin, UINT uEnd, UINT uCheck, bool bPosition = false) const noexcept
     {
         return CheckMenuRadioItem(m_hMenu, uBegin, uEnd, uCheck, PositionFlag(bPosition));
     }
@@ -114,27 +114,27 @@ public:
         return m_hMenu;
     }
 
-    EckInline BOOL DeleteItem(UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline bool DeleteItem(UINT uPos, bool bPosition = false) const noexcept
     {
         return DeleteMenu(m_hMenu, uPos, PositionFlag(bPosition));
     }
 
-    EckInline BOOL Clear() noexcept
+    EckInline bool Clear() noexcept
     {
         return DestroyMenu(Attach(nullptr));
     }
 
-    EckInline int EnableItem(UINT uPos, UINT uFlags, BOOL bPosition = FALSE) const noexcept
+    EckInline int EnableItem(UINT uPos, UINT uFlags, bool bPosition = false) const noexcept
     {
         return EnableMenuItem(m_hMenu, uPos, PositionFlag(bPosition) | uFlags);
     }
 
-    EckInline UINT GetDefaultItem(UINT uFlags, BOOL bPosition = FALSE) const noexcept
+    EckInline UINT GetDefaultItem(UINT uFlags, bool bPosition = false) const noexcept
     {
         return GetMenuDefaultItem(m_hMenu, PositionFlag(bPosition), uFlags);
     }
 
-    EckInline BOOL GetInformation(MENUINFO* pmi) const noexcept
+    EckInline bool GetInformation(MENUINFO* pmi) const noexcept
     {
         return GetMenuInfo(m_hMenu, pmi);
     }
@@ -149,35 +149,35 @@ public:
         return GetMenuItemID(m_hMenu, idx);
     }
 
-    EckInline BOOL GetItemInformation(
+    EckInline bool GetItemInformation(
         _Inout_ MENUITEMINFOW* pmii,
         UINT uPos,
-        BOOL bPosition = FALSE) const noexcept
+        bool bPosition = false) const noexcept
     {
         return GetMenuItemInfoW(m_hMenu, uPos, bPosition, pmii);
     }
 
-    EckInline BOOL GetItemRect(HWND hWnd, int idx, _Out_ RECT* prc) const noexcept
+    EckInline bool GetItemRect(HWND hWnd, int idx, _Out_ RECT* prc) const noexcept
     {
         return GetMenuItemRect(hWnd, m_hMenu, idx, prc);
     }
 
-    EckInlineNd UINT GetItemState(UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInlineNd UINT GetItemState(UINT uPos, bool bPosition = false) const noexcept
     {
         return GetMenuState(m_hMenu, uPos, PositionFlag(bPosition));
     }
 
-    EckInlineNd BOOL GetItemString(
+    EckInlineNd bool GetItemString(
         Eck_Append_buffer_ CStringW& rs,
         UINT uPos,
-        BOOL bPosition = FALSE) const noexcept
+        bool bPosition = false) const noexcept
     {
         MENUITEMINFOW mii;
         mii.cbSize = sizeof(mii);
         mii.fMask = MIIM_TYPE;
         mii.cch = 0;
         if (!GetItemInformation(&mii, uPos, bPosition))
-            return FALSE;
+            return false;
         if (mii.cch)
         {
             ++mii.cch;
@@ -185,14 +185,14 @@ public:
             mii.fMask = MIIM_STRING;
             return GetItemInformation(&mii, uPos, bPosition);
         }
-        return TRUE;
+        return true;
     }
 
-    EckInline BOOL GetItemString(
+    EckInline bool GetItemString(
         _Out_writes_(cchBuf) PWSTR pszBuf,
         int cchBuf,
         UINT uPos,
-        BOOL bPosition = FALSE) const noexcept
+        bool bPosition = false) const noexcept
     {
         MENUITEMINFOW mii;
         mii.cbSize = sizeof(mii);
@@ -207,57 +207,57 @@ public:
         return ::GetSubMenu(m_hMenu, idx);
     }
 
-    EckInline BOOL HighLightItem(
+    EckInline bool HighLightItem(
         HWND hWnd,
-        BOOL bHiLite,
+        bool bHiLite,
         UINT uPos,
-        BOOL bPosition = FALSE) const noexcept
+        bool bPosition = false) const noexcept
     {
         return HiliteMenuItem(hWnd, m_hMenu, uPos,
             PositionFlag(bPosition) | (bHiLite ? MF_HILITE : MF_UNHILITE));
     }
 
-    EckInline BOOL InsertString(PCWSTR pszText, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool InsertString(PCWSTR pszText, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return InsertMenuW(m_hMenu, uPos, uFlags | MF_STRING, uId, pszText);
     }
-    EckInline BOOL InsertString(PCWSTR pszText, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool InsertString(PCWSTR pszText, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return InsertMenuW(m_hMenu, uPos, uFlags | MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, pszText);
     }
 
-    EckInline BOOL InsertBitmap(HBITMAP hBitmap, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool InsertBitmap(HBITMAP hBitmap, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return InsertMenuW(m_hMenu, uPos, uFlags | MF_BITMAP, uId, (PCWSTR)hBitmap);
     }
-    EckInline BOOL InsertBitmap(HBITMAP hBitmap, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool InsertBitmap(HBITMAP hBitmap, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return InsertMenuW(m_hMenu, uPos, uFlags | MF_BITMAP | MF_POPUP, (UINT_PTR)hSubMenu, (PCWSTR)hBitmap);
     }
 
-    EckInline BOOL InsertOwnerDraw(LPARAM lParam, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool InsertOwnerDraw(LPARAM lParam, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return InsertMenuW(m_hMenu, uPos, uFlags | MF_OWNERDRAW, uId, (PCWSTR)lParam);
     }
-    EckInline BOOL InsertOwnerDraw(LPARAM lParam, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool InsertOwnerDraw(LPARAM lParam, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return InsertMenuW(m_hMenu, uPos, uFlags | MF_OWNERDRAW | MF_POPUP, (UINT_PTR)hSubMenu, (PCWSTR)lParam);
     }
 
-    EckInline BOOL InsertItem(UINT uPos, UINT uFlags, UINT_PTR uIDNewItem, PCWSTR pNewItem) const noexcept
+    EckInline bool InsertItem(UINT uPos, UINT uFlags, UINT_PTR uIDNewItem, PCWSTR pNewItem) const noexcept
     {
         return InsertMenuW(m_hMenu, uPos, uFlags, uIDNewItem, pNewItem);
     }
-    EckInline BOOL InsertItem(const MENUITEMINFOW* pmii, UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline bool InsertItem(const MENUITEMINFOW* pmii, UINT uPos, bool bPosition = false) const noexcept
     {
         return InsertMenuItemW(m_hMenu, uPos, bPosition, pmii);
     }
-    EckInline BOOL InsertSeparator(UINT uPos, UINT uFlags) const noexcept
+    EckInline bool InsertSeparator(UINT uPos, UINT uFlags) const noexcept
     {
         return InsertMenuW(m_hMenu, uPos, MF_SEPARATOR | uFlags, 0, nullptr);
     }
 
-    EckInlineNd BOOL IsValid() const noexcept
+    EckInlineNd bool IsValid() const noexcept
     {
         return m_hMenu && ::IsMenu(m_hMenu);
     }
@@ -267,80 +267,80 @@ public:
         return MenuItemFromPoint(hWnd, m_hMenu, pt);
     }
 
-    EckInline BOOL ModifyString(PCWSTR pszText, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool ModifyString(PCWSTR pszText, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return ModifyMenuW(m_hMenu, uPos, uFlags | MF_STRING, uId, pszText);
     }
-    EckInline BOOL ModifyString(PCWSTR pszText, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool ModifyString(PCWSTR pszText, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return ModifyMenuW(m_hMenu, uPos, uFlags | MF_STRING | MF_POPUP, (UINT_PTR)hSubMenu, pszText);
     }
 
-    EckInline BOOL ModifyBitmap(HBITMAP hBitmap, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool ModifyBitmap(HBITMAP hBitmap, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return ModifyMenuW(m_hMenu, uPos, uFlags | MF_BITMAP, uId, (PCWSTR)hBitmap);
     }
-    EckInline BOOL ModifyBitmap(HBITMAP hBitmap, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool ModifyBitmap(HBITMAP hBitmap, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return ModifyMenuW(m_hMenu, uPos, uFlags | MF_BITMAP | MF_POPUP, (UINT_PTR)hSubMenu, (PCWSTR)hBitmap);
     }
 
-    EckInline BOOL ModifyOwnerDraw(LPARAM lParam, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool ModifyOwnerDraw(LPARAM lParam, UINT uId, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return ModifyMenuW(m_hMenu, uPos, uFlags | MF_OWNERDRAW, uId, (PCWSTR)lParam);
     }
-    EckInline BOOL ModifyOwnerDraw(LPARAM lParam, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
+    EckInline bool ModifyOwnerDraw(LPARAM lParam, HMENU hSubMenu, UINT uPos, UINT uFlags = 0u) const noexcept
     {
         return ModifyMenuW(m_hMenu, uPos, uFlags | MF_OWNERDRAW | MF_POPUP, (UINT_PTR)hSubMenu, (PCWSTR)lParam);
     }
 
-    EckInline BOOL ModifyItem(UINT uPos, UINT uFlags, UINT_PTR uIDNewItem, PCWSTR pNewItem) const noexcept
+    EckInline bool ModifyItem(UINT uPos, UINT uFlags, UINT_PTR uIDNewItem, PCWSTR pNewItem) const noexcept
     {
         return ModifyMenuW(m_hMenu, uPos, uFlags, uIDNewItem, pNewItem);
     }
 
-    EckInline BOOL RemoveItem(UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline bool RemoveItem(UINT uPos, bool bPosition = false) const noexcept
     {
         return RemoveMenu(m_hMenu, uPos, PositionFlag(bPosition));
     }
 
-    EckInline BOOL SetMenu(HWND hWnd) const noexcept
+    EckInline bool SetMenu(HWND hWnd) const noexcept
     {
         return ::SetMenu(hWnd, m_hMenu);
     }
 
-    EckInline BOOL SetDefaultItem(UINT uPos, BOOL bPosition = FALSE) const noexcept
+    EckInline bool SetDefaultItem(UINT uPos, bool bPosition = false) const noexcept
     {
         return SetMenuDefaultItem(m_hMenu, uPos, bPosition);
     }
 
-    EckInline BOOL SetInformation(const MENUINFO* pmi) const noexcept
+    EckInline bool SetInformation(const MENUINFO* pmi) const noexcept
     {
         return SetMenuInfo(m_hMenu, pmi);
     }
 
-    EckInline BOOL SetItemBitmaps(
+    EckInline bool SetItemBitmaps(
         HBITMAP hbmUnchecked,
         HBITMAP hbmChecked,
         UINT uPos,
-        BOOL bPosition = FALSE) const noexcept
+        bool bPosition = false) const noexcept
     {
         return SetMenuItemBitmaps(m_hMenu, uPos, PositionFlag(bPosition), hbmUnchecked, hbmChecked);
     }
 
-    EckInline BOOL SetItemInformation(
+    EckInline bool SetItemInformation(
         _In_ const MENUITEMINFOW* pmii,
         UINT uPos,
-        BOOL bPosition = FALSE) const noexcept
+        bool bPosition = false) const noexcept
     {
         return SetMenuItemInfoW(m_hMenu, uPos, bPosition, pmii);
     }
 
-    EckInline BOOL TrackPopupMenu(HWND hWnd, int x, int y, UINT uFlags = 0u) const noexcept
+    EckInline bool TrackPopupMenu(HWND hWnd, int x, int y, UINT uFlags = 0u) const noexcept
     {
         return ::TrackPopupMenu(m_hMenu, uFlags, x, y, 0, hWnd, nullptr);
     }
-    EckInline BOOL TrackPopupMenuEx(
+    EckInline bool TrackPopupMenuEx(
         HWND hWnd,
         int x, int y,
         UINT uFlags,

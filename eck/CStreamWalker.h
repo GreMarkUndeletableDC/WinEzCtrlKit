@@ -201,13 +201,13 @@ public:
             }
         }
         //
-        BOOL bExternalBuf = FALSE;
+        bool bExternalBuf = false;
         if (!pMoveBuf)
         {
             pMoveBuf = VAllocate(cbMoveBuf);
             if (!pMoveBuf)
                 throw XptHResult{ E_OUTOFMEMORY };
-            bExternalBuf = TRUE;
+            bExternalBuf = true;
         }
         const UniquePtr<DelVA<void>> _{ bExternalBuf ? pMoveBuf : nullptr };
 

@@ -80,9 +80,9 @@ public:
         return (int)SendMessageW(CB_FINDSTRINGEXACT, idxStart, (LPARAM)pszText);
     }
 
-    EckInline BOOL GetComboBoxInformation(_Inout_ COMBOBOXINFO* pcbi) const noexcept
+    EckInline bool GetComboBoxInformation(_Inout_ COMBOBOXINFO* pcbi) const noexcept
     {
-        return (BOOL)SendMessageW(CB_GETCOMBOBOXINFO, 0, (LPARAM)pcbi);
+        return (bool)SendMessageW(CB_GETCOMBOBOXINFO, 0, (LPARAM)pcbi);
     }
 
     EckInline int GetItemCount() const noexcept
@@ -126,14 +126,14 @@ public:
     /// </summary>
     /// <param name="prc">接收矩形，相对屏幕</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL GetDroppedControlRect(_Out_ RECT* prc) const noexcept
+    EckInline bool GetDroppedControlRect(_Out_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(CB_GETDROPPEDCONTROLRECT, 0, (LPARAM)prc);
+        return (bool)SendMessageW(CB_GETDROPPEDCONTROLRECT, 0, (LPARAM)prc);
     }
 
-    EckInline BOOL GetDroppedState() const noexcept
+    EckInline bool GetDroppedState() const noexcept
     {
-        return (BOOL)SendMessageW(CB_GETDROPPEDSTATE, 0, 0);
+        return (bool)SendMessageW(CB_GETDROPPEDSTATE, 0, 0);
     }
 
     /// <summary>
@@ -153,9 +153,9 @@ public:
         SendMessageW(CB_GETEDITSEL, (WPARAM)puStart, (LPARAM)puEnd);
     }
 
-    EckInline BOOL GetExtendUi() const noexcept
+    EckInline bool GetExtendUi() const noexcept
     {
-        return (BOOL)SendMessageW(CB_GETEXTENDEDUI, 0, 0);
+        return (bool)SendMessageW(CB_GETEXTENDEDUI, 0, 0);
     }
 
     EckInline int GetHorizontalExtent() const noexcept
@@ -184,11 +184,11 @@ public:
         return (int)SendMessageW(CB_GETLBTEXT, idx, (LPARAM)pszBuf);
     }
 
-    EckInline BOOL GetItemText(int idx, Eck_Append_buffer_ CStringW& rs) const noexcept
+    EckInline bool GetItemText(int idx, Eck_Append_buffer_ CStringW& rs) const noexcept
     {
         int cch = GetItemTextLength(idx);
         if (cch <= 0)
-            return FALSE;
+            return false;
         return GetItemText(idx, rs.PushBackNoExtra(cch)) >= 0;
     }
 
@@ -281,16 +281,16 @@ public:
         return (int)SendMessageW(CB_SETCUEBANNER, 0, (LPARAM)pszText);
     }
 
-    EckInline BOOL SetCurrentSelection(int idxSel = -1) const noexcept
+    EckInline bool SetCurrentSelection(int idxSel = -1) const noexcept
     {
         int iRet = (int)SendMessageW(CB_SETCURSEL, idxSel, 0);
         if (idxSel < 0)
-            return TRUE;
+            return true;
         else
             return (iRet != CB_ERR);
     }
 
-    EckInline BOOL SetDroppedWidth(int cx = 0) const noexcept
+    EckInline bool SetDroppedWidth(int cx = 0) const noexcept
     {
         return (SendMessageW(CB_SETDROPPEDWIDTH, cx, 0) != CB_ERR);
     }
@@ -300,9 +300,9 @@ public:
         SendMessageW(CB_SETEDITSEL, 0, MAKELPARAM(wStart, wEnd));
     }
 
-    EckInline BOOL SetExtendUi(BOOL bExtUI) const noexcept
+    EckInline bool SetExtendUi(bool bExtUi) const noexcept
     {
-        return (SendMessageW(CB_SETEXTENDEDUI, bExtUI, 0) != CB_ERR);
+        return (SendMessageW(CB_SETEXTENDEDUI, bExtUi, 0) != CB_ERR);
     }
 
     EckInline void SetHorizontalExtent(int iHorizontalExtent) const noexcept
@@ -310,7 +310,7 @@ public:
         SendMessageW(CB_SETHORIZONTALEXTENT, iHorizontalExtent, 0);
     }
 
-    EckInline BOOL SetItemData(int idx, LPARAM lParam) const noexcept
+    EckInline bool SetItemData(int idx, LPARAM lParam) const noexcept
     {
         return (SendMessageW(CB_SETITEMDATA, idx, lParam) != CB_ERR);
     }
@@ -322,7 +322,7 @@ public:
     /// 若组合框具有CBS_OWNERDRAWVARIABLE，则该参数指示项目索引</param>
     /// <param name="cy">高度</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SetItemHeight(int idx, int cy) const noexcept
+    EckInline bool SetItemHeight(int idx, int cy) const noexcept
     {
         return (SendMessageW(CB_SETITEMHEIGHT, idx, cy) != CB_ERR);
     }
@@ -337,17 +337,17 @@ public:
         return (LCID)SendMessageW(CB_SETLOCALE, lcid, 0);
     }
 
-    EckInline BOOL SetMinimumVisible(int cItems) const noexcept
+    EckInline bool SetMinimumVisible(int cItems) const noexcept
     {
-        return (BOOL)SendMessageW(CB_SETMINVISIBLE, cItems, 0);
+        return (bool)SendMessageW(CB_SETMINVISIBLE, cItems, 0);
     }
 
-    EckInline BOOL SetTopIndex(int idx) const noexcept
+    EckInline bool SetTopIndex(int idx) const noexcept
     {
         return (SendMessageW(CB_SETTOPINDEX, idx, 0) != CB_ERR);
     }
 
-    EckInline void ShowDropDown(BOOL bShow) const noexcept
+    EckInline void ShowDropDown(bool bShow) const noexcept
     {
         SendMessageW(CB_SHOWDROPDOWN, bShow, 0);
     }
@@ -358,7 +358,7 @@ public:
     /// </summary>
     /// <param name="cy">高度</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SetItemHeight(int cy) const noexcept
+    EckInline bool SetItemHeight(int cy) const noexcept
     {
         RECT rc;
         GetClientRect(m_hWnd, &rc);

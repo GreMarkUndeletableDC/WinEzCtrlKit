@@ -5,7 +5,7 @@ ECK_NAMESPACE_BEGIN
 template<class T>
 struct RectTraits
 {
-    constexpr static BOOL Empty{};
+    constexpr static bool Empty{};
 };
 
 #define ECK_DEF_RECT_TRAITS(Type)               \

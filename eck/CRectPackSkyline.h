@@ -32,7 +32,7 @@ private:
     TCoord m_cy{};
     CTrivialBuffer<LINE> m_vSkyline;
 
-    BOOL BlfCanPlaceAtLeft(size_t idx, TCoord cx, TCoord cy,
+    bool BlfCanPlaceAtLeft(size_t idx, TCoord cx, TCoord cy,
         _Out_ BEST_POS& Pos) const noexcept
     {
         Pos.idx = (UINT)idx;
@@ -42,7 +42,7 @@ private:
         for (size_t i = idx; ; ++i)
         {
             if (i >= m_vSkyline.Size())
-                return FALSE;
+                return false;
             const auto& e = m_vSkyline[i];
             if (y < e.y)// 跨越多段天际线，需要取最高点
                 y = e.y;
@@ -57,13 +57,13 @@ private:
         }
 
         if (y + cy > m_cy)
-            return FALSE;
+            return false;
 
         Pos.y = y;
-        return TRUE;
+        return true;
     }
 
-    BOOL BlfCanPlaceAtRight(size_t idx, TCoord cx, TCoord cy,
+    bool BlfCanPlaceAtRight(size_t idx, TCoord cx, TCoord cy,
         _Out_ BEST_POS& Pos) const noexcept
     {
         Pos.idxEnd = (UINT)idx;
@@ -85,14 +85,14 @@ private:
             cxLeave -= e.cx;
 
             if (i == 0)
-                return FALSE;
+                return false;
         }
 
         if (y + cy > m_cy)
-            return FALSE;
+            return false;
 
         Pos.y = y;
-        return TRUE;
+        return true;
     }
 
     TCoord BlfCalculateWasteArea(const BEST_POS& Pos, TCoord cxNew) const noexcept
@@ -147,7 +147,7 @@ private:
         }
     }
 
-    void LmPlaceRectangle(TCoord cx, TCoord cy, const BEST_POS& Pos, BOOL bRight) noexcept
+    void LmPlaceRectangle(TCoord cx, TCoord cy, const BEST_POS& Pos, bool bRight) noexcept
     {
         // 矩形的某个顶点一定与天际线端点重合
         // 如果矩形放置在一条天际线内，则操作后天际线段数不确定
@@ -274,7 +274,7 @@ public:
         m_vSkyline[0] = { 0, 0, cx };
     }
 
-    BOOL AllocateBottomLeft(_Inout_ RECT& rcNew) noexcept
+    bool AllocateBottomLeft(_Inout_ RECT& rcNew) noexcept
     {
         constexpr auto InvalidCoord = std::numeric_limits<TCoord>::max();
 
@@ -292,28 +292,28 @@ public:
         }
 
         if (BestPos.y == InvalidCoord)
-            return FALSE;
+            return false;
 
         rcNew.x = m_vSkyline[BestPos.idx].x;
         rcNew.y = BestPos.y;
 
-        LmPlaceRectangle(rcNew.cx, rcNew.cy, BestPos, FALSE);
+        LmPlaceRectangle(rcNew.cx, rcNew.cy, BestPos, false);
 
 #if ECK_OPT_SKYLINE_VALIDATE
         DbgValidateSkyline();
         DbgValidateAllocatedRectangle(rcNew);
 #endif
-        return TRUE;
+        return true;
     }
 
-    BOOL AllocateMinimumWaste(_Inout_ RECT& rcNew) noexcept
+    bool AllocateMinimumWaste(_Inout_ RECT& rcNew) noexcept
     {
         constexpr auto InvalidCoord = std::numeric_limits<TCoord>::max();
 
         BEST_POS Pos, BestPos;
         BestPos.y = InvalidCoord;
         TCoord MinWaste = InvalidCoord;
-        BOOL bRight{};
+        bool bRight{};
 
         for (size_t i = 0; i < m_vSkyline.Size(); ++i)
         {
@@ -328,7 +328,7 @@ public:
                         (Pos.y == BestPos.y && MinWaste > Waste))
                     {
                         BestPos = Pos;
-                        bRight = FALSE;
+                        bRight = false;
                         MinWaste = Waste;
                     }
                 }
@@ -344,14 +344,14 @@ public:
                         (Pos.y == BestPos.y && MinWaste > Waste))
                     {
                         BestPos = Pos;
-                        bRight = TRUE;
+                        bRight = true;
                         MinWaste = Waste;
                     }
                 }
             }
         }
         if (BestPos.y == InvalidCoord)
-            return FALSE;
+            return false;
 
         if (bRight)
             rcNew.x = m_vSkyline[BestPos.idx].x + BestPos.cxLineLeave;
@@ -365,7 +365,7 @@ public:
         DbgValidateSkyline();
         DbgValidateAllocatedRectangle(rcNew);
 #endif
-        return TRUE;
+        return true;
     }
 
     EckInlineCe void GetSize(_Out_ TCoord& cx, _Out_ TCoord& cy) const noexcept
@@ -374,7 +374,7 @@ public:
         cy = m_cy;
     }
 
-    BOOL IsEmpty() const noexcept
+    bool IsEmpty() const noexcept
     {
         if (m_vSkyline.Size() == 1)
         {
@@ -382,26 +382,26 @@ public:
             if (e.x == 0 && e.y == 0)
             {
                 EckAssert(e.cx == m_cx);
-                return TRUE;
+                return true;
             }
         }
-        return FALSE;
+        return false;
     }
 
-    BOOL ReSize(TCoord cx, TCoord cy) noexcept
+    bool ReSize(TCoord cx, TCoord cy) noexcept
     {
         if (m_cx > cx || m_cy > cy)
-            return FALSE;
+            return false;
         m_cx = cx;
         m_cy = cy;
         m_vSkyline.Back().cx = m_cx - m_vSkyline.Back().x;
-        return TRUE;
+        return true;
     }
 
-    BOOL ReSizeEmpty(TCoord cx, TCoord cy) noexcept
+    bool ReSizeEmpty(TCoord cx, TCoord cy) noexcept
     {
         if (!IsEmpty())
-            return FALSE;
+            return false;
         m_cx = cx;
         m_cy = cy;
         m_vSkyline.Front() = { 0, 0, m_cx };

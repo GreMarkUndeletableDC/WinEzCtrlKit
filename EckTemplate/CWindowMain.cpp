@@ -137,9 +137,9 @@ LRESULT CWindowMain::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
     return __super::OnMessage(uMsg, wParam, lParam);
 }
 
-BOOL CWindowMain::PreTranslateMessage(const MSG& Msg) noexcept
+bool CWindowMain::PreTranslateMessage(const MSG& Msg) noexcept
 {
     if (IsDialogMessageW(Handle, (MSG*)&Msg))
-        return TRUE;
+        return true;
     return __super::PreTranslateMessage(Msg);
 }

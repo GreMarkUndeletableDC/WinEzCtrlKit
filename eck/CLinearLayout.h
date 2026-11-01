@@ -32,7 +32,7 @@ protected:
     UINT m_uWeightSum : 31{};
     UINT m_bHasIdeal : 1{};
 public:
-    void LoShow(BOOL bShow) noexcept override
+    void LoShow(bool bShow) noexcept override
     {
         for (const auto& e : m_vItem)
             e.pObject->LoShow(bShow);
@@ -97,7 +97,7 @@ private:
         const auto bHasIdealSize =
             (e.uFlags & (LF_FILL_HEIGHT | LF_IDEAL)) ?
             e.pObject->LoGetIdealSize(sizeIdeal) :
-            FALSE;
+            false;
         if (bHasIdealSize)
         {
             if (e.uFlags & (LF_FILL_WIDTH | LF_IDEAL_WIDTH))
@@ -133,7 +133,7 @@ private:
         if (!(e.uFlags & (LF_FIX_HEIGHT | LF_IDEAL_HEIGHT)))
             m_uWeightSum += e.uWeight;
         if (e.uFlags & LF_IDEAL_HEIGHT)
-            m_bHasIdeal = TRUE;
+            m_bHasIdeal = true;
     }
 public:
     void LoCommit() noexcept override
@@ -143,14 +143,14 @@ public:
         //
 
         TLytCoord dLeave = m_cy - m_dFixedSum - m_dIdealSum;
-        BOOL bPrepared{};
+        bool bPrepared{};
 
         UINT wSum = m_uWeightSum;
         UINT wShrinkableSum{};// 可收缩对象的权重和
         EckLoop()
         {
             UINT wNewSum{};
-            BOOL bClamped{};
+            bool bClamped{};
             for (auto& e : m_vItem)
             {
                 if (!bPrepared)
@@ -165,7 +165,7 @@ public:
                     e.dAlloc = e.cy;
                     dLeave -= e.cy;
                     e.uFlags |= LLFP_CUT;
-                    bClamped = TRUE;
+                    bClamped = true;
                 }
                 else
                     wNewSum += e.uWeight;
@@ -173,7 +173,7 @@ public:
 
             if (bClamped)
             {
-                bPrepared = TRUE;
+                bPrepared = true;
                 wSum = wNewSum;
             }
             else// 已收敛
@@ -227,7 +227,7 @@ public:
     {
         m_dFixedSum = 0;
         m_uWeightSum = 0;
-        m_bHasIdeal = FALSE;
+        m_bHasIdeal = false;
         for (auto& e : m_vItem)
             OnAddObject(e);
     }
@@ -279,7 +279,7 @@ private:
         const auto bHasIdealSize =
             (e.uFlags & (LF_FILL_WIDTH | LF_IDEAL)) ?
             e.pObject->LoGetIdealSize(sizeIdeal) :
-            FALSE;
+            false;
         if (bHasIdealSize)
         {
             if (e.uFlags & (LF_FILL_WIDTH | LF_IDEAL_WIDTH))
@@ -315,7 +315,7 @@ private:
         if (!(e.uFlags & (LF_FIX_WIDTH | LF_IDEAL_WIDTH)))
             m_uWeightSum += e.uWeight;
         if (e.uFlags & LF_IDEAL_WIDTH)
-            m_bHasIdeal = TRUE;
+            m_bHasIdeal = true;
     }
 public:
     void LoCommit() noexcept override
@@ -325,14 +325,14 @@ public:
         //
 
         TLytCoord dLeave = m_cx - m_dFixedSum - m_dIdealSum;
-        BOOL bPrepared{};
+        bool bPrepared{};
 
         UINT wSum = m_uWeightSum;
         UINT wShrinkableSum{};// 可收缩对象的权重和
         EckLoop()
         {
             UINT wNewSum{};
-            BOOL bClamped{};
+            bool bClamped{};
             for (auto& e : m_vItem)
             {
                 if (!bPrepared)
@@ -347,7 +347,7 @@ public:
                     e.dAlloc = e.cx;
                     dLeave -= e.cx;
                     e.uFlags |= LLFP_CUT;
-                    bClamped = TRUE;
+                    bClamped = true;
                 }
                 else
                     wNewSum += e.uWeight;
@@ -355,7 +355,7 @@ public:
 
             if (bClamped)
             {
-                bPrepared = TRUE;
+                bPrepared = true;
                 wSum = wNewSum;
             }
             else// 已收敛
@@ -409,7 +409,7 @@ public:
     {
         m_dFixedSum = 0;
         m_uWeightSum = 0;
-        m_bHasIdeal = FALSE;
+        m_bHasIdeal = false;
         for (auto& e : m_vItem)
             OnAddObject(e);
     }

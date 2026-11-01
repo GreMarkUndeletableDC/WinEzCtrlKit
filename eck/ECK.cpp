@@ -426,7 +426,7 @@ static void UxfpOnThemeClose(HTHEME hTheme) noexcept
     }
 }
 
-EckInlineNdCe BOOL UxfpIsDarkTaskDialogAvailable() noexcept
+EckInlineNdCe bool UxfpIsDarkTaskDialogAvailable() noexcept
 {
     return g_NtVersion.uBuild >= WINVER_11_21H2;
 }
@@ -480,7 +480,7 @@ HRESULT UxfMenuInitialize(CWindow* pWnd) noexcept
                 mii.fMask = MIIM_STRING;
                 mii.dwTypeData = szText;
                 mii.cch = ARRAYSIZE(szText);
-                GetMenuItemInfoW(pudmi->um.hmenu, pudmi->umi.iPosition, TRUE, &mii);
+                GetMenuItemInfoW(pudmi->um.hmenu, pudmi->umi.iPosition, true, &mii);
                 if (mii.fType & MFT_OWNERDRAW)
                     break;
                 Ctx.Processed();
@@ -560,7 +560,7 @@ HRESULT UxfMenuInitialize(CWindow* pWnd) noexcept
                 Ctx.Processed();
 
                 if (uMsg == WM_NCACTIVATE)
-                    return TRUE;
+                    return true;
             }
             return 0;
 
@@ -596,9 +596,9 @@ HRESULT UxfMenuUninitialize(CWindow* pWnd) noexcept
 /// <param name="bInvert">是否反转颜色</param>
 static HRESULT UxfpAdjustLuma(HTHEME hTheme, HDC hDC, int iPartId, int iStateId,
     _In_ const RECT* prc, _In_opt_ const DTBGOPTS* pOpt,
-    float fDelta, BOOL bInvert = FALSE) noexcept
+    float fDelta, bool bInvert = false) noexcept
 {
-    const BOOL bClip = pOpt && (pOpt->dwFlags & DTBG_CLIPRECT);
+    const bool bClip = pOpt && (pOpt->dwFlags & DTBG_CLIPRECT);
     HRESULT hr;
     int eBgType;
     GetThemeEnumValue(hTheme, iPartId, iStateId, TMT_BGTYPE, &eBgType);
@@ -670,7 +670,7 @@ static HRESULT UxfpAdjustLuma(HTHEME hTheme, HDC hDC, int iPartId, int iStateId,
         }
 
         GdipSetImageAttributesColorMatrix(pIA, Gdiplus::ColorAdjustTypeDefault,
-            TRUE, &Mat, nullptr, Gdiplus::ColorMatrixFlagsDefault);
+            true, &Mat, nullptr, Gdiplus::ColorMatrixFlagsDefault);
         GpGraphics* pGraphics;
         GdipCreateFromHDC(hDC, &pGraphics);
         if (bClip)
@@ -1269,7 +1269,7 @@ static HRESULT UxfpDrawThemeBackground(const THEME_INFO& ti, const ThreadContext
                 prc, pOptions, iStateId != HDDFS_HOT ? 0.7f : -0.4f);
         case HP_HEADERSORTARROW:
             return UxfpAdjustLuma(ti.hThemeExtra, hDC, iPartId, iStateId,
-                prc, pOptions, 0.f, TRUE);
+                prc, pOptions, 0.f, true);
         }
         break;
     case ThemeType::Progress:
@@ -1322,9 +1322,9 @@ static HRESULT UxfpDrawThemeBackground(const THEME_INFO& ti, const ThreadContext
         switch (iPartId)
         {
         case STATUSBAR_PART_COMMON:
-            return UxfpAdjustLuma(hTheme, hDC, iPartId, iStateId, prc, pOptions, 0.1f, TRUE);
+            return UxfpAdjustLuma(hTheme, hDC, iPartId, iStateId, prc, pOptions, 0.1f, true);
         case STATUSBAR_PART_PANE:
-            return UxfpAdjustLuma(hTheme, hDC, iPartId, iStateId, prc, pOptions, 0.1f, TRUE);
+            return UxfpAdjustLuma(hTheme, hDC, iPartId, iStateId, prc, pOptions, 0.1f, true);
         }
         break;
     case ThemeType::Menu:
@@ -1894,7 +1894,7 @@ void ThreadInitialize() noexcept
     TlsSetValue(GetThreadContextTlsSlot(), p);
     p->UpdateDefaultColor();
 #if ECK_OPT_NO_DARKMODE
-    p->bEnableDarkModeHook = FALSE;
+    p->bEnableDarkModeHook = false;
 #else
     p->hhkCbtDarkMode = SetWindowsHookExW(WH_CBT, [](int iCode, WPARAM wParam, LPARAM lParam)->LRESULT
         {
@@ -1927,12 +1927,12 @@ void ThreadInitialize() noexcept
             {
                 const auto pccw = (CBT_CREATEWNDW*)lParam;
                 const auto hWnd = (HWND)wParam;
-                AllowDarkModeForWindow(hWnd, TRUE);
+                AllowDarkModeForWindow(hWnd, true);
 
                 const auto lResult = CallNextHookEx(ptc->hhkCbtDarkMode, iCode, wParam, lParam);
                 if (IsWindow(hWnd))
                 {
-                    const BOOL bPszIsId = IS_INTRESOURCE(pccw->lpcs->lpszClass);
+                    const bool bPszIsId = IS_INTRESOURCE(pccw->lpcs->lpszClass);
                     WCHAR szCls[MaxClsBuf];
                     if (bPszIsId)
                         GetClassNameW(hWnd, szCls, MaxClsBuf);
@@ -1997,7 +1997,7 @@ Detail::QueuedCallbackQueue::QueuedCallbackQueue() noexcept
     dwTid = NtCurrentThreadId32();
 }
 void Detail::QueuedCallbackQueue::EnQueueCoroutine(void* pCoroutine,
-    UINT nPriority, BOOL bWakeUiThread, ULONGLONG Tag, BOOL bClearExistingTag) noexcept
+    UINT nPriority, bool bWakeUiThread, ULONGLONG Tag, bool bClearExistingTag) noexcept
 {
     EckAssert(pCoroutine);
     RtlAcquireSRWLockExclusive(&Lk);
@@ -2025,13 +2025,13 @@ void Detail::QueuedCallbackQueue::UnlockedDeQueue() noexcept
 }
 
 
-void ThreadContext::WmAdd(HWND hWnd, CWindow* pWnd, BOOL bTopLevel) noexcept
+void ThreadContext::WmAdd(HWND hWnd, CWindow* pWnd, bool bTopLevel) noexcept
 {
     EckAssert(IsWindow(hWnd) && pWnd);
     hmWnd.insert(std::make_pair(hWnd,
         WINDOW{
             .pWnd = pWnd,
-            .bTopLevel = (BOOLEAN)bTopLevel
+            .bTopLevel = (bool)bTopLevel
         }));
 }
 void ThreadContext::WmRemove(HWND hWnd) noexcept
@@ -2072,7 +2072,7 @@ void ThreadContext::WmSetBubbleFlags(HWND hWnd, BYTE uFlags) noexcept
         it->second.uBubbleFlags = uFlags;
 }
 
-void ThreadContext::TwmMarkTopLevel(HWND hWnd, BOOL bTopLevel) noexcept
+void ThreadContext::TwmMarkTopLevel(HWND hWnd, bool bTopLevel) noexcept
 {
     const auto it = hmWnd.find(hWnd);
     if (it != hmWnd.end())
@@ -2088,7 +2088,7 @@ ThreadContext::WINDOW ThreadContext::TwmAt(HWND hWnd) noexcept
         return {};
 }
 
-void ThreadContext::TwmEnableNcDarkMode(BOOL bDark) noexcept
+void ThreadContext::TwmEnableNcDarkMode(bool bDark) noexcept
 {
 #if !ECK_OPT_NO_DARKMODE
     for (const auto& e : hmWnd)
@@ -2120,10 +2120,10 @@ void ThreadContext::TwmBroadcastThemeChanged() noexcept
         // lParam - 一组位标志
         if (GetWindowLongPtrW(hWnd, GWL_STYLE) & WS_VISIBLE)
         {
-            SendMessageW(hWnd, WM_SETREDRAW, FALSE, 0);
+            SendMessageW(hWnd, WM_SETREDRAW, false, 0);
             SendMessageW(hWnd, WM_THEMECHANGED, -1, 0);
             BroadcastChildrenMessage(hWnd, WM_THEMECHANGED, -1, 0);
-            SendMessageW(hWnd, WM_SETREDRAW, TRUE, 0);
+            SendMessageW(hWnd, WM_SETREDRAW, true, 0);
             RedrawWindow(hWnd, nullptr, nullptr,
                 RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
         }
@@ -2144,7 +2144,7 @@ void ThreadContext::UpdateDefaultColor() noexcept
     crGray1 = (bAppDarkMode ? RGB(180, 180, 180) : GetSysColor(COLOR_GRAYTEXT));
     crTip1 = (bAppDarkMode ? RGB(131, 162, 198) : RGB(97, 116, 139));
     HIGHCONTRASTW hc{ sizeof(hc) };
-    if (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, FALSE) &&
+    if (SystemParametersInfoW(SPI_GETHIGHCONTRAST, sizeof(hc), &hc, false) &&
         (hc.dwFlags & HCF_HIGHCONTRASTON))
         crHiLightText = GetSysColor(COLOR_HIGHLIGHTTEXT);
     else
@@ -2162,18 +2162,18 @@ void ThreadContext::DoCallback() noexcept
         const auto Top{ std::move(Callback.q.front()) };
         Callback.UnlockedDeQueue();
         RtlReleaseSRWLockExclusive(&Callback.Lk);
-        bEnterCallback = TRUE;
+        bEnterCallback = true;
         if (Top.Callback.index() == 0)
             std::get<0>(Top.Callback)();
         else
             std::coroutine_handle<>::from_address(std::get<1>(Top.Callback)).resume();
-        bEnterCallback = FALSE;
+        bEnterCallback = false;
         RtlAcquireSRWLockExclusive(&Callback.Lk);
     }
     RtlReleaseSRWLockExclusive(&Callback.Lk);
 }
 
-HWND ThreadContext::CreateGhostWindow(BOOL bMsgOnly) noexcept
+HWND ThreadContext::CreateGhostWindow(bool bMsgOnly) noexcept
 {
     if (hGhost)
         return hGhost;
@@ -2221,17 +2221,17 @@ HHOOK BeginCbtHook(CWindow* pCurrWnd, FWindowCreating pfnCreatingProc) noexcept
     return ptc->hhkCbtCreate;
 }
 
-BOOL EndCbtHook() noexcept
+bool EndCbtHook() noexcept
 {
     const auto ptc = PtcCurrent();
     if (!ptc->hhkCbtCreate)
-        return FALSE;
+        return false;
     UnhookWindowsHookEx(ptc->hhkCbtCreate);
     ptc->hhkCbtCreate = nullptr;
-    return TRUE;
+    return true;
 }
 
-BOOL PreTranslateMessage(const MSG& Msg) noexcept
+bool PreTranslateMessage(const MSG& Msg) noexcept
 {
     HWND hWnd = Msg.hwnd;
     CWindow* pWnd;
@@ -2242,10 +2242,10 @@ BOOL PreTranslateMessage(const MSG& Msg) noexcept
     {
         pWnd = ptc->WmAt(hWnd);
         if (pWnd && pWnd->PreTranslateMessage(Msg))
-            return TRUE;
+            return true;
         hWnd = GetParent(hWnd);
     }
-    return FALSE;
+    return false;
 }
 #pragma endregion Wnd
 

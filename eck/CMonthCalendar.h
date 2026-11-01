@@ -5,7 +5,7 @@ ECK_NAMESPACE_BEGIN
 class CMonthCalendar : public CWindow
 {
 private:
-    BOOL m_bAutoDarkMode{ TRUE };
+    bool m_bAutoDarkMode{ true };
 public:
     ECK_RTTI(CMonthCalendar, CWindow);
     ECK_W_ATTACHABLE(CMonthCalendar);
@@ -47,9 +47,9 @@ public:
         return (int)SendMessageW(MCM_GETCALENDARCOUNT, 0, 0);
     }
 
-    EckInline BOOL GetGridInformation(_Inout_ MCGRIDINFO* pmcgi) const noexcept
+    EckInline bool GetGridInformation(_Inout_ MCGRIDINFO* pmcgi) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_GETCALENDARGRIDINFO, 0, (LPARAM)pmcgi);
+        return (bool)SendMessageW(MCM_GETCALENDARGRIDINFO, 0, (LPARAM)pmcgi);
     }
 
     /// <summary>
@@ -80,9 +80,9 @@ public:
         return (int)SendMessageW(MCM_GETCURRENTVIEW, 0, 0);
     }
 
-    EckInline BOOL GetCurrentSelection(_Out_ SYSTEMTIME* pst) const noexcept
+    EckInline bool GetCurrentSelection(_Out_ SYSTEMTIME* pst) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_GETCURSEL, 0, (LPARAM)pst);
+        return (bool)SendMessageW(MCM_GETCURSEL, 0, (LPARAM)pst);
     }
 
     EckInline UINT GetFirstDayOfWeek() const noexcept
@@ -90,7 +90,7 @@ public:
         return (UINT)SendMessageW(MCM_GETFIRSTDAYOFWEEK, 0, 0);
     }
 
-    EckInline BOOL GetFirstDayOfWeek(_Out_ int* pnDay) const noexcept
+    EckInline bool GetFirstDayOfWeek(_Out_ int* pnDay) const noexcept
     {
         const auto dwRet = GetFirstDayOfWeek();
         *pnDay = LOWORD(dwRet);
@@ -107,9 +107,9 @@ public:
         return (int)SendMessageW(MCM_GETMAXTODAYWIDTH, 0, 0);
     }
 
-    EckInline BOOL GetMinimumRect(_Out_ RECT* prc) const noexcept
+    EckInline bool GetMinimumRect(_Out_ RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_GETMINREQRECT, 0, (LPARAM)prc);
+        return (bool)SendMessageW(MCM_GETMINREQRECT, 0, (LPARAM)prc);
     }
 
     EckInline int GetMonthDelta() const noexcept
@@ -139,14 +139,14 @@ public:
         return (UINT)SendMessageW(MCM_GETRANGE, 0, (LPARAM)pst);
     }
 
-    EckInline BOOL GetSelectionRange(_Out_writes_(2) SYSTEMTIME* pst) const noexcept
+    EckInline bool GetSelectionRange(_Out_writes_(2) SYSTEMTIME* pst) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_GETSELRANGE, 0, (LPARAM)pst);
+        return (bool)SendMessageW(MCM_GETSELRANGE, 0, (LPARAM)pst);
     }
 
-    EckInline BOOL GetToday(_Out_ SYSTEMTIME* pst) const noexcept
+    EckInline bool GetToday(_Out_ SYSTEMTIME* pst) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_GETTODAY, 0, (LPARAM)pst);
+        return (bool)SendMessageW(MCM_GETTODAY, 0, (LPARAM)pst);
     }
 
     EckInline UINT HitTest(_Inout_ MCHITTESTINFO* pMCHitTest) const noexcept
@@ -154,7 +154,7 @@ public:
         return (UINT)SendMessageW(MCM_HITTEST, 0, (LPARAM)pMCHitTest);
     }
 
-    EckInline void SetCalendarBorder(int i, BOOL bSetOrReset) const noexcept
+    EckInline void SetCalendarBorder(int i, bool bSetOrReset) const noexcept
     {
         SendMessageW(MCM_SETCALENDARBORDER, bSetOrReset, i);
     }
@@ -180,19 +180,19 @@ public:
     /// </summary>
     /// <param name="iView">MCMV_常量</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SetView(int iView) const noexcept
+    EckInline bool SetView(int iView) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_SETCURRENTVIEW, iView, 0);
+        return (bool)SendMessageW(MCM_SETCURRENTVIEW, iView, 0);
     }
 
-    EckInline BOOL SetCurrentSelection(_In_ SYSTEMTIME* pst) const noexcept
+    EckInline bool SetCurrentSelection(_In_ SYSTEMTIME* pst) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_SETCURSEL, 0, (LPARAM)pst);
+        return (bool)SendMessageW(MCM_SETCURSEL, 0, (LPARAM)pst);
     }
 
-    EckInline BOOL SetDayState(_In_ MONTHDAYSTATE* pmds, int c)
+    EckInline bool SetDayState(_In_ MONTHDAYSTATE* pmds, int c)
     {
-        return (BOOL)SendMessageW(MCM_SETDAYSTATE, c, (LPARAM)pmds);
+        return (bool)SendMessageW(MCM_SETDAYSTATE, c, (LPARAM)pmds);
     }
 
     EckInline UINT SetFirstDayOfWeek(int nDay) const noexcept
@@ -200,9 +200,9 @@ public:
         return (UINT)SendMessageW(MCM_SETFIRSTDAYOFWEEK, 0, nDay);
     }
 
-    EckInline BOOL SetMaxSelectionCount(int cMax) const noexcept
+    EckInline bool SetMaxSelectionCount(int cMax) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_SETMAXSELCOUNT, cMax, 0);
+        return (bool)SendMessageW(MCM_SETMAXSELCOUNT, cMax, 0);
     }
 
     EckInline int SetMonthDelta(int nDelta) const noexcept
@@ -210,14 +210,14 @@ public:
         return (int)SendMessageW(MCM_SETMONTHDELTA, nDelta, 0);
     }
 
-    EckInline BOOL SetRange(UINT uType, _In_ SYSTEMTIME* pst) const noexcept
+    EckInline bool SetRange(UINT uType, _In_ SYSTEMTIME* pst) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_SETRANGE, uType, (LPARAM)pst);
+        return (bool)SendMessageW(MCM_SETRANGE, uType, (LPARAM)pst);
     }
 
-    EckInline BOOL SetSelectionRange(_In_reads_(2) SYSTEMTIME* pst) const noexcept
+    EckInline bool SetSelectionRange(_In_reads_(2) SYSTEMTIME* pst) const noexcept
     {
-        return (BOOL)SendMessageW(MCM_SETSELRANGE, 0, (LPARAM)pst);
+        return (bool)SendMessageW(MCM_SETSELRANGE, 0, (LPARAM)pst);
     }
 
     EckInline void SetToday(_In_ SYSTEMTIME* pst) const noexcept
@@ -225,8 +225,8 @@ public:
         SendMessageW(MCM_SETTODAY, 0, (LPARAM)pst);
     }
 
-    EckInline constexpr void SetAutoDarkMode(BOOL b) noexcept { m_bAutoDarkMode = b; }
-    EckInline constexpr BOOL GetAutoDarkMode() const noexcept { return m_bAutoDarkMode; }
+    EckInline constexpr void SetAutoDarkMode(bool b) noexcept { m_bAutoDarkMode = b; }
+    EckInline constexpr bool GetAutoDarkMode() const noexcept { return m_bAutoDarkMode; }
 
     EckInline void SetCorrectColor() const noexcept
     {

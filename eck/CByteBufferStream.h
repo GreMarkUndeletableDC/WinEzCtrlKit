@@ -8,7 +8,7 @@ template<class TAllocator>
 class CByteBufferStreamT : public CUnknown<CByteBufferStreamT<TAllocator>, IStream, IMemoryView>
 {
 private:
-    BOOL m_bLocked{};
+    bool m_bLocked{};
 
     CByteBufferT<TAllocator>& m_rb;
     size_t m_posSeek{}; // 相对于m_rb的起始位置
@@ -208,17 +208,17 @@ public:
     {
         *ppvData = m_rb.Data();
         *pcbData = m_rb.Size();
-        m_bLocked = TRUE;
+        m_bLocked = true;
         return S_OK;
     }
 
     STDMETHODIMP MemUnlock() override
     {
-        m_bLocked = FALSE;
+        m_bLocked = false;
         return S_OK;
     }
 
-    STDMETHODIMP MemIsLocked(BOOL* pbLocked) override
+    STDMETHODIMP MemIsLocked(bool* pbLocked) override
     {
         *pbLocked = m_bLocked;
         return S_OK;

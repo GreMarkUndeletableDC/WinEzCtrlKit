@@ -44,7 +44,7 @@ EckInline NTSTATUS GetProcessPeb64(HANDLE hProcess, _Out_ ULONG64& Peb) noexcept
 inline NTSTATUS GetProcessPath(
     UINT uPid,
     Eck_Out_buffer_ CStringW& rsPath,
-    BOOL bDosPath = TRUE) noexcept
+    bool bDosPath = true) noexcept
 {
     SYSTEM_PROCESS_ID_INFORMATION spii{ .ProcessId = DwordToPointer<HANDLE>(uPid) };
     NTSTATUS nts = NtQuerySystemInformation(SystemProcessIdInformation,
@@ -72,7 +72,7 @@ inline NTSTATUS GetProcessPath(
 inline NTSTATUS GetProcessPath(
     HANDLE hProcess,
     Eck_Out_buffer_ CStringW& rsPath,
-    BOOL bDosPath = TRUE) noexcept
+    bool bDosPath = true) noexcept
 {
     const auto eInfo = bDosPath ? ProcessImageFileNameWin32 : ProcessImageFileName;
     ULONG cbReal;
@@ -446,7 +446,7 @@ inline NTSTATUS EnumerateProcess(
             if (uFlags & EPF_MODULE_INFO)
             {
                 const auto hProcess = NaOpenProcess(
-                    PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ, FALSE, e.uPid);
+                    PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ, false, e.uPid);
                 if (hProcess)
                 {
                     EnumerateProcessModules(hProcess, e.vModules);
@@ -471,9 +471,9 @@ EckInline NTSTATUS GetProcessIdByName(
                     pspi->ImageName.Length / sizeof(WCHAR)) == 0)
             {
                 uPid = PointerToDword<UINT>(pspi->UniqueProcessId);
-                return FALSE;
+                return false;
             }
-            return TRUE;
+            return true;
         });
 }
 
@@ -496,7 +496,7 @@ EckInline NTSTATUS GetProcessIdByName(
 
 inline NTSTATUS AdjustProcessPrivilege(
     HANDLE hProcess,
-    BOOL bEnable,
+    bool bEnable,
     std::wstring_view svPrivilege) noexcept
 {
     HANDLE hToken;
@@ -517,7 +517,7 @@ inline NTSTATUS AdjustProcessPrivilege(
     {
         tp.PrivilegeCount = 1;
         tp.Privileges[0].Attributes = bEnable ? SE_PRIVILEGE_ENABLED : 0;
-        nts = NtAdjustPrivilegesToken(hToken, FALSE, &tp, 0, nullptr, nullptr);
+        nts = NtAdjustPrivilegesToken(hToken, false, &tp, 0, nullptr, nullptr);
     }
     NtClose(hToken);
     return nts;
@@ -525,7 +525,7 @@ inline NTSTATUS AdjustProcessPrivilege(
 
 namespace Detail
 {
-    EckInline BOOL SendGetIconMessage(
+    EckInline bool SendGetIconMessage(
         HWND hWnd,
         int nIconType,
         int msTimeOut,
@@ -539,9 +539,9 @@ namespace Detail
             SMTO_ABORTIFHUNG | SMTO_BLOCK | SMTO_ERRORONEXIT,
             msTimeOut,
             (DWORD_PTR*)&hIcon))
-            return TRUE;
+            return true;
         hIcon = nullptr;
-        return FALSE;
+        return false;
     }
 }
 
@@ -592,11 +592,11 @@ _Ret_maybenull_
 _Ret_maybenull_
 [[nodiscard]] inline HICON GetWindowIcon(
     HWND hWnd,
-    _Out_ BOOL& bFileIcon,
-    BOOL bSmall = FALSE,
+    _Out_ bool& bFileIcon,
+    bool bSmall = false,
     int msTimeOut = 300) noexcept
 {
-    bFileIcon = FALSE;
+    bFileIcon = false;
     const auto hIcon = (bSmall ?
         GetWindowSmallIcon(hWnd, msTimeOut) :
         GetWindowLargeIcon(hWnd, msTimeOut));

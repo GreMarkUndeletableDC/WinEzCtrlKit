@@ -3,15 +3,15 @@
 
 ECK_NAMESPACE_BEGIN
 #define ECK_W_TLBE_STYLE(Name, Style)                      \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;     \
-    BOOL StyleGet##Name() const noexcept                   \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;     \
+    bool StyleGet##Name() const noexcept                   \
     {                                                      \
         if constexpr (Style == 0)                          \
             return !GetTBExtendStyle();                    \
         else                                               \
             return IsBitSet(GetTBExtendStyle(), Style);    \
     }                                                      \
-    void StyleSet##Name(BOOL b) const noexcept             \
+    void StyleSet##Name(bool b) const noexcept             \
     {                                                      \
         if (b)                                             \
             SetTBExtendStyle(GetTBExtendStyle() | Style);  \
@@ -48,7 +48,7 @@ public:
         return (int)SendMessageW(TB_ADDBITMAP, cBitmaps, (LPARAM)&tbab);
     }
 
-    EckInline BOOL AddButtons(int cButtons, TBBUTTON* ptbb) const noexcept
+    EckInline bool AddButtons(int cButtons, TBBUTTON* ptbb) const noexcept
     {
         return (int)SendMessageW(TB_ADDBUTTONSW, cButtons, (LPARAM)ptbb);
     }
@@ -73,14 +73,14 @@ public:
         SendMessageW(TB_BUTTONSTRUCTSIZE, cbStruct, 0);
     }
 
-    EckInline BOOL ChangeBitmap(int idCommand, int idxImg) const noexcept
+    EckInline bool ChangeBitmap(int idCommand, int idxImg) const noexcept
     {
-        return (BOOL)SendMessageW(TB_CHANGEBITMAP, idCommand, idxImg);
+        return (bool)SendMessageW(TB_CHANGEBITMAP, idCommand, idxImg);
     }
 
-    EckInline BOOL CheckButton(int idCommand, BOOL bChecked) const noexcept
+    EckInline bool CheckButton(int idCommand, bool bChecked) const noexcept
     {
-        return (BOOL)SendMessageW(TB_CHECKBUTTON, idCommand, bChecked);
+        return (bool)SendMessageW(TB_CHECKBUTTON, idCommand, bChecked);
     }
 
     EckInline int CommandToIndex(int idCommand) const noexcept
@@ -93,19 +93,19 @@ public:
         SendMessageW(TB_CUSTOMIZE, 0, 0);
     }
 
-    EckInline BOOL DeleteButton(int idxButton) const noexcept
+    EckInline bool DeleteButton(int idxButton) const noexcept
     {
-        return (BOOL)SendMessageW(TB_DELETEBUTTON, idxButton, 0);
+        return (bool)SendMessageW(TB_DELETEBUTTON, idxButton, 0);
     }
 
-    EckInline BOOL EnableButton(int idCommand, BOOL bEnabled) const noexcept
+    EckInline bool EnableButton(int idCommand, bool bEnabled) const noexcept
     {
-        return (BOOL)SendMessageW(TB_ENABLEBUTTON, idCommand, bEnabled);
+        return (bool)SendMessageW(TB_ENABLEBUTTON, idCommand, bEnabled);
     }
 
-    EckInline BOOL GetAnchorHighlight() const noexcept
+    EckInline bool GetAnchorHighlight() const noexcept
     {
-        return (BOOL)SendMessageW(TB_GETANCHORHIGHLIGHT, 0, 0);
+        return (bool)SendMessageW(TB_GETANCHORHIGHLIGHT, 0, 0);
     }
 
     EckInline int GetBitmap(int idCommand) const noexcept
@@ -118,9 +118,9 @@ public:
         return (UINT)SendMessageW(TB_GETBITMAPFLAGS, 0, 0);
     }
 
-    EckInline BOOL GetButton(int idxButton, TBBUTTON* ptbb) const noexcept
+    EckInline bool GetButton(int idxButton, TBBUTTON* ptbb) const noexcept
     {
-        return (BOOL)SendMessageW(TB_GETBUTTON, idxButton, (LPARAM)ptbb);
+        return (bool)SendMessageW(TB_GETBUTTON, idxButton, (LPARAM)ptbb);
     }
 
     EckInline int GetButtonInformation(int idCommand, TBBUTTONINFOW* ptbbi) const noexcept
@@ -147,9 +147,9 @@ public:
         return (int)SendMessageW(TB_GETBUTTONTEXTW, idCommand, (LPARAM)pszBuf);
     }
 
-    EckInline BOOL GetColorScheme(COLORSCHEME* pcs) const noexcept
+    EckInline bool GetColorScheme(COLORSCHEME* pcs) const noexcept
     {
-        return (BOOL)SendMessageW(TB_GETCOLORSCHEME, 0, (LPARAM)pcs);
+        return (bool)SendMessageW(TB_GETCOLORSCHEME, 0, (LPARAM)pcs);
     }
 
     EckInline HIMAGELIST GetDisabledImageList() const noexcept
@@ -172,17 +172,17 @@ public:
         return (int)SendMessageW(TB_GETHOTITEM, 0, 0);
     }
 
-    EckInline BOOL GetIdealSize(BOOL bHeight, SIZE* psize) const noexcept
+    EckInline bool GetIdealSize(bool bHeight, SIZE* psize) const noexcept
     {
-        return (BOOL)SendMessageW(TB_GETIDEALSIZE, bHeight, (LPARAM)psize);
+        return (bool)SendMessageW(TB_GETIDEALSIZE, bHeight, (LPARAM)psize);
     }
 
-    EckInline BOOL GetIdealSize(SIZE* psize) const noexcept
+    EckInline bool GetIdealSize(SIZE* psize) const noexcept
     {
         SIZE size;
-        BOOL b = (BOOL)SendMessageW(TB_GETIDEALSIZE, TRUE, (LPARAM)&size);
+        bool b = (bool)SendMessageW(TB_GETIDEALSIZE, true, (LPARAM)&size);
         psize->cy = size.cy;
-        b = b && (BOOL)SendMessageW(TB_GETIDEALSIZE, FALSE, (LPARAM)&size);
+        b = b && (bool)SendMessageW(TB_GETIDEALSIZE, false, (LPARAM)&size);
         psize->cx = size.cx;
         return b;
     }
@@ -212,14 +212,14 @@ public:
         SendMessageW(TB_GETITEMDROPDOWNRECT, idxButton, (LPARAM)prc);
     }
 
-    EckInline BOOL GetItemRect(int idxButton, RECT* prc) const noexcept
+    EckInline bool GetItemRect(int idxButton, RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(TB_GETITEMRECT, idxButton, (LPARAM)prc);
+        return (bool)SendMessageW(TB_GETITEMRECT, idxButton, (LPARAM)prc);
     }
 
-    EckInline BOOL GetMaximumSize(SIZE* psize) const noexcept
+    EckInline bool GetMaximumSize(SIZE* psize) const noexcept
     {
-        return (BOOL)SendMessageW(TB_GETMAXSIZE, 0, (LPARAM)psize);
+        return (bool)SendMessageW(TB_GETMAXSIZE, 0, (LPARAM)psize);
     }
 
     EckInline void GetMetrics(TBMETRICS* ptbm) const noexcept
@@ -251,9 +251,9 @@ public:
         return (HIMAGELIST)SendMessageW(TB_GETPRESSEDIMAGELIST, 0, 0);
     }
 
-    EckInline BOOL GetRect(int idCommand, RECT* prc) const noexcept
+    EckInline bool GetRect(int idCommand, RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(TB_GETRECT, idCommand, (LPARAM)prc);
+        return (bool)SendMessageW(TB_GETRECT, idCommand, (LPARAM)prc);
     }
 
     EckInline int GetRows() const noexcept
@@ -286,9 +286,9 @@ public:
         return (HWND)SendMessageW(TB_GETTOOLTIPS, 0, 0);
     }
 
-    EckInline BOOL HideButton(int idCommand, BOOL bHide) const noexcept
+    EckInline bool HideButton(int idCommand, bool bHide) const noexcept
     {
-        return (BOOL)SendMessageW(TB_HIDEBUTTON, idCommand, MAKELPARAM(bHide, 0));
+        return (bool)SendMessageW(TB_HIDEBUTTON, idCommand, MAKELPARAM(bHide, 0));
     }
 
     EckInline int HitTest(POINT* ppt) const noexcept
@@ -296,49 +296,49 @@ public:
         return (int)SendMessageW(TB_HITTEST, 0, (LPARAM)ppt);
     }
 
-    EckInline BOOL Indeterminate(int idCommand, BOOL bIndeterminate) const noexcept
+    EckInline bool Indeterminate(int idCommand, bool bIndeterminate) const noexcept
     {
-        return (BOOL)SendMessageW(TB_INDETERMINATE, idCommand, MAKELPARAM(bIndeterminate, 0));
+        return (bool)SendMessageW(TB_INDETERMINATE, idCommand, MAKELPARAM(bIndeterminate, 0));
     }
 
-    EckInline BOOL InsertButton(int pos, TBBUTTON* ptbb) const noexcept
+    EckInline bool InsertButton(int pos, TBBUTTON* ptbb) const noexcept
     {
-        return (BOOL)SendMessageW(TB_INSERTBUTTONW, pos, (LPARAM)ptbb);
+        return (bool)SendMessageW(TB_INSERTBUTTONW, pos, (LPARAM)ptbb);
     }
 
-    EckInline BOOL InsertMarkHitTest(POINT* ppt, TBINSERTMARK* ptbim) const noexcept
+    EckInline bool InsertMarkHitTest(POINT* ppt, TBINSERTMARK* ptbim) const noexcept
     {
-        return (BOOL)SendMessageW(TB_INSERTMARKHITTEST, (WPARAM)ppt, (LPARAM)ptbim);
+        return (bool)SendMessageW(TB_INSERTMARKHITTEST, (WPARAM)ppt, (LPARAM)ptbim);
     }
 
-    EckInline BOOL IsButtonChecked(int idCommand) const noexcept
+    EckInline bool IsButtonChecked(int idCommand) const noexcept
     {
-        return (BOOL)SendMessageW(TB_ISBUTTONCHECKED, idCommand, 0);
+        return (bool)SendMessageW(TB_ISBUTTONCHECKED, idCommand, 0);
     }
 
-    EckInline BOOL IsButtonEnabled(int idCommand) const noexcept
+    EckInline bool IsButtonEnabled(int idCommand) const noexcept
     {
-        return (BOOL)SendMessageW(TB_ISBUTTONENABLED, idCommand, 0);
+        return (bool)SendMessageW(TB_ISBUTTONENABLED, idCommand, 0);
     }
 
-    EckInline BOOL IsButtonHidden(int idCommand) const noexcept
+    EckInline bool IsButtonHidden(int idCommand) const noexcept
     {
-        return (BOOL)SendMessageW(TB_ISBUTTONHIDDEN, idCommand, 0);
+        return (bool)SendMessageW(TB_ISBUTTONHIDDEN, idCommand, 0);
     }
 
-    EckInline BOOL IsButtonHighlighted(int idCommand) const noexcept
+    EckInline bool IsButtonHighlighted(int idCommand) const noexcept
     {
-        return (BOOL)SendMessageW(TB_ISBUTTONHIGHLIGHTED, idCommand, 0);
+        return (bool)SendMessageW(TB_ISBUTTONHIGHLIGHTED, idCommand, 0);
     }
 
-    EckInline BOOL IsButtonIndeterminate(int idCommand) const noexcept
+    EckInline bool IsButtonIndeterminate(int idCommand) const noexcept
     {
-        return (BOOL)SendMessageW(TB_ISBUTTONINDETERMINATE, idCommand, 0);
+        return (bool)SendMessageW(TB_ISBUTTONINDETERMINATE, idCommand, 0);
     }
 
-    EckInline BOOL IsButtonPressed(int idCommand) const noexcept
+    EckInline bool IsButtonPressed(int idCommand) const noexcept
     {
-        return (BOOL)SendMessageW(TB_ISBUTTONPRESSED, idCommand, 0);
+        return (bool)SendMessageW(TB_ISBUTTONPRESSED, idCommand, 0);
     }
 
     EckInline int LoadImages(UINT_PTR nID) const noexcept
@@ -346,29 +346,29 @@ public:
         return (int)SendMessageW(TB_LOADIMAGES, nID, (LPARAM)HINST_COMMCTRL);
     }
 
-    EckInline BOOL MapAccelerator(WCHAR chAccel, UINT* pidCommand) const noexcept
+    EckInline bool MapAccelerator(WCHAR chAccel, UINT* pidCommand) const noexcept
     {
-        return (BOOL)SendMessageW(TB_MAPACCELERATORW, chAccel, (LPARAM)pidCommand);
+        return (bool)SendMessageW(TB_MAPACCELERATORW, chAccel, (LPARAM)pidCommand);
     }
 
-    EckInline BOOL MarkButton(int idCommand, BOOL bHighlighted) const noexcept
+    EckInline bool MarkButton(int idCommand, bool bHighlighted) const noexcept
     {
-        return (BOOL)SendMessageW(TB_MARKBUTTON, idCommand, MAKELPARAM(bHighlighted, 0));
+        return (bool)SendMessageW(TB_MARKBUTTON, idCommand, MAKELPARAM(bHighlighted, 0));
     }
 
-    EckInline BOOL MoveButton(int idx, int idxDest) const noexcept
+    EckInline bool MoveButton(int idx, int idxDest) const noexcept
     {
-        return (BOOL)SendMessageW(TB_MOVEBUTTON, idx, idxDest);
+        return (bool)SendMessageW(TB_MOVEBUTTON, idx, idxDest);
     }
 
-    EckInline BOOL PressButton(int idCommand, BOOL bPressed) const noexcept
+    EckInline bool PressButton(int idCommand, bool bPressed) const noexcept
     {
-        return (BOOL)SendMessageW(TB_PRESSBUTTON, idCommand, MAKELPARAM(bPressed, 0));
+        return (bool)SendMessageW(TB_PRESSBUTTON, idCommand, MAKELPARAM(bPressed, 0));
     }
 
-    EckInline BOOL ReplaceBitmap(TBREPLACEBITMAP* ptbrb) const noexcept
+    EckInline bool ReplaceBitmap(TBREPLACEBITMAP* ptbrb) const noexcept
     {
-        return (BOOL)SendMessageW(TB_REPLACEBITMAP, 0, (LPARAM)ptbrb);
+        return (bool)SendMessageW(TB_REPLACEBITMAP, 0, (LPARAM)ptbrb);
     }
 
     EckInline void SaveRestore(TBSAVEPARAMSW* ptbsp) const noexcept
@@ -376,34 +376,34 @@ public:
         SendMessageW(TB_SAVERESTOREW, 0, (LPARAM)ptbsp);
     }
 
-    EckInline BOOL SetAnchorHighlighted(BOOL bHighlighted) const noexcept
+    EckInline bool SetAnchorHighlighted(bool bHighlighted) const noexcept
     {
-        return (BOOL)SendMessageW(TB_SETANCHORHIGHLIGHT, bHighlighted, 0);
+        return (bool)SendMessageW(TB_SETANCHORHIGHLIGHT, bHighlighted, 0);
     }
 
-    EckInline BOOL SetBitmapSize(int cx, int cy) const noexcept
+    EckInline bool SetBitmapSize(int cx, int cy) const noexcept
     {
-        return (BOOL)SendMessageW(TB_SETBITMAPSIZE, 0, MAKELPARAM(cx, cy));
+        return (bool)SendMessageW(TB_SETBITMAPSIZE, 0, MAKELPARAM(cx, cy));
     }
 
-    EckInline BOOL SetButtonInformation(int idCommand, TBBUTTONINFOW* ptbbi) const noexcept
+    EckInline bool SetButtonInformation(int idCommand, TBBUTTONINFOW* ptbbi) const noexcept
     {
-        return (BOOL)SendMessageW(TB_SETBUTTONINFOW, idCommand, (LPARAM)ptbbi);
+        return (bool)SendMessageW(TB_SETBUTTONINFOW, idCommand, (LPARAM)ptbbi);
     }
 
-    EckInline BOOL SetButtonSize(int cx, int cy) const noexcept
+    EckInline bool SetButtonSize(int cx, int cy) const noexcept
     {
-        return (BOOL)SendMessageW(TB_SETBUTTONSIZE, 0, MAKELPARAM(cx, cy));
+        return (bool)SendMessageW(TB_SETBUTTONSIZE, 0, MAKELPARAM(cx, cy));
     }
 
-    EckInline BOOL SetButtonWidth(int cxMin, int cxMax) const noexcept
+    EckInline bool SetButtonWidth(int cxMin, int cxMax) const noexcept
     {
-        return (BOOL)SendMessageW(TB_SETBUTTONWIDTH, 0, MAKELPARAM(cxMin, cxMax));
+        return (bool)SendMessageW(TB_SETBUTTONWIDTH, 0, MAKELPARAM(cxMin, cxMax));
     }
 
-    EckInline BOOL SetCommandId(int idxButton, int idNew) const noexcept
+    EckInline bool SetCommandId(int idxButton, int idNew) const noexcept
     {
-        return (BOOL)SendMessageW(TB_SETCMDID, idxButton, idNew);
+        return (bool)SendMessageW(TB_SETCMDID, idxButton, idNew);
     }
 
     EckInline void SetColorScheme(COLORSCHEME* pcs) const noexcept
@@ -446,9 +446,9 @@ public:
         return (HIMAGELIST)SendMessageW(TB_SETIMAGELIST, idxImageList, (LPARAM)hImageList);
     }
 
-    EckInline BOOL SetIndent(int iIndent) const noexcept
+    EckInline bool SetIndent(int iIndent) const noexcept
     {
-        return (BOOL)SendMessageW(TB_SETINDENT, iIndent, 0);
+        return (bool)SendMessageW(TB_SETINDENT, iIndent, 0);
     }
 
     EckInline void SetInsertMark(TBINSERTMARK* ptbim) const noexcept
@@ -466,9 +466,9 @@ public:
         SendMessageW(TB_SETLISTGAP, iGap, 0);
     }
 
-    EckInline BOOL SetMaximumRows(int cRows) const noexcept
+    EckInline bool SetMaximumRows(int cRows) const noexcept
     {
-        return (BOOL)SendMessageW(TB_SETMAXTEXTROWS, cRows, 0);
+        return (bool)SendMessageW(TB_SETMAXTEXTROWS, cRows, 0);
     }
 
     EckInline void SetMetrics(TBMETRICS* ptbm) const noexcept
@@ -491,7 +491,7 @@ public:
         return (HIMAGELIST)SendMessageW(TB_SETPRESSEDIMAGELIST, idxImageList, (LPARAM)hImageList);
     }
 
-    EckInline void SetRows(int cRows, BOOL bAllowMoreRows, RECT* prc) const noexcept
+    EckInline void SetRows(int cRows, bool bAllowMoreRows, RECT* prc) const noexcept
     {
         SendMessageW(TB_SETROWS, MAKEWPARAM(cRows, bAllowMoreRows), (LPARAM)prc);
     }

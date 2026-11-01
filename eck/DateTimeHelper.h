@@ -58,7 +58,7 @@ inline constexpr BYTE DayInMonth[]
 };
 
 // 是否闰年
-EckInlineNdCe BOOL IsLeapYear(int iYear) noexcept
+EckInlineNdCe bool IsLeapYear(int iYear) noexcept
 {
     return iYear % 4 == 0 && (iYear % 100 != 0 || iYear % 400 == 0);
 }
@@ -320,7 +320,7 @@ EckInlineNdCe SYSTEMTIME UnixTimestampToSystemTimeMs(ULONGLONG ull) noexcept
     return NtTimeToSystemTime(ull);
 }
 
-inline BOOL FormatDate(
+inline bool FormatDate(
     Eck_Append_buffer_ CStringW& rs,
     const SYSTEMTIME& st,
     _In_opt_z_ PCWSTR pszFmt = nullptr,
@@ -330,12 +330,12 @@ inline BOOL FormatDate(
     const int cchDate = GetDateFormatEx(
         pszLocale, uFlags, &st, pszFmt, nullptr, 0, nullptr);
     if (!cchDate)
-        return FALSE;
+        return false;
     return !!GetDateFormatEx(pszLocale, uFlags, &st, pszFmt,
         rs.PushBackNoExtra(cchDate - 1), cchDate, nullptr);
 }
 
-inline BOOL FormatTime(
+inline bool FormatTime(
     Eck_Append_buffer_ CStringW& rs,
     const SYSTEMTIME& st,
     _In_opt_z_ PCWSTR pszFmt = nullptr,
@@ -345,12 +345,12 @@ inline BOOL FormatTime(
     const int cchTime = GetTimeFormatEx(
         pszLocale, uFlags, &st, pszFmt, nullptr, 0);
     if (!cchTime)
-        return FALSE;
+        return false;
     return !!GetTimeFormatEx(pszLocale, uFlags, &st, pszFmt,
         rs.PushBackNoExtra(cchTime - 1), cchTime);
 }
 
-inline BOOL FormatDateTime(
+inline bool FormatDateTime(
     Eck_Append_buffer_ CStringW& rs,
     const SYSTEMTIME& st,
     _In_opt_z_ PCWSTR pszFmtDate = nullptr,
@@ -364,7 +364,7 @@ inline BOOL FormatDateTime(
     int cchTime = GetTimeFormatEx(
         pszLocale, dwFlagsTime, &st, pszFmtTime, nullptr, 0);
     if (!cchDate || !cchTime)
-        return FALSE;
+        return false;
 
     auto p = rs.PushBackNoExtra(cchDate - 1 + cchTime - 1 + 1);
 
@@ -375,6 +375,6 @@ inline BOOL FormatDateTime(
 
     GetTimeFormatEx(
         pszLocale, dwFlagsTime, &st, pszFmtTime, p, cchTime);
-    return TRUE;
+    return true;
 }
 ECK_NAMESPACE_END

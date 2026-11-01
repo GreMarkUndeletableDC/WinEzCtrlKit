@@ -47,7 +47,7 @@ public:
             FILE_LIST_DIRECTORY | SYNCHRONIZE,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
             FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_OPEN_FOR_BACKUP_INTENT,
-            &nts, nullptr, FALSE, hRoot));
+            &nts, nullptr, false, hRoot));
         return nts;
     }
 
@@ -71,9 +71,9 @@ public:
 
         auto usPattern = StringViewToNtString(svPattern);
         nts = NtQueryDirectoryFile(m_hObject, nullptr, nullptr, nullptr, &iosb,
-            pBuf, (ULONG)cbBuf, eCls, FALSE,
+            pBuf, (ULONG)cbBuf, eCls, false,
             svPattern.empty() ? nullptr : &usPattern,
-            TRUE);
+            true);
         if (nts == STATUS_NO_MORE_FILES)
             return STATUS_SUCCESS;
         if (!NT_SUCCESS(nts))
@@ -90,7 +90,7 @@ public:
                 pInfo = (T*)((BYTE*)pInfo + pInfo->NextEntryOffset);
             }
             nts = NtQueryDirectoryFile(m_hObject, nullptr, nullptr, nullptr, &iosb,
-                pBuf, (ULONG)cbBuf, eCls, FALSE, nullptr, FALSE);
+                pBuf, (ULONG)cbBuf, eCls, false, nullptr, false);
             if (nts == STATUS_NO_MORE_FILES)
                 return STATUS_SUCCESS;
             if (!NT_SUCCESS(nts))
@@ -105,14 +105,14 @@ class CFileEnumeratorSingle : public CFileEnumerator
 private:
     void* m_pBuffer{};
     ULONG m_cbBuffer{ 4096 };
-    BOOL m_bExternalBuf{};
+    bool m_bExternalBuf{};
     // 若第一次枚举还未进行，则为nullptr
     // 若当前缓冲区遍历完成，则为INVALID_HANDLE_VALUE
     void* m_pCurrItem{};
 
     void AllocateBuffer() noexcept
     {
-        m_bExternalBuf = FALSE;
+        m_bExternalBuf = false;
         m_pBuffer = VAllocate(m_cbBuffer);
     }
 
@@ -145,14 +145,14 @@ public:
         {
             auto usPattern = StringViewToNtString(svPattern);
             nts = NtQueryDirectoryFile(m_hObject, nullptr, nullptr, nullptr, &iosb,
-                m_pBuffer, m_cbBuffer, eCls, FALSE,
+                m_pBuffer, m_cbBuffer, eCls, false,
                 svPattern.empty() ? nullptr : &usPattern,
-                TRUE);
+                true);
         }
         else if (m_pCurrItem == INVALID_HANDLE_VALUE)
         {
             nts = NtQueryDirectoryFile(m_hObject, nullptr, nullptr, nullptr, &iosb,
-                m_pBuffer, m_cbBuffer, eCls, FALSE, nullptr, FALSE);
+                m_pBuffer, m_cbBuffer, eCls, false, nullptr, false);
         }
         else
         {
@@ -182,7 +182,7 @@ public:
             FreeBuffer();
             m_pBuffer = pBuffer;
             m_cbBuffer = (ULONG)cbBuffer;
-            m_bExternalBuf = TRUE;
+            m_bExternalBuf = true;
         }
         else
         {
@@ -192,7 +192,7 @@ public:
             {
                 m_cbBuffer = (ULONG)cbBuffer;
                 m_pBuffer = nullptr;
-                m_bExternalBuf = FALSE;
+                m_bExternalBuf = false;
             }
             else if ((ULONG)cbBuffer != m_cbBuffer)
             {

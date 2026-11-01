@@ -24,7 +24,7 @@ private:
         const auto bHasIdealSize =
             (e.uFlags & LF_IDEAL) ?
             e.pObject->LoGetIdealSize(sizeIdeal) :
-            FALSE;
+            false;
         if (bHasIdealSize)
         {
             if (e.uFlags & LF_IDEAL_WIDTH)
@@ -49,7 +49,7 @@ private:
         m_cyIdeal = m_cy = std::max(m_cy, e.cy + e.Margins.t + e.Margins.b);
     }
 public:
-    void LoShow(BOOL bShow) noexcept override
+    void LoShow(bool bShow) noexcept override
     {
         for (const auto& e : m_vItem)
             e.pObject->LoShow(bShow);
@@ -120,11 +120,11 @@ public:
     {
         EckAssert(idx >= 0 && idx < (int)m_vItem.Size());
         int i{};
-        m_vItem[idx].pObject->LoShow(TRUE);
+        m_vItem[idx].pObject->LoShow(true);
         for (; i < idx; ++i)
-            m_vItem[i].pObject->LoShow(FALSE);
+            m_vItem[i].pObject->LoShow(false);
         for (i = idx + 1; i < (int)m_vItem.Size(); ++i)
-            m_vItem[i].pObject->LoShow(FALSE);
+            m_vItem[i].pObject->LoShow(false);
     }
 
     EckInlineNdCe auto& GetList() noexcept { return m_vItem; }

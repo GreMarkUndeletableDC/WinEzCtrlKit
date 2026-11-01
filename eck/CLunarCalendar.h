@@ -25,7 +25,7 @@ public:
     COLORREF m_crText{ CLR_DEFAULT };
     COLORREF m_crBkg{ CLR_DEFAULT };
 
-    BITBOOL m_bShowBorder : 1{ FALSE };
+    BITBOOL m_bShowBorder : 1{ false };
 
     void UpdateTipText() noexcept
     {

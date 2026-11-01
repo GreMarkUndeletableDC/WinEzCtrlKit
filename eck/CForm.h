@@ -22,14 +22,14 @@ private:
 
     ImageMode m_eBkImageMode{ ImageMode::TopLeft };
 
-    BITBOOL m_bMoveable : 1 = TRUE;
-    BITBOOL m_bFillWndImage : 1 = FALSE;
-    BITBOOL m_bEscClose : 1 = FALSE;
-    BITBOOL m_bMoveAnywhere : 1 = FALSE;
-    BITBOOL m_bClrDisableEdit : 1 = FALSE;
+    BITBOOL m_bMoveable : 1 = true;
+    BITBOOL m_bFillWndImage : 1 = false;
+    BITBOOL m_bEscClose : 1 = false;
+    BITBOOL m_bMoveAnywhere : 1 = false;
+    BITBOOL m_bClrDisableEdit : 1 = false;
 public:
 
-    BOOL PreTranslateMessage(const MSG& Msg) noexcept override
+    bool PreTranslateMessage(const MSG& Msg) noexcept override
     {
         switch (Msg.message)
         {
@@ -38,7 +38,7 @@ public:
             if (m_bEscClose && Msg.wParam == VK_ESCAPE && IsWindowEnabled(GetHandle()))
             {
                 PostMessageW(WM_CLOSE, 0, 0);
-                return TRUE;
+                return true;
             }
         }
         break;
@@ -49,7 +49,7 @@ public:
                     (::SendMessageW(Msg.hwnd, WM_GETDLGCODE, Msg.wParam, (LPARAM)&Msg) & DLGC_STATIC)))
                 {
                     PostMessageW(WM_NCLBUTTONDOWN, HTCAPTION, 0);
-                    return TRUE;
+                    return true;
                 }
         }
         break;
@@ -117,7 +117,7 @@ public:
                 PtcCurrent()->crDefBkg : m_crBk);
             FillRect(hDC, &rc, GetStockBrush(DC_BRUSH));
         }
-        return TRUE;
+        return true;
         }
 
         return __super::OnMessage(uMsg, wParam, lParam);
@@ -136,26 +136,26 @@ public:
     EckInlineCe void SetBackgroundMode(ImageMode iMode) noexcept { m_eBkImageMode = iMode; }
     EckInlineNdCe ImageMode GetBackgroundMode() const noexcept { return m_eBkImageMode; }
 
-    EckInlineCe void SetBackgroundFillWindow(BOOL b) noexcept { m_bFillWndImage = b; }
-    EckInlineNdCe BOOL GetBackgroundFillWindow() const noexcept { return m_bFillWndImage; }
+    EckInlineCe void SetBackgroundFillWindow(bool b) noexcept { m_bFillWndImage = b; }
+    EckInlineNdCe bool GetBackgroundFillWindow() const noexcept { return m_bFillWndImage; }
 
-    EckInline void SetMoveable(BOOL bMoveable) noexcept
+    EckInline void SetMoveable(bool bMoveable) noexcept
     {
         m_bMoveable = bMoveable;
-        CMenu SysMenu(GetSystemMenu(GetHandle(), FALSE));
+        CMenu SysMenu(GetSystemMenu(GetHandle(), false));
         if (bMoveable)
-            SysMenu.EnableItem(SC_MOVE, MF_ENABLED, FALSE);
+            SysMenu.EnableItem(SC_MOVE, MF_ENABLED, false);
         else
-            SysMenu.EnableItem(SC_MOVE, MF_GRAYED, FALSE);
+            SysMenu.EnableItem(SC_MOVE, MF_GRAYED, false);
         (void)SysMenu.Detach();
     }
-    EckInlineNdCe BOOL GetMoveable() const noexcept { return m_bMoveable; }
+    EckInlineNdCe bool GetMoveable() const noexcept { return m_bMoveable; }
 
-    EckInlineCe void SetEscClose(BOOL b) noexcept { m_bEscClose = b; }
-    EckInlineNdCe BOOL GetEscClose() const noexcept { return m_bEscClose; }
+    EckInlineCe void SetEscClose(bool b) noexcept { m_bEscClose = b; }
+    EckInlineNdCe bool GetEscClose() const noexcept { return m_bEscClose; }
 
-    EckInlineCe void SetDragMoveAnywhere(BOOL b) noexcept { m_bMoveAnywhere = b; }
-    EckInlineNdCe BOOL GetDragMoveAnywhere() const noexcept { return m_bMoveAnywhere; }
+    EckInlineCe void SetDragMoveAnywhere(bool b) noexcept { m_bMoveAnywhere = b; }
+    EckInlineNdCe bool GetDragMoveAnywhere() const noexcept { return m_bMoveAnywhere; }
 
     EckInlineCe void SetBackgroundColor(COLORREF crBk) noexcept { m_crBk = crBk; }
     EckInlineNdCe COLORREF GetBackgroundColor() const noexcept { return m_crBk; }

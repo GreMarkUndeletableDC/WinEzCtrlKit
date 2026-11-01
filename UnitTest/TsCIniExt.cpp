@@ -433,7 +433,7 @@ public:
     {
         CIniExt ini;
         ini.Load(L"[S]\nK=2A\n");
-        Assert::AreEqual(42, ini.GetKeyValue(L"S", L"K").GetInt<int>(0, TRUE));
+        Assert::AreEqual(42, ini.GetKeyValue(L"S", L"K").GetInt<int>(0, true));
     }
 
     TEST_METHOD(GetFloat_ParsesDecimal)
@@ -446,7 +446,7 @@ public:
     TEST_METHOD(GetBool_RecognizesTrueVariants)
     {
         CIniExt ini;
-        ini.Load(L"[S]\nA=true\nB=TRUE\nC=1\nD=真\n");
+        ini.Load(L"[S]\nA=true\nB=true\nC=1\nD=真\n");
         const auto sec = ini.GetSection(L"S");
         Assert::IsTrue((bool)ini.GetKeyValue(sec, L"A").GetBool());
         Assert::IsTrue((bool)ini.GetKeyValue(sec, L"B").GetBool());
@@ -468,8 +468,8 @@ public:
     {
         CIniExt ini;
         ini.Load(L"[S]\nA=true\n");
-        Assert::IsTrue((bool)ini.GetKeyValue(L"S", L"Missing").GetBool(TRUE));
-        Assert::IsFalse((bool)ini.GetKeyValue(L"S", L"Missing").GetBool(FALSE));
+        Assert::IsTrue((bool)ini.GetKeyValue(L"S", L"Missing").GetBool(true));
+        Assert::IsFalse((bool)ini.GetKeyValue(L"S", L"Missing").GetBool(false));
     }
 
     enum class ETestEnum : int { A = 0, B = 1, C = 2 };
@@ -785,8 +785,8 @@ public:
         Assert::IsTrue((bool)kv.IsEmpty());
         Assert::IsTrue(kv.GetString() == L""sv);
         Assert::AreEqual(42, kv.GetInt<int>(42));
-        Assert::IsTrue((bool)kv.GetBool(TRUE));
-        Assert::IsFalse((bool)kv.GetBool(FALSE));
+        Assert::IsTrue((bool)kv.GetBool(true));
+        Assert::IsFalse((bool)kv.GetBool(false));
     }
 
     TEST_METHOD(EscapeCarriageReturnAndNul)

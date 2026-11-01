@@ -8,7 +8,7 @@ class CButton : public CElement
 public:
     static RcPtr<CThemeBase> TmDefaultTheme() noexcept;
 
-    static RcPtr<CThemeStyle> TmMakeDefaultStyle(BOOL bDarkMode) noexcept
+    static RcPtr<CThemeStyle> TmMakeDefaultStyle(bool bDarkMode) noexcept
     {
         auto p = RcPtr<CThemeStyle>::Make();
         auto& vStyle = p->GetList();

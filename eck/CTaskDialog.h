@@ -12,7 +12,7 @@ public:
     {
         TASKDIALOGCONFIG* ptdc;
         int iRadioButton;
-        BOOL bChecked;
+        bool bChecked;
         HRESULT hr;
     };
 protected:
@@ -57,13 +57,13 @@ protected:
         case TDN_NAVIGATED:
         case TDN_DIALOG_CONSTRUCTED:
         {
-            EnumChildWindows(hWnd, [](HWND hWnd, LPARAM lParam)->BOOL
+            EnumChildWindows(hWnd, [](HWND hWnd, LPARAM lParam) noexcept -> BOOL
                 {
                     WCHAR szCls[ARRAYSIZE(WC_LINK) + 2];
                     GetClassNameW(hWnd, szCls, ARRAYSIZE(szCls));
                     if (_wcsicmp(szCls, WC_LINK) == 0)
                         SetWindowSubclass(GetParent(hWnd), LinkParentSubclassProcedure, 0, 0);
-                    return TRUE;
+                    return true;
                 }, 0);
         }
         break;
@@ -85,8 +85,10 @@ public:
 
         int iButton{};
         BeginCbtHook(this);
+        BOOL bChecked{};
         pCtx->hr = TaskDialogIndirect(ptdc, &iButton,
-            &pCtx->iRadioButton, &pCtx->bChecked);
+            &pCtx->iRadioButton, &bChecked);
+        pCtx->bChecked = !!bChecked;
         return iButton;
     }
 
@@ -107,7 +109,7 @@ public:
         return CDialog::OnMessage(uMsg, wParam, lParam);
     }
 
-    EckInline BOOL EndDialog(INT_PTR nResult) noexcept override { return FALSE; }
+    EckInline bool EndDialog(INT_PTR nResult) noexcept override { return false; }
 
     virtual HRESULT OnTaskDialogNotify(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
     {
@@ -127,17 +129,17 @@ public:
         SendMessageW(TDM_CLICK_RADIO_BUTTON, iID, 0);
     }
 
-    EckInline void ClickCheckBox(BOOL bChecked, BOOL bSetFocus = FALSE) const noexcept
+    EckInline void ClickCheckBox(bool bChecked, bool bSetFocus = false) const noexcept
     {
         SendMessageW(TDM_CLICK_VERIFICATION, bChecked, bSetFocus);
     }
 
-    EckInline void EnableButton(int iID, BOOL bEnable) const noexcept
+    EckInline void EnableButton(int iID, bool bEnable) const noexcept
     {
         SendMessageW(TDM_ENABLE_BUTTON, iID, bEnable);
     }
 
-    EckInline void EnableRadioButton(int iID, BOOL bEnable) const noexcept
+    EckInline void EnableRadioButton(int iID, bool bEnable) const noexcept
     {
         SendMessageW(TDM_ENABLE_RADIO_BUTTON, iID, bEnable);
     }
@@ -152,7 +154,7 @@ public:
         SendMessageW(TDM_NAVIGATE_PAGE, 0, (LPARAM)m_pParam->ptdc);
     }
 
-    EckInline void SetShieldIcon(int iID, BOOL bShieldIcon) const noexcept
+    EckInline void SetShieldIcon(int iID, bool bShieldIcon) const noexcept
     {
         SendMessageW(TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE, iID, bShieldIcon);
     }
@@ -168,12 +170,12 @@ public:
         SendMessageW(TDM_SET_ELEMENT_TEXT, uType, (LPARAM)pszText);
     }
 
-    EckInline void PBSetMarqueeShowing(BOOL bShowing) const noexcept
+    EckInline void PBSetMarqueeShowing(bool bShowing) const noexcept
     {
         SendMessageW(TDM_SET_MARQUEE_PROGRESS_BAR, bShowing, 0);
     }
 
-    EckInline void PBSetMarquee(BOOL bMarquee, UINT uAnimationGap = 0u) const noexcept
+    EckInline void PBSetMarquee(bool bMarquee, UINT uAnimationGap = 0u) const noexcept
     {
         SendMessageW(TDM_SET_PROGRESS_BAR_MARQUEE, bMarquee, uAnimationGap);
     }

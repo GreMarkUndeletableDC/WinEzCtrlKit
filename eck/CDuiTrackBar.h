@@ -161,7 +161,7 @@ private:
                 rc.right = rc.left + (rc.right - rc.left) * fScale;
     }
 
-    void ChangePosition(float fPos, BOOL bDragging, BOOL bUpdateNow = TRUE) noexcept
+    void ChangePosition(float fPos, bool bDragging, bool bUpdateNow = true) noexcept
     {
         if (FloatEqual(fPos, m_fPos))
             return;
@@ -186,11 +186,11 @@ private:
         Invalidate(rcThumb, bUpdateNow);
     }
 public:
-    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(bool bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(bool bDark) noexcept
     {
-        static auto p1{ TmMakeDefaultTheme(TRUE) };
-        static auto p2{ TmMakeDefaultTheme(FALSE) };
+        static auto p1{ TmMakeDefaultTheme(true) };
+        static auto p2{ TmMakeDefaultTheme(false) };
         return bDark ? p1 : p2;
     }
 
@@ -263,12 +263,12 @@ public:
         case WM_MOUSEMOVE:
         {
             if (TmState() & SapLButtonDown)
-                ChangePosition(HitTest(LpPoint(lParam)), TRUE);
+                ChangePosition(HitTest(LpPoint(lParam)), true);
             else if (!(TmState() & SaHot))
             {
                 TmState() |= SaHot;
                 m_ec.Start(0.f, 1.f, m_bAnActive);
-                m_bAnActive = TRUE;
+                m_bAnActive = true;
                 GetWindow().KctWake();
             }
         }
@@ -280,7 +280,7 @@ public:
             {
                 TmState() &= ~SaHot;
                 m_ec.Start(1.f, 0.f, m_bAnActive);
-                m_bAnActive = TRUE;
+                m_bAnActive = true;
                 GetWindow().KctWake();
             }
         }
@@ -301,7 +301,7 @@ public:
                 m_fDragPos = m_fPos;
             }
             else
-                ChangePosition(HitTest(pt), FALSE);
+                ChangePosition(HitTest(pt), false);
         }
         return 0;
 
@@ -315,7 +315,7 @@ public:
             ChangePosition(
                 (uMsg == WM_CAPTURECHANGED) ?
                 m_fDragPos :
-                HitTest(LpPoint(lParam)), FALSE);
+                HitTest(LpPoint(lParam)), false);
         }
         return 0;
 
@@ -325,7 +325,7 @@ public:
             if (!(TmState() & SapLButtonDown))
             {
                 const auto d = -GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-                ChangePosition(GetTrackPosition() + d, FALSE);
+                ChangePosition(GetTrackPosition() + d, false);
             }
         }
         return 0;
@@ -348,7 +348,7 @@ public:
             default:
                 goto Skip;
             }
-            ChangePosition(std::clamp(m_fPos + d, m_fMin, m_fMax), FALSE);
+            ChangePosition(std::clamp(m_fPos + d, m_fMin, m_fMax), false);
         Skip:;
         }
         return 0;
@@ -378,15 +378,15 @@ public:
         m_msLastDuration = (USHORT)ms;
         m_bAnActive = m_ec.Tick((float)ms, 200);
         if (m_bThinTrack)
-            Invalidate(FALSE);
+            Invalidate(false);
         else
         {
             Kw::Rect rc;
             GetThumbRect(rc);
-            Invalidate(rc, FALSE);
+            Invalidate(rc, false);
         }
     }
-    BOOL TlIsValid() noexcept override { return m_bAnActive; }
+    bool TlIsValid() noexcept override { return m_bAnActive; }
     int TlGetCurrentInterval() const noexcept override { return (int)m_msLastDuration; }
 
     constexpr void SetRange(float fMin, float fMax) noexcept
@@ -407,26 +407,26 @@ public:
         return (TmGetState() & SapLButtonDown) ? m_fDragPos : m_fPos;
     }
 
-    EckInlineCe void SetVertical(BOOL b) noexcept { m_bVertical = b; }
-    EckInlineNdCe BOOL GetVertical() const noexcept { return m_bVertical; }
+    EckInlineCe void SetVertical(bool b) noexcept { m_bVertical = b; }
+    EckInlineNdCe bool GetVertical() const noexcept { return m_bVertical; }
 
     EckInlineCe void SetTrackSize(float f) noexcept { m_cxyTrack = f; }
     EckInlineNdCe float GetTrackSize() const noexcept { return m_cxyTrack; }
 
-    EckInlineCe void SetThumbTrack(BOOL b) noexcept { m_bThumbTrack = b; }
-    EckInlineNdCe BOOL GetThumbTrack() const noexcept { return m_bThumbTrack; }
+    EckInlineCe void SetThumbTrack(bool b) noexcept { m_bThumbTrack = b; }
+    EckInlineNdCe bool GetThumbTrack() const noexcept { return m_bThumbTrack; }
 
-    EckInlineCe void SetTransparentSpace(BOOL b) noexcept { m_bTransparentSpace = b; }
-    EckInlineNdCe BOOL GetTransparentSpace() const noexcept { return m_bTransparentSpace; }
+    EckInlineCe void SetTransparentSpace(bool b) noexcept { m_bTransparentSpace = b; }
+    EckInlineNdCe bool GetTransparentSpace() const noexcept { return m_bTransparentSpace; }
 
-    EckInlineCe void SetThinTrack(BOOL b) noexcept { m_bThinTrack = b; }
-    EckInlineNdCe BOOL GetThinTrack() const noexcept { return m_bThinTrack; }
+    EckInlineCe void SetThinTrack(bool b) noexcept { m_bThinTrack = b; }
+    EckInlineNdCe bool GetThinTrack() const noexcept { return m_bThinTrack; }
 
-    EckInlineCe void SetAutoTrackSize(BOOL b) { m_bAutoTrackSize = b; }
-    EckInlineNdCe BOOL GetAutoTrackSize() const { return m_bAutoTrackSize; }
+    EckInlineCe void SetAutoTrackSize(bool b) { m_bAutoTrackSize = b; }
+    EckInlineNdCe bool GetAutoTrackSize() const { return m_bAutoTrackSize; }
 
-    EckInlineCe void SetReverseDirection(BOOL b) noexcept { m_bReverseDirection = b; }
-    EckInlineNdCe BOOL GetReverseDirection() const noexcept { return m_bReverseDirection; }
+    EckInlineCe void SetReverseDirection(bool b) noexcept { m_bReverseDirection = b; }
+    EckInlineNdCe bool GetReverseDirection() const noexcept { return m_bReverseDirection; }
 
     EckInlineCe void SetSmallDelta(float f) noexcept { m_fSmallDelta = f; }
     EckInlineNdCe float GetSmallDelta() const noexcept { return m_fSmallDelta; }
@@ -537,7 +537,7 @@ public:
     }
 
 };
-inline RcPtr<CTheme> CTrackBar::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CTrackBar::TmMakeDefaultTheme(bool bDark) noexcept
 {
     return TmMakeTheme<CTmTrackBar>(bDark);
 }
@@ -588,7 +588,7 @@ class CUiaTrackBar : public CUnknownAppend<CUiaBase, IRangeValueProvider>
     {
         if (!GetElement())
             return UIA_E_ELEMENTNOTAVAILABLE;
-        *pRetVal = FALSE;
+        *pRetVal = false;
         return S_OK;
     }
     STDMETHODIMP get_Maximum(double* pRetVal) override

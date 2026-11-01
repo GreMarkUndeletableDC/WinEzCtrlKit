@@ -14,7 +14,7 @@ namespace SkiaTessellator
     // 细分器向接口输出带索引的三角形列表，三角形绕序不确定，因此渲染时应禁用面剔除
     struct ITessellationHost
     {
-        STDMETHOD_(BOOL, PaIsEmpty)() noexcept = 0;
+        STDMETHOD_(bool, PaIsEmpty)() noexcept = 0;
 
         STDMETHOD_(pk::SkPathFillType, PaGetFillType)() noexcept = 0;
 

@@ -6,29 +6,29 @@
 
 ECK_NAMESPACE_BEGIN
 #define ECK_W_REE_STYLE(Name, Style)                    \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-    BOOL StyleGet##Name() const noexcept                \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;  \
+    bool StyleGet##Name() const noexcept                \
     {                                                   \
         if constexpr (Style == 0)                       \
             return !GetEditStyle();                     \
         else                                            \
             return IsBitSet(GetEditStyle(), Style);     \
     }                                                   \
-    void StyleSet##Name(BOOL b) const noexcept          \
+    void StyleSet##Name(bool b) const noexcept          \
     {                                                   \
         SetEditStyle(b ? Style : 0, Style);             \
     }
 
 #define ECK_W_REEEX_STYLE(Name, Style)                  \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-    BOOL StyleGet##Name() const noexcept                \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;  \
+    bool StyleGet##Name() const noexcept                \
     {                                                   \
         if constexpr (Style == 0)                       \
             return !GetEditStyleEx();                   \
         else                                            \
             return IsBitSet(GetEditStyleEx(), Style);   \
     }                                                   \
-    void StyleSet##Name(BOOL b) const noexcept          \
+    void StyleSet##Name(bool b) const noexcept          \
     {                                                   \
         SetEditStyleEx(b ? Style : 0, Style);           \
     }
@@ -124,9 +124,9 @@ public:
         return (HRESULT)SendMessageW(EM_CANREDO, 0, 0);
     }
 
-    EckInline BOOL DisplayBand(RECT* prc) const noexcept
+    EckInline bool DisplayBand(RECT* prc) const noexcept
     {
-        return (BOOL)SendMessageW(EM_DISPLAYBAND, 0, (LPARAM)prc);
+        return (bool)SendMessageW(EM_DISPLAYBAND, 0, (LPARAM)prc);
     }
 
     EckInline void GetSelection(CHARRANGE* pchrg) const noexcept
@@ -164,7 +164,7 @@ public:
         return (int)SendMessageW(EM_FINDWORDBREAK, uFlags, idxChar);
     }
 
-    EckInline int FormatRange(BOOL bInPlace, FORMATRANGE* pfr) const noexcept
+    EckInline int FormatRange(bool bInPlace, FORMATRANGE* pfr) const noexcept
     {
         return (int)SendMessageW(EM_FORMATRANGE, bInPlace, (LPARAM)pfr);
     }
@@ -174,9 +174,9 @@ public:
         return (AutoCorrectProc)SendMessageW(EM_GETAUTOCORRECTPROC, 0, 0);
     }
 
-    EckInline BOOL GetAutoUrlDetect() const noexcept
+    EckInline bool GetAutoUrlDetect() const noexcept
     {
-        return (BOOL)SendMessageW(EM_GETAUTOURLDETECT, 0, 0);
+        return (bool)SendMessageW(EM_GETAUTOURLDETECT, 0, 0);
     }
 
     EckInline void GetBidiOptions(BIDIOPTIONS* pbidio) const noexcept
@@ -194,9 +194,9 @@ public:
         return (int)SendMessageW(EM_GETCTFMODEBIAS, 0, 0);
     }
 
-    EckInline BOOL GetCtfOpenStatus() const noexcept
+    EckInline bool GetCtfOpenStatus() const noexcept
     {
-        return (BOOL)SendMessageW(EM_GETCTFOPENSTATUS, 0, 0);
+        return (bool)SendMessageW(EM_GETCTFOPENSTATUS, 0, 0);
     }
 
     EckInline UINT GetEditStyle() const noexcept
@@ -216,9 +216,9 @@ public:
         return dw;
     }
 
-    EckInline BOOL GetEllipsisState() const noexcept
+    EckInline bool GetEllipsisState() const noexcept
     {
-        return (BOOL)SendMessageW(EM_GETELLIPSISSTATE, 0, 0);
+        return (bool)SendMessageW(EM_GETELLIPSISSTATE, 0, 0);
     }
 
     EckInline UINT GetEventMask() const noexcept
@@ -321,9 +321,9 @@ public:
         return (int)SendMessageW(EM_GETTEXTRANGE, 0, (LPARAM)pTextRange);
     }
 
-    EckInline BOOL GetTouchOptions() const noexcept
+    EckInline bool GetTouchOptions() const noexcept
     {
-        return (BOOL)SendMessageW(EM_GETTOUCHOPTIONS, RTO_SHOWHANDLES, 0);
+        return (bool)SendMessageW(EM_GETTOUCHOPTIONS, RTO_SHOWHANDLES, 0);
     }
 
     EckInline UINT GetTypographyOptions() const noexcept
@@ -341,12 +341,12 @@ public:
         return (EDITWORDBREAKPROCEX)SendMessageW(EM_GETWORDBREAKPROCEX, 0, 0);
     }
 
-    EckInline BOOL GetZoom(int* pnZoomNumerator, int* pnZoomDenominator) const noexcept
+    EckInline bool GetZoom(int* pnZoomNumerator, int* pnZoomDenominator) const noexcept
     {
-        return (BOOL)SendMessageW(EM_GETZOOM, (WPARAM)pnZoomNumerator, (LPARAM)pnZoomDenominator);
+        return (bool)SendMessageW(EM_GETZOOM, (WPARAM)pnZoomNumerator, (LPARAM)pnZoomDenominator);
     }
 
-    EckInline void HideSelection(BOOL bHide) const noexcept
+    EckInline void HideSelection(bool bHide) const noexcept
     {
         SendMessageW(EM_HIDESELECTION, bHide, 0);
     }
@@ -361,9 +361,9 @@ public:
         return (HRESULT)SendMessageW(EM_INSERTTABLE, (WPARAM)ptrp, (LPARAM)ptcp);
     }
 
-    EckInline BOOL IsIme() const noexcept
+    EckInline bool IsIme() const noexcept
     {
-        return (BOOL)SendMessageW(EM_ISIME, 0, 0);
+        return (bool)SendMessageW(EM_ISIME, 0, 0);
     }
 
     EckInline void PasteSpecial(UINT uClipFormat, REPASTESPECIAL* prps) const noexcept
@@ -376,9 +376,9 @@ public:
         SendMessageW(EM_RECONVERSION, 0, 0);
     }
 
-    EckInline BOOL Redo() const noexcept
+    EckInline bool Redo() const noexcept
     {
-        return (BOOL)SendMessageW(EM_REDO, 0, 0);
+        return (bool)SendMessageW(EM_REDO, 0, 0);
     }
 
     EckInline void RequestResize() const noexcept
@@ -391,9 +391,9 @@ public:
         return (UINT)SendMessageW(EM_SELECTIONTYPE, 0, 0);
     }
 
-    EckInline BOOL SetAutoCorrectProcedure(AutoCorrectProc pfnNewProc) const noexcept
+    EckInline bool SetAutoCorrectProcedure(AutoCorrectProc pfnNewProc) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETAUTOCORRECTPROC, (WPARAM)pfnNewProc, 0);
+        return (bool)SendMessageW(EM_SETAUTOCORRECTPROC, (WPARAM)pfnNewProc, 0);
     }
 
     EckInline void SetBidiOptions(BIDIOPTIONS* pbidio) const noexcept
@@ -401,14 +401,14 @@ public:
         SendMessageW(EM_SETBIDIOPTIONS, 0, (LPARAM)pbidio);
     }
 
-    EckInline COLORREF SetBackgroundColor(BOOL bSysColor, COLORREF cr) const noexcept
+    EckInline COLORREF SetBackgroundColor(bool bSysColor, COLORREF cr) const noexcept
     {
         return (COLORREF)SendMessageW(EM_SETBKGNDCOLOR, bSysColor, cr);
     }
 
-    EckInline BOOL SetCharFormat(int iFmt, CHARFORMAT2W* pcf) const noexcept
+    EckInline bool SetCharFormat(int iFmt, CHARFORMAT2W* pcf) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETCHARFORMAT, iFmt, (LPARAM)pcf);
+        return (bool)SendMessageW(EM_SETCHARFORMAT, iFmt, (LPARAM)pcf);
     }
 
     EckInline int SetCtfModeBias(int iModeBias) const noexcept
@@ -416,14 +416,14 @@ public:
         return (int)SendMessageW(EM_SETCTFMODEBIAS, iModeBias, 0);
     }
 
-    EckInline BOOL SetCtfOpenStatus(BOOL bOpen) const noexcept
+    EckInline bool SetCtfOpenStatus(bool bOpen) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETCTFOPENSTATUS, bOpen, 0);
+        return (bool)SendMessageW(EM_SETCTFOPENSTATUS, bOpen, 0);
     }
 
-    EckInline BOOL SetDisableOleLinkConversion(BOOL bDisable) const noexcept
+    EckInline bool SetDisableOleLinkConversion(bool bDisable) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETDISABLEOLELINKCONVERSION, 0, bDisable);
+        return (bool)SendMessageW(EM_SETDISABLEOLELINKCONVERSION, 0, bDisable);
     }
 
     EckInline UINT SetEditStyle(UINT dwStyle, UINT uMask) const noexcept
@@ -436,9 +436,9 @@ public:
         return (UINT)SendMessageW(EM_SETEDITSTYLEEX, dwStyleEx, dwMask);
     }
 
-    EckInline BOOL SetEllipsisMode(UINT uEllipsisMode) const noexcept
+    EckInline bool SetEllipsisMode(UINT uEllipsisMode) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETELLIPSISMODE, 0, uEllipsisMode);
+        return (bool)SendMessageW(EM_SETELLIPSISMODE, 0, uEllipsisMode);
     }
 
     EckInline UINT SetEventMask(UINT dwEventMask) const noexcept
@@ -446,9 +446,9 @@ public:
         return (UINT)SendMessageW(EM_SETEVENTMASK, 0, dwEventMask);
     }
 
-    EckInline BOOL SetFontSize(int iSize) const noexcept
+    EckInline bool SetFontSize(int iSize) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETFONTSIZE, iSize, 0);
+        return (bool)SendMessageW(EM_SETFONTSIZE, iSize, 0);
     }
 
     EckInline void SetHyphenateInformation(HYPHENATEINFO* phr) const noexcept
@@ -466,9 +466,9 @@ public:
         SendMessageW(EM_SETLANGOPTIONS, 0, dwOptions);
     }
 
-    EckInline BOOL SetOleCallback(IRichEditOleCallback* pCallback) const noexcept
+    EckInline bool SetOleCallback(IRichEditOleCallback* pCallback) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETOLECALLBACK, 0, (LPARAM)pCallback);
+        return (bool)SendMessageW(EM_SETOLECALLBACK, 0, (LPARAM)pCallback);
     }
 
     EckInline UINT SetOptions(int iType, UINT dwOptions) const noexcept
@@ -476,9 +476,9 @@ public:
         return (UINT)SendMessageW(EM_SETOPTIONS, iType, dwOptions);
     }
 
-    EckInline BOOL SetParagraphFormat(PARAFORMAT2* ppf) const noexcept
+    EckInline bool SetParagraphFormat(PARAFORMAT2* ppf) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETPARAFORMAT, 0, (LPARAM)ppf);
+        return (bool)SendMessageW(EM_SETPARAFORMAT, 0, (LPARAM)ppf);
     }
 
     EckInline int SetPageRotate(int iRotate) const noexcept
@@ -530,24 +530,24 @@ public:
         return (int)SendMessageW(EM_SETTEXTEX, (WPARAM)pst, (LPARAM)pszText);
     }
 
-    EckInline BOOL SetTextMode(TEXTMODE tm) const noexcept
+    EckInline bool SetTextMode(TEXTMODE tm) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETTEXTMODE, tm, 0);
+        return (bool)SendMessageW(EM_SETTEXTMODE, tm, 0);
     }
 
-    EckInline void SetTouchOptions(BOOL bShowHandles) const noexcept
+    EckInline void SetTouchOptions(bool bShowHandles) const noexcept
     {
         SendMessageW(EM_SETTOUCHOPTIONS, RTO_SHOWHANDLES, bShowHandles);
     }
 
-    EckInline BOOL SetTypographyOptions(UINT dwOptions, UINT dwMask) const noexcept
+    EckInline bool SetTypographyOptions(UINT dwOptions, UINT dwMask) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETTYPOGRAPHYOPTIONS, dwOptions, dwMask);
+        return (bool)SendMessageW(EM_SETTYPOGRAPHYOPTIONS, dwOptions, dwMask);
     }
 
-    EckInline BOOL SetUiAutomationName(PCWSTR pszText) const noexcept
+    EckInline bool SetUiAutomationName(PCWSTR pszText) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETUIANAME, 0, (LPARAM)pszText);
+        return (bool)SendMessageW(EM_SETUIANAME, 0, (LPARAM)pszText);
     }
 
     EckInline int SetUndoLimit(int cLimit) const noexcept
@@ -560,12 +560,12 @@ public:
         return (EDITWORDBREAKPROCEX)SendMessageW(EM_SETWORDBREAKPROCEX, 0, (LPARAM)pfnNewProc);
     }
 
-    EckInline BOOL SetZoom(int iZoomNumerator, int iZoomDenominator) const noexcept
+    EckInline bool SetZoom(int iZoomNumerator, int iZoomDenominator) const noexcept
     {
-        return (BOOL)SendMessageW(EM_SETZOOM, iZoomNumerator, iZoomDenominator);
+        return (bool)SendMessageW(EM_SETZOOM, iZoomNumerator, iZoomDenominator);
     }
 
-    EckInline void ShowScrollBar(int iBar, BOOL bShow) const noexcept
+    EckInline void ShowScrollBar(int iBar, bool bShow) const noexcept
     {
         SendMessageW(EM_SHOWSCROLLBAR, iBar, bShow);
     }

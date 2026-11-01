@@ -40,7 +40,7 @@ namespace Detail
     struct IniContext
     {
         TIterator it;
-        BOOL bValid{};
+        bool bValid{};
 
         EckInlineNdCe auto& GetIterator() const noexcept { return it; }
 
@@ -49,8 +49,8 @@ namespace Detail
         EckInlineNdCe auto& Data() noexcept { return *it; }
         EckInlineNdCe auto& Data() const noexcept { return *it; }
 
-        EckInlineNdCe BOOL IsValid() const noexcept { return bValid; }
-        EckInlineNdCe operator BOOL() const noexcept { return bValid; }
+        EckInlineNdCe bool IsValid() const noexcept { return bValid; }
+        EckInlineNdCe operator bool() const noexcept { return bValid; }
     };
 
     template<class TIterator>
@@ -59,7 +59,7 @@ namespace Detail
         EckInlineNdCe const CStringW& GetKey() const noexcept { return this->Data().rsName; }
         EckInlineNdCe const CStringW& GetValue() const noexcept { return this->Data().rsValue; }
 
-        EckInlineNd BOOL IsEmpty() const noexcept
+        EckInlineNd bool IsEmpty() const noexcept
         {
             return !this->IsValid() || GetValue().IsEmpty();
         }
@@ -73,7 +73,7 @@ namespace Detail
         }
 
         template<std::integral T>
-        T GetInt(T nDef = 0, BOOL bHex = FALSE) const noexcept
+        T GetInt(T nDef = 0, bool bHex = false) const noexcept
         {
             if (IsEmpty())
                 return nDef;
@@ -98,7 +98,7 @@ namespace Detail
             }
         }
 
-        EckInline BOOL GetBool(BOOL bDef = FALSE) const noexcept
+        EckInline bool GetBool(bool bDef = false) const noexcept
         {
             if (IsEmpty())
                 return bDef;
@@ -281,7 +281,7 @@ private:
     EolType m_eEolType{ EolType::CRLF };
     UINT m_uId{};
 
-    constexpr static BOOL EscapeChar(_Inout_ WCHAR& ch) noexcept
+    constexpr static bool EscapeChar(_Inout_ WCHAR& ch) noexcept
     {
         switch (ch)
         {
@@ -294,40 +294,40 @@ private:
         case '[':   break;
         case ']':   break;
         case '=':   break;
-        default:    return FALSE;
+        default:    return false;
         }
-        return TRUE;
+        return true;
     }
 
-    EckInlineNdCe static BOOL IsBreakLineChar(WCHAR ch) noexcept
+    EckInlineNdCe static bool IsBreakLineChar(WCHAR ch) noexcept
     {
         return ch == '\n' || ch == '\r';
     }
 
-    EckInlineNdCe static BOOL IsSpaceChar(WCHAR ch) noexcept
+    EckInlineNdCe static bool IsSpaceChar(WCHAR ch) noexcept
     {
         return IsBreakLineChar(ch) || ch == '\t' || ch == ' ' || ch == '\0';
     }
 
-    EckInlineNdCe static BOOL IsCommentChar(WCHAR ch) noexcept
+    EckInlineNdCe static bool IsCommentChar(WCHAR ch) noexcept
     {
         return ch == ';';
     }
 
-    EckInlineNdCe static BOOL IsSpaceOrCommentChar(WCHAR ch) noexcept
+    EckInlineNdCe static bool IsSpaceOrCommentChar(WCHAR ch) noexcept
     {
         return IsSpaceChar(ch) || ch == ';';
     }
 
-    EckInlineNdCe static BOOL IsBreakLineOrCommentChar(WCHAR ch) noexcept
+    EckInlineNdCe static bool IsBreakLineOrCommentChar(WCHAR ch) noexcept
     {
         return ch == '\n' || ch == '\r' || ch == ';';
     }
-    EckInlineNdCe static BOOL IsBomChar(WCHAR ch) noexcept
+    EckInlineNdCe static bool IsBomChar(WCHAR ch) noexcept
     {
         return ch == 0xFEFF;
     }
-    EckInlineNdCe static BOOL IsSpaceCharHeader(WCHAR ch) noexcept
+    EckInlineNdCe static bool IsSpaceCharHeader(WCHAR ch) noexcept
     {
         return IsSpaceChar(ch) || IsBomChar(ch);
     }
@@ -383,7 +383,7 @@ private:
     // 调用前：psz指向键的第一个字符
     // 调用后：psz指向值最后一个字符的下一个位置
     static IniResult UnescapeKeyValue(CStringW& rsKey, CStringW& rsVal,
-        PCWCH& psz, size_t cch, BOOL bKeepSpace) noexcept
+        PCWCH& psz, size_t cch, bool bKeepSpace) noexcept
     {
         const auto pOrg = psz;
         const auto pszEnd = psz + cch;
@@ -439,7 +439,7 @@ private:
     // 调用前：psz指向键的第一个字符
     // 调用后：psz指向值最后一个字符的下一个位置
     static IniResult ScanKeyValue(CStringW& rsKey, CStringW& rsVal,
-        PCWCH& psz, size_t cch, BOOL bKeepSpace) noexcept
+        PCWCH& psz, size_t cch, bool bKeepSpace) noexcept
     {
         const auto pOrg = psz;
         auto pR = TcsCharLength(psz, cch, '=');
@@ -572,11 +572,11 @@ public:
         struct ITEM
         {
             TSectionIterator it{};
-            BOOL bContainer{};// 该节是否为容器
+            bool bContainer{};// 该节是否为容器
         };
 
-        const BOOL bKeepSpace = (uFlags & INIE_IF_KEEP_SPACE);
-        const BOOL bEscape = (uFlags & INIE_IF_ESCAPE);
+        const bool bKeepSpace = (uFlags & INIE_IF_KEEP_SPACE);
+        const bool bEscape = (uFlags & INIE_IF_ESCAPE);
 
         State eState{ State::Section };
         CStringW rsComment{};
@@ -623,14 +623,14 @@ public:
                 {
                     if (pszIni >= pszEnd)
                         return IniResult::SecRBracketNotFound;
-                    BOOL bContainer;
+                    bool bContainer;
                     if (*pszIni == '>')
                     {
                         ++pszIni;
-                        bContainer = TRUE;
+                        bContainer = true;
                     }
                     else
-                        bContainer = FALSE;
+                        bContainer = false;
                     CStringW rsName{};
                     const auto r = (bEscape ?
                         UnescapeSectionName(rsName, pszIni, pszEnd - pszIni) :
@@ -793,7 +793,7 @@ public:
             Fn(*e);
     }
 
-    EckInlineNd BOOL IsEmpty() const noexcept { return m_Root.empty(); }
+    EckInlineNd bool IsEmpty() const noexcept { return m_Root.empty(); }
 
     void Clear() noexcept
     {

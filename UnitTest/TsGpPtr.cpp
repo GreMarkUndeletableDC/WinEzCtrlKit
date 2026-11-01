@@ -136,7 +136,7 @@ public:
         // ===== AdjustableArrowCap (CustomLineCap) =====
         {
             GpPtr<GpAdjustableArrowCap> cap;
-            GdipCreateAdjustableArrowCap(10, 5, TRUE, &cap);
+            GdipCreateAdjustableArrowCap(10, 5, true, &cap);
 
             GpPtr<GpAdjustableArrowCap> capClone;
             auto s = cap.Clone(capClone);

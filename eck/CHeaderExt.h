@@ -35,10 +35,10 @@ private:
     // 选项
     BITBOOL m_bSplitBtnHot : 1{};               // [内部标志]拆分按钮已点燃
     BITBOOL m_bFilterBtnHot : 1{};              // [内部标志]筛选按钮已点燃
-    BITBOOL m_bAutoDarkMode : 1{ TRUE };        // 自动处理暗色
+    BITBOOL m_bAutoDarkMode : 1{ true };        // 自动处理暗色
     BITBOOL m_bUseExtText : 1{};                // 使用扩展文本
-    BITBOOL m_bRepairDbClick : 1{ TRUE };       // 连击修正
-    BITBOOL m_bShowEmptyMainExtText : 1{ TRUE };// 即使主文本为空也不忽略其高度
+    BITBOOL m_bRepairDbClick : 1{ true };       // 连击修正
+    BITBOOL m_bShowEmptyMainExtText : 1{ true };// 即使主文本为空也不忽略其高度
     BYTE m_byColorAlpha{ 100 };                 // 背景色透明度
     Alignment m_eExtAlignV{ Alignment::Center };// 扩展文本垂直对齐
     COLORREF m_crText{ CLR_DEFAULT };           // 文本颜色
@@ -230,11 +230,11 @@ private:
         // 画图像
         BITMAP bm{};
         int xRight{ xAvailable - m_cxEdge };
-        BOOL bBmp = (hdi.fmt & HDF_BITMAP) && hdi.hbm;
-        BOOL bImg = (hdi.fmt & HDF_IMAGE) && hdi.iImage >= 0 && m_hIL;
+        bool bBmp = (hdi.fmt & HDF_BITMAP) && hdi.hbm;
+        bool bImg = (hdi.fmt & HDF_IMAGE) && hdi.iImage >= 0 && m_hIL;
         if (bBmp || bImg)
         {
-            const BOOL bRight = (hdi.fmt & HDF_BITMAP_ON_RIGHT);
+            const bool bRight = (hdi.fmt & HDF_BITMAP_ON_RIGHT);
             if (bRight)
                 if (bBmp && bImg)
                 {
@@ -251,7 +251,7 @@ private:
             else
                 if (bBmp && bImg)// hbm绘制在右边，bRight对iImage生效
                 {
-                    bImg = FALSE;
+                    bImg = false;
                     rc.left += m_cxEdge;
                     ImageList_Draw(m_hIL, hdi.iImage, hDC,
                         rc.left, rc.top + (rc.bottom - rc.top - m_cyIL) / 2, ILD_NORMAL);
@@ -263,7 +263,7 @@ private:
                 }
                 else if (bBmp)// bRight对hbm生效
                 {
-                    bBmp = FALSE;
+                    bBmp = false;
                     rc.left += m_cxEdge;
                     GetObjectW(hdi.hbm, sizeof(bm), &bm);
                     const int y = rc.top + (rc.bottom - rc.top - bm.bmHeight) / 2;
@@ -280,7 +280,7 @@ private:
                 }
                 else/* if (bImg)*/// bRight对iImage生效
                 {
-                    bImg = FALSE;
+                    bImg = false;
                     rc.left += m_cxEdge;
                     ImageList_Draw(m_hIL, hdi.iImage, hDC,
                         rc.left, rc.top + (rc.bottom - rc.top - m_cyIL) / 2, ILD_NORMAL);
@@ -495,7 +495,7 @@ private:
                 CreateCompatibleDC(nullptr),
                 (HBITMAP)LoadImageW(g_hModCommonControl, MAKEINTRESOURCEW(140),
                     IMAGE_BITMAP, 0, 0, LR_SHARED),
-                TRUE);
+                true);
 
             BITMAP bm;
             GetObjectW(m_DcFilterBmp.GetBitmap(), sizeof(bm), &bm);
@@ -557,8 +557,8 @@ private:
         m_hIL = nullptr;
         m_cxIL = m_cyIL = 0;
         m_idxHotItem = m_idxFilterEditing = -1;
-        m_bAutoDarkMode = m_bRepairDbClick = m_bShowEmptyMainExtText = TRUE;
-        m_bUseExtText = FALSE;
+        m_bAutoDarkMode = m_bRepairDbClick = m_bShowEmptyMainExtText = true;
+        m_bUseExtText = false;
         m_eExtAlignV = Alignment::Center;
         m_crText = m_crBk = m_crTextBk = m_crTextSubText = m_crTextBkSubText =
             m_crTextFilter = m_crTextBkFilter = CLR_DEFAULT;
@@ -611,7 +611,7 @@ public:
                 {
                     RECT rc;
                     GetItemRect(m_idxHotItem, &rc);
-                    InvalidateRect(Handle, &rc, FALSE);
+                    InvalidateRect(Handle, &rc, false);
                 }
             }
             if (b2 != m_bFilterBtnHot)
@@ -621,7 +621,7 @@ public:
                 {
                     RECT rc;
                     GetItemRect(m_idxHotItem, &rc);
-                    InvalidateRect(Handle, &rc, FALSE);
+                    InvalidateRect(Handle, &rc, false);
                 }
             }
 
@@ -635,7 +635,7 @@ public:
 
         case WM_MOUSELEAVE:
             m_idxHotItem = -1;
-            m_bSplitBtnHot = FALSE;
+            m_bSplitBtnHot = false;
             break;
 
         case WM_LBUTTONUP:
@@ -815,7 +815,7 @@ public:
     }
 
     LRESULT OnNotifyMessage(HWND hParent, UINT uMsg,
-        WPARAM wParam, LPARAM lParam, BOOL& bProcessed) noexcept override
+        WPARAM wParam, LPARAM lParam, bool& bProcessed) noexcept override
     {
         switch (uMsg)
         {
@@ -825,7 +825,7 @@ public:
             {
             case NM_CUSTOMDRAW:
             {
-                bProcessed = TRUE;
+                bProcessed = true;
                 const auto pnmcd = (NMCUSTOMDRAW*)lParam;
                 switch (pnmcd->dwDrawStage)
                 {
@@ -849,7 +849,7 @@ public:
                 {
                     RECT rc;
                     GetItemRect(idx, &rc);
-                    InvalidateRect(Handle, &rc, FALSE);
+                    InvalidateRect(Handle, &rc, false);
                 }
             }
             break;
@@ -897,17 +897,17 @@ public:
 
     EckInlineNdCe HFONT HeGetMainTextFont() const noexcept { return m_hFontMainText; }
 
-    EckInlineCe void HeSetAutoDarkMode(BOOL b) noexcept { m_bAutoDarkMode = b; }
-    EckInlineNdCe BOOL HeGetAutoDarkMode() const noexcept { return m_bAutoDarkMode; }
+    EckInlineCe void HeSetAutoDarkMode(bool b) noexcept { m_bAutoDarkMode = b; }
+    EckInlineNdCe bool HeGetAutoDarkMode() const noexcept { return m_bAutoDarkMode; }
 
-    EckInlineCe void HeSetUseExtText(BOOL b) noexcept { m_bUseExtText = b; }
-    EckInlineNdCe BOOL HeGetUseExtText() const noexcept { return m_bUseExtText; }
+    EckInlineCe void HeSetUseExtText(bool b) noexcept { m_bUseExtText = b; }
+    EckInlineNdCe bool HeGetUseExtText() const noexcept { return m_bUseExtText; }
 
-    EckInlineCe void HeSetRepairDoubleClick(BOOL b) noexcept { m_bRepairDbClick = b; }
-    EckInlineNdCe BOOL HeGetRepairDoubleClick() const noexcept { return m_bRepairDbClick; }
+    EckInlineCe void HeSetRepairDoubleClick(bool b) noexcept { m_bRepairDbClick = b; }
+    EckInlineNdCe bool HeGetRepairDoubleClick() const noexcept { return m_bRepairDbClick; }
 
-    EckInlineCe void HeSetShowEmptyMainExtText(BOOL b) noexcept { m_bShowEmptyMainExtText = b; }
-    EckInlineNdCe BOOL HeGetShowEmptyMainExtText() const noexcept { return m_bShowEmptyMainExtText; }
+    EckInlineCe void HeSetShowEmptyMainExtText(bool b) noexcept { m_bShowEmptyMainExtText = b; }
+    EckInlineNdCe bool HeGetShowEmptyMainExtText() const noexcept { return m_bShowEmptyMainExtText; }
 
     EckInlineCe void HeSetBkColorAlpha(BYTE by) noexcept { m_byColorAlpha = by; }
     EckInlineNdCe BYTE HeGetBkColorAlpha() const noexcept { return m_byColorAlpha; }

@@ -77,9 +77,9 @@ EckInline HFONT EzFont(
     PCWSTR pszFontName,
     int iPoint,
     int iWeight = 400,
-    BOOL bItalic = FALSE,
-    BOOL bUnderline = FALSE,
-    BOOL bStrikeOut = FALSE,
+    bool bItalic = false,
+    bool bUnderline = false,
+    bool bStrikeOut = false,
     DWORD dwCharSet = DEFAULT_CHARSET) noexcept
 {
     return CreateFontW(-iPoint * iDpi / 72, 0, 0, 0, iWeight, bItalic, bUnderline,
@@ -87,19 +87,19 @@ EckInline HFONT EzFont(
 }
 
 // 函数枚举子窗口并悉数设置字体
-EckInline void ApplyWindowFont(HWND hWnd, HFONT hFont, BOOL bRedraw = FALSE) noexcept
+EckInline void ApplyWindowFont(HWND hWnd, HFONT hFont, bool bRedraw = false) noexcept
 {
     EnumChildWindows(hWnd, [](HWND hWnd, LPARAM lParam) -> BOOL
         {
-            SendMessageW(hWnd, WM_SETFONT, lParam, FALSE);
-            return TRUE;
+            SendMessageW(hWnd, WM_SETFONT, lParam, false);
+            return true;
         }, (LPARAM)hFont);
     if (bRedraw)
         RedrawWindow(hWnd, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
 }
 
 EckNfInlineNd HFONT ReCreateFontForDpiChanged(HFONT hFont,
-    int iDpiNew, int iDpiOld, BOOL bDeletePrevFont = FALSE) noexcept
+    int iDpiNew, int iDpiOld, bool bDeletePrevFont = false) noexcept
 {
     LOGFONTW lf;
     GetObjectW(hFont, sizeof(lf), &lf);
@@ -113,7 +113,7 @@ inline void ReCreateAndApplyFontForDpiChanged(
     HWND hWnd, _Inout_ HFONT& hFontVar, int iDpiNew, int iDpiOld) noexcept
 {
     auto hFont = ReCreateFontForDpiChanged(hFontVar, iDpiNew, iDpiOld);
-    ApplyWindowFont(hWnd, hFont, FALSE);
+    ApplyWindowFont(hWnd, hFont, false);
     std::swap(hFontVar, hFont);
     DeleteObject(hFont);
 }
@@ -198,11 +198,11 @@ inline ATOM RegisterWindowClass(PCWSTR pszClass,
 EckInline void BroadcastChildrenMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 {
     const MSG msg{ nullptr,uMsg,wParam,lParam };
-    EnumChildWindows(hWnd, [](HWND hWnd, LPARAM lParam)->BOOL
+    EnumChildWindows(hWnd, [](HWND hWnd, LPARAM lParam) noexcept -> BOOL
         {
             const auto pMsg = (const MSG*)lParam;
             SendMessageW(hWnd, pMsg->message, pMsg->wParam, pMsg->lParam);
-            return TRUE;
+            return true;
         }, (LPARAM)&msg);
 }
 
@@ -238,21 +238,22 @@ EckInline void EndPaint(HWND hWnd, WPARAM wParam, const PAINTSTRUCT& ps) noexcep
 #pragma endregion Wrapper
 
 #pragma region Color
-EckInline HRESULT EnableWindowNcDarkMode(HWND hWnd, BOOL bAllow) noexcept
+EckInline HRESULT EnableWindowNcDarkMode(HWND hWnd, bool bAllow) noexcept
 {
+    BOOL b{ bAllow };
     if (g_NtVersion.uBuild > WINVER_11_21H2)
-        return DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &bAllow, sizeof(bAllow));
+        return DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &b, sizeof(b));
     else
     {
-        WINDOWCOMPOSITIONATTRIBDATA t{ WCA_USEDARKMODECOLORS, &bAllow, sizeof(bAllow) };
+        WINDOWCOMPOSITIONATTRIBDATA t{ WCA_USEDARKMODECOLORS, &b, sizeof(b) };
         return SetWindowCompositionAttribute(hWnd, &t) ? S_OK : E_FAIL;
     }
 }
 
-EckInline BOOL IsColorSchemeChangeMessage(LPARAM lParam) noexcept
+EckInline bool IsColorSchemeChangeMessage(LPARAM lParam) noexcept
 {
     return CompareStringOrdinal((PCWCH)lParam, -1,
-        EckArgString(L"ImmersiveColorSet"), TRUE) == CSTR_EQUAL;
+        EckArgString(L"ImmersiveColorSet"), true) == CSTR_EQUAL;
 }
 
 EckInline void RefreshImmersiveColorStuff() noexcept
@@ -262,7 +263,7 @@ EckInline void RefreshImmersiveColorStuff() noexcept
 }
 
 // 取ItemsView前景背景色。返回当前是否为暗色
-inline BOOL GetItemsViewForeBackColor(_Out_ COLORREF& crText, _Out_ COLORREF& crBk) noexcept
+inline bool GetItemsViewForeBackColor(_Out_ COLORREF& crText, _Out_ COLORREF& crBk) noexcept
 {
     crBk = GetSysColor(COLOR_WINDOW);
     crText = GetSysColor(COLOR_WINDOWTEXT);
@@ -280,10 +281,10 @@ inline BOOL GetItemsViewForeBackColor(_Out_ COLORREF& crText, _Out_ COLORREF& cr
 
             CloseThemeData(hThemeIV);
         }
-        return TRUE;
+        return true;
     }
 #endif// !ECK_OPT_NO_DARKMODE
-    return FALSE;
+    return false;
 }
 #pragma endregion Color
 
@@ -366,8 +367,8 @@ EckInline void MsgOnDpiChanged(HWND hWnd, LPARAM lParam) noexcept
 // 一般WM_DPICHANGED会重新调整窗口尺寸到一个合适的值，但若存在特殊情况，
 // 即WM_DPICHANGED下尺寸不变时，将bRestoreSize设为TRUE
 // 截止到2025.10.4  26100.6725此问题仍然存在
-inline BOOL MsgOnSettingChangeFixDpiAwareV2(HWND hWnd, WPARAM wParam, LPARAM lParam,
-    BOOL bRestoreSize = FALSE) noexcept
+inline bool MsgOnSettingChangeFixDpiAwareV2(HWND hWnd, WPARAM wParam, LPARAM lParam,
+    bool bRestoreSize = false) noexcept
 {
     if (wParam == SPI_SETLOGICALDPIOVERRIDE /*since NT 6.2*/ &&
         g_NtVersion.uBuild > WINVER_11_23H2 /*经粗略测试Bug在此版本之后引入*/ &&
@@ -380,32 +381,33 @@ inline BOOL MsgOnSettingChangeFixDpiAwareV2(HWND hWnd, WPARAM wParam, LPARAM lPa
         if (bRestoreSize)
             SetWindowPos(hWnd, nullptr, 0, 0, rc.right - rc.left, rc.bottom - rc.top,
                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 
 // 提供对亮暗切换的默认处理。
 // 一般仅用于**主**顶级窗口，除了产生相关更新消息外还更新当前线程上下文的默认颜色
-inline BOOL MsgOnSettingChangeMainWindow(HWND hWnd, WPARAM wParam, LPARAM lParam,
-    BOOL bRefreshUxColorMode = FALSE) noexcept
+inline bool MsgOnSettingChangeMainWindow(
+    HWND hWnd, WPARAM wParam, LPARAM lParam,
+    bool bRefreshUxColorMode = false) noexcept
 {
     if (IsColorSchemeChangeMessage(lParam))
     {
         const auto ptc = PtcCurrent();
         if (bRefreshUxColorMode)
             RefreshImmersiveColorStuff();
-        if (ptc->bAppDarkMode != ShouldAppsUseDarkMode())
+        if ((BOOL)ptc->bAppDarkMode != ShouldAppsUseDarkMode())
         {
             ptc->UpdateDefaultColor();
             ptc->TwmEnableNcDarkMode(ShouldAppsUseDarkMode());
             BroadcastChildrenMessage(hWnd, WM_SETTINGCHANGE, wParam, lParam);
             ptc->TwmBroadcastThemeChanged();
         }
-        return TRUE;
+        return true;
     }
     else
-        return FALSE;
+        return false;
 }
 
 // 提供对WM_SYSCOLORCHANGE的默认处理。
@@ -435,8 +437,8 @@ EckInline void MsgOnSystemColorChange(HWND hWnd, WPARAM wParam, LPARAM lParam) n
 inline LRESULT MsgOnControlColorXxx(
     WPARAM wParam,
     LPARAM lParam,
-    BOOL& bHandled,
-    BOOL bColorDisableEdit = TRUE,
+    bool& bHandled,
+    bool bColorDisableEdit = true,
     COLORREF crBk = CLR_DEFAULT,
     COLORREF crText = CLR_DEFAULT) noexcept
 {
@@ -456,7 +458,7 @@ inline LRESULT MsgOnControlColorXxx(
     case WM_CTLCOLOREDIT:
     case WM_CTLCOLORLISTBOX:
     {
-        bHandled = TRUE;
+        bHandled = true;
         const auto* const ptc = PtcCurrent();
         SetTextColor((HDC)wParam, (crText != CLR_DEFAULT) ? crText : ptc->crDefText);
         SetBkColor((HDC)wParam, (crBk != CLR_DEFAULT) ? crBk : ptc->crDefBkg);
@@ -465,7 +467,7 @@ inline LRESULT MsgOnControlColorXxx(
     }
     break;
     }
-    bHandled = FALSE;
+    bHandled = false;
     return 0;
 }
 #pragma endregion MessageHandler
@@ -476,15 +478,15 @@ inline HWND GetThreadFirstWindow(UINT uTid) noexcept
     HWND hWnd = GetActiveWindow();
     if (!hWnd)
         return hWnd;
-    EnumThreadWindows(uTid, [](HWND hWnd, LPARAM lParam)->BOOL
+    EnumThreadWindows(uTid, [](HWND hWnd, LPARAM lParam) noexcept -> BOOL
         {
             if (IsWindowVisible(hWnd))
             {
                 *(HWND*)lParam = hWnd;
-                return TRUE;
+                return true;
             }
             else
-                return FALSE;
+                return false;
         }, (LPARAM)&hWnd);
     return hWnd;
 }
@@ -516,7 +518,7 @@ inline HWND GetSafeOwner(HWND hParent, _Out_opt_ HWND* phWndTop) noexcept
         if (hWndTop && IsWindowEnabled(hWndTop) && hWndTop != hWnd)
         {
             *phWndTop = hWndTop;
-            EnableWindow(hWndTop, FALSE);
+            EnableWindow(hWndTop, false);
         }
         else
             *phWndTop = nullptr;
@@ -538,7 +540,7 @@ inline HWND GetSafeOwner(HWND hParent, _Out_opt_ HWND* phWndTop) noexcept
 /// <param name="dy">y方向的阈值，若为负，则使用GetSystemMetrics(SM_CYDRAG)</param>
 /// <param name="iDpi">DPI，若为负，则自动获取</param>
 /// <returns>移动距离超出阈值返回TRUE，此时调用方可执行拖放操作；否则返回FALSE</returns>
-inline BOOL IsMouseMovedBeforeDragging(
+inline bool IsMouseMovedBeforeDragging(
     HWND hWnd,
     int x, int y,
     int dx = -1, int dy = -1,
@@ -567,12 +569,12 @@ inline BOOL IsMouseMovedBeforeDragging(
                 ReleaseCapture();
                 TranslateMessage(&msg);
                 DispatchMessageW(&msg);
-                return FALSE;
+                return false;
             case WM_MOUSEMOVE:
                 if (Abs(x - msg.pt.x) >= dx && Abs(y - msg.pt.y) >= dx)
                 {
                     ReleaseCapture();
-                    return TRUE;
+                    return true;
                 }
                 [[fallthrough]];
             default:
@@ -586,21 +588,21 @@ inline BOOL IsMouseMovedBeforeDragging(
             WaitMessage();
     }
     ReleaseCapture();
-    return FALSE;
+    return false;
 }
 
 inline void DoEvents() noexcept
 {
-    MSG msg;
-    while (PeekMessageW(&msg, nullptr, 0u, 0u, PM_REMOVE))
+    MSG Msg;
+    while (PeekMessageW(&Msg, nullptr, 0u, 0u, PM_REMOVE))
     {
-        if (msg.message == WM_QUIT)
+        if (Msg.message == WM_QUIT)
         {
-            PostQuitMessage((int)msg.wParam);
+            PostQuitMessage((int)Msg.wParam);
             return;
         }
-        TranslateMessage(&msg);
-        DispatchMessageW(&msg);
+        TranslateMessage(&Msg);
+        DispatchMessageW(&Msg);
     }
 }
 #pragma endregion Thread
@@ -633,7 +635,7 @@ inline HWND GetWindowFromPoint(POINT pt, UINT uFlags = CWP_SKIPINVISIBLE) noexce
 /// <param name="hWnd">窗口句柄</param>
 /// <param name="rcClient">客户区尺寸，其中left和top总为0</param>
 /// <returns>成功返回TRUE，失败返回FALSE</returns>
-inline BOOL GetWindowClientRect(HWND hWnd, _Out_ RECT& rcClient) noexcept
+inline bool GetWindowClientRect(HWND hWnd, _Out_ RECT& rcClient) noexcept
 {
     const int iDpi = GetDpi(hWnd);
     RECT rcMainClient;
@@ -665,13 +667,13 @@ inline BOOL GetWindowClientRect(HWND hWnd, _Out_ RECT& rcClient) noexcept
         rcMainClient.right -= (rcNcOnly.right - rcNcOnly.left);
         rcMainClient.bottom -= (rcNcOnly.bottom - rcNcOnly.top);
         rcClient = rcMainClient;
-        return TRUE;
+        return true;
     }
     else
     {
     Failed:
         rcClient = {};
-        return FALSE;
+        return false;
     }
 }
 #pragma endregion Window
@@ -691,7 +693,8 @@ EckInlineNd HMONITOR MonitorFromRectByWorkArea(const RECT& rc,
     }
     Ctx{ rc,INT_MAX };
 
-    EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC, RECT*, LPARAM lParam)->BOOL
+    EnumDisplayMonitors(nullptr, nullptr,
+        [](HMONITOR hMonitor, HDC, RECT*, LPARAM lParam) noexcept -> BOOL
         {
             const auto pCtx = (CTX*)lParam;
 
@@ -722,7 +725,7 @@ EckInlineNd HMONITOR MonitorFromRectByWorkArea(const RECT& rc,
                 pCtx->iMinDistance = d;
                 pCtx->hMonNearest = hMonitor;
             }
-            return TRUE;
+            return true;
         }, (LPARAM)&Ctx);
 
     if (phMonMain)
@@ -735,7 +738,8 @@ EckInlineNd HMONITOR MonitorFromRectByWorkArea(const RECT& rc,
 EckInline HMONITOR GetPrimaryMonitor() noexcept
 {
     HMONITOR hMonitor{};
-    EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hMonitor, HDC, RECT*, LPARAM lParam)->BOOL
+    EnumDisplayMonitors(nullptr, nullptr,
+        [](HMONITOR hMonitor, HDC, RECT*, LPARAM lParam) noexcept -> BOOL
         {
             MONITORINFO mi;
             mi.cbSize = sizeof(mi);
@@ -743,10 +747,10 @@ EckInline HMONITOR GetPrimaryMonitor() noexcept
             if (IsBitSet(mi.dwFlags, MONITORINFOF_PRIMARY))
             {
                 *(HMONITOR*)lParam = hMonitor;
-                return FALSE;
+                return false;
             }
             else
-                return TRUE;
+                return true;
         }, (LPARAM)&hMonitor);
     return hMonitor;
 }
@@ -776,7 +780,7 @@ inline HMONITOR GetOwnerMonitor(HWND hWnd) noexcept
 /// <param name="bEnsureInMonitor">是否确保在显示器内</param>
 /// <returns>子窗口左上角坐标，相对屏幕</returns>
 inline POINT CalculateCenterWindowPosition(HWND hParent, int cx, int cy,
-    BOOL bEnsureInMonitor = TRUE) noexcept
+    bool bEnsureInMonitor = true) noexcept
 {
     if (hParent)
     {
@@ -814,7 +818,7 @@ inline POINT CalculateCenterWindowPosition(HWND hParent, int cx, int cy,
 #pragma endregion Monitor
 
 #pragma region Input
-inline LRESULT GenerateCharMessage(HWND hWnd, WCHAR ch, BOOL bExtended = FALSE) noexcept
+inline LRESULT GenerateCharMessage(HWND hWnd, WCHAR ch, bool bExtended = false) noexcept
 {
     switch (ch)
     {
@@ -848,11 +852,15 @@ inline LRESULT GenerateCharMessage(HWND hWnd, WCHAR ch, BOOL bExtended = FALSE) 
         break;
     }
     const auto uScanCode = MapVirtualKeyW(ch, MAPVK_VK_TO_VSC);
-    return PostMessageW(hWnd, WM_CHAR, ch, MakeKeyStrokeFlag(1, uScanCode, bExtended, FALSE, FALSE, FALSE));
+    return PostMessageW(hWnd, WM_CHAR, ch, MakeKeyStrokeFlag(1, uScanCode, bExtended, false, false, false));
 }
 
-inline void GenerateCharMessage(HWND hWnd, PCWSTR pszText, int cchText = -1,
-    BOOL bExtended = FALSE, BOOL bReplaceEndOfLine = TRUE) noexcept
+inline void GenerateCharMessage(
+    HWND hWnd,
+    _In_reads_or_z_(cchText) PCWSTR pszText,
+    int cchText = -1,
+    bool bExtended = false,
+    bool bReplaceEndOfLine = true) noexcept
 {
     if (cchText < 0)
         cchText = (int)wcslen(pszText);
@@ -881,18 +889,21 @@ enum class KeyType
     Press,
 };
 
-inline void GenerateKeyMessage(HWND hWnd, UINT Vk,
-    KeyType eType, BOOL bExtended = FALSE) noexcept
+inline void GenerateKeyMessage(
+    HWND hWnd,
+    UINT Vk,
+    KeyType eType,
+    bool bExtended = false) noexcept
 {
     switch (eType)
     {
     case KeyType::Down:
         PostMessageW(hWnd, bExtended ? WM_SYSKEYDOWN : WM_KEYDOWN, Vk,
-            MakeKeyStrokeFlag(1, MapVirtualKeyW(Vk, MAPVK_VK_TO_VSC), bExtended, FALSE, FALSE, FALSE));
+            MakeKeyStrokeFlag(1, MapVirtualKeyW(Vk, MAPVK_VK_TO_VSC), bExtended, false, false, false));
         break;
     case KeyType::Up:
         PostMessageW(hWnd, bExtended ? WM_SYSKEYUP : WM_KEYUP, Vk,
-            MakeKeyStrokeFlag(1, MapVirtualKeyW(Vk, MAPVK_VK_TO_VSC), bExtended, FALSE, TRUE, TRUE));
+            MakeKeyStrokeFlag(1, MapVirtualKeyW(Vk, MAPVK_VK_TO_VSC), bExtended, false, true, true));
         break;
     case KeyType::Press:
         GenerateKeyMessage(hWnd, Vk, KeyType::Down, bExtended);
@@ -903,7 +914,7 @@ inline void GenerateKeyMessage(HWND hWnd, UINT Vk,
     }
 }
 
-constexpr BOOL IsInputMessage(UINT uMsg) noexcept
+constexpr bool IsInputMessage(UINT uMsg) noexcept
 {
     return
         (uMsg >= WM_MOUSEFIRST && uMsg <= WM_MOUSELAST) ||
@@ -945,7 +956,7 @@ inline SIZE GetCharDimension(HWND hWnd, HFONT hFont) noexcept
 }
 
 // 根据位置判断窗口是否应显示大小调整控件。该函数无视被判断窗口的样式
-inline BOOL ShouldWindowDisplaySizeGrip(HWND hWnd, int iDpi = -1) noexcept
+inline bool ShouldWindowDisplaySizeGrip(HWND hWnd, int iDpi = -1) noexcept
 {
     const auto hDesktop = GetDesktopWindow();
     if (iDpi < 0)
@@ -960,21 +971,23 @@ inline BOOL ShouldWindowDisplaySizeGrip(HWND hWnd, int iDpi = -1) noexcept
         if (IsBitSet(dwStyle, WS_SIZEBOX))// 向上找到第一个可调窗口
         {
             if (IsBitSet(dwStyle, WS_MAXIMIZE))
-                return FALSE;// 最大化时不应显示
+                return false;// 最大化时不应显示
             GetWindowRect(hWnd, &rcTmp);
             if (rc.right < rcTmp.right || rc.bottom < rcTmp.bottom)
-                return FALSE;// 没有贴近右下角时不应显示
-            return TRUE;
+                return false;// 没有贴近右下角时不应显示
+            return true;
         }
         else
             hWnd = GetParent(hWnd);
     }
-    return FALSE;
+    return false;
 }
 
 #if !ECK_OPT_NO_DWRITE
-inline HRESULT MatchLogFontFromFamilyName(PCWSTR pszFamilyName,
-    _Out_ LOGFONTW& lf, IDWriteFontCollection* pFontCollection = nullptr) noexcept
+inline HRESULT MatchLogFontFromFamilyName(
+    PCWSTR pszFamilyName,
+    _Out_ LOGFONTW& lf,
+    IDWriteFontCollection* pFontCollection = nullptr) noexcept
 {
     HRESULT hr;
     ComPtr<IDWriteFontCollection> pFontCollection_;
@@ -983,7 +996,7 @@ inline HRESULT MatchLogFontFromFamilyName(PCWSTR pszFamilyName,
         if (!g_pDwFactory)
             return HRESULT_FROM_WIN32(ERROR_NOT_READY);
         g_pDwFactory->GetSystemFontCollection(
-            &pFontCollection_, FALSE);
+            &pFontCollection_, false);
         pFontCollection = pFontCollection_.Get();
     }
     UINT32 idxFamily;
@@ -1023,17 +1036,17 @@ FallbackToGdi:;
     struct PARAM
     {
         LOGFONTW* plf;
-        BOOL bFound;
+        bool bFound;
     } Param{ &lf };
 
     const auto hDC = GetDC(nullptr);
     EnumFontFamiliesExW(hDC, &lf,
-        [](const LOGFONTW* plf, const TEXTMETRICW*, DWORD, LPARAM lParam) -> int
+        [](const LOGFONTW* plf, const TEXTMETRICW*, DWORD, LPARAM lParam) noexcept -> int
         {
             const auto pParam = (PARAM*)lParam;
             *pParam->plf = *plf;
-            pParam->bFound = TRUE;
-            return FALSE;
+            pParam->bFound = true;
+            return false;
         }, (LPARAM)&Param, 0);
     ReleaseDC(nullptr, hDC);
     if (Param.bFound)
@@ -1045,7 +1058,7 @@ FallbackToGdi:;
 #pragma endregion Others
 
 #pragma region SystemFont
-EckInline BOOL DftGetLogFont(_Out_ LOGFONTW& lf, int iDpi = 96) noexcept
+EckInline bool DftGetLogFont(_Out_ LOGFONTW& lf, int iDpi = 96) noexcept
 {
     return DaSystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(lf), &lf, 0, iDpi);
 }

@@ -239,17 +239,17 @@ inline HRESULT GetCpuInformation(CPUINFO& ci) noexcept
 #endif// __arm__
 }
 
-inline BOOL GetDesktopPartHandle(
+inline bool GetDesktopPartHandle(
     _Out_ HWND& hPmOrWorkerW,
     _Out_ HWND& hDefView,
     _Out_ HWND& hLV) noexcept
 {
     hDefView = hLV = nullptr;
     if (!(hPmOrWorkerW = FindWindowW(L"Progman", L"Program Manager")))
-        return FALSE;
+        return false;
     if (hDefView = FindWindowExW(hPmOrWorkerW, nullptr, L"SHELLDLL_DefView", nullptr))
         if (hLV = FindWindowExW(hDefView, nullptr, L"SysListView32", nullptr))
-            return TRUE;
+            return true;
     hPmOrWorkerW = nullptr;
     EckCounterNV(1024)
     {
@@ -258,25 +258,25 @@ inline BOOL GetDesktopPartHandle(
         if (!(hDefView = FindWindowExW(hPmOrWorkerW, nullptr, L"SHELLDLL_DefView", nullptr)))
             continue;
         if (hLV = FindWindowExW(hDefView, nullptr, L"SysListView32", nullptr))
-            return TRUE;
+            return true;
     }
-    return FALSE;
+    return false;
 }
 
-inline BOOL ShowDesktop(BOOL bShow, BOOL bIgnoreProgman = TRUE) noexcept
+inline bool ShowDesktop(bool bShow, bool bIgnoreProgman = true) noexcept
 {
     HWND hPmOrWorkerW, hDefView, hLV;
     if (!GetDesktopPartHandle(hPmOrWorkerW, hDefView, hLV))
-        return FALSE;
+        return false;
     const int sw = (bShow ? SW_SHOWNOACTIVATE : SW_HIDE);
     ShowWindowAsync(hLV, sw);
     ShowWindowAsync(hDefView, sw);
     if (!bIgnoreProgman)
         ShowWindowAsync(hPmOrWorkerW, sw);
-    return TRUE;
+    return true;
 }
 
-inline BOOL GetTaskBarPartHandle(
+inline bool GetTaskBarPartHandle(
     _Out_ HWND& hTaskBar,
     _Out_writes_opt_(*pcSecondary) HWND* phSecondary = nullptr,
     _Inout_opt_ size_t* pcSecondary = nullptr) noexcept
@@ -285,7 +285,7 @@ inline BOOL GetTaskBarPartHandle(
     if (!hTaskBar)
     {
         if (pcSecondary) *pcSecondary = 0u;
-        return FALSE;
+        return false;
     }
     if (phSecondary && pcSecondary)
     {
@@ -300,10 +300,10 @@ inline BOOL GetTaskBarPartHandle(
         }
         *pcSecondary = c;
     }
-    return TRUE;
+    return true;
 }
 
-inline BOOL ShowTaskBar(BOOL bShow, BOOL bIgnoreSecondary = FALSE) noexcept
+inline bool ShowTaskBar(bool bShow, bool bIgnoreSecondary = false) noexcept
 {
     HWND hTaskBar, hSecondary[16];
     size_t cSecondary = ARRAYSIZE(hSecondary);
@@ -311,7 +311,7 @@ inline BOOL ShowTaskBar(BOOL bShow, BOOL bIgnoreSecondary = FALSE) noexcept
         hTaskBar,
         hSecondary,
         bIgnoreSecondary ? nullptr : &cSecondary))
-        return FALSE;
+        return false;
     const int sw = (bShow ? SW_SHOWNOACTIVATE : SW_HIDE);
     if (bIgnoreSecondary)
         ShowWindowAsync(hTaskBar, sw);
@@ -321,7 +321,7 @@ inline BOOL ShowTaskBar(BOOL bShow, BOOL bIgnoreSecondary = FALSE) noexcept
         EckCounter(cSecondary, i)
             ShowWindow(hSecondary[i], sw);
     }
-    return TRUE;
+    return true;
 }
 
 struct FILEVERINFO
@@ -340,17 +340,17 @@ struct FILEVERINFO
     CStringW SpecialBuild;
 };
 
-inline BOOL GetFileVersionInformation(
+inline bool GetFileVersionInformation(
     _In_z_ PCWSTR pszFile,
     Eck_Out_buffer_ FILEVERINFO& fvi) noexcept
 {
     const DWORD cbBuf = GetFileVersionInfoSizeW(pszFile, nullptr);
     if (!cbBuf)
-        return FALSE;
+        return false;
     const UniquePtr<DelMA<void>> pBuf{ malloc(cbBuf) };
     EckCheckPointer(pBuf.get());
     if (!GetFileVersionInfoW(pszFile, 0, cbBuf, pBuf.get()))
-        return FALSE;
+        return false;
 
     struct
     {
@@ -363,7 +363,7 @@ inline BOOL GetFileVersionInformation(
         LR"(\VarFileInfo\Translation)",
         (void**)&pLangCp,
         &cbLangCp))
-        return FALSE;
+        return false;
 
     WCHAR szLangCp[9];
     _swprintf(szLangCp, L"%04X%04X", pLangCp[0].wLanguage, pLangCp[0].wCodePage);
@@ -426,10 +426,10 @@ inline BOOL GetFileVersionInformation(
     EckCopyConstStringW(p, L"SpecialBuild");
     VerQueryValueW(pBuf.get(), szSub, &pStr, &cchStr);
     fvi.SpecialBuild.Assign((PCWSTR)pStr, (int)cchStr);
-    return TRUE;
+    return true;
 }
 
-inline void InputChar(WCHAR ch, BOOL bReplaceEndOfLine = TRUE) noexcept
+inline void InputChar(WCHAR ch, bool bReplaceEndOfLine = true) noexcept
 {
     INPUT input[2]{ {.type = INPUT_KEYBOARD } };
     if (bReplaceEndOfLine && (ch == L'\r' || ch == L'\n'))
@@ -448,7 +448,7 @@ inline void InputChar(WCHAR ch, BOOL bReplaceEndOfLine = TRUE) noexcept
 inline void InputChar(
     _In_reads_or_z_(cchText) PCWSTR pszText,
     int cchText = -1,
-    BOOL bReplaceEndOfLine = TRUE) noexcept
+    bool bReplaceEndOfLine = true) noexcept
 {
     if (cchText < 0)
         cchText = (int)TcsLength(pszText);
@@ -479,7 +479,7 @@ inline NTSTATUS RestartExplorer() noexcept
     GetWindowThreadProcessId(hWnd, &dwProcessId);
     NTSTATUS nts;
     const auto hProcess = NaOpenProcess(
-        PROCESS_TERMINATE, FALSE, dwProcessId, &nts);
+        PROCESS_TERMINATE, false, dwProcessId, &nts);
     if (hProcess)
     {
         NtTerminateProcess(hProcess, 2);

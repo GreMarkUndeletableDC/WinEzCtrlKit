@@ -18,7 +18,7 @@ public:
     struct DRAW_SHAPE
     {
         Shape eShape;
-        BOOLEAN bHollow;
+        bool bHollow;
         float mgHollow;
         ID2D1Brush* pBrush;
         union
@@ -455,7 +455,7 @@ public:
         return S_OK;
     }
 
-    EckInlineNdCe BOOL IsValid() const noexcept { return !!m_pDC; }
+    EckInlineNdCe bool IsValid() const noexcept { return !!m_pDC; }
 
     EckInlineNdCe D2D1_SIZE_U GetCachePixelSize() const noexcept { return m_SizeCachePixel; }
     EckInlineNdCe D2D1_SIZE_F GetCacheLogicalSize() const noexcept { return m_SizeCacheLogical; }

@@ -8,15 +8,15 @@ TVS_EX_FADEINOUTEXPANDOS | TVS_EX_PARTIALCHECKBOXES | TVS_EX_EXCLUSIONCHECKBOXES
 TVS_EX_DIMMEDCHECKBOXES | TVS_EX_DRAWIMAGEASYNC;
 
 #define ECK_W_TVE_STYLE(Name, Style)                    \
-    ECKPROP(StyleGet##Name, StyleSet##Name) BOOL Name;  \
-    BOOL StyleGet##Name() const noexcept                \
+    ECKPROP(StyleGet##Name, StyleSet##Name) bool Name;  \
+    bool StyleGet##Name() const noexcept                \
     {                                                   \
         if constexpr (Style == 0)                       \
             return !GetTVExtendStyle();                 \
         else                                            \
             return IsBitSet(GetTVExtendStyle(), Style); \
     }                                                   \
-    void StyleSet##Name(BOOL b) const noexcept          \
+    void StyleSet##Name(bool b) const noexcept          \
     {                                                   \
         SetTVExtendStyle(b ? Style : 0, Style);         \
     }
@@ -55,9 +55,9 @@ public:
     ECK_W_TVE_STYLE(PartialCheckboxes, TVS_EX_PARTIALCHECKBOXES);
     ECK_W_TVE_STYLE(RichTooltip, TVS_EX_RICHTOOLTIP);
 protected:
-    BOOL m_bAutoDarkMode{ TRUE };
+    bool m_bAutoDarkMode{ true };
 public:
-    EckInlineCe void SetAutoDarkMode(BOOL b) { m_bAutoDarkMode = b; }
+    EckInlineCe void SetAutoDarkMode(bool b) { m_bAutoDarkMode = b; }
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
     {
@@ -85,9 +85,9 @@ public:
         return (HIMAGELIST)SendMessageW(TVM_CREATEDRAGIMAGE, 0, (LPARAM)hItem);
     }
 
-    EckInline BOOL DeleteItem(HTREEITEM hItem) const noexcept
+    EckInline bool DeleteItem(HTREEITEM hItem) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_DELETEITEM, 0, (LPARAM)hItem);
+        return (bool)SendMessageW(TVM_DELETEITEM, 0, (LPARAM)hItem);
     }
 
     /// <summary>
@@ -101,9 +101,9 @@ public:
         return (HWND)SendMessageW(TVM_EDITLABELW, 0, (LPARAM)hItem);
     }
 
-    EckInline BOOL EndEditLabel(BOOL bSave) const noexcept
+    EckInline bool EndEditLabel(bool bSave) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_ENDEDITLABELNOW, bSave, 0);
+        return (bool)SendMessageW(TVM_ENDEDITLABELNOW, bSave, 0);
     }
 
     /// <summary>
@@ -112,12 +112,12 @@ public:
     /// <param name="hItem">项目</param>
     /// <param name="bTop">是否尽可能将项目滚动到顶部</param>
     /// <returns>如果滚动视图并且未展开任何项目则返回TRUE，否则返回FALSE</returns>
-    EckInline BOOL EnsureVisible(HTREEITEM hItem, BOOL bTop = FALSE) const noexcept
+    EckInline bool EnsureVisible(HTREEITEM hItem, bool bTop = false) const noexcept
     {
         if (bTop)
-            return (BOOL)SendMessageW(TVM_SELECTITEM, TVGN_FIRSTVISIBLE, (LPARAM)hItem);
+            return (bool)SendMessageW(TVM_SELECTITEM, TVGN_FIRSTVISIBLE, (LPARAM)hItem);
         else
-            return (BOOL)SendMessageW(TVM_ENSUREVISIBLE, 0, (LPARAM)hItem);
+            return (bool)SendMessageW(TVM_ENSUREVISIBLE, 0, (LPARAM)hItem);
     }
 
     /// <summary>
@@ -132,9 +132,9 @@ public:
     /// TVE_TOGGLE - 反转折叠状态
     /// </param>
     /// <returns>成功返回TRUE</returns>
-    EckInline BOOL Expand(HTREEITEM hItem, UINT uOp) const noexcept
+    EckInline bool Expand(HTREEITEM hItem, UINT uOp) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_EXPAND, uOp, (LPARAM)hItem);
+        return (bool)SendMessageW(TVM_EXPAND, uOp, (LPARAM)hItem);
     }
 
     EckInline COLORREF GetBackgroundColor() const noexcept
@@ -198,9 +198,9 @@ public:
         return (int)SendMessageW(TVM_GETISEARCHSTRINGW, 0, (LPARAM)pszBuf);
     }
 
-    EckInline BOOL GetItem(_Inout_ TVITEMEXW* ptvi) const noexcept
+    EckInline bool GetItem(_Inout_ TVITEMEXW* ptvi) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_GETITEMW, 0, (LPARAM)ptvi);
+        return (bool)SendMessageW(TVM_GETITEMW, 0, (LPARAM)ptvi);
     }
 
     EckInline int GetItemHeight() const noexcept
@@ -215,11 +215,11 @@ public:
     /// <param name="prc">接收矩形</param>
     /// <param name="bOnlyText">是否仅文本尺寸</param>
     /// <returns>如果项目可见且矩形检索成功则返回TRUE，否则返回FALSE</returns>
-    EckInline BOOL GetItemRect(HTREEITEM hItem,
-        _Out_ RECT* prc, BOOL bOnlyText = FALSE) const noexcept
+    EckInline bool GetItemRect(HTREEITEM hItem,
+        _Out_ RECT* prc, bool bOnlyText = false) const noexcept
     {
         *(HTREEITEM*)prc = hItem;
-        return (BOOL)SendMessageW(TVM_GETITEMRECT, bOnlyText, (LPARAM)prc);
+        return (bool)SendMessageW(TVM_GETITEMRECT, bOnlyText, (LPARAM)prc);
     }
 
     EckInline UINT GetItemState(HTREEITEM hItem, UINT uMask) const noexcept
@@ -364,15 +364,15 @@ public:
     /// <param name="hItem">项目</param>
     /// <param name="bNoSingleExpand">选择单个项时不展开子项</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SelectItem(HTREEITEM hItem, BOOL bNoSingleExpand = FALSE) const noexcept
+    EckInline bool SelectItem(HTREEITEM hItem, bool bNoSingleExpand = false) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_SELECTITEM, TVGN_CARET |
+        return (bool)SendMessageW(TVM_SELECTITEM, TVGN_CARET |
             (bNoSingleExpand ? TVSI_NOSINGLEEXPAND : 0), (LPARAM)hItem);
     }
 
-    EckInline BOOL SelectDropTargetItem(HTREEITEM hItem) const noexcept
+    EckInline bool SelectDropTargetItem(HTREEITEM hItem) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_SELECTITEM, TVGN_DROPHILITE, (LPARAM)hItem);
+        return (bool)SendMessageW(TVM_SELECTITEM, TVGN_DROPHILITE, (LPARAM)hItem);
     }
 
     EckInline void SetAutoScrollInformation(int iPixelPreSecond, int iRedrawGap) const noexcept
@@ -409,9 +409,9 @@ public:
         SendMessageW(TVM_SETINDENT, iIndent, 0);
     }
 
-    EckInline BOOL SetInsertMark(HTREEITEM hItem, BOOL bInsertAfterItem = TRUE) const noexcept
+    EckInline bool SetInsertMark(HTREEITEM hItem, bool bInsertAfterItem = true) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_SETINSERTMARK, bInsertAfterItem, (LPARAM)hItem);
+        return (bool)SendMessageW(TVM_SETINSERTMARK, bInsertAfterItem, (LPARAM)hItem);
     }
 
     EckInline COLORREF SetInsertMarkColor(COLORREF cr) const noexcept
@@ -419,9 +419,9 @@ public:
         return (COLORREF)SendMessageW(TVM_SETINSERTMARKCOLOR, 0, cr);
     }
 
-    EckInline BOOL SetItem(_Inout_ TVITEMEXW* ptvi) const noexcept
+    EckInline bool SetItem(_Inout_ TVITEMEXW* ptvi) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_SETITEM, 0, (LPARAM)ptvi);
+        return (bool)SendMessageW(TVM_SETITEM, 0, (LPARAM)ptvi);
     }
 
     /// <summary>
@@ -465,9 +465,9 @@ public:
     /// <param name="hItem">项目</param>
     /// <param name="bAllChildren">是否包含所有子项，若为FALSE则指排序hItem的直接子项</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SortChildren(HTREEITEM hItem, BOOL bAllChildren = TRUE) const noexcept
+    EckInline bool SortChildren(HTREEITEM hItem, bool bAllChildren = true) const noexcept
     {
-        return (BOOL)SendMessageW(TVM_SORTCHILDREN, bAllChildren, (LPARAM)hItem);
+        return (bool)SendMessageW(TVM_SORTCHILDREN, bAllChildren, (LPARAM)hItem);
     }
 
     /// <summary>
@@ -481,14 +481,14 @@ public:
     /// </param>
     /// <param name="lParam">自定义数值</param>
     /// <returns>成功返回TRUE，失败返回FALSE</returns>
-    EckInline BOOL SortChildren(HTREEITEM hItem,
+    EckInline bool SortChildren(HTREEITEM hItem,
         _In_ PFNTVCOMPARE pfnCompare, LPARAM lParam) const noexcept
     {
         TVSORTCB tvscb;
         tvscb.hParent = hItem;
         tvscb.lpfnCompare = pfnCompare;
         tvscb.lParam = lParam;
-        return (BOOL)SendMessageW(TVM_SORTCHILDRENCB, 0, (LPARAM)&tvscb);
+        return (bool)SendMessageW(TVM_SORTCHILDRENCB, 0, (LPARAM)&tvscb);
     }
 };
 ECK_NAMESPACE_END

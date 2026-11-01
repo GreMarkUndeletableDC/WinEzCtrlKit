@@ -165,32 +165,37 @@ EckInline const auto* UserSharedData() noexcept { return USER_SHARED_DATA; }
 EckInline NTSTATUS WaitObjectMs(HANDLE hObject, LONGLONG ms) noexcept
 {
     ms *= -10000ll;
-    return NtWaitForSingleObject(hObject, FALSE, (LARGE_INTEGER*)&ms);
+    return NtWaitForSingleObject(hObject, false, (LARGE_INTEGER*)&ms);
 }
 
 EckInline NTSTATUS WaitObject(HANDLE hObject, _In_opt_ const LARGE_INTEGER* pli = nullptr) noexcept
 {
-    return NtWaitForSingleObject(hObject, FALSE, (LARGE_INTEGER*)pli);
+    return NtWaitForSingleObject(hObject, false, (LARGE_INTEGER*)pli);
 }
 
-EckInline int GetKeyNameTextByVk(WORD wVk, PWSTR pszBuf, int cchBuf,
-    BOOL bExtended = FALSE, BOOL bDontCare = FALSE) noexcept
+EckInline int GetKeyNameTextByVk(
+    WORD wVk,
+    _Out_writes_(cchBuf) PWSTR pszBuf,
+    int cchBuf,
+    bool bExtended = false,
+    bool bDontCare = false) noexcept
 {
-    return GetKeyNameTextW((MapVirtualKeyW(wVk, MAPVK_VK_TO_VSC) << 16) |
-        ((!!bExtended) << 24) |
-        ((!!bDontCare) << 25),
-        pszBuf, cchBuf);
+    const LPARAM lParam =
+        (MapVirtualKeyW(wVk, MAPVK_VK_TO_VSC) << 16) |
+        (int(!!bExtended) << 24) |
+        (int(!!bDontCare) << 25);
+    return GetKeyNameTextW(lParam, pszBuf, cchBuf);
 }
 
-inline BOOL GetUserLocaleName(CStringW& rsLocaleName) noexcept
+inline bool GetUserLocaleName(CStringW& rsLocaleName) noexcept
 {
     WCHAR sz[LOCALE_NAME_MAX_LENGTH];
     const auto r = GetUserDefaultLocaleName(sz, ARRAYSIZE(sz));
     if (r <= 1)
-        return FALSE;
+        return false;
     rsLocaleName.ReSize(r - 1);
     TcsCopyLengthEnd(rsLocaleName.Data(), sz, r - 1);
-    return TRUE;
+    return true;
 }
 #pragma endregion 包装器
 

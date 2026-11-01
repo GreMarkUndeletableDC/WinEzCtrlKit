@@ -21,7 +21,7 @@ private:
     /// <param name="idxItem">项目索引</param>
     /// <param name="bFound">是否在返回的区间内</param>
     /// <returns>搜寻结束时的迭代器，若未找到，此迭代器指向第一个大于idxItem的区间</returns>
-    constexpr auto FindRange(T idxItem, _Out_ BOOL& bFound) noexcept
+    constexpr auto FindRange(T idxItem, _Out_ bool& bFound) noexcept
     {
         const auto it = std::lower_bound(m_vRange.begin(), m_vRange.end(), idxItem,
             [](RANGE r, T idx) { return r.idxEnd < idx; });
@@ -29,7 +29,7 @@ private:
         return it;
     }
 
-    constexpr auto FindRange(T idxItem, _Out_ BOOL& bFound) const noexcept
+    constexpr auto FindRange(T idxItem, _Out_ bool& bFound) const noexcept
     {
         const auto it = std::lower_bound(m_vRange.begin(), m_vRange.end(), idxItem,
             [](RANGE r, T idx) { return r.idxEnd < idx; });
@@ -181,7 +181,7 @@ public:
     constexpr void InsertItem(T idxItem) noexcept
     {
         EckAssert(idxItem >= 0);
-        BOOL bFound;
+        bool bFound;
         const auto it = FindRange(idxItem, bFound);
         typename std::vector<RANGE>::iterator itIncBegin;
         if (bFound)
@@ -210,12 +210,12 @@ public:
     constexpr void RemoveItem(T idxItem) noexcept
     {
         EckAssert(idxItem >= 0);
-        BOOL bFound;
+        bool bFound;
         const auto it = FindRange(idxItem, bFound);
         if (it == m_vRange.end())
             return;
         typename std::vector<RANGE>::iterator itDecBegin;
-        BOOL bEraseIt;
+        bool bEraseIt;
         if (bFound)
         {
             --it->idxEnd;
@@ -225,14 +225,14 @@ public:
         else
         {
             itDecBegin = it;
-            bEraseIt = FALSE;
+            bEraseIt = false;
             if (it != m_vRange.begin())
             {
                 if (idxItem == (it - 1)->idxEnd + 1 &&
                     idxItem == it->idxBegin - 1)
                 {
                     (it - 1)->idxEnd = it->idxEnd - 1;
-                    bEraseIt = TRUE;
+                    bEraseIt = true;
                     ++itDecBegin;
                 }
             }
@@ -258,7 +258,7 @@ public:
         T idxVisibleBegin, T idxVisibleEnd,
         _Out_ T& idxChangedBegin, _Out_ T& idxChangedEnd) noexcept
     {
-        BOOL bFound;
+        bool bFound;
         auto it = FindRange(idxVisibleBegin, bFound);
         if (it == m_vRange.end())
             idxChangedBegin = idxChangedEnd = -1;
@@ -281,14 +281,14 @@ public:
         Clear();
     }
 
-    EckInlineCe BOOL IsSelected(T idxItem) const noexcept
+    EckInlineCe bool IsSelected(T idxItem) const noexcept
     {
-        BOOL bFound;
+        bool bFound;
         FindRange(idxItem, bFound);
         return bFound;
     }
 
-    EckInlineCe BOOL IsEmpty() const noexcept
+    EckInlineCe bool IsEmpty() const noexcept
     {
         return m_vRange.empty();
     }
@@ -296,7 +296,7 @@ public:
     // 取下一选中项。若idxItem选中，则返回idxItem
     constexpr T NextSelected(T idxItem) const noexcept
     {
-        BOOL bFound;
+        bool bFound;
         const auto it = FindRange(idxItem, bFound);
         if (bFound)
             return idxItem;
@@ -309,7 +309,7 @@ public:
     // 取下一未选中项。若idxItem未选中，则返回idxItem
     constexpr T NextUnSelected(T idxItem) const noexcept
     {
-        BOOL bFound;
+        bool bFound;
         const auto it = FindRange(idxItem, bFound);
         if (bFound)
             return it->idxEnd + 1;

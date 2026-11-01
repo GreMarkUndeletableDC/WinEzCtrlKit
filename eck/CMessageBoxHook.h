@@ -105,7 +105,7 @@ public:
             {
                 DrawIconEx(pdis->hDC, pdis->rcItem.left, pdis->rcItem.top, m_hIcon,
                     0, 0, 0, nullptr, DI_NORMAL);
-                return TRUE;
+                return true;
             }
         }
         break;

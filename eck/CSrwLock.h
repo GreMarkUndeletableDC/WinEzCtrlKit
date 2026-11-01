@@ -19,7 +19,7 @@ public:
         RtlAcquireSRWLockShared(&m_srw);
     }
 
-    EckInline BOOL TryEnterRead() noexcept
+    EckInline bool TryEnterRead() noexcept
     {
         return RtlTryAcquireSRWLockShared(&m_srw);
     }
@@ -34,7 +34,7 @@ public:
         RtlAcquireSRWLockExclusive(&m_srw);
     }
 
-    EckInline BOOL TryEnterWrite() noexcept
+    EckInline bool TryEnterWrite() noexcept
     {
         return RtlTryAcquireSRWLockExclusive(&m_srw);
     }

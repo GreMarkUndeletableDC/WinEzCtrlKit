@@ -24,8 +24,8 @@ private:
         CSrwLock Lock{};
     };
 
-    BOOLEAN m_bAutoAccent{};
-    BOOLEAN m_bDark{};
+    bool m_bAutoAccent{};
+    bool m_bDark{};
 
     static STATIC& GetStatic() noexcept
     {
@@ -33,7 +33,7 @@ private:
         return s;
     }
 
-    void AccentRegister(BOOL bRegister) noexcept
+    void AccentRegister(bool bRegister) noexcept
     {
         auto& s = GetStatic();
         CSrwWriteGuard _{ s.Lock };
@@ -85,12 +85,12 @@ public:
     ~CColorCollection()
     {
         if (m_bAutoAccent)
-            AccentRegister(FALSE);
+            AccentRegister(false);
     }
 
-    EckInlineNdCe BOOL GetAutoAccent() const noexcept { return m_bAutoAccent; }
+    EckInlineNdCe bool GetAutoAccent() const noexcept { return m_bAutoAccent; }
     // 复制构造不会继承AutoAccent状态
-    void SetAutoAccent(BOOL b) noexcept
+    void SetAutoAccent(bool b) noexcept
     {
         if (m_bAutoAccent != !!b)
         {
@@ -138,8 +138,8 @@ public:
         AccentUpdate(ParamLight, ParamDark);
     }
 
-    EckInlineNdCe BOOL GetDarkMode() const noexcept { return m_bDark; }
-    EckInlineCe void SetDarkMode(BOOL b) noexcept { m_bDark = b; }
+    EckInlineNdCe bool GetDarkMode() const noexcept { return m_bDark; }
+    EckInlineCe void SetDarkMode(bool b) noexcept { m_bDark = b; }
 };
 
 enum class TmResult
@@ -179,15 +179,15 @@ struct SimpleStyle
     {
         struct
         {
-            BOOLEAN bForeArgb;
-            BOOLEAN bBackArgb;
-            BOOLEAN bBorderArgb;
+            bool bForeArgb;
+            bool bBackArgb;
+            bool bBorderArgb;
         };
-        BOOLEAN bArgb[3];
+        bool bArgb[3];
     };
 
-    EckInlineNdCe BOOL HasRoundCorner() const noexcept { return rRound >= 1.f; }
-    EckInlineNdCe BOOL HasBorder() const noexcept
+    EckInlineNdCe bool HasRoundCorner() const noexcept { return rRound >= 1.f; }
+    EckInlineNdCe bool HasBorder() const noexcept
     {
         return cxBorder >= 1.f && Border != IdTmInvalid;
     }
@@ -286,7 +286,7 @@ public:
 
 inline std::optional<ARGB> TmSsLerpColor(
     CTheme* pTheme,
-    BOOL bArgbOrId,
+    bool bArgbOrId,
     UINT cr1, UINT cr2,
     float kLerp) noexcept
 {
@@ -316,7 +316,7 @@ inline SimpleStyle TmSsLerp(
     if (crFore)
     {
         s.Fore = *crFore;
-        s.bForeArgb = TRUE;
+        s.bForeArgb = true;
     }
     else
         s.Fore = IdTmInvalid;
@@ -324,7 +324,7 @@ inline SimpleStyle TmSsLerp(
     if (crBack)
     {
         s.Back = *crBack;
-        s.bBackArgb = TRUE;
+        s.bBackArgb = true;
     }
     else
         s.Back = IdTmInvalid;
@@ -332,7 +332,7 @@ inline SimpleStyle TmSsLerp(
     if (crBorder)
     {
         s.Border = *crBorder;
-        s.bBorderArgb = TRUE;
+        s.bBorderArgb = true;
     }
     else
         s.Border = IdTmInvalid;
@@ -402,8 +402,8 @@ inline RcPtr<CColorCollection> TmsColorCollectionLight() noexcept
     static auto p = []
         {
             auto p = TmsMakeColorCollectionLight();
-            p->SetAutoAccent(TRUE);
-            p->SetDarkMode(FALSE);
+            p->SetAutoAccent(true);
+            p->SetDarkMode(false);
             return p;
         }();
     return p;
@@ -441,8 +441,8 @@ inline RcPtr<CColorCollection> TmsColorCollectionDark() noexcept
     static auto p = []
         {
             auto p = TmsMakeColorCollectionDark();
-            p->SetAutoAccent(TRUE);
-            p->SetDarkMode(TRUE);
+            p->SetAutoAccent(true);
+            p->SetDarkMode(true);
             return p;
         }();
     return p;
@@ -466,7 +466,7 @@ EckInlineNdCe SimpleStyle TmsSsMakeDisabled(float cxBorder = 0.f, float r = 0.f)
 }
 
 template<std::derived_from<CTheme> TTheme>
-EckInline auto TmMakeTheme(BOOL bDark) noexcept
+EckInline auto TmMakeTheme(bool bDark) noexcept
 {
     const auto p = RcPtr<TTheme>::Make();
     p->SetMetricCollection(TmsMetricCollection().Get());
@@ -478,15 +478,15 @@ EckInline auto TmMakeTheme(BOOL bDark) noexcept
 
 // WM_STYLECHANGED DES_DARK_MODE被改变时的默认处理
 template<class TElement>
-EckInline BOOL TmAutoSwitchTheme(TElement* pEle, WPARAM wParam) noexcept
+EckInline bool TmAutoSwitchTheme(TElement* pEle, WPARAM wParam) noexcept
 {
     if ((pEle->GetStyle() ^ wParam) & DES_DARK_MODE)
     {
         const auto bDark = !!(pEle->GetStyle() & DES_DARK_MODE);
         pEle->SetTheme(TElement::TmDefaultTheme(bDark).Get());
-        return TRUE;
+        return true;
     }
-    return FALSE;
+    return false;
 }
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END

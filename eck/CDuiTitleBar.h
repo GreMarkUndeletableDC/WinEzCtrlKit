@@ -24,13 +24,13 @@ private:
     BYTE m_eInterMode{ (BYTE)D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR };
     BYTE m_eInterModeIcon{ (BYTE)D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR };
 
-    BITBOOL m_bCloseButton : 1{ TRUE };
-    BITBOOL m_bMaxButton : 1{ TRUE };
-    BITBOOL m_bMinButton : 1{ TRUE };
+    BITBOOL m_bCloseButton : 1{ true };
+    BITBOOL m_bMaxButton : 1{ true };
+    BITBOOL m_bMinButton : 1{ true };
     BITBOOL m_bCloseButtonEnabled : 1{};
     BITBOOL m_bMaxButtonEnabled : 1{};
     BITBOOL m_bMinButtonEnabled : 1{};
-    BITBOOL m_bSyncToStyle : 1{ TRUE };
+    BITBOOL m_bSyncToStyle : 1{ true };
 
     BITBOOL m_bMaximized : 1{};
 
@@ -79,16 +79,16 @@ private:
             if (!m_bSyncToStyle)
                 break;
             const auto* const pss = (STYLESTRUCT*)lParam;
-            BOOL bUpdate{};
+            bool bUpdate{};
             if ((pss->styleOld ^ pss->styleNew) & WS_MINIMIZEBOX)
             {
                 m_bMinButton = !!(pss->styleNew & WS_MINIMIZEBOX);
-                bUpdate = TRUE;
+                bUpdate = true;
             }
             if ((pss->styleOld ^ pss->styleNew) & WS_MAXIMIZEBOX)
             {
                 m_bMaxButton = !!(pss->styleNew & WS_MAXIMIZEBOX);
-                bUpdate = TRUE;
+                bUpdate = true;
             }
 
             if (bUpdate)
@@ -99,7 +99,7 @@ private:
         return 0;
     }
 
-    static EckInlineNdCe BOOL IsPartValid(UdwPart ePart) noexcept
+    static EckInlineNdCe bool IsPartValid(UdwPart ePart) noexcept
     {
         return ePart != UdwPart::Invalid && ePart != UdwPart::Extra;
     }
@@ -112,13 +112,13 @@ private:
         rc.bottom = roundf(rc.bottom);
     }
 
-    BOOL PaintButton(UdwPart ePart, const D2D1_RECT_F& rcClip) noexcept
+    bool PaintButton(UdwPart ePart, const D2D1_RECT_F& rcClip) noexcept
     {
         D2D1_RECT_F rcDst;
         GetPartRect(ePart, rcDst);
         ElementToClient(rcDst);
         if (!IsRectsIntersect(rcDst, rcClip))
-            return FALSE;
+            return false;
 
         LogicalToPixel(rcDst);
         SnapToPixel(rcDst);
@@ -133,7 +133,7 @@ private:
             ePart,
             GetPartState(ePart),
             TmIsDarkMode(),
-            TRUE,
+            true,
             GetWindow().GetUserDpi(),
             &Extra))
         {
@@ -150,18 +150,18 @@ private:
 
             GetDC()->DrawBitmap(m_pAtlas.Get(), rcIcon, 1.f,
                 GetIconInterpolationMode(), MakeD2DRectF(rc));
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
 
-    EckInlineNd BOOL IsWindowThemeReady() const noexcept { return m_pUdwTheme && m_pAtlas; }
+    EckInlineNd bool IsWindowThemeReady() const noexcept { return m_pUdwTheme && m_pAtlas; }
 public:
-    static RcPtr<CTheme> TmMakeDefaultTheme(BOOL bDark) noexcept;
-    static RcPtr<CTheme> TmDefaultTheme(BOOL bDark) noexcept
+    static RcPtr<CTheme> TmMakeDefaultTheme(bool bDark) noexcept;
+    static RcPtr<CTheme> TmDefaultTheme(bool bDark) noexcept
     {
-        static auto p1{ TmMakeDefaultTheme(TRUE) };
-        static auto p2{ TmMakeDefaultTheme(FALSE) };
+        static auto p1{ TmMakeDefaultTheme(true) };
+        static auto p2{ TmMakeDefaultTheme(false) };
         return bDark ? p1 : p2;
     }
 
@@ -468,7 +468,7 @@ public:
         GetPartRect(ePart, *(Kw::Rect*)&rc);
     }
 
-    void InvalidateButton(BOOL bUpdateNow = TRUE) noexcept
+    void InvalidateButton(bool bUpdateNow = true) noexcept
     {
         Kw::Rect rc{}, rc1;
         if (m_bCloseButton)
@@ -489,7 +489,7 @@ public:
         Invalidate(rc, bUpdateNow);
     }
 
-    void InvalidatePart(UdwPart ePart, BOOL bUpdateNow = TRUE) noexcept
+    void InvalidatePart(UdwPart ePart, bool bUpdateNow = true) noexcept
     {
         if (!IsPartValid(ePart))
             return;
@@ -500,13 +500,13 @@ public:
 
     void SynchronizeToSystemMenu() noexcept
     {
-        CMenu Menu{ GetSystemMenu(GetWindow().Handle, FALSE) };
+        CMenu Menu{ GetSystemMenu(GetWindow().Handle, false) };
         constexpr UINT DisableFlags = MF_GRAYED | MF_DISABLED;
-        m_bCloseButtonEnabled = !(Menu.GetItemState(SC_CLOSE, FALSE) & DisableFlags);
+        m_bCloseButtonEnabled = !(Menu.GetItemState(SC_CLOSE, false) & DisableFlags);
         m_bMaxButtonEnabled =
-            !(Menu.GetItemState(SC_MAXIMIZE, FALSE) & DisableFlags) &&
-            !(Menu.GetItemState(SC_RESTORE, FALSE) & DisableFlags);
-        m_bMinButtonEnabled = !(Menu.GetItemState(SC_MINIMIZE, FALSE) & DisableFlags);
+            !(Menu.GetItemState(SC_MAXIMIZE, false) & DisableFlags) &&
+            !(Menu.GetItemState(SC_RESTORE, false) & DisableFlags);
+        m_bMinButtonEnabled = !(Menu.GetItemState(SC_MINIMIZE, false) & DisableFlags);
         (void)Menu.Detach();
     }
 
@@ -515,15 +515,15 @@ public:
     EckInlineCe void SetIconInterpolationMode(D2D1_INTERPOLATION_MODE e) noexcept { m_eInterModeIcon = (BYTE)e; }
     EckInlineNdCe D2D1_INTERPOLATION_MODE GetIconInterpolationMode() const noexcept { return (D2D1_INTERPOLATION_MODE)m_eInterModeIcon; }
 
-    EckInlineCe void SetSynchronizeToStyle(BOOL b) noexcept { m_bSyncToStyle = b; }
-    EckInlineNdCe BOOL GetSynchronizeToStyle() const noexcept { return m_bSyncToStyle; }
+    EckInlineCe void SetSynchronizeToStyle(bool b) noexcept { m_bSyncToStyle = b; }
+    EckInlineNdCe bool GetSynchronizeToStyle() const noexcept { return m_bSyncToStyle; }
 
     EckInline void SetUxDwmWindowTheme(RefPtr<CUxDwmWindowTheme> p) noexcept { m_pUdwTheme = std::move(p); }
     EckInlineNdCe auto& GetUxDwmWindowTheme() const noexcept { return m_pUdwTheme; }
     EckInline void SetThemeAtlas(ComPtr<ID2D1Bitmap1> p) noexcept { m_pAtlas = std::move(p); }
     EckInlineNdCe auto& GetThemeAtlas() const noexcept { return m_pAtlas; }
 
-    EckInlineCe void SetButtonVisible(UdwPart ePart, BOOL b) noexcept
+    EckInlineCe void SetButtonVisible(UdwPart ePart, bool b) noexcept
     {
         switch (ePart)
         {
@@ -539,7 +539,7 @@ public:
             break;
         }
     }
-    EckInlineNdCe BOOL GetButtonVisible(UdwPart ePart) const noexcept
+    EckInlineNdCe bool GetButtonVisible(UdwPart ePart) const noexcept
     {
         switch (ePart)
         {
@@ -551,10 +551,10 @@ public:
         case UdwPart::Minimize:
             return m_bMinButton;
         }
-        return FALSE;
+        return false;
     }
 
-    EckInlineCe void EnableButton(UdwPart ePart, BOOL b) noexcept
+    EckInlineCe void EnableButton(UdwPart ePart, bool b) noexcept
     {
         switch (ePart)
         {
@@ -570,7 +570,7 @@ public:
             break;
         }
     }
-    EckInlineNdCe BOOL IsButtonEnabled(UdwPart ePart) const noexcept
+    EckInlineNdCe bool IsButtonEnabled(UdwPart ePart) const noexcept
     {
         switch (ePart)
         {
@@ -582,7 +582,7 @@ public:
         case UdwPart::Minimize:
             return m_bMinButtonEnabled;
         }
-        return FALSE;
+        return false;
     }
 };
 
@@ -600,7 +600,7 @@ public:
         return TmResult::NotSupport;
     }
 };
-inline RcPtr<CTheme> CTitleBar::TmMakeDefaultTheme(BOOL bDark) noexcept
+inline RcPtr<CTheme> CTitleBar::TmMakeDefaultTheme(bool bDark) noexcept
 {
     return TmMakeTheme<CTmTitleBar>(bDark);
 }

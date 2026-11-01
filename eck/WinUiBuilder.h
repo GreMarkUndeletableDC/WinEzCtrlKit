@@ -11,25 +11,25 @@ struct Rect { int x, y, cx, cy; };
 struct Margin { int l, t, r, b; };
 struct Extra { int cx, cy; };
 
-constexpr inline BOOL Replace = TRUE;
-constexpr inline BOOL Merge = FALSE;
+constexpr inline bool Replace = true;
+constexpr inline bool Merge = false;
 
 struct Style
 {
     DWORD dwStyle;
-    BOOL bReplace;
+    bool bReplace;
 };
 struct ExStyle
 {
     DWORD dwExStyle;
-    BOOL bReplace;
+    bool bReplace;
 };
 struct Id { int iId; };
 struct Weight { UINT uWeight; };
 struct Flags
 {
     UINT uFlags;
-    BOOL bReplace;
+    bool bReplace;
 };
 struct Font { HFONT hFont; };
 struct Table { USHORT r, c, rSpan, cSpan; };
@@ -212,7 +212,7 @@ namespace Detail
             TcsCopyLength(p, sv.data(), sv.size());
             p += sv.size();
 
-            const auto pEnd = TcvFromInt(p, cchBuf, idxNode, 10, TRUE).pEnd;
+            const auto pEnd = TcvFromInt(p, cchBuf, idxNode, 10, true).pEnd;
             ErrCtx.rsPath.ReSize(int(pEnd - ErrCtx.rsPath.Data()));
         }
         void Pop() noexcept
@@ -280,7 +280,7 @@ namespace Detail
     inline Result CfgParseDefault(
         const Detail::Proxy& pr,
         DEF_PARAM& Param,
-        BOOL bDefaultOrLocal) noexcept
+        bool bDefaultOrLocal) noexcept
     {
         const auto& il = (bDefaultOrLocal ?
             pr.Get<Type::Default>()->il :
@@ -402,7 +402,7 @@ namespace Detail
 
         Result r;
         DEF_PARAM NewDefault{ Default }, NewLocal{ Default };
-        BOOLEAN bLocal{};
+        bool bLocal{};
 
         const auto& il = pr.Get<Type::Window>()->il;
         auto it = il.begin();
@@ -413,16 +413,16 @@ namespace Detail
             case Type::Default:
                 if (bLocal)// Default必须在Local前
                     return Result::DefaultAfterLocal;
-                r = CfgParseDefault(*it, NewDefault, TRUE);
+                r = CfgParseDefault(*it, NewDefault, true);
                 if (r != Result::Ok)
                     return r;
                 NewLocal = NewDefault;
                 break;
             case Type::Local:
-                r = CfgParseDefault(*it, NewLocal, FALSE);
+                r = CfgParseDefault(*it, NewLocal, false);
                 if (r != Result::Ok)
                     return r;
-                bLocal = TRUE;
+                bLocal = true;
                 break;
             case Type::CWindow:
                 pWnd = it->Get<Type::CWindow>();
@@ -520,7 +520,7 @@ namespace Detail
         CLayoutBase* pLyt{};
         DEF_PARAM NewDefault{ Default }, NewLocal{ Default };
         Result r;
-        BOOLEAN bLocal{};
+        bool bLocal{};
 
         const auto eType = pr.GetType();
         const auto& il = (
@@ -540,16 +540,16 @@ namespace Detail
             case Type::Default:
                 if (bLocal)// Default必须在Local前
                     return Result::DefaultAfterLocal;
-                r = CfgParseDefault(*it, NewDefault, TRUE);
+                r = CfgParseDefault(*it, NewDefault, true);
                 if (r != Result::Ok)
                     return r;
                 NewLocal = NewDefault;
                 break;
             case Type::Local:
-                r = CfgParseDefault(*it, NewLocal, FALSE);
+                r = CfgParseDefault(*it, NewLocal, false);
                 if (r != Result::Ok)
                     return r;
-                bLocal = TRUE;
+                bLocal = true;
                 break;
             case Type::CLayoutBase:
                 pLyt = it->Get<Type::CLayoutBase>();

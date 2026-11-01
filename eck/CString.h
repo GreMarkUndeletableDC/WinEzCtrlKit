@@ -232,11 +232,11 @@ public:
 
     EckInlineNd TAllocator GetAllocator() const noexcept { return m_Alloc; }
     EckInlineNdCe int Size() const noexcept { return m_cchText; }
-    EckInlineNdCe BOOL IsEmpty() const noexcept { return Size() == 0; }
+    EckInlineNdCe bool IsEmpty() const noexcept { return Size() == 0; }
     EckInlineNdCe size_t ByteSize() const noexcept { return (m_cchText + 1) * sizeof(TChar); }
     EckInlineNdCe size_t ByteSizePure() const noexcept { return m_cchText * sizeof(TChar); }
     EckInlineNdCe int Capacity() const noexcept { return m_cchCapacity; }
-    EckInlineNdCe BOOL IsLocal() const noexcept { return Capacity() == LocalBufferSize; }
+    EckInlineNdCe bool IsLocal() const noexcept { return Capacity() == LocalBufferSize; }
     EckInlineNdCe size_t ByteCapacity() const noexcept { return m_cchCapacity * sizeof(TChar); }
     EckInlineNdCe TPointer Data() noexcept { return IsLocal() ? m_szLocal : m_pszText; }
     EckInlineNdCe TConstPointer Data() const noexcept { return IsLocal() ? m_szLocal : m_pszText; }
@@ -529,7 +529,7 @@ public:
     /// <param name="cchNew">用作替换的字符串长度</param>
     void Replace(int posStart, int cchReplacing, TConstPointer pszNew, int cchNew)
     {
-        EckAssert(pszNew ? TRUE : cchNew == 0);
+        EckAssert(pszNew ? true : cchNew == 0);
         if (cchNew < 0)
             cchNew = (int)TcsLength(pszNew);
         const int cchOrg = Size();
@@ -564,7 +564,7 @@ public:
         int posStart = 0, int cReplacing = 0)
     {
         EckAssert(pszReplaced);
-        EckAssert(pszSrc ? TRUE : cchSrc == 0);
+        EckAssert(pszSrc ? true : cchSrc == 0);
         if (cchReplaced < 0)
             cchReplaced = (int)TcsLength(pszReplaced);
         if (cchSrc < 0)
@@ -621,7 +621,7 @@ public:
     EckInline void Insert(int pos, TConstPointer pszText, int cchText = -1)
     {
         EckAssert(pos <= Size() && pos >= 0);
-        EckAssert(pszText ? TRUE : (cchText == 0));
+        EckAssert(pszText ? true : (cchText == 0));
         if (cchText < 0)
             cchText = (int)TcsLength(pszText);
         ReSizeExtra(Size() + cchText);
@@ -991,12 +991,12 @@ public:
         ReSize(int(pCurr - pData));
     }
 
-    [[nodiscard]] BOOL IsStartWith(TConstPointer psz, int cch = -1) const noexcept
+    [[nodiscard]] bool IsStartWith(TConstPointer psz, int cch = -1) const noexcept
     {
         if (cch < 0)
             cch = (int)TcsLength(psz);
         if (cch == 0 || Size() < cch)
-            return FALSE;
+            return false;
         return TcsEqualLength(Data(), psz, cch);
     }
     template<class TTraits>
@@ -1004,12 +1004,12 @@ public:
     {
         return IsStartWith(sv.data(), (int)sv.size());
     }
-    [[nodiscard]] BOOL IsStartWithI(TConstPointer psz, int cch = -1) const noexcept
+    [[nodiscard]] bool IsStartWithI(TConstPointer psz, int cch = -1) const noexcept
     {
         if (cch < 0)
             cch = (int)TcsLength(psz);
         if (cch == 0 || Size() < cch)
-            return FALSE;
+            return false;
         return TcsEqualLengthI(Data(), psz, cch);
     }
     template<class TTraits>
@@ -1018,12 +1018,12 @@ public:
         return IsStartWithI(sv.data(), (int)sv.size());
     }
 
-    [[nodiscard]] BOOL IsEndWith(TConstPointer psz, int cch = -1) const noexcept
+    [[nodiscard]] bool IsEndWith(TConstPointer psz, int cch = -1) const noexcept
     {
         if (cch < 0)
             cch = (int)TcsLength(psz);
         if (cch == 0 || Size() < cch)
-            return FALSE;
+            return false;
         return TcsEqualLength(Data() + Size() - cch, psz, cch);
     }
     template<class TTraits>
@@ -1031,12 +1031,12 @@ public:
     {
         return IsEndWith(sv.data(), (int)sv.size());
     }
-    [[nodiscard]] BOOL IsEndWithI(TConstPointer psz, int cch = -1) const noexcept
+    [[nodiscard]] bool IsEndWithI(TConstPointer psz, int cch = -1) const noexcept
     {
         if (cch < 0)
             cch = (int)TcsLength(psz);
         if (cch == 0 || Size() < cch)
-            return FALSE;
+            return false;
         return TcsEqualLengthI(Data() + Size() - cch, psz, cch);
     }
     template<class TTraits>
@@ -1110,7 +1110,7 @@ public:
     TcvResult PushBackNumber(
         T x,
         int iRadix = 10,
-        BOOL bUpperCase = FALSE,
+        bool bUpperCase = false,
         int cchFillTo = 0,
         TChar chFill = ' ') noexcept
     {
@@ -1160,28 +1160,28 @@ public:
         return eck::PazFindFileName(Data(), Size());
     }
 
-    BOOL PazRemoveFileName() noexcept
+    bool PazRemoveFileName() noexcept
     {
         const auto pos = PazFindFileName();
         if (pos < 0)
-            return FALSE;
+            return false;
         EckAssert(pos >= 1);
         ReSize(pos - 1);
-        return TRUE;
+        return true;
     }
 
-    BOOL PazRenameFileName(TConstPointer pszNewName, int cchNewName = -1)
+    bool PazRenameFileName(TConstPointer pszNewName, int cchNewName = -1)
     {
         const auto pos = PazFindFileName();
         if (pos < 0)
-            return FALSE;
+            return false;
         if (cchNewName < 0)
             cchNewName = (int)TcsLength(pszNewName);
         ReSize(pos + cchNewName);
         TcsCopyLength(Data() + pos, pszNewName, cchNewName);
-        return TRUE;
+        return true;
     }
-    BOOL PazRenameFileName(std::basic_string_view<TChar> svNewName)
+    bool PazRenameFileName(std::basic_string_view<TChar> svNewName)
     {
         return PazRenameFileName(svNewName.data(), (int)svNewName.size());
     }
@@ -1191,13 +1191,13 @@ public:
         return eck::PazFindExtension(Data(), Size());
     }
 
-    BOOL PazRemoveExtension() noexcept
+    bool PazRemoveExtension() noexcept
     {
         const auto pos = PazFindExtension();
         if (pos < 0)
-            return FALSE;
+            return false;
         ReSize(pos);
-        return TRUE;
+        return true;
     }
 
     void PazRenameExtension(TConstPointer pszNewExt, int cchNewExt = -1)
@@ -1219,26 +1219,26 @@ public:
     }
 
     // 如果没有反斜杠，则在末尾添加。返回值指示操作前是否已有反斜杠
-    BOOL PazAddBackslash()
+    bool PazAddBackslash()
     {
         if (IsEmpty())
-            return FALSE;
+            return false;
         if (Back() == '\\' || Back() == '/')
-            return TRUE;
+            return true;
         PushBackChar('\\');
-        return FALSE;
+        return false;
     }
     // 去掉末尾的反斜杠
-    BOOL PazRemoveBackslash() noexcept
+    bool PazRemoveBackslash() noexcept
     {
         if (IsEmpty())
-            return FALSE;
+            return false;
         if (Back() == '\\' || Back() == '/')
         {
             PopBack();
-            return TRUE;
+            return true;
         }
-        return FALSE;
+        return false;
     }
     // 将所有斜杠替换为反斜杠
     void PazConvertToBackslash() noexcept
@@ -1287,7 +1287,7 @@ public:
 
 
     void PazFindFileName(
-        BOOL bKeepExtension,
+        bool bKeepExtension,
         _Out_ int& pos0,
         _Out_ int& pos1) const noexcept
     {
@@ -1300,28 +1300,28 @@ public:
             pos0 = pos1 = -1;
     }
 
-    BOOL PazTrimToFileName(BOOL bKeepExtension = FALSE) noexcept
+    bool PazTrimToFileName(bool bKeepExtension = false) noexcept
     {
         int pos0, pos1;
         PazFindFileName(bKeepExtension, pos0, pos1);
         if (pos0 < 0)
-            return FALSE;
+            return false;
         TcsMoveLength(Data(), Data() + pos0, pos1 - pos0);
         ReSize(pos1 - pos0);
-        return TRUE;
+        return true;
     }
-    BOOL PazTrimToFileName(CStringT& rsFileName, BOOL bKeepExtension = FALSE) const
+    bool PazTrimToFileName(CStringT& rsFileName, bool bKeepExtension = false) const
     {
         int pos0, pos1;
         PazFindFileName(bKeepExtension, pos0, pos1);
         if (pos0 < 0)
-            return FALSE;
+            return false;
         const auto p = rsFileName.PushBackNoExtra(pos1 - pos0);
         TcsCopyLength(p, Data() + pos0, pos1 - pos0);
-        return TRUE;
+        return true;
     }
 
-    void PazLegalize(TChar chReplace = '_', BOOL bReplaceDot = FALSE) noexcept
+    void PazLegalize(TChar chReplace = '_', bool bReplaceDot = false) noexcept
     {
         eck::PazLegalizeLength(Data(), Size(), chReplace, bReplaceDot);
     }
@@ -1418,14 +1418,14 @@ EckInlineNd std::weak_ordering operator<=>(const EckTemp& rs1, const EckTemp& rs
 #pragma endregion Operator
 
 template<class TCharTraits, class TAllocator>
-EckInline void DbgPrint(const CStringT<WCHAR, TCharTraits, TAllocator>& rs, int iType = 1, BOOL bNewLine = TRUE) noexcept
+EckInline void DbgPrint(const CStringT<WCHAR, TCharTraits, TAllocator>& rs, int iType = 1, bool bNewLine = true) noexcept
 {
     OutputDebugStringW(rs.Data());
     if (bNewLine)
         OutputDebugStringW(L"\n");
 }
 template<class TCharTraits, class TAllocator>
-EckInline void DbgPrint(const CStringT<CHAR, TCharTraits, TAllocator>& rs, int iType = 1, BOOL bNewLine = TRUE) noexcept
+EckInline void DbgPrint(const CStringT<CHAR, TCharTraits, TAllocator>& rs, int iType = 1, bool bNewLine = true) noexcept
 {
     OutputDebugStringA(rs.Data());
     if (bNewLine)
@@ -1434,7 +1434,7 @@ EckInline void DbgPrint(const CStringT<CHAR, TCharTraits, TAllocator>& rs, int i
 
 template<std::integral T>
 EckInlineNd CStringW ToString(T x,
-    int iRadix = 10, BOOL bUpperCase = FALSE) noexcept
+    int iRadix = 10, bool bUpperCase = false) noexcept
 {
     CStringW rs{};
     rs.PushBackNumber(x, iRadix, bUpperCase);

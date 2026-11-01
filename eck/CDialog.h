@@ -11,7 +11,7 @@ protected:
     HWND m_hTop{};
     COLORREF m_crBkg{ CLR_DEFAULT };
 
-    BITBOOL m_bUseDefBkClr : 1{ TRUE };
+    BITBOOL m_bUseDefBkClr : 1{ true };
 #   ifdef _DEBUG
     BITBOOL m_bDlgProcInit : 1{};
 #   endif
@@ -20,7 +20,7 @@ protected:
 
     EckInline HWND PreModal(HWND hParent) noexcept
     {
-        m_bModal = TRUE;
+        m_bModal = true;
         return GetSafeOwner(hParent, &m_hTop);
     }
 
@@ -28,8 +28,8 @@ protected:
     {
         if (!m_hTop)
             return;
-        m_bModal = FALSE;
-        EnableWindow(m_hTop, TRUE);
+        m_bModal = false;
+        EnableWindow(m_hTop, true);
         m_hTop = nullptr;
     }
 
@@ -50,17 +50,17 @@ protected:
         HINSTANCE hInst, PCWSTR pszTemplate, HWND hParent,
         LPARAM lParam = 0, FWindowCreating pfnCreatingProc = nullptr) noexcept
     {
-        m_bModal = TRUE;
+        m_bModal = true;
 
         const HWND hOwner = PreModal(hParent);
-        BOOL bNeedEnableOwner;
+        bool bNeedEnableOwner;
         if (hOwner && hOwner != GetDesktopWindow() && IsWindowEnabled(hOwner))
         {
-            bNeedEnableOwner = TRUE;
-            EnableWindow(hOwner, FALSE);
+            bNeedEnableOwner = true;
+            EnableWindow(hOwner, false);
         }
         else
-            bNeedEnableOwner = FALSE;
+            bNeedEnableOwner = false;
 
         BeginCbtHook(this, pfnCreatingProc);
         CreateDialogParamW(hInst, pszTemplate, hParent, EckDialogProcedure, lParam);
@@ -68,7 +68,7 @@ protected:
 
         MessageLoop();
         if (bNeedEnableOwner)
-            EnableWindow(hOwner, TRUE);
+            EnableWindow(hOwner, true);
         if (hParent)
             SetActiveWindow(hParent);
         PostModal();
@@ -80,7 +80,7 @@ protected:
         HINSTANCE hInst, PCWSTR pszTemplate, HWND hParent,
         LPARAM lParam = 0, FWindowCreating pfnCreatingProc = nullptr) noexcept
     {
-        m_bModal = FALSE;
+        m_bModal = false;
         BeginCbtHook(this, pfnCreatingProc);
         const auto h = CreateDialogParamW(hInst, pszTemplate, hParent, EckDialogProcedure, lParam);
         EckAssert(m_bDlgProcInit);
@@ -95,12 +95,12 @@ public:
         {
             EckDbgPrintWithLocation(L"** WARNING **  CDialog指针为NULL");
             EckDbgBreak();
-            return FALSE;
+            return false;
         }
 #endif // _DEBUG
         if (uMsg == WM_INITDIALOG)
             return pDlg->OnInitializeDialog((HWND)wParam, lParam);
-        return FALSE;
+        return false;
     }
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
@@ -111,14 +111,14 @@ public:
             m_iResult = 0;
             SetWindowLongPtrW(Handle, DWLP_DLGPROC, (LONG_PTR)EckDialogProcedure);
 #ifdef _DEBUG
-            m_bDlgProcInit = TRUE;
+            m_bDlgProcInit = true;
             break;
         case WM_NCDESTROY:
-            m_bDlgProcInit = FALSE;
+            m_bDlgProcInit = false;
 #endif // _DEBUG
             break;
         case WM_DESTROY:
-            m_bModal = FALSE;
+            m_bModal = false;
             break;
         case WM_COMMAND:
         {
@@ -162,7 +162,7 @@ public:
         return __super::OnMessage(uMsg, wParam, lParam);
     }
 
-    virtual BOOL OnInitializeDialog(HWND hFocus, LPARAM lParam) noexcept { return TRUE; }
+    virtual bool OnInitializeDialog(HWND hFocus, LPARAM lParam) noexcept { return true; }
 
     virtual HWND CreateModelessDialog(HWND hParent, void* pData = nullptr) noexcept
     {
@@ -174,13 +174,13 @@ public:
         EckBugCheck(BccNotImplemented, L"CDialog::CreateModalDialog not implemented");
     }
 
-    virtual BOOL EndDialog(INT_PTR nResult) noexcept
+    virtual bool EndDialog(INT_PTR nResult) noexcept
     {
         m_iResult = nResult;
         if (m_bModal)
         {
             PostQuitMessage(0);
-            return TRUE;
+            return true;
         }
         else
             return Destroy();
@@ -197,8 +197,8 @@ public:
     }
 
     EckInline void SetBackgroundColor(COLORREF cr) noexcept { m_crBkg = cr; }
-    EckInline void SetAllowColorDisableEdit(BOOL b) noexcept { m_bClrDisableEdit = b; }
-    EckInline void SetUseDefaultBackgroundColor(BOOL b) noexcept { m_bUseDefBkClr = b; }
+    EckInline void SetAllowColorDisableEdit(bool b) noexcept { m_bClrDisableEdit = b; }
+    EckInline void SetUseDefaultBackgroundColor(bool b) noexcept { m_bUseDefBkClr = b; }
 };
 
 enum : UINT
@@ -219,21 +219,21 @@ protected:
         UINT uDlgFlags = 0u, FWindowCreating pfnCreatingProc = nullptr) noexcept
     {
         const HWND hOwner = PreModal(hParent);
-        BOOL bNeedEnableOwner;
+        bool bNeedEnableOwner;
         if (hOwner && hOwner != GetDesktopWindow() && IsWindowEnabled(hOwner))
         {
-            bNeedEnableOwner = TRUE;
-            EnableWindow(hOwner, FALSE);
+            bNeedEnableOwner = true;
+            EnableWindow(hOwner, false);
         }
         else
-            bNeedEnableOwner = FALSE;
+            bNeedEnableOwner = false;
 
         InternalCreateModelessDialog(dwExStyle, pszClass, pszText, dwStyle,
             x, y, cx, cy, hParent, hMenu, hInst, pParam, uDlgFlags, pfnCreatingProc);
 
         MessageLoop();
         if (bNeedEnableOwner)
-            EnableWindow(hOwner, TRUE);
+            EnableWindow(hOwner, true);
         if (hParent)
             SetActiveWindow(hParent);
         PostModal();
@@ -259,10 +259,10 @@ protected:
 
         if (m_hWnd)
         {
-            HWND hFirstCtrl = GetNextDlgTabItem(m_hWnd, nullptr, FALSE);
+            HWND hFirstCtrl = GetNextDlgTabItem(m_hWnd, nullptr, false);
             if (SendMessageW(WM_INITDIALOG, (WPARAM)hFirstCtrl, (LPARAM)pParam))
             {
-                hFirstCtrl = GetNextDlgTabItem(m_hWnd, nullptr, FALSE);
+                hFirstCtrl = GetNextDlgTabItem(m_hWnd, nullptr, false);
                 SetFocus(hFirstCtrl);
             }
         }

@@ -3,7 +3,7 @@
 
 ECK_NAMESPACE_BEGIN
 ECK_MEDIATAG_NAMESPACE_BEGIN
-EckInlineNd BOOL TagCheckId3FrameId(_In_reads_(4) PCCH Id) noexcept
+EckInlineNd bool TagCheckId3FrameId(_In_reads_(4) PCCH Id) noexcept
 {
     return isalnum(Id[0]) && isalnum(Id[1]) && isalnum(Id[2]) && isalnum(Id[3]) &&
         (memcmp(Id, "ID3", 3) != 0) &&
@@ -59,9 +59,9 @@ public:
 
     struct EXTHDR_INFO
     {
-        BOOLEAN bCrc;
-        BOOLEAN bTagAlter;      // ID3v2.4 Only
-        BOOLEAN bRestrictions;  // ID3v2.4 Only
+        bool bCrc;
+        bool bTagAlter;      // ID3v2.4 Only
+        bool bRestrictions;  // ID3v2.4 Only
         TagSizeRestriction eTagSize;            // ID3v2.4 Only
         TextEncodingRestriction eTextEncoding;  // ID3v2.4 Only
         TextFieldSizeRestriction eTextFieldSize;// ID3v2.4 Only
@@ -98,7 +98,7 @@ private:
             .rbWork = m_rbWork,
             .pTagHdr = &m_Header,
             .pFrameHdr = &FrameHdr,
-            .bFrameHdr = FALSE
+            .bFrameHdr = false
         };
         while (m_Stream.GetPosition() < posEnd)
         {
@@ -216,7 +216,7 @@ private:
                 {
                     UINT uCrc;
                     m_Stream >> uCrc;
-                    m_ExtHdrInfo.bCrc = TRUE;
+                    m_ExtHdrInfo.bCrc = true;
                     m_ExtHdrInfo.uCrc = ReverseInteger(uCrc);
                 }
             }
@@ -243,7 +243,7 @@ private:
                 {
                     if (cb < 11)
                         return Result::Length;
-                    m_ExtHdrInfo.bCrc = TRUE;
+                    m_ExtHdrInfo.bCrc = true;
                     BYTE t[5];
                     m_Stream >> t;
                     m_ExtHdrInfo.uCrc = ((t[0] & 0x7F) << 28) | ((t[1] & 0x7F) << 21) |
@@ -253,7 +253,7 @@ private:
                 {
                     if (cb < UINT(7 + (m_ExtHdrInfo.bCrc ? 5 : 0)))
                         return Result::Length;
-                    m_ExtHdrInfo.bRestrictions = TRUE;
+                    m_ExtHdrInfo.bRestrictions = true;
                     m_Stream >> by;
                     m_ExtHdrInfo.eTagSize = TagSizeRestriction((by >> 6) & 0b11);
                     m_ExtHdrInfo.eTextEncoding = TextEncodingRestriction((by >> 5) & 1);
@@ -306,7 +306,7 @@ private:
         _In_ ID3v2::APIC* pFrame,
         Picture& Pic,
         const SIMPLE_OPT& Opt,
-        BOOL bMove) noexcept
+        bool bMove) noexcept
     {
         pFrame->eType = Pic.eType;
         if (bMove)
@@ -342,7 +342,7 @@ private:
         _Out_ size_t& cb,
         _Out_ UINT*& pcbPadding) const noexcept
     {
-        EckAssert(m_ExtHdrInfo.bCrc == FALSE);// TODO: 支持CRC
+        EckAssert(m_ExtHdrInfo.bCrc == false);// TODO: 支持CRC
         pcbPadding = nullptr;
         if (m_Header.Ver == 3)// 至多14字节
         {
@@ -754,10 +754,10 @@ public:
 
         const auto& Loc = m_File.GetTagLocation();
 
-        const BOOL bOnlyAppend =
+        const bool bOnlyAppend =
             Loc.posV2Footer != CMediaFile::InvalidPosition &&
             Loc.posV2 == CMediaFile::InvalidPosition;
-        const BOOL bShouldAppend = (uFlags & MIF_APPEND_TAG);
+        const bool bShouldAppend = (uFlags & MIF_APPEND_TAG);
 
         ID3v2_HEADER Hdr{ m_Header };
         if (uFlags & MIF_CREATE_ID3V2_3)
@@ -774,15 +774,15 @@ public:
         {
             .rbWork = m_rbWork,
             .pTagHdr = &Hdr,
-            .bFrameHdr = TRUE,
+            .bFrameHdr = true,
         };
 
         CByteBuffer rbPrepend{}, rbAppend{};
-        BOOL bSeekFrameFound{};
+        bool bSeekFrameFound{};
         for (const auto& e : m_vItem)
         {
             if (!bSeekFrameFound && e->EqualId("SEEK"))
-                bSeekFrameFound = TRUE;
+                bSeekFrameFound = true;
             if (bShouldAppend || (e->byFlags & MIIF_ID3V2_4_APPEND))
             {
                 e->Serialize(rbAppend, SerialCtx);
@@ -794,7 +794,7 @@ public:
         }
 
         // 前置后置均存在时，不允许使用填充
-        const BOOL bAllowPadding = (uFlags & MIF_ALLOW_PADDING) &&
+        const bool bAllowPadding = (uFlags & MIF_ALLOW_PADDING) &&
             !(!rbPrepend.IsEmpty() && !rbAppend.IsEmpty());
 
         size_t ocbNextTag{ CMediaFile::InvalidPosition };
@@ -886,7 +886,7 @@ public:
             if (!bSeekFrameFound && ocbNextTag != CMediaFile::InvalidPosition)// 补下SEEK帧
             {
                 ID3v2::SEEK Seek{};
-                Seek.bFileAlterDiscard = TRUE;
+                Seek.bFileAlterDiscard = true;
                 Seek.ocbNextTag = (UINT)ocbNextTag;
                 Seek.Serialize(rbPrepend, SerialCtx);
                 cbPrependTotal += (sizeof(ID3v2_FRAME_HEADER) + 4);
@@ -983,7 +983,7 @@ public:
         m_SeekVal = CMediaFile::InvalidPosition;
     }
 
-    BOOL IsEmpty() noexcept override { return m_vItem.empty(); }
+    bool IsEmpty() noexcept override { return m_vItem.empty(); }
 
     EckInlineNdCe auto& GetItemList() noexcept { return m_vItem; }
     EckInlineNdCe auto& GetItemList() const noexcept { return m_vItem; }

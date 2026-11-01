@@ -221,7 +221,7 @@ public:
             nullptr, pdwType, (BYTE*)pDataBuf, pcbDataBuf);
     }
 
-    int EnumerateValue(const std::function<BOOL(CStringW& rsName, DWORD dwType)>& fn,
+    int EnumerateValue(const std::function<bool(CStringW& rsName, DWORD dwType)>& fn,
         LSTATUS* plStatus = nullptr) noexcept
     {
         if (plStatus)
@@ -486,12 +486,12 @@ public:
         return RegLoadMUIStringW(m_hKey, pszValue, pszBuf, cbBuf, pcbOut, dwFlags, pszDir);
     }
 
-    EckInline BOOL IsKeyExists(PCWSTR pszSubKey) noexcept
+    EckInline bool IsKeyExists(PCWSTR pszSubKey) noexcept
     {
         return GetValue(pszSubKey, nullptr, nullptr, nullptr) == ERROR_SUCCESS;
     }
 
-    EckInline BOOL IsValueExists(PCWSTR pszValue) noexcept
+    EckInline bool IsValueExists(PCWSTR pszValue) noexcept
     {
         return QueryValue(pszValue, nullptr, nullptr) == ERROR_SUCCESS;
     }

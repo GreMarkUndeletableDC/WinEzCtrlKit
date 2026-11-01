@@ -118,7 +118,7 @@ EckInlineCe void ReverseByteOrder(BYTE* p, size_t cb) noexcept
     std::reverse(p, p + cb);
 }
 
-EckInlineNdCe BOOL IsBitSet(auto x1, auto x2) noexcept { return (x1 & x2) == x2; }
+EckInlineNdCe bool IsBitSet(auto x1, auto x2) noexcept { return (x1 & x2) == x2; }
 
 template<std::integral T>
 EckInlineNdCe T BitsLowN(T x, size_t n) noexcept
@@ -145,7 +145,7 @@ EckInlineNdCe T BitsClearHighN(T x, size_t n) noexcept
 
 #pragma region 图形结构
 template<CcpRect T>
-EckInlineNdCe BOOL EqualRect(const T& rc1, const T& rc2) noexcept
+EckInlineNdCe bool EqualRect(const T& rc1, const T& rc2) noexcept
 {
     if constexpr (RectTraits<T>::IsRcwh)
         return rc1.x == rc2.x && rc1.y == rc2.y &&
@@ -200,18 +200,18 @@ EckNfInlineNdCe TRect MakeRect(
     return rc;
 }
 
-EckInlineNdCe BOOL PointInRect(const RECT& rc, POINT pt) noexcept
+EckInlineNdCe bool PointInRect(const RECT& rc, POINT pt) noexcept
 {
     return ((pt.x >= rc.left) && (pt.x < rc.right) &&
         (pt.y >= rc.top) && (pt.y < rc.bottom));
 }
 #if !ECK_OPT_NO_D2D
-EckInlineNdCe BOOL PointInRect(const D2D1_RECT_F& rc, D2D1_POINT_2F pt) noexcept
+EckInlineNdCe bool PointInRect(const D2D1_RECT_F& rc, D2D1_POINT_2F pt) noexcept
 {
     return ((pt.x >= rc.left) && (pt.x < rc.right) &&
         (pt.y >= rc.top) && (pt.y < rc.bottom));
 }
-EckInlineNdCe BOOL PointInRect(const D2D1_RECT_F& rc, POINT pt) noexcept
+EckInlineNdCe bool PointInRect(const D2D1_RECT_F& rc, POINT pt) noexcept
 {
     return ((pt.x >= rc.left) && (pt.x < rc.right) &&
         (pt.y >= rc.top) && (pt.y < rc.bottom));
@@ -274,19 +274,19 @@ EckInlineNdCe D2D1_POINT_2F MakeD2DPointF(POINT pt) noexcept
 #endif // !ECK_OPT_NO_D2D
 
 template<CcpRect T>
-EckInlineNdCe BOOL IsRectsIntersect(const T& rc1, const T& rc2) noexcept
+EckInlineNdCe bool IsRectsIntersect(const T& rc1, const T& rc2) noexcept
 {
     if constexpr (RectTraits<T>::IsRcwh)
     {
         if (std::max(rc1.x, rc2.x) < std::min(rc1.x + rc1.cx, rc2.x + rc2.cx))
             return std::max(rc1.y, rc2.y) < std::min(rc1.y + rc1.cy, rc2.y + rc2.cy);
-        return FALSE;
+        return false;
     }
     else
     {
         if (std::max(rc1.left, rc2.left) < std::min(rc1.right, rc2.right))
             return std::max(rc1.top, rc2.top) < std::min(rc1.bottom, rc2.bottom);
-        return FALSE;
+        return false;
     }
 }
 
@@ -310,7 +310,7 @@ EckInlineCe void InflateRect(_Inout_ T& rc, auto dx, auto dy) noexcept
 }
 
 template<CcpRect T>
-EckInlineCe BOOL IntersectRect(_Out_ T& rcDst, const T& rcSrc1, const T& rcSrc2) noexcept
+EckInlineCe bool IntersectRect(_Out_ T& rcDst, const T& rcSrc1, const T& rcSrc2) noexcept
 {
     if constexpr (RectTraits<T>::IsRcwh)
     {
@@ -321,10 +321,10 @@ EckInlineCe BOOL IntersectRect(_Out_ T& rcDst, const T& rcSrc1, const T& rcSrc2)
             rcDst.y = std::max(rcSrc1.y, rcSrc2.y);
             rcDst.cy = std::min(rcSrc1.y + rcSrc1.cy, rcSrc2.y + rcSrc2.cy) - rcDst.y;
             if (rcDst.cy > 0)
-                return TRUE;
+                return true;
         }
         rcDst = {};
-        return FALSE;
+        return false;
     }
     else
     {
@@ -335,10 +335,10 @@ EckInlineCe BOOL IntersectRect(_Out_ T& rcDst, const T& rcSrc1, const T& rcSrc2)
             rcDst.top = std::max(rcSrc1.top, rcSrc2.top);
             rcDst.bottom = std::min(rcSrc1.bottom, rcSrc2.bottom);
             if (rcDst.top < rcDst.bottom)
-                return TRUE;
+                return true;
         }
         rcDst = {};
-        return FALSE;
+        return false;
     }
 }
 
@@ -360,7 +360,7 @@ EckInlineCe void OffsetRect(_Inout_ T& rc, auto dx, auto dy) noexcept
 }
 
 template<CcpRect T>
-EckInlineNdCe BOOL IsRectEmpty(const T& rc) noexcept
+EckInlineNdCe bool IsRectEmpty(const T& rc) noexcept
 {
     if constexpr (RectTraits<T>::IsRcwh)
         return rc.cx <= 0 || rc.cy <= 0;
@@ -373,7 +373,7 @@ EckNfInlineCe void UnionRect(T& rcDst, const T& rcSrc1, const T& rcSrc2) noexcep
 {
     if constexpr (RectTraits<T>::IsRcwh)
     {
-        const BOOL b1 = IsRectEmpty(rcSrc1), b2 = IsRectEmpty(rcSrc2);
+        const bool b1 = IsRectEmpty(rcSrc1), b2 = IsRectEmpty(rcSrc2);
         if (b1)
         {
             if (b2)
@@ -393,7 +393,7 @@ EckNfInlineCe void UnionRect(T& rcDst, const T& rcSrc1, const T& rcSrc2) noexcep
     }
     else
     {
-        const BOOL b1 = IsRectEmpty(rcSrc1), b2 = IsRectEmpty(rcSrc2);
+        const bool b1 = IsRectEmpty(rcSrc1), b2 = IsRectEmpty(rcSrc2);
         if (b1)
         {
             if (b2)
@@ -414,7 +414,7 @@ EckNfInlineCe void UnionRect(T& rcDst, const T& rcSrc1, const T& rcSrc2) noexcep
 }
 
 template<CcpRect T>
-EckInlineNdCe BOOL IsRectInclude(const T& rcIn, const T& rcOut) noexcept
+EckInlineNdCe bool IsRectInclude(const T& rcIn, const T& rcOut) noexcept
 {
     if constexpr (RectTraits<T>::IsRcwh)
         return
@@ -460,14 +460,14 @@ EckInlineNdCe bool operator==(const RCWH& rc1, const RCWH& rc2) noexcept
 /// <param name="rcRef">参照矩形</param>
 /// <returns>成功返回TRUE，失败或无需调整返回FALSE</returns>
 template<CcpRect T>
-EckNfInlineCe BOOL AdjustRectIntoAnother(_Inout_ T& rc, const T& rcRef) noexcept
+EckNfInlineCe bool AdjustRectIntoAnother(_Inout_ T& rc, const T& rcRef) noexcept
 {
     constexpr auto MaxValue = std::numeric_limits<typename RectTraits<T>::T>::max();
     typename RectTraits<T>::T dxLeft, dxRight, dyTop, dyBottom;
     if constexpr (RectTraits<T>::IsRcwh)
     {
         if (rc.cx > rcRef.cx || rc.cy > rcRef.cy)
-            return FALSE;
+            return false;
         dxLeft = rcRef.x - rc.x;
         dxRight = rc.x + rc.cx - rcRef.cx;
         dyTop = rcRef.y - rc.y;
@@ -477,14 +477,14 @@ EckNfInlineCe BOOL AdjustRectIntoAnother(_Inout_ T& rc, const T& rcRef) noexcept
     {
         if (rc.right - rc.left > rcRef.right - rcRef.left ||
             rc.bottom - rc.top > rcRef.bottom - rcRef.top)
-            return FALSE;
+            return false;
         dxLeft = rcRef.left - rc.left;
         dxRight = rc.right - rcRef.right;
         dyTop = rcRef.top - rc.top;
         dyBottom = rc.bottom - rcRef.bottom;
     }
     if (dxLeft <= 0 && dxRight <= 0 && dyTop <= 0 && dyBottom <= 0)
-        return FALSE;
+        return false;
     if (dxLeft < 0)
         dxLeft = MaxValue;
     if (dxRight < 0)
@@ -503,7 +503,7 @@ EckNfInlineCe BOOL AdjustRectIntoAnother(_Inout_ T& rc, const T& rcRef) noexcept
     else if (dyTop > dyBottom)
         dyTop = -dyBottom;
     OffsetRect(rc, dxLeft, dyTop);
-    return TRUE;
+    return true;
 }
 
 /// <summary>
@@ -514,7 +514,7 @@ EckNfInlineCe BOOL AdjustRectIntoAnother(_Inout_ T& rc, const T& rcRef) noexcept
 /// <param name="rcRef">参照矩形</param>
 /// <returns>成功返回TRUE，失败返回FALSE</returns>
 template<CcpRect T>
-EckNfInlineCe BOOL AdjustRectToFitAnother(_Inout_ T& rc, const T& rcRef) noexcept
+EckNfInlineCe bool AdjustRectToFitAnother(_Inout_ T& rc, const T& rcRef) noexcept
 {
     if constexpr (RectTraits<T>::IsRcwh)
     {
@@ -524,7 +524,7 @@ EckNfInlineCe BOOL AdjustRectToFitAnother(_Inout_ T& rc, const T& rcRef) noexcep
             cx0 = rc.cx,
             cy0 = rc.cy;
         if (cxMax <= 0 || cyMax <= 0 || cx0 <= 0 || cy0 <= 0)
-            return FALSE;
+            return false;
         typename RectTraits<T>::T cx, cy;
         if (cxMax * cy0 > cx0 * cyMax)// y对齐
         {
@@ -541,7 +541,7 @@ EckNfInlineCe BOOL AdjustRectToFitAnother(_Inout_ T& rc, const T& rcRef) noexcep
         rc.y = rcRef.y + (cyMax - cy) / 2;
         rc.cx = cx;
         rc.cy = cy;
-        return TRUE;
+        return true;
     }
     else
     {
@@ -551,7 +551,7 @@ EckNfInlineCe BOOL AdjustRectToFitAnother(_Inout_ T& rc, const T& rcRef) noexcep
             cx0 = rc.right - rc.left,
             cy0 = rc.bottom - rc.top;
         if (cxMax <= 0 || cyMax <= 0 || cx0 <= 0 || cy0 <= 0)
-            return FALSE;
+            return false;
         typename RectTraits<T>::T cx, cy;
         if (cxMax * cy0 > cx0 * cyMax)// y对齐
         {
@@ -568,7 +568,7 @@ EckNfInlineCe BOOL AdjustRectToFitAnother(_Inout_ T& rc, const T& rcRef) noexcep
         rc.top = rcRef.top + (cyMax - cy) / 2;
         rc.right = rc.left + cx;
         rc.bottom = rc.top + cy;
-        return TRUE;
+        return true;
     }
 }
 
@@ -580,7 +580,7 @@ EckNfInlineCe BOOL AdjustRectToFitAnother(_Inout_ T& rc, const T& rcRef) noexcep
 /// <param name="rcRef">参照矩形</param>
 /// <returns>成功返回TRUE，失败返回FALSE</returns>
 template<CcpRect T>
-EckNfInlineCe BOOL AdjustRectToFillAnother(_Inout_ T& rc, const T& rcRef) noexcept
+EckNfInlineCe bool AdjustRectToFillAnother(_Inout_ T& rc, const T& rcRef) noexcept
 {
     if constexpr (RectTraits<T>::IsRcwh)
     {
@@ -590,7 +590,7 @@ EckNfInlineCe BOOL AdjustRectToFillAnother(_Inout_ T& rc, const T& rcRef) noexce
             cx0 = rc.cx,
             cy0 = rc.cy;
         if (cxMax <= 0 || cyMax <= 0 || cx0 <= 0 || cy0 <= 0)
-            return FALSE;
+            return false;
 
         typename RectTraits<T>::T cxRgn, cyRgn, x, y;
         cxRgn = cyMax * cx0 / cy0;
@@ -612,7 +612,7 @@ EckNfInlineCe BOOL AdjustRectToFillAnother(_Inout_ T& rc, const T& rcRef) noexce
         rc.y = rcRef.y + y;
         rc.cx = cxRgn;
         rc.cy = cyRgn;
-        return TRUE;
+        return true;
     }
     else
     {
@@ -622,7 +622,7 @@ EckNfInlineCe BOOL AdjustRectToFillAnother(_Inout_ T& rc, const T& rcRef) noexce
             cx0 = rc.right - rc.left,
             cy0 = rc.bottom - rc.top;
         if (cxMax <= 0 || cyMax <= 0 || cx0 <= 0 || cy0 <= 0)
-            return FALSE;
+            return false;
 
         typename RectTraits<T>::T cxRgn, cyRgn, x, y;
         cxRgn = cyMax * cx0 / cy0;
@@ -644,7 +644,7 @@ EckNfInlineCe BOOL AdjustRectToFillAnother(_Inout_ T& rc, const T& rcRef) noexce
         rc.top = rcRef.top + y;
         rc.right = rcRef.left + x + cxRgn;
         rc.bottom = rcRef.top + y + cyRgn;
-        return TRUE;
+        return true;
     }
 }
 
@@ -693,12 +693,12 @@ EckInlineNdCe MARGINS MakeMarginHV(int h, int v) noexcept
     return { h,h,v,v };
 }
 
-EckInlineNdCe BOOL PtInCircle(D2D1_POINT_2F pt, D2D1_POINT_2F ptCenter, float fRadius) noexcept
+EckInlineNdCe bool PtInCircle(D2D1_POINT_2F pt, D2D1_POINT_2F ptCenter, float fRadius) noexcept
 {
     return (pt.x - ptCenter.x) * (pt.x - ptCenter.x) + (pt.y - ptCenter.y) * (pt.y - ptCenter.y) <=
         fRadius * fRadius;
 }
-EckInlineNdCe BOOL PtInCircle(POINT pt, POINT ptCenter, int iRadius) noexcept
+EckInlineNdCe bool PtInCircle(POINT pt, POINT ptCenter, int iRadius) noexcept
 {
     return (pt.x - ptCenter.x) * (pt.x - ptCenter.x) + (pt.y - ptCenter.y) * (pt.y - ptCenter.y) <=
         iRadius * iRadius;
@@ -819,7 +819,7 @@ EckInlineCe void FromString(_Out_writes_bytes_(cb) PVOID p, size_t cb,
 }
 
 EckInlineCe void Md5ToString(_In_reads_bytes_(16) PCVOID pMd5,
-    _Out_writes_(32) CcpCharPointer auto pszResult, BOOL bUpper = TRUE) noexcept
+    _Out_writes_(32) CcpCharPointer auto pszResult, bool bUpper = true) noexcept
 {
     if (bUpper)
         ToStringUpper(pMd5, (size_t)16, pszResult);
@@ -828,7 +828,7 @@ EckInlineCe void Md5ToString(_In_reads_bytes_(16) PCVOID pMd5,
 }
 
 inline constexpr void GuidToString(const GUID& guid,
-    _Out_writes_(32) CcpCharPointer auto pszResult, BOOL bUpper = TRUE) noexcept
+    _Out_writes_(32) CcpCharPointer auto pszResult, bool bUpper = true) noexcept
 {
     const BYTE* p = (const BYTE*)&guid;
     BYTE by[16];
@@ -907,7 +907,7 @@ EckInlineNd T RoundTo(T fVal, int cDigits) noexcept
     return round(fVal * fTemp) / fTemp;
 }
 
-EckInlineNdCe BOOL Sign(auto v) noexcept { return v >= 0; }
+EckInlineNdCe bool Sign(auto v) noexcept { return v >= 0; }
 template<class T>
 EckInlineNdCe T SignValue(T v) noexcept { return (v >= 0 ? 1 : -1); }
 
@@ -954,7 +954,7 @@ EckInlineNdCe size_t Fnv1aHash(PCBYTE p, size_t cb) noexcept
 }
 
 template<std::floating_point T>
-EckInline BOOL FloatEqual(T f1, T f2, T fEpsilon = std::numeric_limits<T>::epsilon()) noexcept
+EckInline bool FloatEqual(T f1, T f2, T fEpsilon = std::numeric_limits<T>::epsilon()) noexcept
 {
     return abs(f1 - f2) < fEpsilon;
 }
@@ -1172,7 +1172,7 @@ EckInlineNdCe ULARGE_INTEGER ToULargeInt(CcpNumber auto x) noexcept
 #pragma endregion WinLargeInt
 
 #pragma region 其他
-EckInlineNdCe BOOL EqualGuid(REFGUID x1, REFGUID x2) noexcept
+EckInlineNdCe bool EqualGuid(REFGUID x1, REFGUID x2) noexcept
 {
     return
         x1.Data1 == x2.Data1 &&
@@ -1195,8 +1195,8 @@ EckInlineCe void AssignArray(T(&x1)[N], const T(&x2)[N]) noexcept
         x1[i] = x2[i];
 }
 
-EckInlineNdCe LPARAM MakeKeyStrokeFlag(USHORT cRepeat, UINT uScanCode, BOOL bExtended,
-    BOOL bAlt, BOOL bPreviousState, BOOL bTransition) noexcept
+EckInlineNdCe LPARAM MakeKeyStrokeFlag(USHORT cRepeat, UINT uScanCode, bool bExtended,
+    bool bAlt, bool bPreviousState, bool bTransition) noexcept
 {
     EckAssert(bExtended == 0 || bExtended == 1);
     EckAssert(bAlt == 0 || bAlt == 1);

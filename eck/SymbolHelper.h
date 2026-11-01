@@ -123,10 +123,10 @@ inline W32ERR DshInit(
     _Out_ HANDLE& hProcess,
     UINT uOptions = SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS | SYMOPT_LOAD_ANYTHING,
     PCWSTR pszUserSearchPath = nullptr,
-    BOOL bInvadeProcess = FALSE) noexcept
+    bool bInvadeProcess = false) noexcept
 {
     NTSTATUS nts;
-    hProcess = NaOpenProcess(SYNCHRONIZE, FALSE, NtCurrentProcessId32(), &nts);
+    hProcess = NaOpenProcess(SYNCHRONIZE, false, NtCurrentProcessId32(), &nts);
     if (!NT_SUCCESS(nts))
         return WIN32_FROM_NTSTATUS(nts);
     if (!SymInitializeW(hProcess, nullptr, bInvadeProcess))

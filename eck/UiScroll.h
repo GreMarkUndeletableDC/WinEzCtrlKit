@@ -10,8 +10,8 @@ struct __declspec(novtable) IScrollControllerT
     {
         TCoord fPos;
         TCoord fPrevPos;
-        BOOLEAN bAnimating;
-        BOOLEAN bEndAnimation;
+        bool bAnimating;
+        bool bEndAnimation;
         void* pUser;
     };
     using FSccCallback = void(*)(const SCC_CALLBACK_DATA& Data);
@@ -27,11 +27,11 @@ struct __declspec(novtable) IScrollControllerT
     virtual TCoord SccGetMaximum() const noexcept = 0;
     virtual void SccSetMaximum(TCoord x) noexcept = 0;
     virtual void SccSetRange(TCoord Min, TCoord Max) noexcept = 0;
-    virtual void SccSetVisible(BOOL b) noexcept = 0;
+    virtual void SccSetVisible(bool b) noexcept = 0;
     virtual void SccRedraw() noexcept = 0;
 
     virtual void SccMouseWheel(TCoord d) noexcept = 0;
-    virtual void SccScrollDelta(TCoord d, BOOL bSmooth) noexcept = 0;
+    virtual void SccScrollDelta(TCoord d, bool bSmooth) noexcept = 0;
 
     virtual void SccSetCallback(FSccCallback pfnCallback, void* pUser) noexcept = 0;
 
@@ -45,11 +45,11 @@ struct __declspec(novtable) IScrollControllerT
     TCoord SccGetMaximum() const noexcept override {}
     void SccSetMaximum(TCoord x) noexcept override {}
     void SccSetRange(TCoord Min, TCoord Max) noexcept override {}
-    void SccSetVisible(BOOL b) noexcept override {}
+    void SccSetVisible(bool b) noexcept override {}
     void SccRedraw() noexcept override {}
 
     void SccMouseWheel(TCoord d) noexcept override {}
-    void SccScrollDelta(TCoord d, BOOL bSmooth) noexcept override {}
+    void SccScrollDelta(TCoord d, bool bSmooth) noexcept override {}
 
     void SccSetCallback(FSccCallback pfnCallback, void* pUser) noexcept override {}
     */

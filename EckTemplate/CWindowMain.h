@@ -32,5 +32,5 @@ public:
 
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override;
 
-    BOOL PreTranslateMessage(const MSG& Msg) noexcept override;
+    bool PreTranslateMessage(const MSG& Msg) noexcept override;
 };

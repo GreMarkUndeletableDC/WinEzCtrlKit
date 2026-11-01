@@ -76,7 +76,7 @@ namespace Detail
     };
     constexpr inline std::wstring_view ShmCtxMenuHnd{ L"shellex\\ContextMenuHandlers"sv };
 
-    BOOL ShmpQueryComDisplayName(
+    bool ShmpQueryComDisplayName(
         _In_reads_(38) PCWCH pszClsid, CStringW& rsDisplayName) noexcept
     {
         WCHAR szPath[38 + 10];
@@ -93,9 +93,9 @@ namespace Detail
         for (const auto psz : DisplayName)
         {
             if (Key.QueryValueString(rsDisplayName, psz) == ERROR_SUCCESS)
-                return TRUE;
+                return true;
         }
-        return FALSE;
+        return false;
     }
 
     void ShmpLoadIndirectString(CStringW& rs) noexcept
@@ -126,8 +126,8 @@ private:
     CRegistryKey m_RegKey{};
     DWORD m_idxEnum{};
     BYTE m_idxSource{};
-    BOOLEAN m_bCurrIsShellEx{};
-    BOOLEAN m_bFileType{};
+    bool m_bCurrIsShellEx{};
+    bool m_bFileType{};
     CStringW m_rsFileType{};
     CStringW m_rsTmp{};
 
@@ -148,7 +148,7 @@ private:
         if (ls != ERROR_SUCCESS)
             return ls;
         ReserveTempBuffer();
-        m_bCurrIsShellEx = FALSE;
+        m_bCurrIsShellEx = false;
         return ERROR_SUCCESS;
     }
 
@@ -162,7 +162,7 @@ private:
         if (ls != ERROR_SUCCESS)
             return ls;
         ReserveTempBuffer();
-        m_bCurrIsShellEx = TRUE;
+        m_bCurrIsShellEx = true;
         return ERROR_SUCCESS;
     }
 
@@ -182,12 +182,12 @@ private:
         e.rsRegPath.PushBack(m_rsTmp.Data(), cchBuf);
         // CLSID/命令行
         e.rsClsidOrCmd.Clear();
-        BOOL bClsid{};
+        bool bClsid{};
         ls = Key.QueryValueString(e.rsClsidOrCmd, L"ExplorerCommandHandler");
         if (ls == ERROR_SUCCESS)// 有ExplorerCommandHandler
         {
             e.uFlags |= ShmFlags::Com;
-            bClsid = TRUE;
+            bClsid = true;
         }
         else// 检查是否有command\DelegateExecute
         {
@@ -199,7 +199,7 @@ private:
                 if (ls == ERROR_SUCCESS)
                 {
                     e.uFlags |= ShmFlags::Com;
-                    bClsid = TRUE;
+                    bClsid = true;
                 }
                 else// 没有DelegateExecute，检查默认值
                     Key.GetValueString(e.rsClsidOrCmd, L"command", nullptr);
@@ -249,7 +249,7 @@ private:
         e.rsRegPath.PushBackChar(L'\\');
         e.rsRegPath.PushBack(m_rsTmp.Data(), cchBuf);
         // CLSID
-        BOOL bClsid{};
+        bool bClsid{};
         ls = Key.QueryValueString(e.rsClsidOrCmd, nullptr);
         if (ls == ERROR_SUCCESS && !e.rsClsidOrCmd.IsEmpty())
         {
@@ -260,7 +260,7 @@ private:
                 m_rsTmp.Assign(t.Data(), t.Size());
             }
             e.uFlags |= ShmFlags::Com;
-            bClsid = TRUE;
+            bClsid = true;
         }
         // 显示名称
         ls = Key.QueryValueString(e.rsDisplayName, L"MUIVerb");
@@ -280,8 +280,8 @@ public:
         m_RegKey.Close();
         m_idxEnum = 0;
         m_idxSource = 0;
-        m_bCurrIsShellEx = FALSE;
-        m_bFileType = FALSE;
+        m_bCurrIsShellEx = false;
+        m_bFileType = false;
         m_rsFileType.Clear();
     }
 

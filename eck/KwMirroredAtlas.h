@@ -45,7 +45,7 @@ private:
         cy = std::max(cy, cyMin);
         cx = std::min(cx, (TCoord)D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION);
         cy = std::min(cy, (TCoord)D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION);
-        TexNew.CpuCreate(4, TRUE, cx, cy);
+        TexNew.CpuCreate(4, true, cx, cy);
     }
 
     void Compact(CMirroredTexture& TexNew) noexcept
@@ -67,8 +67,8 @@ private:
                 f = { e };
             else
             {
-                f.bFree = FALSE;
-                f.bUnusedId = TRUE;
+                f.bFree = false;
+                f.bUnusedId = true;
                 f.u = idLastEmpty;
 #ifdef _DEBUG
                 f.x = f.y = f.cx = f.cy = std::numeric_limits<TCoord>::max();
@@ -125,7 +125,7 @@ private:
             }
             f = e;
         }
-        TexNew.GpuCreate(TRUE);
+        TexNew.GpuCreate(true);
         m_Tex = std::move(TexNew);
     }
 
@@ -144,7 +144,7 @@ private:
                 auto& e = m_Allocated[id];
                 EckAssert(!e.bFree && e.bUnusedId);
                 m_idFirstUnused = e.u;
-                e.bUnusedId = FALSE;
+                e.bUnusedId = false;
                 e = { x, y, cx, cy };
             }
             else
@@ -166,8 +166,8 @@ public:
         DXGI_FORMAT eFormat = DXGI_FORMAT_B8G8R8A8_UNORM,
         UINT uBind = D3D11_BIND_SHADER_RESOURCE) noexcept
     {
-        m_Tex.CpuCreate(4, TRUE, cx, cy);
-        m_Tex.GpuCreate(TRUE, eFormat, uBind);
+        m_Tex.CpuCreate(4, true, cx, cy);
+        m_Tex.GpuCreate(true, eFormat, uBind);
         m_Packer.Initialize(cx, cy);
         m_Allocated.Clear();
     }
@@ -175,8 +175,8 @@ public:
     TId Allocate(
         TCoord cx, TCoord cy,
         _Out_ TCoord& x, _Out_ TCoord& y,
-        BOOL bUnionDirty = FALSE,
-        BOOL bDiscardable = TRUE) noexcept
+        bool bUnionDirty = false,
+        bool bDiscardable = true) noexcept
     {
         const auto id = AllocateRectangle(cx, cy, x, y);
         if (id != IdInvalid)
@@ -203,7 +203,7 @@ public:
                     y = e.y;
                     e.cx = cx;
                     e.cy = cy;
-                    e.bFree = FALSE;
+                    e.bFree = false;
                     UnionDirtyRect({ x, y, UINT(x + cx), UINT(y + cy) });
                     return id;
                 }
@@ -252,7 +252,7 @@ public:
         ValidateId(id);
 #endif
         auto& e = m_Allocated[id];
-        e.bFree = TRUE;
+        e.bFree = true;
         e.u = m_idFirstFree;
         m_idFirstFree = id;
     }

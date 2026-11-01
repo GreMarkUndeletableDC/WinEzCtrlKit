@@ -19,14 +19,14 @@ private:
     HCURSOR m_hcHit{};
     HCURSOR m_hcDef{};
 
-    BITBOOL m_bCaptured : 1 = FALSE;
+    BITBOOL m_bCaptured : 1 = false;
 public:
     LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
     {
         switch (uMsg)
         {
         case WM_LBUTTONDOWN:
-            m_bCaptured = TRUE;
+            m_bCaptured = true;
             Redraw();
             UpdateWindow(Handle);
             SetCapture(Handle);
@@ -37,7 +37,7 @@ public:
         case WM_LBUTTONUP:
             if (m_bCaptured)
             {
-                m_bCaptured = FALSE;
+                m_bCaptured = false;
                 Redraw();
                 UpdateWindow(Handle);
                 ReleaseCapture();
@@ -53,7 +53,7 @@ public:
                 SetCursor(m_hcHit ? m_hcHit : m_hcDef);
             else
                 SetCursor(m_hcNormal ? m_hcNormal : m_hcDef);
-            return TRUE;
+            return true;
 
         case WM_PAINT:
         {

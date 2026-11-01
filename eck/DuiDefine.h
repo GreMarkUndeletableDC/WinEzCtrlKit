@@ -196,7 +196,7 @@ struct PAINTINFO
     D2D1_RECT_F rcClipInEle;  // 剪裁矩形，相对元素
     float ox;
     float oy;
-    BOOLEAN bClip;
+    bool bClip;
 };
 
 constexpr inline auto DrawTextLayoutFlags =
@@ -206,9 +206,9 @@ struct EVT_SCROLL : ELENMHDR
 {
     float fPos;
     float fPrevPos;
-    BOOLEAN bAnimating;
-    BOOLEAN bVertical;
-    BOOLEAN bEndAnimation;
+    bool bAnimating;
+    bool bVertical;
+    bool bEndAnimation;
 };
 
 class CBitmap final

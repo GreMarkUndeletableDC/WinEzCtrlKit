@@ -279,10 +279,10 @@ public:
         CGeometryPath path;
 
         // 启用偏移
-        path.GstEnableOffset(TRUE);
+        path.GstEnableOffset(true);
         path.GstSetOffset(5.0f, 10.0f);
 
-        BOOL isEnabled = FALSE;
+        bool isEnabled = false;
         path.GstIsOffsetEnabled(&isEnabled);
         Assert::IsTrue(isEnabled, L"Offset should be enabled");
 
@@ -305,7 +305,7 @@ public:
         CGeometryPath path;
 
         // 启用偏移
-        path.GstEnableOffset(TRUE);
+        path.GstEnableOffset(true);
         path.GstSetOffset(2.0f, 3.0f);
 
         path.BeginFigure({ 0.0f, 0.0f }, D2D1_FIGURE_BEGIN_FILLED);
