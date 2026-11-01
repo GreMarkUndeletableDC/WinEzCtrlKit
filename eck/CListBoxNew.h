@@ -1194,7 +1194,7 @@ public:
                 int idxOld{ -1 };
                 std::swap(idxOld, m_idxSel);
                 if (idxOld >= 0)
-                    RedrawItem(idx);
+                    RedrawItem(idxOld);
             }
         }
         else

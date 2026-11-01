@@ -38,7 +38,7 @@ inline bool HeaderComplete(
     std::wstring_view svHeader,
     std::wstring_view svMethod,
     std::wstring_view svCookies,
-    [[maybe_unused]] std::wstring_view svUserAgent) noexcept
+    std::wstring_view svUserAgent) noexcept
 {
     rsHeader.PushBack(svHeader);
 

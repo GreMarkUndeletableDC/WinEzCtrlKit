@@ -935,6 +935,7 @@ constexpr bool IsInputMessage(UINT uMsg) noexcept
 inline SIZE GetCharDimension(HWND hWnd, HFONT hFont) noexcept
 {
     const auto hDC = GetDC(hWnd);
+    SelectObject(hDC, hFont);
     TEXTMETRICW tm;
     GetTextMetricsW(hDC, &tm);
     if (tm.tmPitchAndFamily & TMPF_FIXED_PITCH)

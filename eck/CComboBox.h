@@ -362,7 +362,7 @@ public:
     {
         RECT rc;
         GetClientRect(m_hWnd, &rc);
-        const int oy = rc.bottom - (int)SendMessageW(CB_GETITEMHEIGHT, -1, 0);
+        const int oy = rc.bottom - (int)SendMessageW(CB_GETITEMHEIGHT, WPARAM(-1), 0);
         return (SendMessageW(CB_SETITEMHEIGHT, WPARAM(-1), LPARAM(cy - oy)) != CB_ERR);
     }
 
