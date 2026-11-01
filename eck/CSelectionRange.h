@@ -198,10 +198,10 @@ public:
         }
         else
             itIncBegin = it;
-        for (auto it = itIncBegin; it != m_vRange.end(); ++it)
+        for (auto it1 = itIncBegin; it1 != m_vRange.end(); ++it1)
         {
-            ++it->idxBegin;
-            ++it->idxEnd;
+            ++it1->idxBegin;
+            ++it1->idxEnd;
         }
     }
 
@@ -237,10 +237,10 @@ public:
                 }
             }
         }
-        for (auto it = itDecBegin; it != m_vRange.end(); ++it)
+        for (auto it1 = itDecBegin; it1 != m_vRange.end(); ++it1)
         {
-            --it->idxBegin;
-            --it->idxEnd;
+            --it1->idxBegin;
+            --it1->idxEnd;
         }
         if (bEraseIt)
             m_vRange.erase(it);

@@ -395,7 +395,7 @@ public:
                 if (m_InfoEx.iCheckBoxMode == 1)
                 {
                     iPartID = BP_RADIOBUTTON;
-                    if (m_idxChecked == pdis->itemID)
+                    if (m_idxChecked == (int)pdis->itemID)
                         iStateID = Item.Info.bDisabled ? RBS_CHECKEDDISABLED : RBS_CHECKEDNORMAL;
                     else
                         iStateID = Item.Info.bDisabled ? RBS_UNCHECKEDDISABLED : RBS_UNCHECKEDNORMAL;

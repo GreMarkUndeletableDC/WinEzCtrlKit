@@ -112,6 +112,7 @@ private:
 
     void Paint(HDC hDC, const RECT& rcPaint) noexcept
     {
+        // FIXME: 使用rcPaint
         if (m_bPartMetricsDirty)
         {
             m_bPartMetricsDirty = false;

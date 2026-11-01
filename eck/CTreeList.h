@@ -384,13 +384,10 @@ private:
             idxCurrParent = idxTemp;
         }
 
-        pParent->iLevel = iLevel;
+        pParent->iLevel = (short)iLevel;
         const int cOld = (int)m_vItem.size();
         if (!(pParent->uFlags & TLIF_CLOSED))
         {
-            int cChildrenReal = 0;
-
-            bool b = false;
             EckCounter(cChildren, i)
             {
                 NMTLFILLCHILDREN nm{};
@@ -592,7 +589,7 @@ private:
                         if (f->uFlags & TLIF_CLOSED)
                             b = bLastItem;
 
-                    if (bLastItem = bLastItem && b)
+                    if ((bLastItem = bLastItem && b))
                     {
                         const int yBottom = rcItem.top + m_cyItem * 4 / 5;
                         MoveToEx(hDC, xLine, rcItem.top, nullptr);
@@ -860,9 +857,9 @@ private:
             {
                 const int idx = piOrder[i];
                 m_Header.GetItem(idx, &hdi);
-                auto& e = m_vCol[i + 1];
-                e.iLeft = x;
-                e.iRight = x + hdi.cxy;
+                auto& Col = m_vCol[i + 1];
+                Col.iLeft = x;
+                Col.iRight = x + hdi.cxy;
                 e.idxActual = idx + 1;
                 x += hdi.cxy;
             }
@@ -1355,10 +1352,10 @@ private:
                 else // ONLY FOR SINGLE SEL
                 {
                     EckAssert(m_bSingleSel);
-                    int idx = -1;
-                    std::swap(m_idxSel, idx);
-                    if (idx >= 0)
-                        RedrawItem(idx);
+                    int idxSel = -1;
+                    std::swap(m_idxSel, idxSel);
+                    if (idxSel >= 0)
+                        RedrawItem(idxSel);
                 }
                 UpdateWindow(hWnd);
                 return;
@@ -1389,7 +1386,7 @@ private:
         NmFillHeaderAndSend(nm, NM_TL_MOUSECLICK);
     }
 
-    void OnKeyDown(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
+    void OnKeyDown(HWND hWnd, UINT, WPARAM wParam, LPARAM) noexcept
     {
         if (m_vItem.empty())
             return;
@@ -2331,7 +2328,6 @@ public:
             bool b = false;
             EckCounter(nm.cChildren, i)
             {
-                const int idxCurrParent = (int)m_vItem.size();
                 NMTLFILLCHILDREN nm2{};
                 nm2.pParent = nm.pChildren[i];
                 nm2.pParent->idxParent = -1;
@@ -2384,7 +2380,6 @@ public:
         {
             tlht.iPart = TLIP_NONE;
 
-            const int y = GetItemY(idx);
             const auto e = m_vItem[idx];
             RECT rc;
             if (!m_bFlatMode && (e->uFlags & TLIF_HASCHILDREN))
@@ -3175,7 +3170,6 @@ public:
         nm.pNode = e;
         if (!NmFillHeaderAndSend(nm, NM_TL_ITEMEXPANDING))
         {
-            int i = idx + 1;
             NMTLFILLCHILDREN nmfc;
             nmfc.nmhdr = nm.nmhdr;
             nmfc.nmhdr.code = NM_TL_FILLCHILDREN;

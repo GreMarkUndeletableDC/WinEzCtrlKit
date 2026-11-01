@@ -13,6 +13,7 @@ enum : UINT
     BccBoolFalse,
     BccNotImplemented,
     BccException,
+    BccReferenceCount,
 
     BccUserBegin = 0x10000,
 };

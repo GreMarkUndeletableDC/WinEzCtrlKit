@@ -395,7 +395,7 @@ public:
 )";
 
 #undef ECK_TEMP
-#define ECK_TEMP(Name, Setter, Getter) \
+#define ECK_TEMP(Name) \
     D2D1_VALUE_TYPE_BINDING(L#Name, &CGradientBlurEffect::Set##Name, &CGradientBlurEffect::Get##Name)
         const D2D1_PROPERTY_BINDING Binding[]
         {

@@ -703,7 +703,7 @@ public:
         }
     }
 
-    EckInline int Format(_Printf_format_string_ TConstPointer pszFmt, ...)
+    int Format(_Printf_format_string_ TConstPointer pszFmt, ...)
     {
         va_list vl;
         va_start(vl, pszFmt);
@@ -712,7 +712,7 @@ public:
         return cch;
     }
 
-    EckInline int FormatV(_Printf_format_string_ TConstPointer pszFmt, va_list vl)
+    int FormatV(_Printf_format_string_ TConstPointer pszFmt, va_list vl)
     {
         va_list vl1;
         va_copy(vl1, vl);
@@ -725,7 +725,7 @@ public:
         return cch;
     }
 
-    EckInline int PushBackFormat(_Printf_format_string_ TConstPointer pszFmt, ...)
+    int PushBackFormat(_Printf_format_string_ TConstPointer pszFmt, ...)
     {
         va_list vl;
         va_start(vl, pszFmt);
@@ -734,7 +734,7 @@ public:
         return cch;
     }
 
-    EckInline int PushBackFormatV(_Printf_format_string_ TConstPointer pszFmt, va_list vl)
+    int PushBackFormatV(_Printf_format_string_ TConstPointer pszFmt, va_list vl)
     {
         va_list vl1;
         va_copy(vl1, vl);
@@ -1418,14 +1418,14 @@ EckInlineNd std::weak_ordering operator<=>(const EckTemp& rs1, const EckTemp& rs
 #pragma endregion Operator
 
 template<class TCharTraits, class TAllocator>
-EckInline void DbgPrint(const CStringT<WCHAR, TCharTraits, TAllocator>& rs, int iType = 1, bool bNewLine = true) noexcept
+EckInline void DbgPrint(const CStringT<WCHAR, TCharTraits, TAllocator>& rs, bool bNewLine = true) noexcept
 {
     OutputDebugStringW(rs.Data());
     if (bNewLine)
         OutputDebugStringW(L"\n");
 }
 template<class TCharTraits, class TAllocator>
-EckInline void DbgPrint(const CStringT<CHAR, TCharTraits, TAllocator>& rs, int iType = 1, bool bNewLine = true) noexcept
+EckInline void DbgPrint(const CStringT<CHAR, TCharTraits, TAllocator>& rs, bool bNewLine = true) noexcept
 {
     OutputDebugStringA(rs.Data());
     if (bNewLine)
@@ -1529,7 +1529,7 @@ EckInlineNd auto EcdMultiByteToWide(_In_reads_or_z_(cch) PCCH pszText, int cch =
     return rs;
 }
 
-EckInlineNd CStringW Format(PCWSTR pszFmt, ...)
+inline [[nodiscard]] CStringW Format(PCWSTR pszFmt, ...)
 {
     CStringW rs{};
     va_list vl;
@@ -1538,7 +1538,7 @@ EckInlineNd CStringW Format(PCWSTR pszFmt, ...)
     va_end(vl);
     return rs;
 }
-EckInlineNd CStringA Format(PCSTR pszFmt, ...)
+inline [[nodiscard]] CStringA Format(PCSTR pszFmt, ...)
 {
     CStringA rs{};
     va_list vl;

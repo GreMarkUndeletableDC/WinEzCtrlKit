@@ -922,7 +922,7 @@ private:
         m_bWaitEditDelay = false;
     }
 
-    LRESULT OnMessageEdit(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot& Ctx) noexcept
+    LRESULT OnMessageEdit(CWindow*, UINT uMsg, WPARAM wParam, LPARAM, Slot& Ctx) noexcept
     {
         switch (uMsg)
         {
@@ -1442,11 +1442,6 @@ public:
                 return true;// 取消编辑
             }
             break;
-
-            case LVN_ENDLABELEDITW:
-            {
-                int a{};
-            }
             }
         }
         break;

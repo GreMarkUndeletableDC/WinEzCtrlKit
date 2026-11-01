@@ -106,10 +106,10 @@ private:
                 GrowCpuBuffer(TexNew);
                 goto Retry;
             }
-            e.x = rcNew.x;
-            e.y = rcNew.y;
+            e.x = (TCoord)rcNew.x;
+            e.y = (TCoord)rcNew.y;
             if (rcNew.y + e.cy > yMax)
-                yMax = rcNew.y + e.cy;
+                yMax = TCoord(rcNew.y + e.cy);
         }
         m_yMax = yMax;
 
@@ -134,8 +134,8 @@ private:
         CRectPackSkyline::RECT rcNew{ .cx = cx, .cy = cy };
         if (m_Packer.AllocateMinimumWaste(rcNew))
         {
-            x = rcNew.x;
-            y = rcNew.y;
+            x = (TCoord)rcNew.x;
+            y = (TCoord)rcNew.y;
 
             TId id;
             if (m_idFirstUnused != IdInvalid)
@@ -153,7 +153,7 @@ private:
                 id = TId(m_Allocated.Size() - 1);
             }
             if (rcNew.y + cy > m_yMax)
-                m_yMax = rcNew.y + cy;
+                m_yMax = (TCoord)(rcNew.y + cy);
             return id;
         }
         x = 0, y = 0;
@@ -176,7 +176,7 @@ public:
         TCoord cx, TCoord cy,
         _Out_ TCoord& x, _Out_ TCoord& y,
         bool bUnionDirty = false,
-        bool bDiscardable = true) noexcept
+        [[maybe_unused]] bool bDiscardable = true) noexcept
     {
         const auto id = AllocateRectangle(cx, cy, x, y);
         if (id != IdInvalid)
@@ -187,11 +187,11 @@ public:
         }
         else// 分配失败，尝试搜索合适的空闲区域
         {
-            auto id = m_idFirstFree;
+            auto idFree = m_idFirstFree;
             auto idLast = IdInvalid;
-            while (id != IdInvalid)
+            while (idFree != IdInvalid)
             {
-                auto& e = m_Allocated[id];
+                auto& e = m_Allocated[idFree];
                 EckAssert(e.bFree && !e.bUnusedId);
                 if (e.cx >= cx && e.cy >= cy)
                 {
@@ -205,10 +205,10 @@ public:
                     e.cy = cy;
                     e.bFree = false;
                     UnionDirtyRect({ x, y, UINT(x + cx), UINT(y + cy) });
-                    return id;
+                    return idFree;
                 }
-                idLast = id;
-                id = e.u;
+                idLast = idFree;
+                idFree = e.u;
             }
         }
         // 搜索失败，扩容
@@ -228,11 +228,11 @@ public:
 
             GrowCpuBuffer(TexNew, cxMin, cyMin);
             Compact(TexNew);
-            const auto id = AllocateRectangle(cx, cy, x, y);
-            if (id != IdInvalid)
+            const auto idNew = AllocateRectangle(cx, cy, x, y);
+            if (idNew != IdInvalid)
             {
                 UnionDirtyRect({ x, y, UINT(x + cx), UINT(y + cy) });
-                return id;
+                return idNew;
             }
         }
         return IdInvalid;

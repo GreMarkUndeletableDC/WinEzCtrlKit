@@ -83,10 +83,10 @@ namespace Detail
                     it = hmPaths.insert(std::make_pair(svTemp, idxCurr)).first;
                     ++idxCurr;
 
-                    auto& x = vPIDL.emplace_back(pIDL, std::vector<PIDLIST_ABSOLUTE>{});
+                    auto& vItem = vPIDL.emplace_back(pIDL, std::vector<PIDLIST_ABSOLUTE>{});
                     if (FAILED(SHParseDisplayName(pszPath, nullptr, &pIDL, 0, nullptr)))// 文件转PIDL
                         continue;
-                    x.second.emplace_back(pIDL);
+                    vItem.second.emplace_back(pIDL);
                 }
                 else
                 {

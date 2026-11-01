@@ -247,8 +247,8 @@ inline bool GetDesktopPartHandle(
     hDefView = hLV = nullptr;
     if (!(hPmOrWorkerW = FindWindowW(L"Progman", L"Program Manager")))
         return false;
-    if (hDefView = FindWindowExW(hPmOrWorkerW, nullptr, L"SHELLDLL_DefView", nullptr))
-        if (hLV = FindWindowExW(hDefView, nullptr, L"SysListView32", nullptr))
+    if ((hDefView = FindWindowExW(hPmOrWorkerW, nullptr, L"SHELLDLL_DefView", nullptr)))
+        if ((hLV = FindWindowExW(hDefView, nullptr, L"SysListView32", nullptr)))
             return true;
     hPmOrWorkerW = nullptr;
     EckCounterNV(1024)
@@ -257,7 +257,7 @@ inline bool GetDesktopPartHandle(
             break;
         if (!(hDefView = FindWindowExW(hPmOrWorkerW, nullptr, L"SHELLDLL_DefView", nullptr)))
             continue;
-        if (hLV = FindWindowExW(hDefView, nullptr, L"SysListView32", nullptr))
+        if ((hLV = FindWindowExW(hDefView, nullptr, L"SysListView32", nullptr)))
             return true;
     }
     return false;
@@ -291,8 +291,8 @@ inline bool GetTaskBarPartHandle(
     {
         HWND hLast{};
         size_t c{};
-        while (hLast = FindWindowExW(nullptr, hLast,
-            L"Shell_SecondaryTrayWnd", nullptr))
+        while ((hLast = FindWindowExW(nullptr, hLast,
+            L"Shell_SecondaryTrayWnd", nullptr)))
         {
             *phSecondary++ = hLast;
             if (++c == *pcSecondary)
@@ -488,7 +488,7 @@ inline NTSTATUS RestartExplorer() noexcept
     return nts;
 }
 
-inline SIZE GetCursorSize(int iDpi) noexcept
+inline SIZE GetCursorSize() noexcept
 {
     HKEY hKey;
     DWORD dwBaseSize{}, cb{ sizeof(DWORD) };
@@ -500,7 +500,7 @@ inline SIZE GetCursorSize(int iDpi) noexcept
             nullptr, (PBYTE)&dwBaseSize, &cb);
         RegCloseKey(hKey);
     }
-    return { (int)dwBaseSize,(int)dwBaseSize };
+    return { (int)dwBaseSize, (int)dwBaseSize };
 }
 
 inline NTSTATUS ExpandEnvironmentString(

@@ -173,7 +173,7 @@ inline NTSTATUS IntGetPhysicalDriveIdentifier(F fnProcessData, int idxDrive) noe
         pscip->irDriveRegs.bSectorNumberReg = 1;
         pscip->irDriveRegs.bDriveHeadReg = BYTE(0xA0 | ((idxDrive & 1) << 4)),
             pscip->irDriveRegs.bCommandReg = IDE_ATA_IDENTIFY;
-        pscip->bDriveNumber = idxDrive;
+        pscip->bDriveNumber = (BYTE)idxDrive;
 
         constexpr size_t cbOut = sizeof(SRB_IO_CONTROL) +
             sizeof(SENDCMDOUTPARAMS) - 1/*bBuffer*/ + 512;

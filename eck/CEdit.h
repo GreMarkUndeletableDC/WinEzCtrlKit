@@ -160,7 +160,7 @@ public:
     {
         if (!pszBuf || cchMax < 1)
             return 0;
-        *(WORD*)pszBuf = cchMax - 1;
+        *(WORD*)pszBuf = WORD(cchMax - 1);
         int cch = (int)SendMessageW(EM_GETLINE, idxLine, (LPARAM)pszBuf);
         *(pszBuf + cch) = L'\0';
         return cch;
@@ -476,7 +476,7 @@ public:
     {
         if (!pszBuf || cchMax < 1)
             return 0;
-        *(WORD*)pszBuf = cchMax - 1;
+        *(WORD*)pszBuf = WORD(cchMax - 1);
         int cch = (int)SendMessageW(EM_GETFILELINE, idxLine, (LPARAM)pszBuf);
         *(pszBuf + cch) = L'\0';
         return cch;
@@ -680,7 +680,7 @@ namespace Detail
 
     struct DdxFnEdit : public CDdxControlCollection<DDXE_EDIT>
     {
-        LRESULT operator()(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot& Ctx)
+        LRESULT operator()(CWindow*, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot&) noexcept
         {
             if (uMsg == WM_COMMAND && HIWORD(wParam) == EN_UPDATE)
             {

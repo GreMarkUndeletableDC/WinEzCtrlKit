@@ -282,7 +282,7 @@ namespace Detail
 
     struct DdxFnCheckBox : public CDdxControlCollection<DDXE_CHECKBOX>
     {
-        LRESULT operator()(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot& Ctx)
+        LRESULT operator()(CWindow*, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot&) noexcept
         {
             if (uMsg == WM_COMMAND && HIWORD(wParam) == BN_CLICKED)
             {
@@ -300,13 +300,13 @@ namespace Detail
 template<class T>
 inline CWindow::HSlot DdxBindCheckBox(CButton& Ctrl, CWindow& Parent, Observable<T>& o) noexcept
 {
-    o.SetCallback([](const T& v, void* p)
+    o.SetCallback([](const T& v, void* p) noexcept
         {
             ((CButton*)p)->SetCheckState((int)v);
         }, &Ctrl);
     return DdxpConnect<Detail::DdxFnCheckBox, MHI_DDX_CHECKBOX>(Ctrl, Parent,
         Detail::DDXE_CHECKBOX{
-            &o, [](void* p, int v)
+            &o, [](void* p, int v) noexcept
             {
                 ((Observable<T>*)p)->Get() = (T)v;
             }

@@ -210,12 +210,12 @@ private:
                     iState = HDDS_SOFTHOT;
             else
                 iState = HDDS_NORMAL;
-            RECT rc{ pnmcd->rc };
+            RECT rcSplit{ pnmcd->rc };
             if (m_bFilterBar)
-                rc.bottom -= ((rc.bottom - rc.top) / 2);
-            rc.left = rc.right - m_cxSplitBtn;
-            xAvailable = rc.left;
-            DrawThemeBackground(m_hTheme, hDC, HP_HEADERDROPDOWN, iState, &rc, nullptr);
+                rcSplit.bottom -= ((rcSplit.bottom - rcSplit.top) / 2);
+            rcSplit.left = rcSplit.right - m_cxSplitBtn;
+            xAvailable = rcSplit.left;
+            DrawThemeBackground(m_hTheme, hDC, HP_HEADERDROPDOWN, iState, &rcSplit, nullptr);
         }
         else
             xAvailable = pnmcd->rc.right;

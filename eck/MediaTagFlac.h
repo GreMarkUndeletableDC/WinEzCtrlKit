@@ -675,10 +675,10 @@ public:
                 m_Stream << BYTE(0b1000'0000_by | (BYTE)e.eType);
             else
                 m_Stream << (BYTE)e.eType;
-            const auto cbData = (UINT)e.rbData.Size();
-            m_Stream << GetIntegerByte<2>(cbData)
-                << GetIntegerByte<1>(cbData)
-                << GetIntegerByte<0>(cbData)
+            const auto cbBlockData = (UINT)e.rbData.Size();
+            m_Stream << GetIntegerByte<2>(cbBlockData)
+                << GetIntegerByte<1>(cbBlockData)
+                << GetIntegerByte<0>(cbBlockData)
                 << e.rbData;
         }
         m_Stream.GetStream()->Commit(STGC_DEFAULT);

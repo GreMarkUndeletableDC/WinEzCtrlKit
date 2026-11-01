@@ -60,7 +60,7 @@ private:
         return UdwState::Normal;
     }
 
-    LRESULT OnWindowMessage(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot&) noexcept
+    LRESULT OnWindowMessage(CWindow*, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot&) noexcept
     {
         switch (uMsg)
         {

@@ -404,7 +404,7 @@ private:
 
         std::any Data{};
         ForEachItem(
-            [&](const FOR_ITEM& e)
+            [&](const FOR_ITEM& e) noexcept
             {
                 GetItemRect(e.idx, rcItem);
                 const bool bIntersectOld = IsRectsIntersect(rcItem, rcOld);
@@ -435,9 +435,8 @@ private:
                     }
                 }
             },
-            [&](const FOR_GROUP& e)
+            [&](const FOR_GROUP& e) noexcept
             {
-
             }, rcJudge, false);
         InflateRect(rcJudge, 1.f, 1.f);
         m_pHost->LchInvalidateRect(&rcJudge);

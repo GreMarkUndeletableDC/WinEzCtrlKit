@@ -150,7 +150,6 @@ public:
         // 计算行列的理想尺寸，并从当前布局尺寸中减去已固定部分
         TLytCoord d;
         TLytCoord cxLeave = m_cx, cyLeave = m_cy;
-        bool bMergeCell{};
         for (auto& e : m_vItem)
         {
             LYTSIZE sizeIdeal{};

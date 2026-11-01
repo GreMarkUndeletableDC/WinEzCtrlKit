@@ -362,8 +362,8 @@ public:
     {
         RECT rc;
         GetClientRect(m_hWnd, &rc);
-        int iOffset = rc.bottom - (int)SendMessageW(CB_GETITEMHEIGHT, -1, 0);
-        return (SendMessageW(CB_SETITEMHEIGHT, -1, cy - iOffset) != CB_ERR);
+        const int oy = rc.bottom - (int)SendMessageW(CB_GETITEMHEIGHT, -1, 0);
+        return (SendMessageW(CB_SETITEMHEIGHT, WPARAM(-1), LPARAM(cy - oy)) != CB_ERR);
     }
 
     void SetItemString(int idx, _In_z_ PCWSTR pszText) const noexcept

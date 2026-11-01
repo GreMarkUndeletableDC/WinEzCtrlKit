@@ -118,7 +118,10 @@ EckInlineCe void ReverseByteOrder(BYTE* p, size_t cb) noexcept
     std::reverse(p, p + cb);
 }
 
-EckInlineNdCe bool IsBitSet(auto x1, auto x2) noexcept { return (x1 & x2) == x2; }
+EckInlineNdCe bool IsBitSet(auto x1, auto x2) noexcept
+{
+    return (x1 & x2) == decltype(x1 & x2)(x2);
+}
 
 template<std::integral T>
 EckInlineNdCe T BitsLowN(T x, size_t n) noexcept

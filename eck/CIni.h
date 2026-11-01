@@ -339,7 +339,7 @@ public:
         const int pos1 = FindValueEndPosition(pos0);
         const int cch = pos1 - pos0;
         SplitString(m_rsText.Data() + pos0, L",", 0, cch, 1,
-            [&v](PCWSTR pszStart, int cchSub)
+            [&v](PCWSTR pszStart, int cchSub) noexcept
             {
                 v.emplace_back(_wtoi(pszStart));
                 return false;
@@ -355,7 +355,7 @@ public:
         const int pos1 = FindValueEndPosition(pos0);
         const int cch = pos1 - pos0;
         SplitString(m_rsText.Data() + pos0, L",", 0, cch, 1,
-            [&v](PCWSTR pszStart, int cchSub)
+            [&v](PCWSTR pszStart, int cchSub) noexcept
             {
                 v.emplace_back(_wtof(pszStart));
                 return false;
@@ -633,7 +633,7 @@ public:
         const int cch = (int)wcslen(pszLineBreak);
         if (cch > 2)
             return false;
-        m_cchLineBreak = cch;
+        m_cchLineBreak = (short)cch;
         wcscpy(m_szLineBreak, pszLineBreak);
         return true;
     }

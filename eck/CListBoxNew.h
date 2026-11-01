@@ -1191,9 +1191,9 @@ public:
             }
             else
             {
-                int idx{ -1 };
-                std::swap(idx, m_idxSel);
-                if (idx >= 0)
+                int idxOld{ -1 };
+                std::swap(idxOld, m_idxSel);
+                if (idxOld >= 0)
                     RedrawItem(idx);
             }
         }
@@ -1378,35 +1378,35 @@ public:
             return nm.Item.idxItem;
         else
         {
-            NMLBNGETDISPINFO nm;
-            NmFillHeader(nm, NM_LBN_GETDISPINFO);
-            for (nm.Item.idxItem = idxStart; nm.Item.idxItem < GetItemCount(); ++nm.Item.idxItem)
+            NMLBNGETDISPINFO nmDisp;
+            NmFillHeader(nmDisp, NM_LBN_GETDISPINFO);
+            for (nmDisp.Item.idxItem = idxStart; nmDisp.Item.idxItem < GetItemCount(); ++nmDisp.Item.idxItem)
             {
-                nm.Item.pszText = m_rsTextBuf.Data();
-                nm.Item.cchText = m_rsTextBuf.Size();
-                if (NmFillHeaderAndSend(nm, m_hParent, NM_LBN_GETDISPINFO))
+                nmDisp.Item.pszText = m_rsTextBuf.Data();
+                nmDisp.Item.cchText = m_rsTextBuf.Size();
+                if (NmFillHeaderAndSend(nmDisp, m_hParent, NM_LBN_GETDISPINFO))
                 {
                     if (uFlags & LBN_SF_CASEINSENSITIVE)
                         if (uFlags & LBN_SF_WHOLE)
                         {
-                            if (_wcsicmp(nm.Item.pszText, pszText) == 0)
-                                return nm.Item.idxItem;
+                            if (_wcsicmp(nmDisp.Item.pszText, pszText) == 0)
+                                return nmDisp.Item.idxItem;
                         }
                         else
                         {
-                            if (StrStrIW(nm.Item.pszText, pszText))
-                                return nm.Item.idxItem;
+                            if (StrStrIW(nmDisp.Item.pszText, pszText))
+                                return nmDisp.Item.idxItem;
                         }
                     else
                         if (uFlags & LBN_SF_WHOLE)
                         {
-                            if (wcscmp(nm.Item.pszText, pszText) == 0)
-                                return nm.Item.idxItem;
+                            if (wcscmp(nmDisp.Item.pszText, pszText) == 0)
+                                return nmDisp.Item.idxItem;
                         }
                         else
                         {
-                            if (wcsstr(nm.Item.pszText, pszText))
-                                return nm.Item.idxItem;
+                            if (wcsstr(nmDisp.Item.pszText, pszText))
+                                return nmDisp.Item.idxItem;
                         }
                 }
             }

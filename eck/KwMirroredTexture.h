@@ -143,7 +143,7 @@ public:
         EckAssert(rc.right <= m_cx && rc.bottom <= m_cy);
         const auto cbStride = PixelCb() * (rc.right - rc.left);
         for (UINT y = rc.top; y < rc.bottom; ++y)
-            ZeroMemory(CpuData<BYTE>(rc.left, y), cbStride);
+            RtlZeroMemory(CpuData<BYTE>((TCoord)rc.left, (TCoord)y), cbStride);
     }
 
     void GpuUpload(ID3D11DeviceContext* pContext, const RectU& rcDirty) const noexcept
@@ -161,7 +161,7 @@ public:
             1
         };
         pContext->UpdateSubresource(m_pTexture.Get(), 0, &Box,
-            CpuData<BYTE>(rcDirty.left, rcDirty.top), PixelCb() * m_cx, 0);
+            CpuData<BYTE>((TCoord)rcDirty.left, (TCoord)rcDirty.top), PixelCb() * m_cx, 0);
     }
     EckInline void GpuUpload(ID3D11DeviceContext* pContext) const noexcept
     {
@@ -184,8 +184,8 @@ public:
         {
             D3D11_TEXTURE2D_DESC Desc;
             m_pTexture->GetDesc(&Desc);
-            m_cx = Desc.Width;
-            m_cy = Desc.Height;
+            m_cx = (USHORT)Desc.Width;
+            m_cy = (USHORT)Desc.Height;
             m_Buffer.ReSize(PixelCb() * m_cx * m_cy);
         }
         else
@@ -208,7 +208,7 @@ public:
         {
             memcpy(
                 Dst.CpuData<BYTE>(xDst, yDst + y),
-                CpuData<BYTE>(rcSrc.left, rcSrc.top + y),
+                CpuData<BYTE>((TCoord)rcSrc.left, TCoord(rcSrc.top + y)),
                 PixelCb() * (rcSrc.right - rcSrc.left));
         }
     }

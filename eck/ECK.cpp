@@ -1813,8 +1813,8 @@ StartupStatus Initialize(HINSTANCE hInstance, const INITPARAM* pip, _Out_opt_ UI
         DetourAttach(&s_pfnDrawThemeTextEx, NewDrawThemeTextEx);
         const HMODULE hModUx = GetModuleHandleW(L"UxTheme.dll");
         EckAssert(hModUx);
-        if (s_pfnOpenThemeDataForDpi = (FOpenThemeDataForDpi)
-            GetProcAddress(hModUx, "OpenThemeDataForDpi"))
+        if ((s_pfnOpenThemeDataForDpi = (FOpenThemeDataForDpi)
+            GetProcAddress(hModUx, "OpenThemeDataForDpi")))
             DetourAttach(&s_pfnOpenThemeDataForDpi, NewOpenThemeDataForDpi);
         DetourAttach(&s_pfnDrawThemeBackgroundEx, NewDrawThemeBackgroundEx);
         DetourAttach(&s_pfnDrawThemeBackground, NewDrawThemeBackground);
@@ -2121,16 +2121,16 @@ void ThreadContext::TwmBroadcastThemeChanged() noexcept
         if (GetWindowLongPtrW(hWnd, GWL_STYLE) & WS_VISIBLE)
         {
             SendMessageW(hWnd, WM_SETREDRAW, false, 0);
-            SendMessageW(hWnd, WM_THEMECHANGED, -1, 0);
-            BroadcastChildrenMessage(hWnd, WM_THEMECHANGED, -1, 0);
+            SendMessageW(hWnd, WM_THEMECHANGED, WPARAM(-1), 0);
+            BroadcastChildrenMessage(hWnd, WM_THEMECHANGED, WPARAM(-1), 0);
             SendMessageW(hWnd, WM_SETREDRAW, true, 0);
             RedrawWindow(hWnd, nullptr, nullptr,
                 RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
         }
         else
         {
-            SendMessageW(hWnd, WM_THEMECHANGED, -1, 0);
-            BroadcastChildrenMessage(hWnd, WM_THEMECHANGED, -1, 0);
+            SendMessageW(hWnd, WM_THEMECHANGED, WPARAM(-1), 0);
+            BroadcastChildrenMessage(hWnd, WM_THEMECHANGED, WPARAM(-1), 0);
         }
     }
 #endif // !ECK_OPT_NO_DARKMODE
