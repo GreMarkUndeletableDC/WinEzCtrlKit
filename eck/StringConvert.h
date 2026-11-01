@@ -139,7 +139,7 @@ inline TcvReturn<TPointer> TcvToInt(
             return { TcvResult::Overflow, p };
         }
         else
-            Result = Result * iRadix + Digit;
+            Result = TUnsigned(Result * iRadix + Digit);
     }
     if constexpr (std::is_signed_v<TInt>)
         if (bNeg)
@@ -234,9 +234,10 @@ namespace Detail
 {
     EckInlineNdCe TcvResult CharConvEcToTcvResult(std::errc ec) noexcept
     {
+        if (ec == std::errc{})
+            return TcvResult::Ok;
         switch (ec)
         {
-        case std::errc{}:                    return TcvResult::Ok;
         case std::errc::result_out_of_range:
         case std::errc::value_too_large:     return TcvResult::BufferTooSmall;
         case std::errc::invalid_argument:    return TcvResult::ErrorFormat;

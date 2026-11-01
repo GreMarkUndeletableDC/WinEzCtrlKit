@@ -9,11 +9,14 @@ public:
     ECK_RTTI(CFontDialog, CDialog);
 public:
     // CHOOSEFONTW*
-    INT_PTR CreateModalDialog(HWND hParent,
+    INT_PTR CreateModalDialog(
+        HWND hParent,
         _In_reads_bytes_(sizeof(CHOOSEFONTW)) void* pData = nullptr) noexcept override
     {
         BeginCbtHook(this);
-        return ChooseFontW((CHOOSEFONTW*)pData);
+        const auto p = (CHOOSEFONTW*)pData;
+        p->hwndOwner = hParent;
+        return ChooseFontW(p);
     }
 
 #if !ECK_OPT_NO_DWRITE && !ECK_OPT_NO_DARKMODE

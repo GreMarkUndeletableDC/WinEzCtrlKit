@@ -541,7 +541,7 @@ public:
     EckInline int GetNextItem(int idx, int idxGroup, UINT uFlags) const noexcept
     {
         if (idx < 0)
-            return (int)SendMessageW(LVM_GETNEXTITEMINDEX, -1, uFlags);
+            return (int)SendMessageW(LVM_GETNEXTITEMINDEX, WPARAM(-1), uFlags);
         else
         {
             LVITEMINDEX lvii;

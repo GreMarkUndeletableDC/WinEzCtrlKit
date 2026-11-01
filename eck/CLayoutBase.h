@@ -121,7 +121,6 @@ protected:
             rc.cy = rcCell.cy - e.Margins.t - e.Margins.b;
 
         const auto cx1 = rc.cx + e.Margins.l + e.Margins.r;
-        const auto cy1 = rc.cy + e.Margins.t + e.Margins.b;
         switch (Lf9Align(e.uFlags))
         {
         case LF_ALIGN_LT:

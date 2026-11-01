@@ -312,11 +312,11 @@ private:
                         {
                             const BYTE by = *e.pNeedle;
                             bool bDbcsLeadByte{};
-                            for (int i = 0; i < 10; i += 2)
+                            for (int k = 0; k < 10; k += 2)
                             {
-                                if (!e.LeadByteRange[i])
+                                if (!e.LeadByteRange[k])
                                     break;
-                                if (by >= e.LeadByteRange[i] && by < e.LeadByteRange[i + 1])
+                                if (by >= e.LeadByteRange[k] && by < e.LeadByteRange[k + 1])
                                 {
                                     bDbcsLeadByte = true;
                                     break;

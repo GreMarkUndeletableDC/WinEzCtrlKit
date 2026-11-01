@@ -2,6 +2,7 @@
 #include "CByteBuffer.h"
 #include "IMemoryView.h"
 #include "CUnknown.h"
+#include "Check.h"
 
 ECK_NAMESPACE_BEGIN
 class CStreamView : public CUnknown<CStreamView, IStream, IMemoryView>
@@ -41,7 +42,11 @@ public:
 #endif
     }
 
-    EckInline void AssertReference(LONG l) noexcept { EckAssert(m_cRef == l); }
+    void CheckReference(ULONG l) noexcept
+    {
+        if (m_cRef != l)
+            EckBugCheck(BccReferenceCount);
+    }
 
     STDMETHODIMP Read(void* pv, ULONG cb, ULONG* pcbRead) override
     {

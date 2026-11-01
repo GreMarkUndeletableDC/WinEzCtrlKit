@@ -233,7 +233,6 @@ EckNfInlineNd int PazFindExtension(
         cchPath = (int)TcsLength(pszPath);
     if (!pszPath || !cchPath)
         return -1;
-    int pos{ -1 };
     for (auto p = pszPath + cchPath - 1; p != pszPath; --p)
     {
         const auto ch = *p;

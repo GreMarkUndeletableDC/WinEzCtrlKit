@@ -2,6 +2,7 @@
 #include "CByteBuffer.h"
 #include "IMemoryView.h"
 #include "CUnknown.h"
+#include "Check.h"
 
 ECK_NAMESPACE_BEGIN
 template<class TAllocator>
@@ -39,7 +40,11 @@ public:
 #endif
     }
 
-    EckInline void AssertReference(LONG l) noexcept { EckAssert(this->m_cRef == l); }
+    void CheckReference(ULONG l) noexcept
+    {
+        if (this->m_cRef != l)
+            EckBugCheck(BccReferenceCount);
+    }
 
     STDMETHODIMP Read(void* pv, ULONG cb, ULONG* pcbRead) override
     {
@@ -177,7 +182,7 @@ public:
 
     STDMETHODIMP Stat(STATSTG* pstatstg, DWORD grfStatFlag) override
     {
-        ZeroMemory(pstatstg, sizeof(STATSTG));
+        RtlZeroMemory(pstatstg, sizeof(STATSTG));
         pstatstg->type = STGTY_STREAM;
         pstatstg->cbSize.QuadPart = m_rb.Size();
         if (m_bLocked)
@@ -189,7 +194,7 @@ public:
 
     STDMETHODIMP Clone(IStream** ppstm) override
     {
-        const auto p = new CByteBufferStreamT(m_rb);
+        const auto p = new CByteBufferStreamT{ m_rb };
         p->m_posSeek = m_posSeek;
         p->m_posBegin = m_posBegin;
         p->m_bLocked = m_bLocked;

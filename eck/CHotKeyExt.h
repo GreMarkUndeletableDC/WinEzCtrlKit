@@ -52,7 +52,7 @@ public:
                     wcscat(szBuf + pos, svPlus.data());
                     pos += (int)svPlus.size();
                 }
-                pos += GetKeyNameTextByVk(vk, szBuf + pos, ARRAYSIZE(szBuf) - pos,
+                pos += GetKeyNameTextByVk((WORD)vk, szBuf + pos, ARRAYSIZE(szBuf) - pos,
                     (uFunc & HOTKEYF_EXT));
             }
             else
@@ -83,6 +83,7 @@ public:
             if (GetFocus() == Handle)
                 SetCaretPos(size.cx + cxBorder, cyBorder);
             ShowCaret(Handle);
+            SelectObject(ps.hdc, hOld);
 
             EndPaint(Handle, wParam, ps);
         }

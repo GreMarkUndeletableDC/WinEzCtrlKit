@@ -500,26 +500,26 @@ inline constexpr void CalculateAccentColorSet(ARGB argbBase, _Out_ ACCENT_COLOR_
 
     Detail::AccentColorLighter(v, s, v, s1, v1);
     HsvToRgb(h, s1, v1, x, y, z);
-    acs.argbLight1 = MakeArgb(0xFF, x, y, z);
+    acs.argbLight1 = MakeArgb(0xFF, (BYTE)x, (BYTE)y, (BYTE)z);
 
     Detail::AccentColorLighter(v, s1, v1, s1, v1);
     HsvToRgb(h, s1, v1, x, y, z);
-    acs.argbLight2 = MakeArgb(0xFF, x, y, z);
+    acs.argbLight2 = MakeArgb(0xFF, (BYTE)x, (BYTE)y, (BYTE)z);
 
     Detail::AccentColorLighter(v, s1, v1, s1, v1);
     HsvToRgb(h, s1, v1, x, y, z);
-    acs.argbLight3 = MakeArgb(0xFF, x, y, z);
+    acs.argbLight3 = MakeArgb(0xFF, (BYTE)x, (BYTE)y, (BYTE)z);
 
     Detail::AccentColorDarker(v, v, v1);
     HsvToRgb(h, s, v1, x, y, z);
-    acs.argbDark1 = MakeArgb(0xFF, x, y, z);
+    acs.argbDark1 = MakeArgb(0xFF, (BYTE)x, (BYTE)y, (BYTE)z);
 
     Detail::AccentColorDarker(v, v1, v1);
     HsvToRgb(h, s, v1, x, y, z);
-    acs.argbDark2 = MakeArgb(0xFF, x, y, z);
+    acs.argbDark2 = MakeArgb(0xFF, (BYTE)x, (BYTE)y, (BYTE)z);
 
     Detail::AccentColorDarker(v, v1, v1);
     HsvToRgb(h, s, v1, x, y, z);
-    acs.argbDark3 = MakeArgb(0xFF, x, y, z);
+    acs.argbDark3 = MakeArgb(0xFF, (BYTE)x, (BYTE)y, (BYTE)z);
 }
 ECK_NAMESPACE_END

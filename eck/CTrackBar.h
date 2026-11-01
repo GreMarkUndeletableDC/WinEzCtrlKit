@@ -227,7 +227,7 @@ namespace Detail
 
     struct DdxFnTrackBar : public CDdxControlCollection<DDXE_TRACKBAR>
     {
-        LRESULT operator()(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot& Ctx)
+        LRESULT operator()(CWindow*, UINT uMsg, WPARAM, LPARAM lParam, Slot&) noexcept
         {
             if (uMsg == WM_HSCROLL || uMsg == WM_VSCROLL)
             {

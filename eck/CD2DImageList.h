@@ -134,9 +134,7 @@ public:
     {
         TCoord cx, cy;
         m_Packer.GetTileSize(cx, cy);
-        cx -= GetPadding();
-        cy -= GetPadding();
-        return { cx, cy };
+        return { (UINT)cx - GetPadding(), (UINT)cy - GetPadding() };
     }
     EckInlineNdCe D2D1_SIZE_F GetTileSizeLogical() const noexcept
     {

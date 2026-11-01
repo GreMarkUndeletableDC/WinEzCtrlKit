@@ -47,18 +47,25 @@ inline bool HeaderComplete(
     (FindStringLengthI(svHeader.data(), (int)svHeader.size(), EckArgString(s)) < 0)
 
     if (ECK_TEMP_HIT(L"User-Agent:"))
-        rsHeader.PushBack(L"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\n");
+        if (svUserAgent.empty())
+            rsHeader.PushBack(L"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\n"sv);
+        else
+        {
+            rsHeader.PushBack(L"User-Agent: "sv);
+            rsHeader.PushBack(svUserAgent);
+            rsHeader.PushBack(L"\r\n");
+        }
     if (ECK_TEMP_HIT(L"Accept:"))
-        rsHeader.PushBack(L"Accept: text/html, application/xhtml+xml, */*\r\n");
+        rsHeader.PushBack(L"Accept: text/html, application/xhtml+xml, */*\r\n"sv);
     if (ECK_TEMP_HIT(L"Accept-Language:"))
-        rsHeader.PushBack(L"Accept-Language: *\r\n");
+        rsHeader.PushBack(L"Accept-Language: *\r\n"sv);
     if (ECK_TEMP_HIT(L"Accept-Encoding:"))
-        rsHeader.PushBack(L"Accept-Encoding: gzip, deflate\r\n");
+        rsHeader.PushBack(L"Accept-Encoding: gzip, deflate\r\n"sv);
     if (ECK_TEMP_HIT(L"Cache-Control:"))
-        rsHeader.PushBack(L"Cache-Control: no-cache\r\n");
+        rsHeader.PushBack(L"Cache-Control: no-cache\r\n"sv);
     if (svMethod == L"GET"sv &&
         ECK_TEMP_HIT(L"Content-Type:"))
-        rsHeader.PushBack(L"Content-Type: application/x-www-form-urlencoded\r\n");
+        rsHeader.PushBack(L"Content-Type: application/x-www-form-urlencoded\r\n"sv);
     rsHeader.ReplaceSubString(EckArgString(L"Connection: keep-alive\r\n"), nullptr, 0, 0, 1);
     if (!svCookies.empty())
     {
@@ -78,9 +85,9 @@ inline bool HeaderComplete(
         }
         else
         {
-            rsHeader.PushBack(L"Cookie: ");
+            rsHeader.PushBack(L"Cookie: "sv);
             rsHeader.PushBack(svCookies);
-            rsHeader.PushBack(L"\r\n");
+            rsHeader.PushBack(L"\r\n"sv);
         }
     }
     return true;
@@ -107,7 +114,7 @@ inline HWhConnect WhPrepareConnect(
     // 分解URL
     urlc = { sizeof(urlc) };
     urlc.dwSchemeLength = urlc.dwHostNameLength =
-        urlc.dwUrlPathLength = urlc.dwExtraInfoLength = -1;
+        urlc.dwUrlPathLength = urlc.dwExtraInfoLength = DWORD(-1);
     if (!WinHttpCrackUrl(pszUrl, (DWORD)cchUrl, 0, &urlc))
         return nullptr;
     // 制主机名
@@ -195,11 +202,11 @@ struct CHttpRequestAsync
             HRESULT hr;                 // 因失败而取消
             CEvent EvtSafeExit{ {}, false, false }; // 安全退出事件
 
-            void Cancel(HRESULT hr)
+            void Cancel(HRESULT hrReason)
             {
                 if (hRequest)
                 {
-                    this->hr = hr;
+                    this->hr = hrReason;
                     WinHttpCloseHandle(hRequest);
                 }
             }

@@ -540,7 +540,6 @@ public:
             }
             else
             {
-                const auto& Loc = m_File.GetTagLocation();
                 const auto cbFile = m_Stream.GetSize();
                 size_t pos;
                 if (Loc.posV1Ext != CMediaFile::InvalidPosition)

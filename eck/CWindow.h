@@ -53,7 +53,7 @@ enum class ScrollType
 // Attach / Detach ==============================================
 
 #define ECK_W_DISABLE_ATTACH                                                       \
-    void Attach(HWND hWnd) noexcept override                                       \
+    void Attach(HWND) noexcept override                                            \
     {                                                                              \
         EckBugCheck(::eck::BccNotImplemented, L"CWindow::Attach is disabled.");    \
     }                                                                              \
@@ -64,7 +64,7 @@ enum class ScrollType
     }
 
 #define ECK_W_DISABLE_ATTACHNEW                                                    \
-    void AttachNew(HWND hWnd) noexcept override                                    \
+    void AttachNew(HWND) noexcept override                                         \
     {                                                                              \
         EckBugCheck(::eck::BccNotImplemented, L"CWindow::AttachNew is disabled."); \
     }                                                                              \
@@ -202,7 +202,7 @@ public:
         switch (uMsg)
         {
         case WM_NOTIFY:
-            if (pChild = pCtx->WmAt(((NMHDR*)lParam)->hwndFrom))
+            if ((pChild = pCtx->WmAt(((NMHDR*)lParam)->hwndFrom)))
             {
                 const auto lResult = pChild->OnNotifyMessage(hWnd, uMsg, wParam, lParam, bProcessed);
                 if (bProcessed)
@@ -221,23 +221,23 @@ public:
         case WM_CTLCOLORDLG:
         case WM_CTLCOLORSCROLLBAR:
         case WM_CTLCOLORSTATIC:
-            if (pChild = pCtx->WmAt((HWND)lParam))
+            if ((pChild = pCtx->WmAt((HWND)lParam)))
                 goto CallOnNotify;
             break;
         case WM_DRAWITEM:
-            if (pChild = pCtx->WmAt(((DRAWITEMSTRUCT*)lParam)->hwndItem))
+            if ((pChild = pCtx->WmAt(((DRAWITEMSTRUCT*)lParam)->hwndItem)))
                 goto CallOnNotify;
             break;
         case WM_MEASUREITEM:
-            if (pChild = pCtx->WmAt(GetDlgItem(hWnd, ((MEASUREITEMSTRUCT*)lParam)->CtlID)))
+            if ((pChild = pCtx->WmAt(GetDlgItem(hWnd, ((MEASUREITEMSTRUCT*)lParam)->CtlID))))
                 goto CallOnNotify;
             break;
         case WM_DELETEITEM:
-            if (pChild = pCtx->WmAt(((DELETEITEMSTRUCT*)lParam)->hwndItem))
+            if ((pChild = pCtx->WmAt(((DELETEITEMSTRUCT*)lParam)->hwndItem)))
                 goto CallOnNotify;
             break;
         case WM_COMPAREITEM:
-            if (pChild = pCtx->WmAt(((COMPAREITEMSTRUCT*)lParam)->hwndItem))
+            if ((pChild = pCtx->WmAt(((COMPAREITEMSTRUCT*)lParam)->hwndItem)))
             {
             CallOnNotify:
                 const auto lResult = pChild->OnNotifyMessage(

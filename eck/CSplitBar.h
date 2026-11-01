@@ -33,7 +33,7 @@ private:
     BITBOOL m_bLBtnDown : 1 = false;
     BITBOOL m_bHorizontal : 1 = false;
 
-    LRESULT OnMarkMessage(CWindow* pWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, Slot& Ctx) noexcept
+    LRESULT OnMarkMessage(CWindow*, UINT uMsg, WPARAM wParam, LPARAM, Slot& Ctx) noexcept
     {
         switch (uMsg)
         {

@@ -531,7 +531,7 @@ public:
             TPoint ptLog{ (TCoord)pt.x, (TCoord)pt.y };
             PixelToLogical(ptLog);
             LRESULT lResultNew;
-            if (m_pEleCurrNcHitTest = TElement::EtHitTest(EtLastChild(), ptLog, &lResultNew))
+            if ((m_pEleCurrNcHitTest = TElement::EtHitTest(EtLastChild(), ptLog, &lResultNew)))
                 return lResultNew;
             return lResult;
         }

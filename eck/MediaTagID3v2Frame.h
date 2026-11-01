@@ -338,7 +338,7 @@ protected:
         if (Ctx.bFrameHdr)
             w += sizeof(ID3v2_FRAME_HEADER);
         // 读附加信息
-        UINT cbExtra{}, cbBody, cbOrg{};
+        UINT cbBody, cbOrg{};
         if (Ctx.pTagHdr->Ver == 3)
         {
             cbBody = ReverseInteger(*(UINT*)Ctx.pFrameHdr->Size);

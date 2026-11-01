@@ -281,8 +281,6 @@ protected:
     {
         if ((!m_pSBHorz && !m_pSBVert))
             return;
-        const auto cx = GetWidth();
-        const auto cy = GetHeight();
         const auto cxySB = GetTheme()->GetMetric(IdMeScrollBar);
         const auto bVert = m_pSBVert && m_pSBVert->IsValid() &&
             m_pSBVert->GetScrollView().IsValid();

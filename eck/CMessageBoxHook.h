@@ -61,7 +61,8 @@ public:
         {
             // Call默认过程，先执行初始化
             const auto lResult = __super::OnMessage(uMsg, wParam, lParam);
-            if (HWND hStaticIcon; hStaticIcon = GetDlgItem(Handle, 0x14))
+            const auto hStaticIcon = GetDlgItem(Handle, 0x14);
+            if (hStaticIcon)
             {
                 m_hIcon = (HICON)::SendMessageW(hStaticIcon, STM_GETICON, 0, 0);
                 // OD修正图标白底
@@ -99,7 +100,6 @@ public:
             break;
         case WM_DRAWITEM:
         {
-            const auto* const ptc = PtcCurrent();
             const auto* const pdis = (DRAWITEMSTRUCT*)lParam;
             if (pdis->CtlType == ODT_STATIC && pdis->CtlID == 0x14)
             {

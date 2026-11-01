@@ -385,7 +385,6 @@ private:
     static IniResult UnescapeKeyValue(CStringW& rsKey, CStringW& rsVal,
         PCWCH& psz, size_t cch, bool bKeepSpace) noexcept
     {
-        const auto pOrg = psz;
         const auto pszEnd = psz + cch;
         // 键
         for (; psz != pszEnd; ++psz)
@@ -656,13 +655,13 @@ public:
                         stSec.pop_back();
                     auto& Set = (stSec.empty() ? m_Root : stSec.back().it->Child);
                     const auto sv = rsName.ToStringView();
-                    const UINT uFlags = (bContainer ? INIE_EF_IS_CONTAINER : INIE_EF_NONE) |
+                    const UINT uEntryFlags = (bContainer ? INIE_EF_IS_CONTAINER : INIE_EF_NONE) |
                         (rsComment.IsEmpty() ? INIE_EF_NONE : INIE_EF_HAS_COMMENTS);
                     const auto Ret = EmplacePair(Set.emplace(
                         Section{
                             std::move(rsName),
                             m_uId++,
-                            uFlags,
+                            uEntryFlags,
                             {}
                         }));
                     if (bContainer && !Ret.second)

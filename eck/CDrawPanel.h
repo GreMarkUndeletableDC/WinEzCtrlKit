@@ -36,8 +36,6 @@ public:
             const auto cx = (int)LOWORD(lParam);
             const auto cy = (int)HIWORD(lParam);
 
-            const auto hDC = GetDC(Handle);
-
             CMemoryDC DC{};
             DC.FromWindow(Handle, cx, cy);
 

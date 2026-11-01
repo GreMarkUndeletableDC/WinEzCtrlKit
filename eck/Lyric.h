@@ -356,7 +356,7 @@ private:
             m_vLine.back().vWordTime.pop_back();
         else
         {
-            m_vLine.back().cchWordTotal += e.cchWord;
+            m_vLine.back().cchWordTotal = USHORT(m_vLine.back().cchWordTotal + e.cchWord);
             e.pszWord = (e.cchWord ? p0 : nullptr);
             DbgCutString(e);
         }
@@ -524,8 +524,7 @@ private:
         {
             const auto i = *it;
             const auto& e = m_vLine[i];
-            const auto bWordTime = MgpIsWordTime(e);
-            if (bWordTime)
+            if (MgpIsWordTime(e))
             {
                 if (e.cchWordTotal)
                     cchText += (1/*\n*/ + e.cchWordTotal);
@@ -572,8 +571,7 @@ private:
         {
             const auto i = *it;
             const auto& e = m_vLine[i];
-            const auto bWordTime = MgpIsWordTime(e);
-            if (bWordTime)
+            if (MgpIsWordTime(e))
             {
                 if (e.cchWordTotal)
                 {
@@ -725,7 +723,6 @@ private:
             if (vLastTime.size() && i)
                 if (FloatEqual(vLastTime[0], e.fTime))
                 {
-                    auto& TopItem = m_vLine[i - vLastTime.size()];// 索引i将合并到该项
                     ++cLineSameTime;
                     vNeedDelIndex.emplace_back(i);
                 }

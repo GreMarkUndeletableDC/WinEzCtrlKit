@@ -19,6 +19,7 @@ public:
         auto pcc = (CHOOSECOLORW*)pData;
         if (!pcc->lpCustColors)
             pcc->lpCustColors = m_crCust;
+        pcc->hwndOwner = hParent;
         BeginCbtHook(this);
         return ChooseColorW((CHOOSECOLORW*)pData);
     }

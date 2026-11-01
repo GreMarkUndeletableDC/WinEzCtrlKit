@@ -57,7 +57,7 @@ protected:
         case TDN_NAVIGATED:
         case TDN_DIALOG_CONSTRUCTED:
         {
-            EnumChildWindows(hWnd, [](HWND hWnd, LPARAM lParam) noexcept -> BOOL
+            EnumChildWindows(hWnd, [](HWND hWnd, LPARAM) noexcept -> BOOL
                 {
                     WCHAR szCls[ARRAYSIZE(WC_LINK) + 2];
                     GetClassNameW(hWnd, szCls, ARRAYSIZE(szCls));
@@ -72,7 +72,8 @@ protected:
         return p->OnTaskDialogNotify(hWnd, uMsg, wParam, lParam);
     }
 public:
-    INT_PTR CreateModalDialog(HWND hParent,
+    INT_PTR CreateModalDialog(
+        HWND hParent,
         _In_reads_bytes_(sizeof(DLGCTX)) void* pData) noexcept override
     {
         auto pCtx = (DLGCTX*)pData;
@@ -82,6 +83,7 @@ public:
         m_lRealRefData = ptdc->lpCallbackData;
         ptdc->pfCallback = EckTaskDialogCallback;
         ptdc->lpCallbackData = (LONG_PTR)this;
+        ptdc->hwndParent = hParent;
 
         int iButton{};
         BeginCbtHook(this);

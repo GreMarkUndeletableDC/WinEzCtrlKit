@@ -26,6 +26,7 @@ inline W32ERR DshQueryPePdb(
     _In_reads_bytes_(cbPe) PCVOID pPe,
     size_t cbPe) noexcept
 {
+    // FIXME 使用cbPe
     const auto pDosHeader = (IMAGE_DOS_HEADER*)pPe;
     const auto pNtHeaders = (IMAGE_NT_HEADERS*)((BYTE*)pPe + pDosHeader->e_lfanew);
     const IMAGE_DATA_DIRECTORY* pDbgDataDir;
@@ -122,7 +123,6 @@ inline W32ERR DshMakeSymbolUrl(
 inline W32ERR DshInit(
     _Out_ HANDLE& hProcess,
     UINT uOptions = SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS | SYMOPT_LOAD_ANYTHING,
-    PCWSTR pszUserSearchPath = nullptr,
     bool bInvadeProcess = false) noexcept
 {
     NTSTATUS nts;

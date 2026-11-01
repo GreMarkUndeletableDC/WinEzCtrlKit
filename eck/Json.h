@@ -496,10 +496,7 @@ struct ObjectProxy
 class CMutableValue : public Detail::CValueBase
 {
 public:
-    constexpr CMutableValue(
-        YyMutableValue* pVal,
-        _In_opt_ const CMutableDocument* pDoc = nullptr) noexcept : CValueBase{ pVal }
-    {}
+    constexpr CMutableValue(YyMutableValue* pVal) noexcept : CValueBase{ pVal } {}
     EckInlineNdCe auto GetPointer() const noexcept { return (YyMutableValue*)m_pVal; }
     EckInlineNdCe bool IsValid() const noexcept { return !!m_pVal; }
 

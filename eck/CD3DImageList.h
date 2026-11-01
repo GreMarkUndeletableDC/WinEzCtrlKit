@@ -128,8 +128,8 @@ public:
     EckInlineCe void GetTileSize(_Out_ TCoord& cx, _Out_ TCoord& cy) const noexcept
     {
         m_Packer.GetTileSize(cx, cy);
-        cx -= GetPadding();
-        cy -= GetPadding();
+        cx -= (TCoord)GetPadding();
+        cy -= (TCoord)GetPadding();
     }
 
     EckInlineNdCe UINT GetPageCount() const noexcept { return m_Packer.GetPageCount(); }

@@ -181,7 +181,7 @@ EckInlineNdCe SYSTEMTIME NtTimeToSystemTime(ULONGLONG ft) noexcept
 
 EckInlineCe void TimeDeltaYear(SYSTEMTIME& st, int d) noexcept
 {
-    st.wYear += d;
+    st.wYear = WORD(st.wYear + d);
 }
 EckInlineCe void TimeDeltaMonth(SYSTEMTIME& st, int d) noexcept
 {

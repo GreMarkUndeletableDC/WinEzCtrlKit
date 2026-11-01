@@ -291,8 +291,7 @@ private:
     void TagpSetTrack(
         _In_ ID3v2::TEXTFRAME* pFrame,
         int nTrack,
-        int cTotalTrack,
-        const SIMPLE_OPT& Opt) noexcept
+        int cTotalTrack) noexcept
     {
         pFrame->vText.resize(1);
         if (cTotalTrack > 0)
@@ -305,7 +304,7 @@ private:
     void TagpSetPicture(
         _In_ ID3v2::APIC* pFrame,
         Picture& Pic,
-        const SIMPLE_OPT& Opt,
+        [[maybe_unused]] const SIMPLE_OPT& Opt,
         bool bMove) noexcept
     {
         pFrame->eType = Pic.eType;
@@ -600,7 +599,7 @@ public:
                     continue;
                 }
                 const auto p = DbgDynamicCast<ID3v2::TEXTFRAME*>(e.get());
-                TagpSetTrack(p, mi.nTrack, mi.cTotalTrack, Opt);
+                TagpSetTrack(p, mi.nTrack, mi.cTotalTrack);
                 ++it;
                 mi.uMaskChecked |= MIM_TRACK;
             }
@@ -666,7 +665,7 @@ public:
         if (!(mi.uMaskChecked & MIM_TRACK))
         {
             auto e = std::make_unique<ID3v2::TEXTFRAME>("TRCK");
-            TagpSetTrack(e.get(), mi.nTrack, mi.cTotalTrack, Opt);
+            TagpSetTrack(e.get(), mi.nTrack, mi.cTotalTrack);
             m_vItem.emplace_back(std::move(e));
         }
         if (!(mi.uMaskChecked & MIM_COVER))
@@ -757,7 +756,7 @@ public:
         const bool bOnlyAppend =
             Loc.posV2Footer != CMediaFile::InvalidPosition &&
             Loc.posV2 == CMediaFile::InvalidPosition;
-        const bool bShouldAppend = (uFlags & MIF_APPEND_TAG);
+        const bool bShouldAppend = bOnlyAppend || (uFlags & MIF_APPEND_TAG);
 
         ID3v2_HEADER Hdr{ m_Header };
         if (uFlags & MIF_CREATE_ID3V2_3)
@@ -914,7 +913,7 @@ public:
                     m_Stream.Insert(Loc.posV2 + sizeof(ID3v2_HEADER) + m_cbPrependTag,
                         cbPrependTotal - m_cbPrependTag);
                 }
-                else if (cbPadding = cbPrependOld - cbPrependTotal)
+                else if ((cbPadding = cbPrependOld - cbPrependTotal))
                 {
                     if (bAllowPadding && cbPadding <= 1024 && rbAppend.IsEmpty())
                     {

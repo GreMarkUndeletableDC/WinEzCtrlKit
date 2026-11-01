@@ -160,9 +160,9 @@ private:
             id = CMirroredAtlas::IdInvalid;
             return hr;
         }
-
-        CMirroredAtlas::TCoord x, y;
-        id = m_pAtlas->Allocate(cx + 2, cy + 2, x, y, true);
+        using TCoord = CMirroredAtlas::TCoord;
+        TCoord x, y;
+        id = m_pAtlas->Allocate(TCoord(cx + 2), TCoord(cy + 2), x, y, true);
         ++x, ++y;
         auto& Tex = m_pAtlas->GetMirroredTexture();
 
@@ -170,7 +170,7 @@ private:
         {
             EckCounter(cx, i)
             {
-                *Tex.CpuData<UINT>(x + i, y + j) =
+                *Tex.CpuData<UINT>(TCoord(x + i), TCoord(y + j)) =
                     UINT(0x00FF'FFFF | (m_Ect[m_vTemp[j * cx + i]] << 24));
             }
         }
@@ -196,8 +196,9 @@ private:
             return hr;
         }
 
-        CMirroredAtlas::TCoord x, y;
-        id = m_pAtlas->Allocate(cx + 2, cy + 2, x, y, true);
+        using TCoord = CMirroredAtlas::TCoord;
+        TCoord x, y;
+        id = m_pAtlas->Allocate(TCoord(cx + 2), TCoord(cy + 2), x, y, true);
         ++x, ++y;
         auto& Tex = m_pAtlas->GetMirroredTexture();
 
@@ -211,7 +212,7 @@ private:
                 const auto b = m_vTemp[idxTexel + 2];
                 const auto byGray = BYTE(0.2126f * r + 0.7152f * g + 0.0722f * b);
 
-                *Tex.CpuData<UINT>(x + i, y + j) =
+                *Tex.CpuData<UINT>(TCoord(x + i), TCoord(y + j)) =
                     UINT(0x00FF'FFFF | (m_Ect[byGray] << 24));
             }
         }

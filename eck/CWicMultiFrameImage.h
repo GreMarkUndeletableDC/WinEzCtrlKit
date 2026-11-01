@@ -210,10 +210,10 @@ public:
             return hr;
         // 写宽高
         Var.vt = VT_UI2;
-        Var.uiVal = m_cx;
+        Var.uiVal = (USHORT)m_cx;
         if (FAILED(hr = pMdWriter->SetMetadataByName(L"/logscrdesc/Width", &Var)))
             return hr;
-        Var.uiVal = m_cy;
+        Var.uiVal = (USHORT)m_cy;
         if (FAILED(hr = pMdWriter->SetMetadataByName(L"/logscrdesc/Height", &Var)))
             return hr;
         // 写背景色
@@ -239,33 +239,33 @@ public:
         for (const auto& e : m_vFrame)
         {
             ComPtr<IWICBitmapFrameEncode> pFrameEncode;
-            ComPtr<IWICMetadataQueryWriter> pMdWriter;
+            ComPtr<IWICMetadataQueryWriter> pMdFrameWriter;
 
             if (FAILED(hr = pEncoder->CreateNewFrame(&pFrameEncode, nullptr)))
                 return hr;
             if (FAILED(hr = pFrameEncode->Initialize(nullptr)))
                 return hr;
-            if (FAILED(hr = pFrameEncode->GetMetadataQueryWriter(&pMdWriter)))
+            if (FAILED(hr = pFrameEncode->GetMetadataQueryWriter(&pMdFrameWriter)))
                 return hr;
             // 写帧延迟
             Var.vt = VT_UI2;
-            Var.uiVal = e.msDelay / 10;
-            pMdWriter->SetMetadataByName(L"/grctlext/Delay", &Var);
+            Var.uiVal = USHORT(e.msDelay / 10);
+            pMdFrameWriter->SetMetadataByName(L"/grctlext/Delay", &Var);
             // 写偏移
             if (e.ox)
             {
-                Var.uiVal = e.ox;
-                pMdWriter->SetMetadataByName(L"/imgdesc/Left", &Var);
+                Var.uiVal = (USHORT)e.ox;
+                pMdFrameWriter->SetMetadataByName(L"/imgdesc/Left", &Var);
             }
             if (e.oy)
             {
-                Var.uiVal = e.oy;
-                pMdWriter->SetMetadataByName(L"/imgdesc/Top", &Var);
+                Var.uiVal = (USHORT)e.oy;
+                pMdFrameWriter->SetMetadataByName(L"/imgdesc/Top", &Var);
             }
             // 写擦除标志
             Var.vt = VT_UI1;
             Var.bVal = GifGetDisposal(e);
-            pMdWriter->SetMetadataByName(L"/grctlext/Disposal", &Var);
+            pMdFrameWriter->SetMetadataByName(L"/grctlext/Disposal", &Var);
             // 写入帧
             if (m_bTransparent)
             {
@@ -303,10 +303,10 @@ public:
                 {
                     Var.vt = VT_UI1;
                     Var.bVal = idxTrans;
-                    pMdWriter->SetMetadataByName(L"/grctlext/TransparentColorIndex", &Var);
+                    pMdFrameWriter->SetMetadataByName(L"/grctlext/TransparentColorIndex", &Var);
                     Var.vt = VT_BOOL;
                     Var.boolVal = VARIANT_TRUE;
-                    pMdWriter->SetMetadataByName(L"/grctlext/TransparencyFlag", &Var);
+                    pMdFrameWriter->SetMetadataByName(L"/grctlext/TransparencyFlag", &Var);
                 }
 
                 ComPtr<IWICFormatConverter> pConverter;
@@ -434,7 +434,7 @@ public:
                 return hr;
             pEncoder.Clear();
             pFrame.Clear();
-            PngStream.AssertReference(1);
+            PngStream.CheckReference(1);
 
             CMemoryWalker wt{ rbPng.Data(), rbPng.Size() };
             wt += 8;// 跳过PNG签名
@@ -512,7 +512,7 @@ public:
                 PROPBAG2 Prop{ .pstrName = (PWSTR)L"TiffCompressionMethod" };
                 VARIANT Var{};
                 Var.vt = VT_UI1;
-                Var.bVal = eCompression;
+                Var.bVal = (BYTE)eCompression;
                 pPropBag->Write(1, &Prop, &Var);
                 Prop.pstrName = (PWSTR)L"TiffCompressionQuality";
                 Var.vt = VT_R4;

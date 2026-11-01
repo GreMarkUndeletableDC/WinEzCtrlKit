@@ -935,24 +935,22 @@ constexpr bool IsInputMessage(UINT uMsg) noexcept
 inline SIZE GetCharDimension(HWND hWnd, HFONT hFont) noexcept
 {
     const auto hDC = GetDC(hWnd);
-    const auto hFontOld = (HFONT)SelectObject(hDC, hFont);
+    const auto hOld = SelectObject(hDC, hFont);
     TEXTMETRICW tm;
     GetTextMetricsW(hDC, &tm);
+    SIZE Size;
     if (tm.tmPitchAndFamily & TMPF_FIXED_PITCH)
     {
-        SIZE size;
         GetTextExtentPoint32W(hDC,
-            L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 52, &size);
-        ReleaseDC(hWnd, hDC);
-        size.cx = ((size.cx / 26) + 1) / 2;
-        size.cy = tm.tmHeight;
-        return size;
+            L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 52, &Size);
+        Size.cx = ((Size.cx / 26) + 1) / 2;
+        Size.cy = tm.tmHeight;
     }
     else
-    {
-        ReleaseDC(hWnd, hDC);
-        return { tm.tmAveCharWidth, tm.tmHeight };
-    }
+        Size = { tm.tmAveCharWidth, tm.tmHeight };
+    SelectObject(hDC, hOld);
+    ReleaseDC(hWnd, hDC);
+    return Size;
 }
 
 // 根据位置判断窗口是否应显示大小调整控件。该函数无视被判断窗口的样式

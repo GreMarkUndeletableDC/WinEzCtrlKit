@@ -95,7 +95,7 @@ EckInlineNdCe int LnGetYearDays(int iYear) noexcept
     if (iLeapMonth)
     {
         Date.bLeapMonth = true;
-        Date.byMonth = iLeapMonth;
+        Date.byMonth = (BYTE)iLeapMonth;
         c += LnGetMonthDays(Date);
     }
     return c;
@@ -133,7 +133,7 @@ EckNfInlineNdCe LunarDate CeToLunar(CEDate CeDate) noexcept
                 break;
         }
 
-        Date.byDay = iDays - (c - iCeDays) + 1;
+        Date.byDay = BYTE(iDays - (c - iCeDays) + 1);
         return Date;
     }
     else// 需要在本年寻找
@@ -158,7 +158,7 @@ EckNfInlineNdCe LunarDate CeToLunar(CEDate CeDate) noexcept
                 break;
         }
 
-        Date.byDay = iCeDays - c + 1;
+        Date.byDay = BYTE(iCeDays - c + 1);
         return Date;
     }
 }

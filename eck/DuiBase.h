@@ -687,9 +687,9 @@ private:
             if (m_bFullUpdate)
                 ++rcDirtyInSurface.right, ++rcDirtyInSurface.bottom;
 
-            RENDER_EVENT Evt;
-            Evt.FillBack.rc = MakeD2DRectF(rcDirtyInSurface);
-            OnRenderEvent(RE_FILLBACK, Evt);
+            RENDER_EVENT EvtFill;
+            EvtFill.FillBack.rc = MakeD2DRectF(rcDirtyInSurface);
+            OnRenderEvent(RE_FILLBACK, EvtFill);
 
             if (m_bFullUpdate)
                 --rcDirtyInSurface.right, --rcDirtyInSurface.bottom;
@@ -774,9 +774,9 @@ private:
                 if (m_bFullUpdate)
                     ++rcDirty.right, ++rcDirty.bottom;
 
-                RENDER_EVENT Evt;
-                Evt.FillBack.rc = MakeD2DRectF(rcDirty);
-                OnRenderEvent(RE_FILLBACK, Evt);
+                RENDER_EVENT EvtFill;
+                EvtFill.FillBack.rc = MakeD2DRectF(rcDirty);
+                OnRenderEvent(RE_FILLBACK, EvtFill);
 
                 if (m_bFullUpdate)
                     --rcDirty.right, --rcDirty.bottom;
@@ -1496,7 +1496,7 @@ inline void CElement::InvalidateInternal(
         do
         {
             pEle->CompMarkDirty();
-        } while (pEle = pEle->EtParent());
+        } while ((pEle = pEle->EtParent()));
     }
     GetWindow().CeUnion(rcTemp);
     GetWindow().RdInvalidate(rcTemp, bUpdateNow);

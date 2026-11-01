@@ -237,7 +237,7 @@ inline HRESULT WicSaveSource(
 {
     CStreamView Stream{ rb };
     const auto hr = WicSaveSource(&Stream, pSource, eType);
-    Stream.AssertReference(1);
+    Stream.CheckReference(1);
     return hr;
 }
 
@@ -382,7 +382,7 @@ inline GpStatus GpCreateGdiBitmap(
             return gps;
         gps = GdipCreateHBITMAPFromBitmap(pBitmap.Get(), &hBitmap, 0);
     }
-    Stream.AssertReference(1);
+    Stream.CheckReference(1);
     return gps;
 }
 
@@ -413,7 +413,7 @@ inline GpStatus GpCreateIcon(
             return gps;
         gps = GdipCreateHICONFromBitmap(pBitmap.Get(), &hIcon);
     }
-    Stream.AssertReference(1);
+    Stream.CheckReference(1);
     return gps;
 }
 
@@ -560,7 +560,7 @@ inline GpStatus GpSaveImage(
 {
     CStreamView Stream{ rb };
     const auto gps = GpSaveImage(&Stream, pImage, eType);
-    Stream.AssertReference(1);
+    Stream.CheckReference(1);
     return gps;
 }
 
