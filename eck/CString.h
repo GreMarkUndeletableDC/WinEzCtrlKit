@@ -899,13 +899,13 @@ public:
     EckInlineNd int FindChar(TChar ch, int posStart = 0) const noexcept
     {
         if (IsEmpty())
-            return StrNPos;
+            return -1;
         return FindCharLength(Data(), Size(), ch, posStart);
     }
     EckInlineNd int RFindChar(TChar ch, int posStart = -1) const noexcept
     {
         if (IsEmpty())
-            return StrNPos;
+            return -1;
         return RFindCharLength(Data(), Size(), ch, posStart);
     }
 

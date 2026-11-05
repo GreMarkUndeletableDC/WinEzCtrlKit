@@ -204,6 +204,7 @@
     <ClCompile Include="TsRectOp.cpp" />
     <ClCompile Include="TsRefPtr.cpp" />
     <ClCompile Include="TsStringConvert.cpp" />
+    <ClCompile Include="TsStringUtility.cpp" />
     <ClCompile Include="TsTrivialBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>

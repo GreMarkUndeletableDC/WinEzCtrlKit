@@ -24,13 +24,17 @@ inline std::wstring_view HeaderQueryKeyValue(
         svName.data(), (int)svName.size());
     if (pos < 0)
         return {};
-    const auto posEnd = FindStringLength(
+    auto posEnd = FindStringLength(
         svHeader.data() + pos, (int)svHeader.size() - pos,
         EckArgString(L"\r\n"));
     if (posEnd < 0)
         return {};
-    const auto pszValue = TrimStringLeft(svHeader.data() + pos + svName.size() + 1/*冒号*/);
-    return { pszValue, size_t(posEnd + pos - (pszValue - svHeader.data())) };
+    posEnd += pos;
+    const auto p = svHeader.data() + pos + svName.size() + 1/*冒号*/;
+    const int cchValue = posEnd - int(p - svHeader.data());
+    if (cchValue <= 0)
+        return {};
+    return { TrimStringLeft(p, cchValue), svHeader.data() + posEnd };
 }
 
 inline bool HeaderComplete(
