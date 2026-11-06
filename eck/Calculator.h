@@ -198,7 +198,7 @@ namespace Detail
 template<CcpCharPointer TPtr>
 inline Result CalculateExpression(
     _Out_ double& lfResult,
-    _In_reads_or_z_(cchExp) TPtr pszExp,
+    _In_NLS_string_(cchExp) TPtr pszExp,
     int cchExp = -1) noexcept
 {
     using TChar = CharFromPointer_T<TPtr>;

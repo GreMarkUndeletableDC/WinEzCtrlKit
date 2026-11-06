@@ -857,7 +857,7 @@ inline LRESULT GenerateCharMessage(HWND hWnd, WCHAR ch, bool bExtended = false) 
 
 inline void GenerateCharMessage(
     HWND hWnd,
-    _In_reads_or_z_(cchText) PCWSTR pszText,
+    _In_NLS_string_(cchText) PCWSTR pszText,
     int cchText = -1,
     bool bExtended = false,
     bool bReplaceEndOfLine = true) noexcept

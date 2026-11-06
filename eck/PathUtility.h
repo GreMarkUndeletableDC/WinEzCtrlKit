@@ -202,7 +202,7 @@ EckNfInlineNd bool PazIsDotFileName(
 
 // 返回文件名的位置，注意：若分隔符在开头则返回-1
 EckNfInlineNd int PazFindFileName(
-    _In_reads_or_z_(cchPath) CcpCharPointer auto pszPath,
+    _In_NLS_string_(cchPath) CcpCharPointer auto pszPath,
     int cchPath) noexcept
 {
     if (cchPath < 0)

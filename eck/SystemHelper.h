@@ -446,7 +446,7 @@ inline void InputChar(WCHAR ch, bool bReplaceEndOfLine = true) noexcept
 }
 
 inline void InputChar(
-    _In_reads_or_z_(cchText) PCWSTR pszText,
+    _In_NLS_string_(cchText) PCWSTR pszText,
     int cchText = -1,
     bool bReplaceEndOfLine = true) noexcept
 {
@@ -505,7 +505,7 @@ inline SIZE GetCursorSize() noexcept
 
 inline NTSTATUS ExpandEnvironmentString(
     Eck_Append_buffer_ CStringW& rsDst,
-    _In_reads_or_z_(cchSrc) PCWCH pszSrc,
+    _In_NLS_string_(cchSrc) PCWCH pszSrc,
     int cchSrc = -1,
     int cchInitialBuf = 80) noexcept
 {

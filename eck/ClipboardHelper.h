@@ -32,8 +32,10 @@ inline bool GetClipboardString(HWND hWnd, CStringW& rs) noexcept
     }
     return true;
 }
-inline bool SetClipboardString(HWND hWnd,
-    _In_reads_or_z_(cch) PCWSTR pszText, int cch = -1) noexcept
+inline bool SetClipboardString(
+    HWND hWnd,
+    _In_NLS_string_(cch) PCWSTR pszText,
+    int cch = -1) noexcept
 {
     if (!OpenClipboard(hWnd))
     {

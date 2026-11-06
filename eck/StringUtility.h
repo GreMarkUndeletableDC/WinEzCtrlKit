@@ -804,7 +804,7 @@ EckInlineNd int FindCharLastNotOf(
 }
 
 template<CcpCharPointer TPtr>
-EckInlineNd TPtr TrimStringLeft(_In_reads_or_z_(cchText) TPtr pszText, int cchText) noexcept
+EckInlineNd TPtr TrimStringLeft(_In_NLS_string_(cchText) TPtr pszText, int cchText) noexcept
 {
     if (cchText < 0)
         cchText = (int)TcsLength(pszText);
@@ -819,7 +819,7 @@ EckInlineNd TPtr TrimStringLeft(_In_reads_or_z_(cchText) TPtr pszText, int cchTe
 }
 
 template<CcpCharPointer TPtr>
-EckInlineNd TPtr TrimStringRight(_In_reads_or_z_(cchText) TPtr pszText, int cchText) noexcept
+EckInlineNd TPtr TrimStringRight(_In_NLS_string_(cchText) TPtr pszText, int cchText) noexcept
 {
     if (cchText < 0)
         cchText = (int)TcsLength(pszText);
@@ -835,7 +835,7 @@ EckInlineNd TPtr TrimStringRight(_In_reads_or_z_(cchText) TPtr pszText, int cchT
 
 template<CcpCharPointer TPtr>
 EckInlineNdCe std::basic_string_view<CharFromPointer_T<TPtr>> TrimString(
-    _In_reads_or_z_(cchText) TPtr pszText, int cchText) noexcept
+    _In_NLS_string_(cchText) TPtr pszText, int cchText) noexcept
 {
     if (cchText < 0)
         cchText = (int)TcsLength(pszText);
@@ -848,9 +848,9 @@ EckInlineNdCe std::basic_string_view<CharFromPointer_T<TPtr>> TrimString(
 
 template<CcpCharPointer TPtr, class F>
 inline void SplitString(
-    _In_reads_or_z_(cchText) TPtr pszText,
+    _In_NLS_string_(cchText) TPtr pszText,
     int cchText,
-    ConstCharPointer_T<TPtr> pszDiv,
+    _In_NLS_string_(cchDiv) ConstCharPointer_T<TPtr> pszDiv,
     int cchDiv,
     int cSubTextExpected,
     F&& Processor) noexcept
@@ -880,9 +880,9 @@ inline void SplitString(
 
 template<CcpCharPointer TPtr, class F>
 inline void SplitStringMultipleChar(
-    _In_reads_or_z_(cchText) TPtr pszText,
+    _In_NLS_string_(cchText) TPtr pszText,
     int cchText,
-    ConstCharPointer_T<TPtr> pszDiv,
+    _In_NLS_string_(cchDiv) ConstCharPointer_T<TPtr> pszDiv,
     int cchDiv,
     int cSubTextExpected,
     F&& Processor) noexcept
@@ -914,36 +914,36 @@ inline void SplitStringMultipleChar(
 template<CcpNonConstCharPointer TPtr, CcpCharPointer TPtr2>
     requires IsSameChar_V<TPtr, TPtr2>
 EckInline void SplitStringAndCut(
-    TPtr pszText,
+    _In_NLS_string_(cchText) TPtr pszText,
     int cchText,
-    ConstCharPointer_T<TPtr> pszDiv,
+    _In_NLS_string_(cchDiv) ConstCharPointer_T<TPtr> pszDiv,
     int cchDiv,
-    std::vector<TPtr2>& vResult,
+    Eck_Append_buffer_ std::vector<TPtr2>& vResult,
     int cSubTextExpected = 0) noexcept
 {
     SplitString(pszText, cchText, pszDiv, cchDiv, cSubTextExpected,
         [&](TPtr pszStart, int cchSub) noexcept
         {
             *(pszStart + cchSub) = 0;
-            vResult.push_back(pszStart);
+            vResult.emplace_back(pszStart);
         });
 }
 
 template<CcpNonConstCharPointer TPtr, CcpCharPointer TPtr2>
     requires IsSameChar_V<TPtr, TPtr2>
 EckInline void SplitStringMultipleCharAndCut(
-    TPtr pszText,
+    _In_NLS_string_(cchText) TPtr pszText,
     int cchText,
-    ConstCharPointer_T<TPtr> pszDiv,
+    _In_NLS_string_(cchDiv) ConstCharPointer_T<TPtr> pszDiv,
     int cchDiv,
-    std::vector<TPtr2>& vResult,
+    Eck_Append_buffer_ std::vector<TPtr2>& vResult,
     int cSubTextExpected = 0) noexcept
 {
     SplitStringMultipleChar(pszText, cchText, pszDiv, cchDiv, cSubTextExpected,
         [&](TPtr pszStart, int cchSub) noexcept
         {
             *(pszStart + cchSub) = 0;
-            vResult.push_back(pszStart);
+            vResult.emplace_back(pszStart);
         });
 }
 ECK_NAMESPACE_END

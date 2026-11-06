@@ -3,14 +3,14 @@
 
 ECK_NAMESPACE_BEGIN
 inline void UrlEncode(
-    _In_reads_or_z_(cchText) PCCH pszText,
+    _In_NLS_string_(cchText) PCCH pszText,
     int cchText,
-    CStringA& rs,
+    Eck_Append_buffer_ CStringA& rs,
     bool bPlusForSpace = true) noexcept
 {
     if (cchText < 0)
         cchText = (int)TcsLength(pszText);
-    rs.Reserve(cchText + cchText / 2);
+    rs.Reserve(rs.Size() + cchText + cchText / 2);
     CHAR ch;
     const auto pszEnd = pszText + cchText;
     for (ch = *pszText; pszText < pszEnd; ch = *++pszText)
@@ -29,22 +29,22 @@ inline void UrlEncode(
 }
 
 EckInline void UrlEncode(
-    _In_reads_or_z_(cchText) const char8_t* pszText,
+    _In_NLS_string_(cchText) const char8_t* pszText,
     int cchText,
-    CStringA& rs,
+    Eck_Append_buffer_ CStringA& rs,
     bool bPlusForSpace = true) noexcept
 {
     return UrlEncode((PCCH)pszText, cchText, rs, bPlusForSpace);
 }
 
 inline void UrlDecode(
-    _In_reads_or_z_(cchText) PCCH pszText,
+    _In_NLS_string_(cchText) PCCH pszText,
     int cchText,
-    CStringA& rs) noexcept
+    Eck_Append_buffer_ CStringA& rs) noexcept
 {
     if (cchText < 0)
         cchText = (int)TcsLength(pszText);
-    rs.Reserve(cchText);
+    rs.Reserve(rs.Size() + cchText);
     CHAR ch;
     const auto pszEnd = pszText + cchText;
     for (ch = *pszText; pszText < pszEnd; ch = *++pszText)
@@ -64,9 +64,9 @@ inline void UrlDecode(
 }
 
 EckInline void UrlDecode(
-    _In_reads_or_z_(cchText) const char8_t* pszText,
+    _In_NLS_string_(cchText) const char8_t* pszText,
     int cchText,
-    CStringA& rs) noexcept
+    Eck_Append_buffer_ CStringA& rs) noexcept
 {
     UrlDecode((PCCH)pszText, cchText, rs);
 }

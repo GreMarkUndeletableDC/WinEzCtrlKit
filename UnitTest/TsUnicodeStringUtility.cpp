@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "../eck/LocaleStringUtility.h"
+#include "../eck/UnicodeStringUtility.h"
 
 #include <climits>
 #include <initializer_list>
@@ -33,7 +33,7 @@ static void DecodeUcs8(BYTE& byState, UINT& uCodePoint, std::initializer_list<BY
         Ucs8DecodeChar(byState, uCodePoint, by);
 }
 
-TEST_CLASS(TsLocaleStringUtility)
+TEST_CLASS(TsUnicodeStringUtility)
 {
 public:
     //============================================================

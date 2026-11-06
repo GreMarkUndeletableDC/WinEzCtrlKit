@@ -198,7 +198,7 @@
     <ClCompile Include="TsDateTimeHelper.cpp" />
     <ClCompile Include="TsGpPtr.cpp" />
     <ClCompile Include="TsJson.cpp" />
-    <ClCompile Include="TsLocaleStringUtility.cpp" />
+    <ClCompile Include="TsUnicodeStringUtility.cpp" />
     <ClCompile Include="TsMathHelper.cpp" />
     <ClCompile Include="TsMemoryWalker.cpp" />
     <ClCompile Include="TsRandom.cpp" />

@@ -48,7 +48,7 @@ namespace Detail
 }
 
 inline void Base64Decode(
-    _In_reads_or_z_(cch) PCCH psz,
+    _In_NLS_string_(cch) PCCH psz,
     int cch,
     Eck_Append_buffer_ CByteBuffer& rb) noexcept
 {
@@ -92,7 +92,7 @@ inline void Base64Decode(
 }
 
 EckInline void Base64Decode(
-    _In_reads_or_z_(cch) const char8_t* psz,
+    _In_NLS_string_(cch) const char8_t* psz,
     int cch,
     Eck_Append_buffer_ CByteBuffer& rb) noexcept
 {
@@ -100,7 +100,7 @@ EckInline void Base64Decode(
 }
 
 inline void Base64Encode(
-    _In_reads_bytes_(cb) PCVOID p_,
+    _In_NLS_string_(cb) PCVOID p_,
     size_t cb,
     Eck_Append_buffer_ CStringA& rs) noexcept
 {
@@ -146,13 +146,13 @@ inline void Base64Encode(
     }
 }
 
-EckInline CByteBuffer Base64Decode(_In_reads_or_z_(cch) PCCH psz, int cch) noexcept
+EckInline CByteBuffer Base64Decode(_In_NLS_string_(cch) PCCH psz, int cch) noexcept
 {
     CByteBuffer rb{};
     Base64Decode(psz, cch, rb);
     return rb;
 }
-EckInline CByteBuffer Base64Decode(_In_reads_or_z_(cch) const char8_t* psz, int cch) noexcept
+EckInline CByteBuffer Base64Decode(_In_NLS_string_(cch) const char8_t* psz, int cch) noexcept
 {
     return Base64Decode((PCCH)psz, cch);
 }
@@ -160,12 +160,12 @@ EckInline CByteBuffer Base64Decode(const CStringA& rs) noexcept
 {
     return Base64Decode(rs.Data(), rs.Size());
 }
-EckInline void Base64Decode(const CStringA& rs, CByteBuffer& rb) noexcept
+EckInline void Base64Decode(const CStringA& rs, Eck_Append_buffer_ CByteBuffer& rb) noexcept
 {
     Base64Decode(rs.Data(), rs.Size(), rb);
 }
 
-EckInline CStringA Base64Encode(_In_reads_bytes_(cb) PCVOID p, size_t cb) noexcept
+EckInline CStringA Base64Encode(_In_NLS_string_(cb) PCVOID p, size_t cb) noexcept
 {
     CStringA rs{};
     Base64Encode(p, cb, rs);
@@ -175,7 +175,7 @@ EckInline CStringA Base64Encode(const CByteBuffer& rb) noexcept
 {
     return Base64Encode(rb.Data(), rb.Size());
 }
-EckInline void Base64Encode(const CByteBuffer& rb, CStringA& rs) noexcept
+EckInline void Base64Encode(const CByteBuffer& rb, Eck_Append_buffer_ CStringA& rs) noexcept
 {
     Base64Encode(rb.Data(), rb.Size(), rs);
 }

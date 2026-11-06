@@ -72,7 +72,7 @@ EckInline std::wstring_view GetResourceStringForCurrentLocale(
 template<class TAllocator>
 void EcdWideToMultiByte(
     CByteBufferT<TAllocator>& rbResult,
-    _In_reads_or_z_(cch) PCWCH pszText,
+    _In_NLS_string_(cch) PCWCH pszText,
     int cch = -1,
     UINT uCP = CP_ACP,
     UINT uFlags = WC_COMPOSITECHECK) noexcept
@@ -91,7 +91,7 @@ void EcdWideToMultiByte(
 template<class TAllocator>
 void EcdMultiByteToWide(
     CByteBufferT<TAllocator>& rbResult,
-    _In_reads_or_z_(cch) PCCH pszText,
+    _In_NLS_string_(cch) PCCH pszText,
     int cch,
     UINT uCP = CP_ACP,
     UINT uFlags = MB_PRECOMPOSED) noexcept
@@ -109,12 +109,12 @@ void EcdMultiByteToWide(
 template<class TChar, class TTraits, class TAllocator>
     requires (sizeof(TChar) == 1)
 EckInline void EcdWideToUtf8(CStringT<TChar, TTraits, TAllocator>& rsResult,
-    _In_reads_or_z_(cch) PCWCH pszText, int cch = -1) noexcept
+    _In_NLS_string_(cch) PCWCH pszText, int cch = -1) noexcept
 {
     EcdWideToMultiByte(rsResult, pszText, cch, CP_UTF8, 0u);
 }
 template<class TTraits = CCharTraits<CHAR>, class TAllocator = TStringDefaultAllocator<CHAR>>
-EckInlineNd auto EcdWideToUtf8(_In_reads_or_z_(cch) PCWCH pszText, int cch = -1) noexcept
+EckInlineNd auto EcdWideToUtf8(_In_NLS_string_(cch) PCWCH pszText, int cch = -1) noexcept
 {
     CStringT<CHAR, TTraits, TAllocator> rs;
     EcdWideToUtf8(rs, pszText, cch);
@@ -122,7 +122,7 @@ EckInlineNd auto EcdWideToUtf8(_In_reads_or_z_(cch) PCWCH pszText, int cch = -1)
 }
 template<class TAllocator>
 void EcdWideToUtf8(CByteBufferT<TAllocator>& rbResult,
-    _In_reads_or_z_(cch) PCWCH pszText, int cch = -1) noexcept
+    _In_NLS_string_(cch) PCWCH pszText, int cch = -1) noexcept
 {
     EcdWideToMultiByte(rbResult, pszText, cch, CP_UTF8, 0u);
 }
@@ -130,19 +130,19 @@ void EcdWideToUtf8(CByteBufferT<TAllocator>& rbResult,
 template<class TChar, class TTraits, class TAllocator>
     requires (sizeof(TChar) == 2)
 EckInline void EcdUtf8ToWide(CStringT<TChar, TTraits, TAllocator>& rsResult,
-    _In_reads_or_z_(cch) PCCH pszText, int cch = -1) noexcept
+    _In_NLS_string_(cch) PCCH pszText, int cch = -1) noexcept
 {
     EcdMultiByteToWide(rsResult, pszText, cch, CP_UTF8, 0u);
 }
 template<class TTraits = CCharTraits<WCHAR>, class TAllocator = TStringDefaultAllocator<WCHAR>>
-EckInlineNd auto EcdUtf8ToWide(_In_reads_or_z_(cch) PCCH pszText, int cch = -1) noexcept
+EckInlineNd auto EcdUtf8ToWide(_In_NLS_string_(cch) PCCH pszText, int cch = -1) noexcept
 {
     CStringT<WCHAR, TTraits, TAllocator> rs;
     EcdUtf8ToWide(rs, pszText, cch);
     return rs;
 }
 template<class TAllocator>
-void EcdUtf8ToWide(CByteBufferT<TAllocator>& rbResult, _In_reads_or_z_(cch) PCCH pszText, int cch) noexcept
+void EcdUtf8ToWide(CByteBufferT<TAllocator>& rbResult, _In_NLS_string_(cch) PCCH pszText, int cch) noexcept
 {
     EcdMultiByteToWide(rbResult, pszText, cch, CP_UTF8);
 }
