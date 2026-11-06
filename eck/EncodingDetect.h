@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "FileHelper.h"
-#include "LocaleStringUtility.h"
+#include "UnicodeStringUtility.h"
 #include "../ThirdPartyLibrary/UCharDet/uchardet.h"
 
 ECK_NAMESPACE_BEGIN
@@ -125,9 +125,7 @@ inline UINT EcdDetectCodePage(
     if ((uFlags & ECD_DISABLE_TIS_620) &&
         TcsEqualI(pszName, "TIS-620"))
     {
-        bool bValid;
-        (void)LcsUtf8CountChar((PCSTR)p, (int)cb, bValid);
-        if (bValid)
+        if (Ucs8IsValid((PCSTR)p, (int)cb))
             cp = CP_UTF8;
         else
             cp = EcdNameToCodePage(pszName);
@@ -160,7 +158,7 @@ inline bool EcdConvert(
             return false;
         *(pNew + cchU16) = 0;
         if (cpDst == CP_UTF16BE)
-            LcsUtf16ReverseByteOrder(pNew, cchU16);
+            Ucs16ReverseByteOrder(pNew, cchU16);
         return true;
     }
     rbWork.ReSize(cchU16 * sizeof(WCHAR));
@@ -170,14 +168,13 @@ inline bool EcdConvert(
         return false;
     if (cpDst == CP_UTF32LE || cpDst == CP_UTF32BE)
     {
-        auto pU32 = (UINT*)rbDst.PushBackNoExtra(cchU16 * sizeof(UINT));
-        bool bValid;
-        const auto cchU32 = LcsUtf16LeToUtf32(
+        const auto pU32 = (UINT*)rbDst.PushBackNoExtra(cchU16 * sizeof(UINT));
+        int posInvalid;
+        const auto cchU32 = Ucs16ConvertToUcs32(
             (PCWSTR)rbWork.Data(), cchU16,
-            pU32, bValid, (cpDst == CP_UTF32LE));
+            pU32, (cpDst == CP_UTF32LE), posInvalid);
         rbDst.ReSize((BYTE*)(pU32 + cchU32) - rbDst.Data());
-        EckAssert(bValid);
-        return bValid;
+        return posInvalid < 0;
     }
 
     int cbMb = WideCharToMultiByte(cpDst, uFlagsWc2Mb,

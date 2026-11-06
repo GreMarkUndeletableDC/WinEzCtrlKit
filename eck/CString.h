@@ -1458,7 +1458,7 @@ namespace Literals
 
 EckInlineNd void LcsToFullWidth(
     CStringW& rs,
-    _In_reads_or_z_(cch) PCWCH pszText,
+    _In_NLS_string_(cch) PCWCH pszText,
     int cch = -1) noexcept
 {
     const int cchResult = LCMapStringEx(LOCALE_NAME_USER_DEFAULT, LCMAP_FULLWIDTH,
@@ -1468,7 +1468,7 @@ EckInlineNd void LcsToFullWidth(
 }
 EckInlineNd void LcsToHalfWidth(
     CStringW& rs,
-    _In_reads_or_z_(cch) PCWCH pszText,
+    _In_NLS_string_(cch) PCWCH pszText,
     int cch = -1) noexcept
 {
     const int cchResult = LCMapStringEx(LOCALE_NAME_USER_DEFAULT, LCMAP_HALFWIDTH,
@@ -1481,7 +1481,7 @@ template<class TChar, class TTraits, class TAllocator>
     requires (sizeof(TChar) == 1)
 void EcdWideToMultiByte(
     CStringT<TChar, TTraits, TAllocator>& rsResult,
-    _In_reads_or_z_(cch) PCWCH pszText,
+    _In_NLS_string_(cch) PCWCH pszText,
     int cch = -1,
     UINT uCP = CP_ACP,
     UINT uFlags = WC_COMPOSITECHECK) noexcept
@@ -1496,7 +1496,7 @@ void EcdWideToMultiByte(
         (PCH)rsResult.PushBackNoExtra(cchBuf), cchBuf, nullptr, nullptr);
 }
 template<class TTraits = CCharTraits<CHAR>, class TAllocator = TStringDefaultAllocator<CHAR>>
-EckInlineNd auto EcdWideToMultiByte(_In_reads_or_z_(cch) PCWCH pszText, int cch = -1, int uCP = CP_ACP) noexcept
+EckInlineNd auto EcdWideToMultiByte(_In_NLS_string_(cch) PCWCH pszText, int cch = -1, int uCP = CP_ACP) noexcept
 {
     CStringT<CHAR, TTraits, TAllocator> rs{};
     EcdWideToMultiByte(rs, pszText, cch, uCP);
@@ -1507,7 +1507,7 @@ template<class TChar, class TTraits, class TAllocator>
     requires (sizeof(TChar) == 2)
 void EcdMultiByteToWide(
     CStringT<TChar, TTraits, TAllocator>& rsResult,
-    _In_reads_or_z_(cch) PCCH pszText,
+    _In_NLS_string_(cch) PCCH pszText,
     int cch = -1,
     UINT uCP = CP_ACP,
     UINT uFlags = MB_PRECOMPOSED) noexcept
@@ -1522,7 +1522,7 @@ void EcdMultiByteToWide(
         pszText, cch, rsResult.PushBackNoExtra(cchBuf), cchBuf);
 }
 template<class TTraits = CCharTraits<WCHAR>, class TAllocator = TStringDefaultAllocator<WCHAR>>
-EckInlineNd auto EcdMultiByteToWide(_In_reads_or_z_(cch) PCCH pszText, int cch = -1, int uCP = CP_ACP) noexcept
+EckInlineNd auto EcdMultiByteToWide(_In_NLS_string_(cch) PCCH pszText, int cch = -1, int uCP = CP_ACP) noexcept
 {
     CStringT<WCHAR, TTraits, TAllocator> rs{};
     EcdMultiByteToWide(rs, pszText, cch, uCP);

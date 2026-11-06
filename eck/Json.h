@@ -169,10 +169,11 @@ public:
     EckInlineNdCe bool IsValid() const noexcept { return !!m_pVal; }
 
     EckInline bool SetRaw(
-        _In_reads_or_z_(cchRaw) PCSTR pszRaw,
+        Eck_In_string_size_(cchRaw) PCSTR pszRaw,
         size_t cchRaw = MaxSizeT) const noexcept
     {
-        return yyjson_set_raw(GetPointer(), pszRaw, cchRaw);
+        return yyjson_set_raw(GetPointer(), pszRaw,
+            cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw);
     }
     EckInline bool SetNull() const noexcept { return yyjson_set_null(GetPointer()); }
     EckInline bool SetBool(bool bVal) const noexcept { return yyjson_set_bool(GetPointer(), bVal); }
@@ -229,7 +230,7 @@ public:
     }
 
     EckInlineNd CValue AtValue(
-        _In_reads_or_z_(cchPtr) PCSTR pszPtr,
+        Eck_In_string_size_(cchPtr) PCSTR pszPtr,
         size_t cchPtr = MaxSizeT,
         _Out_opt_ YyPointerError* pErr = nullptr) const noexcept
     {
@@ -253,13 +254,15 @@ private:
 public:
     ECK_DISABLE_COPY_DEF_CONS(CDocument);
     CDocument(
-        _In_reads_or_z_(cchJson) PCSTR pszJson,
+        Eck_In_string_size_(cchJson) PCSTR pszJson,
         size_t cchJson = MaxSizeT,
         YyReadFlag uFlags = 0,
         _In_opt_ const YyAllocator* pAlc = nullptr,
         _Out_opt_ YyReadError* pErr = nullptr) noexcept
     {
-        m_pDoc = yyjson_read_opts((PSTR)pszJson, cchJson == MaxSizeT ? strlen(pszJson) : cchJson,
+        m_pDoc = yyjson_read_opts(
+            (PSTR)pszJson,
+            cchJson == MaxSizeT ? strlen(pszJson) : cchJson,
             uFlags, pAlc, pErr);
     }
 
@@ -300,7 +303,7 @@ public:
     {}
 
     CDocument(
-        _In_reads_or_z_(cchJson) const char8_t* pszJson,
+        Eck_In_string_size_(cchJson) const char8_t* pszJson,
         size_t cchJson = MaxSizeT,
         YyReadFlag uFlags = 0,
         _In_opt_ const YyAllocator* pAlc = nullptr,
@@ -344,7 +347,7 @@ public:
     EckInlineNd size_t GetReadSize() const noexcept { return yyjson_doc_get_read_size(m_pDoc); }
     EckInlineNd size_t GetValueCount() const noexcept { return yyjson_doc_get_val_count(m_pDoc); }
     EckInlineNd CValue AtValue(
-        _In_reads_or_z_(cchPtr) PCSTR pszPtr,
+        Eck_In_string_size_(cchPtr) PCSTR pszPtr,
         size_t cchPtr = MaxSizeT,
         _Out_opt_ YyPointerError* pErr = nullptr) const noexcept
     {
@@ -501,10 +504,11 @@ public:
     EckInlineNdCe bool IsValid() const noexcept { return !!m_pVal; }
 
     EckInline bool SetRaw(
-        _In_reads_or_z_(cchRaw) PCSTR pszRaw,
+        Eck_In_string_size_(cchRaw) PCSTR pszRaw,
         size_t cchRaw = MaxSizeT) const noexcept
     {
-        return yyjson_mut_set_raw(GetPointer(), pszRaw, cchRaw);
+        return yyjson_mut_set_raw(GetPointer(), pszRaw,
+            cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw);
     }
     EckInline bool SetNull() const noexcept { return yyjson_mut_set_null(GetPointer()); }
     EckInline bool SetBool(bool bVal) const noexcept { return yyjson_mut_set_bool(GetPointer(), bVal); }
@@ -600,7 +604,7 @@ public:
     }
 
     EckInlineNd CMutableValue AtValue(
-        _In_reads_or_z_(cchPtr) PCSTR pszPtr,
+        Eck_In_string_size_(cchPtr) PCSTR pszPtr,
         size_t cchPtr = MaxSizeT,
         _Out_opt_ YyPointerContext* pCtx = nullptr,
         _Out_opt_ YyPointerError* pErr = nullptr) const noexcept
@@ -699,7 +703,7 @@ public:
     EckInline bool SetStringPoolSize(size_t cb) const noexcept { return yyjson_mut_doc_set_str_pool_size(m_pDoc, cb); }
     EckInline bool SetValuePoolSize(size_t cb) const noexcept { return yyjson_mut_doc_set_val_pool_size(m_pDoc, cb); }
     EckInlineNd CMutableValue AtValue(
-        _In_reads_or_z_(cchPtr) PCSTR pszPtr,
+        Eck_In_string_size_(cchPtr) PCSTR pszPtr,
         size_t cchPtr = MaxSizeT,
         _Out_opt_ YyPointerContext* pCtx = nullptr,
         _Out_opt_ YyPointerError* pErr = nullptr) const noexcept
@@ -737,13 +741,13 @@ public:
     EckInlineNd CDocument CloneImmutable() const noexcept { return CDocument(yyjson_mut_doc_imut_copy(m_pDoc, nullptr)); }
 
     EckInlineNd CMutableValue NewRaw(
-        _In_reads_or_z_(cchRaw) PCSTR pszRaw,
+        Eck_In_string_size_(cchRaw) PCSTR pszRaw,
         size_t cchRaw = MaxSizeT) const noexcept
     {
         return yyjson_mut_rawn(m_pDoc, pszRaw, cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw);
     }
     EckInlineNd CMutableValue NewRawCopy(
-        _In_reads_or_z_(cchRaw) PCSTR pszRaw,
+        Eck_In_string_size_(cchRaw) PCSTR pszRaw,
         size_t cchRaw = MaxSizeT) const noexcept
     {
         return yyjson_mut_rawncpy(m_pDoc, pszRaw, cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw);
@@ -757,19 +761,19 @@ public:
     EckInlineNd CMutableValue NewInt(int iVal) const noexcept { return yyjson_mut_int(m_pDoc, iVal); }
     EckInlineNd CMutableValue NewReal(double dVal) const noexcept { return yyjson_mut_real(m_pDoc, dVal); }
     EckInlineNd CMutableValue NewString(
-        _In_reads_or_z_(cchVal) PCSTR pszVal,
+        Eck_In_string_size_(cchVal) PCSTR pszVal,
         size_t cchVal = MaxSizeT) const noexcept
     {
         return yyjson_mut_strn(m_pDoc, pszVal, cchVal == MaxSizeT ? strlen(pszVal) : cchVal);
     }
     EckInlineNd CMutableValue NewStringCopy(
-        _In_reads_or_z_(cchVal) PCSTR pszVal,
+        Eck_In_string_size_(cchVal) PCSTR pszVal,
         size_t cchVal = MaxSizeT) const noexcept
     {
         return yyjson_mut_strncpy(m_pDoc, pszVal, cchVal == MaxSizeT ? strlen(pszVal) : cchVal);
     }
     EckInlineNd CMutableValue NewStringCopy(
-        _In_reads_or_z_(cchVal) PCWSTR pszVal,
+        Eck_In_string_size_(cchVal) PCWSTR pszVal,
         size_t cchVal = MaxSizeT) const noexcept
     {
         if (cchVal == MaxSizeT)

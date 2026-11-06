@@ -365,8 +365,16 @@ ECK_NAMESPACE_END
 #define ECK_DISABLE_ARITHMETIC_OVERFLOW_WARNING __pragma(warning(disable:26451))
 #define ECK_SUPPRESS_MISSING_ZERO_TERMINATION   __pragma(warning(suppress:6054))
 
+#define ECK_MAX_SIZE_T ((size_t)-1)
+
 #define Eck_Out_buffer_
 #define Eck_Append_buffer_
+#define Eck_In_string_size_(size)   \
+    _SAL2_Source_(                  \
+        Eck_In_string_size_,        \
+        (size),                     \
+        _When_((size) == ECK_MAX_SIZE_T, _In_z_) \
+        _When_((size) != ECK_MAX_SIZE_T, _In_reads_(size)))
 #pragma endregion Generator
 
 ECK_NAMESPACE_BEGIN
