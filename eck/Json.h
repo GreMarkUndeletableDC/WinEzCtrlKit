@@ -507,7 +507,8 @@ public:
         Eck_In_string_size_(cchRaw) PCSTR pszRaw,
         size_t cchRaw = MaxSizeT) const noexcept
     {
-        return yyjson_mut_set_raw(GetPointer(), pszRaw, cchRaw);
+        return yyjson_mut_set_raw(GetPointer(), pszRaw,
+            cchRaw == MaxSizeT ? strlen(pszRaw) : cchRaw);
     }
     EckInline bool SetNull() const noexcept { return yyjson_mut_set_null(GetPointer()); }
     EckInline bool SetBool(bool bVal) const noexcept { return yyjson_mut_set_bool(GetPointer(), bVal); }

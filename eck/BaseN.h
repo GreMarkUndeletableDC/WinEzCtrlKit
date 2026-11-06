@@ -100,7 +100,7 @@ EckInline void Base64Decode(
 }
 
 inline void Base64Encode(
-    _In_NLS_string_(cb) PCVOID p_,
+    _In_reads_bytes_(cb) PCVOID p_,
     size_t cb,
     Eck_Append_buffer_ CStringA& rs) noexcept
 {
@@ -165,7 +165,7 @@ EckInline void Base64Decode(const CStringA& rs, Eck_Append_buffer_ CByteBuffer& 
     Base64Decode(rs.Data(), rs.Size(), rb);
 }
 
-EckInline CStringA Base64Encode(_In_NLS_string_(cb) PCVOID p, size_t cb) noexcept
+EckInline CStringA Base64Encode(_In_reads_bytes_(cb) PCVOID p, size_t cb) noexcept
 {
     CStringA rs{};
     Base64Encode(p, cb, rs);

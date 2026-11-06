@@ -48,7 +48,7 @@ enum : BYTE
 };
 
 inline void Ucs8DecodeChar(
-    _Inout_ BYTE& byState, _Inout_ UINT& uCodePoint, UINT byUtf8)
+    _Inout_ BYTE& byState, _Inout_ UINT& uCodePoint, UINT byUtf8) noexcept
 {
     const UINT Type = Detail::Utf8Dfa[byUtf8];
     uCodePoint = (byState != UTF8DC_ACCEPT) ?

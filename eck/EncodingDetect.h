@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "FileHelper.h"
-#include "LocaleStringUtility.h"
+#include "UnicodeStringUtility.h"
 #include "../ThirdPartyLibrary/UCharDet/uchardet.h"
 
 ECK_NAMESPACE_BEGIN
@@ -173,10 +173,8 @@ inline bool EcdConvert(
         const auto cchU32 = Ucs16ConvertToUcs32(
             (PCWSTR)rbWork.Data(), cchU16,
             pU32, (cpDst == CP_UTF32LE), posInvalid);
-        if (posInvalid >= 0)
-            return false;
         rbDst.ReSize((BYTE*)(pU32 + cchU32) - rbDst.Data());
-        return true;
+        return posInvalid < 0;
     }
 
     int cbMb = WideCharToMultiByte(cpDst, uFlagsWc2Mb,

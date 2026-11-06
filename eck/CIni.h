@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "FileHelper.h"
-#include "LocaleStringUtility.h"
+#include "UnicodeStringUtility.h"
 
 ECK_NAMESPACE_BEGIN
 class CIni
