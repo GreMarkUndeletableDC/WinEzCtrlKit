@@ -17,11 +17,11 @@ private:
         int* pposSectionEnd = nullptr, int* pposKeyBegin = nullptr) const noexcept
     {
         if (pposSectionEnd)
-            *pposSectionEnd = StrNPos;
+            *pposSectionEnd = -1;
         if (pposKeyBegin)
-            *pposKeyBegin = StrNPos;
+            *pposKeyBegin = -1;
         if (m_rsText.IsEmpty())
-            return StrNPos;
+            return -1;
 
         CStringW rsUnescaping{};
         if (m_bParseEscape)
@@ -38,7 +38,7 @@ private:
         rsSection.PushBack(pszSection);
         rsSection.PushBackChar(L']');
         if (m_rsText.Size() < rsSection.Size() - m_cchLineBreak)
-            return StrNPos;
+            return -1;
         if (wcscmp(m_rsText.Data(), rsSection.Data() + m_cchLineBreak) == 0)
         {
             pos = 0;
@@ -47,8 +47,8 @@ private:
         else
         {
             pos = m_rsText.Find(rsSection);
-            if (pos == StrNPos)
-                return StrNPos;
+            if (pos < 0)
+                return -1;
             pos += rsSection.Size();
         }
 
@@ -68,8 +68,8 @@ private:
         rsKey.PushBackChar(L'=');
 
         pos = m_rsText.Find(rsKey, pos);
-        if (pos == StrNPos)
-            return StrNPos;
+        if (pos < 0)
+            return -1;
         if (pposKeyBegin)
             *pposKeyBegin = pos;
 
@@ -80,8 +80,8 @@ private:
 
     int FindValueEndPosition(int posValueBegin) noexcept
     {
-        const int posEnd = m_rsText.Find(m_szLineBreak, posValueBegin);
-        if (posEnd == StrNPos)
+        const int posEnd = m_rsText.Find(m_szLineBreak, m_cchLineBreak, posValueBegin);
+        if (posEnd < 0)
             return m_rsText.Size();
         if (m_bParseComment)
         {
@@ -91,7 +91,7 @@ private:
             if (m_bParseEscape)
             {
                 posComment = posValueBegin;
-                while ((posComment = m_rsText.Find(L";", posComment)) != StrNPos)
+                while ((posComment = m_rsText.Find(L";", 1, posComment)) >= 0)
                 {
                     if (m_rsText[posComment - 1] != L'\\')
                         break;
@@ -100,10 +100,10 @@ private:
                 }
             }
             else
-                posComment = m_rsText.Find(L";", posValueBegin);
+                posComment = m_rsText.Find(L";", 1, posValueBegin);
 
             m_rsText[posEnd] = m_szLineBreak[0];// 恢复
-            if (posComment != StrNPos)
+            if (posComment >= 0)
                 return posComment;
         }
         return posEnd;
@@ -115,11 +115,11 @@ private:
         int pos1, posSectionEnd;
         CStringW rsNew{}, rsUnescaping{};
         int pos0 = FindValuePosition(pszSection, pszKey, &posSectionEnd);
-        if (pos0 == StrNPos)
+        if (pos0 < 0)
         {
             if (bMustExist)
                 return false;
-            else if (posSectionEnd == StrNPos)// 没有节
+            else if (posSectionEnd < 0)// 没有节
             {
                 //-----------制节
                 //-----检查换行
@@ -170,7 +170,7 @@ private:
                 int posNextSection = m_rsText.Find(szNextSection, posSectionEnd);
                 //-----------制键
                 //-----检查换行
-                if (posNextSection == StrNPos)
+                if (posNextSection < 0)
                 {
                     if (m_rsText.Size() >= m_cchLineBreak &&
                         wcsncmp(
@@ -197,7 +197,7 @@ private:
                 rsNew.PushBack(pszValue);
                 rsNew.PushBack(m_szLineBreak, m_cchLineBreak);
                 //-----------添加
-                if (posNextSection == StrNPos)
+                if (posNextSection < 0)
                     m_rsText.PushBack(rsNew);
                 else
                     m_rsText.Insert(posNextSection, rsNew);
@@ -288,7 +288,7 @@ public:
         int Default = 0) noexcept
     {
         const int pos = FindValuePosition(pszSection, pszKey);
-        if (pos == StrNPos)
+        if (pos < 0)
             return Default;
         return _wtoi(m_rsText.Data() + pos);
     }
@@ -297,7 +297,7 @@ public:
         double Default = 0.0) noexcept
     {
         const int pos = FindValuePosition(pszSection, pszKey);
-        if (pos == StrNPos)
+        if (pos < 0)
             return Default;
         return _wtof(m_rsText.Data() + pos);
     }
@@ -306,7 +306,7 @@ public:
         bool Default = false) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
-        if (pos0 == StrNPos)
+        if (pos0 < 0)
             return Default;
         const int pos1 = FindValueEndPosition(pos0);
         const int cch = pos1 - pos0;
@@ -322,10 +322,10 @@ public:
         PCWSTR Default = L"") noexcept
     {
         int pos0 = FindValuePosition(pszSection, pszKey);
-        if (pos0 == StrNPos)
+        if (pos0 < 0)
             return Default;
         int pos1 = FindValueEndPosition(pos0);
-        auto rs = CStringW(m_rsText.Data() + pos0, pos1 - pos0);
+        CStringW rs{ m_rsText.Data() + pos0, pos1 - pos0 };
         if (m_bParseEscape)
             Escape(rs);
         return rs;
@@ -334,11 +334,12 @@ public:
     bool ReadIntArray(std::vector<int>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
-        if (pos0 == StrNPos)
+        if (pos0 < 0)
             return false;
         const int pos1 = FindValueEndPosition(pos0);
-        const int cch = pos1 - pos0;
-        SplitString(m_rsText.Data() + pos0, L",", 0, cch, 1,
+        SplitString(
+            m_rsText.Data() + pos0, pos1 - pos0,
+            EckArgString(L","), 0,
             [&v](PCWSTR pszStart, int cchSub) noexcept
             {
                 v.emplace_back(_wtoi(pszStart));
@@ -350,11 +351,12 @@ public:
     bool ReadDoubleArray(std::vector<double>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
-        if (pos0 == StrNPos)
+        if (pos0 < 0)
             return false;
         const int pos1 = FindValueEndPosition(pos0);
-        const int cch = pos1 - pos0;
-        SplitString(m_rsText.Data() + pos0, L",", 0, cch, 1,
+        SplitString(
+            m_rsText.Data() + pos0, pos1 - pos0,
+            EckArgString(L","), 0,
             [&v](PCWSTR pszStart, int cchSub) noexcept
             {
                 v.emplace_back(_wtof(pszStart));
@@ -367,12 +369,13 @@ public:
     bool ReadBoolArray(std::vector<TBool>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
-        if (pos0 == StrNPos)
+        if (pos0 < 0)
             return false;
         const int pos1 = FindValueEndPosition(pos0);
-        const int cch = pos1 - pos0;
-        SplitString(m_rsText.Data() + pos0, L",", 0, cch, 1,
-            [&v](PCWSTR pszStart, int cchSub)
+        SplitString(
+            m_rsText.Data() + pos0, pos1 - pos0,
+            EckArgString(L","), 0,
+            [&v](PCWSTR pszStart, int cchSub) noexcept
             {
                 if (cchSub == 4 && wcsnicmp(pszStart, L"True", 4) == 0)
                     v.emplace_back(1);
@@ -388,14 +391,16 @@ public:
     bool ReadStringArray(std::vector<CStringW>& v, PCWSTR pszSection, PCWSTR pszKey) noexcept
     {
         const int pos0 = FindValuePosition(pszSection, pszKey);
-        if (pos0 == StrNPos)
+        if (pos0 < 0)
             return false;
         const int pos1 = FindValueEndPosition(pos0);
         if (pos1 <= pos0)
             return true;
         if (!m_bParseEscape)
         {
-            SplitString(m_rsText.Data() + pos0, L",", 0, pos1 - pos0, 1,
+            SplitString(
+                m_rsText.Data() + pos0, pos1 - pos0,
+                EckArgString(L","), 0,
                 [&v](PCWSTR pszStart, int cchSub)
                 {
                     v.emplace_back(pszStart, cchSub);
@@ -533,7 +538,7 @@ public:
         else
         {
             pos0 = m_rsText.Find(rsSection);
-            if (pos0 == StrNPos)
+            if (pos0 < 0)
                 return false;
         }
 
@@ -542,7 +547,7 @@ public:
         wcscpy(szNextSection, m_szLineBreak);
         wcscat(szNextSection, L"[");
         const int pos1 = m_rsText.Find(szNextSection, pos0 + rsSection.Size());
-        if (pos1 == StrNPos)
+        if (pos1 < 0)
             m_rsText.PopBack(m_rsText.Size() - pos0);
         else
             m_rsText.Erase(pos0, pos1 - pos0);
@@ -553,7 +558,7 @@ public:
     {
         int posKeyBegin;
         const int pos0 = FindValuePosition(pszSection, pszKey, nullptr, &posKeyBegin);
-        if (pos0 == StrNPos)
+        if (pos0 < 0)
             return false;
         const int pos1 = FindValueEndPosition(pos0);
         m_rsText.Erase(posKeyBegin, pos1 - posKeyBegin);
