@@ -576,7 +576,7 @@ public:
         else if (uCp == CP_UTF16BE)
         {
             m_rsText.Assign((PCWCH)rbFile.Data(), int(rbFile.Size() / sizeof(WCHAR)));
-            LcsUtf16ReverseByteOrder(m_rsText.Data(), m_rsText.Size());
+            Ucs16ReverseByteOrder(m_rsText.Data(), m_rsText.Size());
         }
         else
             m_rsText = EcdMultiByteToWide((PCSTR)rbFile.Data(), (int)rbFile.Size(), uCp);
