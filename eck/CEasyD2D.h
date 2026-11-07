@@ -34,19 +34,19 @@ struct EZD2D_PARAM
 
     static EZD2D_PARAM MakeBitBlit(
         HWND hWnd,
-        IDXGIFactory2* pDxgiFactory,
-        IDXGIDevice* pDxgiDevice,
-        ID2D1Device* pD2DDevice,
         int cx,
         int cy,
-        float fDpi) noexcept
+        float fDpi,
+        IDXGIFactory2* pDxgiFactory = nullptr,
+        IDXGIDevice* pDxgiDevice = nullptr,
+        ID2D1Device* pD2DDevice = nullptr) noexcept
     {
         return
         {
             .hWnd = hWnd,
-            .pDxgiFactory = pDxgiFactory,
-            .pDxgiDevice = pDxgiDevice,
-            .pD2DDevice = pD2DDevice,
+            .pDxgiFactory = pDxgiFactory ? pDxgiFactory : g_pDxgiFactory,
+            .pDxgiDevice = pDxgiDevice ? pDxgiDevice : g_pDxgiDevice,
+            .pD2DDevice = pD2DDevice ? pD2DDevice : g_pD2DDevice,
             .cx = (UINT)cx,
             .cy = (UINT)cy,
             .uScaling = DXGI_SCALING_STRETCH,
@@ -54,38 +54,28 @@ struct EZD2D_PARAM
             .fDpi = fDpi
         };
     }
-    static EZD2D_PARAM MakeBitBlit(
-        HWND hWnd, int cx, int cy, float fDpi) noexcept
-    {
-        return MakeBitBlit(hWnd, g_pDxgiFactory, g_pDxgiDevice, g_pD2DDevice, cx, cy, fDpi);
-    }
 
     static EZD2D_PARAM MakeFlip(
         HWND hWnd,
-        IDXGIFactory2* pDxgiFactory,
-        IDXGIDevice* pDxgiDevice,
-        ID2D1Device* pD2DDevice,
         int cx,
         int cy,
-        float fDpi) noexcept
+        float fDpi,
+        IDXGIFactory2* pDxgiFactory = nullptr,
+        IDXGIDevice* pDxgiDevice = nullptr,
+        ID2D1Device* pD2DDevice = nullptr) noexcept
     {
         return
         {
             .hWnd = hWnd,
-            .pDxgiFactory = pDxgiFactory,
-            .pDxgiDevice = pDxgiDevice,
-            .pD2DDevice = pD2DDevice,
+            .pDxgiFactory = pDxgiFactory ? pDxgiFactory : g_pDxgiFactory,
+            .pDxgiDevice = pDxgiDevice ? pDxgiDevice : g_pDxgiDevice,
+            .pD2DDevice = pD2DDevice ? pD2DDevice : g_pD2DDevice,
             .cx = (UINT)cx,
             .cy = (UINT)cy,
             .cBuffer = 2,
             .uSwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
             .fDpi = fDpi
         };
-    }
-    static EZD2D_PARAM MakeFlip(
-        HWND hWnd, int cx, int cy, float fDpi) noexcept
-    {
-        return MakeFlip(hWnd, g_pDxgiFactory, g_pDxgiDevice, g_pD2DDevice, cx, cy, fDpi);
     }
 };
 
