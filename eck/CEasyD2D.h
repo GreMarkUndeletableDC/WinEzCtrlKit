@@ -1,114 +1,145 @@
 ﻿#pragma once
-#include "Utility.h"
+#include "ComPtr.h"
 
 ECK_NAMESPACE_BEGIN
 #if !ECK_OPT_NO_D2D
 struct EZD2D_PARAM
 {
-    HWND hWnd = nullptr;
+    static constexpr D2D1_DEVICE_CONTEXT_OPTIONS DefaultDcOptions =
+        D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS;
+    static constexpr D2D1_ALPHA_MODE DefaultBitmapAlphaMode = D2D1_ALPHA_MODE_IGNORE;
+    static constexpr D2D1_BITMAP_OPTIONS DefaultBitmapOptions =
+        D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
 
-    IDXGIFactory2* pDxgiFactory = nullptr;
-    IDXGIDevice* pDxgiDevice = nullptr;
-    ID2D1Device* pD2dDevice = nullptr;
+    HWND hWnd{};
 
-    UINT cx = 8;
-    UINT cy = 8;
-    UINT cBuffer = 1;
-    DXGI_SCALING uScaling = DXGI_SCALING_NONE;
-    DXGI_SWAP_EFFECT uSwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    DXGI_ALPHA_MODE uAlphaMode = DXGI_ALPHA_MODE_IGNORE;
-    UINT uFlags = 0;
+    IDXGIFactory2* pDxgiFactory{};
+    IDXGIDevice* pDxgiDevice{};
+    ID2D1Device* pD2DDevice{};
 
-    D2D1_DEVICE_CONTEXT_OPTIONS uDcOptions = D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS;
+    UINT cx{ 8 };
+    UINT cy{ 8 };
+    UINT cBuffer{ 1 };
+    DXGI_SCALING uScaling{ DXGI_SCALING_NONE };
+    DXGI_SWAP_EFFECT uSwapEffect{ DXGI_SWAP_EFFECT_DISCARD };
+    DXGI_ALPHA_MODE uAlphaMode{ DXGI_ALPHA_MODE_IGNORE };
+    UINT uFlags{};
 
-    D2D1_ALPHA_MODE uBmpAlphaMode = D2D1_ALPHA_MODE_IGNORE;
-    D2D1_BITMAP_OPTIONS uBmpOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
+    D2D1_DEVICE_CONTEXT_OPTIONS uDcOptions{ DefaultDcOptions };
 
-    float fDpi = 96.f;
+    D2D1_ALPHA_MODE eBitmapAlphaMode{ DefaultBitmapAlphaMode };
+    D2D1_BITMAP_OPTIONS uBitmapOptions{ DefaultBitmapOptions };
 
-    EckInline static EZD2D_PARAM MakeBitblt(HWND hWnd, IDXGIFactory2* pDxgiFactory,
-        IDXGIDevice* pDxgiDevice, ID2D1Device* pD2dDevice, int cx, int cy, float fDpi = 96.f) noexcept
+    float fDpi{ 96.f };
+
+    static EZD2D_PARAM MakeBitBlit(
+        HWND hWnd,
+        IDXGIFactory2* pDxgiFactory,
+        IDXGIDevice* pDxgiDevice,
+        ID2D1Device* pD2DDevice,
+        int cx,
+        int cy,
+        float fDpi) noexcept
     {
         return
         {
-            hWnd,pDxgiFactory,pDxgiDevice,pD2dDevice,(UINT)cx,(UINT)cy,
-            1,DXGI_SCALING_STRETCH,DXGI_SWAP_EFFECT_SEQUENTIAL,DXGI_ALPHA_MODE_IGNORE,0,
-            D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,D2D1_ALPHA_MODE_IGNORE,
-            D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-            fDpi
+            .hWnd = hWnd,
+            .pDxgiFactory = pDxgiFactory,
+            .pDxgiDevice = pDxgiDevice,
+            .pD2DDevice = pD2DDevice,
+            .cx = (UINT)cx,
+            .cy = (UINT)cy,
+            .uScaling = DXGI_SCALING_STRETCH,
+            .uSwapEffect = DXGI_SWAP_EFFECT_SEQUENTIAL,
+            .fDpi = fDpi
         };
     }
-
-    EckInline static EZD2D_PARAM MakeFlip(HWND hWnd, IDXGIFactory2* pDxgiFactory,
-        IDXGIDevice* pDxgiDevice, ID2D1Device* pD2dDevice, int cx, int cy, float fDpi = 96.f) noexcept
+    static EZD2D_PARAM MakeBitBlit(
+        HWND hWnd, int cx, int cy, float fDpi) noexcept
     {
-        return
-        {
-            hWnd,pDxgiFactory,pDxgiDevice,pD2dDevice,(UINT)cx,(UINT)cy,
-            2,DXGI_SCALING_NONE,DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,DXGI_ALPHA_MODE_IGNORE,0,
-            D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,D2D1_ALPHA_MODE_IGNORE,
-            D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-            fDpi
-        };
+        return MakeBitBlit(hWnd, g_pDxgiFactory, g_pDxgiDevice, g_pD2DDevice, cx, cy, fDpi);
     }
 
-    EckInline static EZD2D_PARAM MakeComp(HWND hWnd, IDXGIFactory2* pDxgiFactory,
-        IDXGIDevice* pDxgiDevice, ID2D1Device* pD2dDevice, int cx, int cy, float fDpi = 96.f) noexcept
+    static EZD2D_PARAM MakeFlip(
+        HWND hWnd,
+        IDXGIFactory2* pDxgiFactory,
+        IDXGIDevice* pDxgiDevice,
+        ID2D1Device* pD2DDevice,
+        int cx,
+        int cy,
+        float fDpi) noexcept
     {
         return
         {
-            hWnd,pDxgiFactory,pDxgiDevice,pD2dDevice,(UINT)cx,(UINT)cy,
-            2,DXGI_SCALING_STRETCH,DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,DXGI_ALPHA_MODE_IGNORE,0,
-            D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,D2D1_ALPHA_MODE_IGNORE,
-            D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-            fDpi
+            .hWnd = hWnd,
+            .pDxgiFactory = pDxgiFactory,
+            .pDxgiDevice = pDxgiDevice,
+            .pD2DDevice = pD2DDevice,
+            .cx = (UINT)cx,
+            .cy = (UINT)cy,
+            .cBuffer = 2,
+            .uSwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
+            .fDpi = fDpi
         };
+    }
+    static EZD2D_PARAM MakeFlip(
+        HWND hWnd, int cx, int cy, float fDpi) noexcept
+    {
+        return MakeFlip(hWnd, g_pDxgiFactory, g_pDxgiDevice, g_pD2DDevice, cx, cy, fDpi);
     }
 };
 
-struct CEasyD2D
+class CEasyD2D
 {
-    ID2D1DeviceContext* m_pDC = nullptr;
-    IDXGISwapChain1* m_pSwapChain = nullptr;
-    ID2D1Bitmap1* m_pBitmap = nullptr;
+private:
+    ComPtr<ID2D1DeviceContext> m_pDC{};
+    ComPtr<IDXGISwapChain1> m_pSwapChain{};
+    ComPtr<ID2D1Bitmap1> m_pBitmap{};
 
-    CEasyD2D() = default;
-    CEasyD2D(const CEasyD2D&) = delete;
-    CEasyD2D(CEasyD2D&& x) noexcept
-        : m_pDC{ x.m_pDC }, m_pSwapChain{ x.m_pSwapChain }, m_pBitmap{ x.m_pBitmap }
+    static HRESULT InternalCreateD2D(
+        const EZD2D_PARAM& Param,
+        IDXGISwapChain1* pSwapChain,
+        ComPtr<ID2D1DeviceContext>& pDC,
+        ComPtr<ID2D1Bitmap1>& pBitmap) noexcept
     {
-        x.m_pDC = nullptr;
-        x.m_pSwapChain = nullptr;
-        x.m_pBitmap = nullptr;
-    }
+        HRESULT hr;
 
-    CEasyD2D(const EZD2D_PARAM& Param) noexcept
-    {
-        Create(Param);
-    }
+        ComPtr<IDXGISurface1> pSurface;
+        hr = pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pSurface));
+        if (FAILED(hr))
+            return hr;
 
-    ~CEasyD2D()
-    {
-        Destroy();
-    }
+        hr = Param.pD2DDevice->CreateDeviceContext(Param.uDcOptions, &pDC);
+        if (FAILED(hr))
+            return hr;
 
-    CEasyD2D& operator=(const CEasyD2D&) = delete;
-    CEasyD2D& operator=(CEasyD2D&& x) noexcept
-    {
-        std::swap(m_pDC, x.m_pDC);
-        std::swap(m_pSwapChain, x.m_pSwapChain);
-        std::swap(m_pBitmap, x.m_pBitmap);
-    }
+        const D2D1_BITMAP_PROPERTIES1 BitmapProp
+        {
+            { DXGI_FORMAT_B8G8R8A8_UNORM, Param.eBitmapAlphaMode },
+            Param.fDpi,
+            Param.fDpi,
+            Param.uBitmapOptions
+        };
 
+        hr = pDC->CreateBitmapFromDxgiSurface(pSurface.Get(), &BitmapProp, &pBitmap);
+        if (FAILED(hr))
+            return hr;
+        pDC->SetTarget(pBitmap.Get());
+        return S_OK;
+    }
+public:
     HRESULT Create(const EZD2D_PARAM& Param) noexcept
     {
-        const DXGI_SWAP_CHAIN_DESC1 DxgiSwapChainDesc
+        HRESULT hr;
+        Clear();
+
+        const DXGI_SWAP_CHAIN_DESC1 SwapChainDesc
         {
             Param.cx,
             Param.cy,
             DXGI_FORMAT_B8G8R8A8_UNORM,
             false,
-            { 1,0 },
+            { 1, 0 },
             DXGI_USAGE_RENDER_TARGET_OUTPUT,
             Param.cBuffer,
             Param.uScaling,
@@ -117,65 +148,41 @@ struct CEasyD2D
             Param.uFlags
         };
 
-        HRESULT hr;
-        if (FAILED(hr = Param.pDxgiFactory->CreateSwapChainForHwnd(Param.pDxgiDevice, Param.hWnd,
-            &DxgiSwapChainDesc, nullptr, nullptr, &m_pSwapChain)))
-        {
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
+        ComPtr<IDXGISwapChain1> pSwapChain{};
+        hr = Param.pDxgiFactory->CreateSwapChainForHwnd(
+            Param.pDxgiDevice,
+            Param.hWnd,
+            &SwapChainDesc,
+            nullptr,
+            nullptr,
+            &pSwapChain);
+        if (FAILED(hr))
             return hr;
-        }
 
-        if (FAILED(hr = Param.pD2dDevice->CreateDeviceContext(Param.uDcOptions, &m_pDC)))
-        {
-            SafeRelease(m_pSwapChain);
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
+        ComPtr<ID2D1DeviceContext> pDC{};
+        ComPtr<ID2D1Bitmap1> pBitmap{};
+        hr = InternalCreateD2D(Param, pSwapChain.Get(), pDC, pBitmap);
+        if (FAILED(hr))
             return hr;
-        }
 
-        IDXGISurface1* pSurface;
-        if (FAILED(hr = m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pSurface))))
-        {
-            SafeRelease(m_pSwapChain);
-            SafeRelease(m_pDC);
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
-            return hr;
-        }
-
-        const D2D1_BITMAP_PROPERTIES1 D2dBmpProp
-        {
-            { DXGI_FORMAT_B8G8R8A8_UNORM,Param.uBmpAlphaMode },
-            Param.fDpi,
-            Param.fDpi,
-            Param.uBmpOptions
-        };
-
-        if (FAILED(hr = m_pDC->CreateBitmapFromDxgiSurface(pSurface, &D2dBmpProp, &m_pBitmap)))
-        {
-            SafeRelease(m_pSwapChain);
-            SafeRelease(m_pDC);
-            pSurface->Release();
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
-            return hr;
-        }
-
-        pSurface->Release();
-        m_pDC->SetTarget(m_pBitmap);
+        m_pDC = std::move(pDC);
+        m_pSwapChain = std::move(pSwapChain);
+        m_pBitmap = std::move(pBitmap);
         return S_OK;
     }
 
     HRESULT CreateComposition(const EZD2D_PARAM& Param) noexcept
     {
-        const DXGI_SWAP_CHAIN_DESC1 DxgiSwapChainDesc
+        HRESULT hr;
+        Clear();
+
+        const DXGI_SWAP_CHAIN_DESC1 SwapChainDesc
         {
             Param.cx,
             Param.cy,
             DXGI_FORMAT_B8G8R8A8_UNORM,
             false,
-            { 1,0 },
+            { 1, 0 },
             DXGI_USAGE_RENDER_TARGET_OUTPUT,
             Param.cBuffer,
             Param.uScaling,
@@ -184,113 +191,91 @@ struct CEasyD2D
             Param.uFlags
         };
 
-        HRESULT hr;
-        if (FAILED(hr = Param.pDxgiFactory->CreateSwapChainForComposition(Param.pDxgiDevice,
-            &DxgiSwapChainDesc, nullptr, &m_pSwapChain)))
-        {
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
+        ComPtr<IDXGISwapChain1> pSwapChain{};
+        hr = Param.pDxgiFactory->CreateSwapChainForComposition(
+            Param.pDxgiDevice,
+            &SwapChainDesc,
+            nullptr,
+            &pSwapChain);
+        if (FAILED(hr))
             return hr;
-        }
 
-        if (FAILED(hr = Param.pD2dDevice->CreateDeviceContext(Param.uDcOptions, &m_pDC)))
-        {
-            SafeRelease(m_pSwapChain);
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
+        ComPtr<ID2D1DeviceContext> pDC{};
+        ComPtr<ID2D1Bitmap1> pBitmap{};
+        hr = InternalCreateD2D(Param, pSwapChain.Get(), pDC, pBitmap);
+        if (FAILED(hr))
             return hr;
-        }
 
-        IDXGISurface1* pSurface;
-        if (FAILED(hr = m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pSurface))))
-        {
-            SafeRelease(m_pSwapChain);
-            SafeRelease(m_pDC);
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
-            return hr;
-        }
-
-        const D2D1_BITMAP_PROPERTIES1 D2dBmpProp
-        {
-            { DXGI_FORMAT_B8G8R8A8_UNORM,Param.uBmpAlphaMode },
-            Param.fDpi,
-            Param.fDpi,
-            Param.uBmpOptions
-        };
-
-        if (FAILED(hr = m_pDC->CreateBitmapFromDxgiSurface(pSurface, &D2dBmpProp, &m_pBitmap)))
-        {
-            SafeRelease(m_pSwapChain);
-            SafeRelease(m_pDC);
-            pSurface->Release();
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
-            return hr;
-        }
-
-        pSurface->Release();
-        m_pDC->SetTarget(m_pBitmap);
+        m_pDC = std::move(pDC);
+        m_pSwapChain = std::move(pSwapChain);
+        m_pBitmap = std::move(pBitmap);
         return S_OK;
     }
 
-    HRESULT ReSize(UINT cBuffer, UINT cx, UINT cy, UINT uSwapChainFlags,
-        D2D1_ALPHA_MODE uBmpAlphaMode = D2D1_ALPHA_MODE_IGNORE,
-        D2D1_BITMAP_OPTIONS uBmpOptions = D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-        float fDpi = 96.0f) noexcept
+    HRESULT CreateDeviceContext(
+        ID2D1Device* pD2DDevice = nullptr,
+        D2D1_DEVICE_CONTEXT_OPTIONS uDcOptions = EZD2D_PARAM::DefaultDcOptions) noexcept
     {
-        EckAssert(!!m_pDC && !!m_pSwapChain && !!m_pBitmap);
+        if (!pD2DDevice)
+            pD2DDevice = g_pD2DDevice;
+        return pD2DDevice->CreateDeviceContext(uDcOptions, m_pDC.AtClear());
+    }
+
+    HRESULT ReSizeSwapChain(
+        UINT cBuffer,
+        UINT cx, UINT cy,
+        float fDpi,
+        UINT uSwapChainFlags,
+        D2D1_ALPHA_MODE eBitmapAlphaMode = EZD2D_PARAM::DefaultBitmapAlphaMode,
+        D2D1_BITMAP_OPTIONS uBitmapOptions = EZD2D_PARAM::DefaultBitmapOptions) noexcept
+    {
+        EckAssert(m_pDC && m_pSwapChain && m_pBitmap);
         m_pDC->SetTarget(nullptr);
-        SafeRelease(m_pBitmap);
+        m_pBitmap.Clear();
 
         HRESULT hr;
-        if (FAILED(hr = m_pSwapChain->ResizeBuffers(cBuffer,
-            std::max(8u, cx), std::max(8u, cy), DXGI_FORMAT_UNKNOWN, uSwapChainFlags)))
-        {
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
+        hr = m_pSwapChain->ResizeBuffers(
+            cBuffer,
+            std::max(8u, cx),
+            std::max(8u, cy),
+            DXGI_FORMAT_UNKNOWN,
+            uSwapChainFlags);
+        if (FAILED(hr))
             return hr;
-        }
 
-        IDXGISurface1* pSurface;
+        ComPtr<IDXGISurface1> pSurface;
         hr = m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pSurface));
         if (FAILED(hr))
-        {
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
             return hr;
-        }
 
-        D2D1_BITMAP_PROPERTIES1 D2dBmpProp
+        D2D1_BITMAP_PROPERTIES1 BitmapProp
         {
-            { DXGI_FORMAT_B8G8R8A8_UNORM,uBmpAlphaMode },
+            { DXGI_FORMAT_B8G8R8A8_UNORM, eBitmapAlphaMode },
             fDpi,
             fDpi,
-            uBmpOptions,
-            nullptr
+            uBitmapOptions,
         };
 
-        if (FAILED(hr = m_pDC->CreateBitmapFromDxgiSurface(pSurface, &D2dBmpProp, &m_pBitmap)))
-        {
-            EckDbgPrintFormatMessage(hr);
-            EckDbgBreak();
+        hr = m_pDC->CreateBitmapFromDxgiSurface(pSurface.Get(), &BitmapProp, &m_pBitmap);
+        if (FAILED(hr))
             return hr;
-        }
 
-        pSurface->Release();
-        m_pDC->SetTarget(m_pBitmap);
+        m_pDC->SetTarget(m_pBitmap.Get());
         return S_OK;
     }
 
-    EckInlineNdCe auto GetDC() const noexcept { return m_pDC; }
-    EckInlineNdCe auto GetBitmap() const noexcept { return m_pBitmap; }
-    EckInlineNdCe auto GetSwapChain() const noexcept { return m_pSwapChain; }
+    EckInlineNdCe auto& GetDC() const noexcept { return m_pDC; }
+    EckInlineNdCe auto& GetSwapChain() const noexcept { return m_pSwapChain; }
+    EckInlineNdCe auto& GetBitmap() const noexcept { return m_pBitmap; }
+    EckInlineNdCe auto& GetDC() noexcept { return m_pDC; }
+    EckInlineNdCe auto& GetSwapChain() noexcept { return m_pSwapChain; }
+    EckInlineNdCe auto& GetBitmap() noexcept { return m_pBitmap; }
 
-    EckInline void Destroy() noexcept
+    void Clear() noexcept
     {
-        SafeRelease(m_pDC);
-        SafeRelease(m_pBitmap);
-        SafeRelease(m_pSwapChain);
+        m_pDC.Clear();
+        m_pSwapChain.Clear();
+        m_pBitmap.Clear();
     }
 };
 #endif// !ECK_OPT_NO_D2D

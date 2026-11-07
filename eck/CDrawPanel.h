@@ -1,9 +1,6 @@
 ﻿#pragma once
 #include "CWindow.h"
 #include "CMemoryDC.h"
-#include "CEasyD2D.h"
-
-#include <dxgi1_2.h>
 
 ECK_NAMESPACE_BEGIN
 class CDrawPanel : public CWindow
@@ -78,37 +75,5 @@ public:
             DeleteObject(m_hbrBK);
         m_hbrBK = hbr;
     }
-};
-
-class CDrawPanelD2D : public CWindow
-{
-public:
-    ECK_RTTI(CDrawPanelD2D, CWindow);
-    ECK_W_NONATTACHABLE(CDrawPanelD2D);
-    ECK_W_CREATE_CLASS_INST(WCN_DRAWPANEL, g_hInstance);
-private:
-    CEasyD2D m_D2D{};
-public:
-    LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override
-    {
-        switch (uMsg)
-        {
-        case WM_PAINT:
-            ValidateRect(Handle, nullptr);
-            m_D2D.GetSwapChain()->Present(0, 0);
-            return 0;
-        case WM_SIZE:
-            m_D2D.ReSize(0, LOWORD(lParam), HIWORD(lParam), 0);
-            return 0;
-        case WM_CREATE:
-            m_D2D.Create(EZD2D_PARAM::MakeBitblt(Handle, g_pDxgiFactory, g_pDxgiDevice, g_pD2DDevice, 0, 0));
-            return 0;
-        }
-        return __super::OnMessage(uMsg, wParam, lParam);
-    }
-
-    EckInlineNdCe ID2D1DeviceContext* GetDC() const noexcept { return m_D2D.GetDC(); }
-
-    EckInlineNdCe IDXGISwapChain1* GetSwapChain() const noexcept { return m_D2D.GetSwapChain(); }
 };
 ECK_NAMESPACE_END
