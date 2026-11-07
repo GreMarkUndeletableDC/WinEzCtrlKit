@@ -410,6 +410,7 @@ private:
     USHORT m_cLockUpdate{};
 
     PresentMode m_ePresentMode{ PresentMode::FlipSwapChain };
+    BYTE m_cFlipBuffer{ 2 };
 
     BITBOOL m_bAutoTheme : 1{ true };
     BITBOOL m_bAutoThemeAccent : 1{ true };
@@ -610,8 +611,8 @@ private:
 
     void RdpRender_DComposition(const Kw::Rect& rc) noexcept
     {
-        EckAssert(GetPresentMode() == PresentMode::DCompositionSurface ||
-            GetPresentMode() == PresentMode::DCompositionVisual);
+        EckAssert(m_ePresentMode == PresentMode::DCompositionSurface ||
+            m_ePresentMode == PresentMode::DCompositionVisual);
 
         const auto pDC = RdGetDC();
 
@@ -836,29 +837,50 @@ private:
             *prcPixel = {};
     }
 
+    void RdpCreateGdiInteropBitmap(UINT cx, UINT cy, float fDpi) noexcept
+    {
+        EckAssert(m_ePresentMode == PresentMode::UpdateLayeredWindow);
+        const D2D1_BITMAP_PROPERTIES1 BitmapProp
+        {
+            { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
+            fDpi, fDpi,
+            EZD2D_PARAM::DefaultBitmapOptions | D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
+        };
+        RdGetDC()->CreateBitmap(
+            { cx, cy },
+            nullptr, 0, BitmapProp,
+            m_D2D.GetBitmap().AtClear());
+        RdGetDC()->SetTarget(m_D2D.GetBitmap().Get());
+    }
+
     void RdReSize() noexcept
     {
         m_bFullUpdate = true;
-
-        constexpr auto BitmapOptions =
-            D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
         const auto cx = (UINT)std::max(GetClientWidth(), 8);
         const auto cy = (UINT)std::max(GetClientHeight(), 8);
         const auto fDpi = (float)GetUserDpi();
         switch (m_ePresentMode)
         {
         case PresentMode::BitBltSwapChain:
-            m_D2D.ReSize(1, cx, cy, 0,
-                D2D1_ALPHA_MODE_PREMULTIPLIED, BitmapOptions, fDpi);
+            m_D2D.ReSizeSwapChain(
+                1,
+                cx, cy,
+                fDpi,
+                0,
+                D2D1_ALPHA_MODE_PREMULTIPLIED);
             break;
         case PresentMode::FlipSwapChain:
-            m_D2D.ReSize(2, cx, cy, DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT,
-                D2D1_ALPHA_MODE_PREMULTIPLIED, BitmapOptions, fDpi);
+            m_D2D.ReSizeSwapChain(
+                m_cFlipBuffer,
+                cx, cy,
+                fDpi,
+                DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT,
+                D2D1_ALPHA_MODE_PREMULTIPLIED);
             break;
         case PresentMode::DCompositionSurface:
         case PresentMode::DCompositionVisual:
         {
-            IDCompositionSurface* pDcSurface = nullptr;
+            IDCompositionSurface* pDcSurface{};
             m_pDcDevice->CreateSurface(cx, cy,
                 DXGI_FORMAT_B8G8R8A8_UNORM,
                 DXGI_ALPHA_MODE_PREMULTIPLIED,
@@ -873,20 +895,8 @@ private:
             m_pRtHwnd->Resize({ cx, cy });
             break;
         case PresentMode::UpdateLayeredWindow:
-        {
-            SafeRelease(m_D2D.m_pBitmap);
-            const D2D1_BITMAP_PROPERTIES1 BmpProp
-            {
-                { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
-                fDpi, fDpi,
-                D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW |
-                D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
-            };
-            RdGetDC()->CreateBitmap({ cx, cy },
-                nullptr, 0, BmpProp, &m_D2D.m_pBitmap);
-            RdGetDC()->SetTarget(m_D2D.m_pBitmap);
-        }
-        break;
+            RdpCreateGdiInteropBitmap(cx, cy, fDpi);
+            break;
         default:
             ECK_UNREACHABLE;
         }
@@ -908,22 +918,21 @@ private:
         {
         case PresentMode::BitBltSwapChain:
         {
-            auto Param = EZD2D_PARAM::MakeBitblt(Handle, g_pDxgiFactory, g_pDxgiDevice,
-                g_pD2DDevice, cx, cy, fDpi);
-            Param.uBmpAlphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
+            auto Param = EZD2D_PARAM::MakeBitBlit(Handle, cx, cy, fDpi);
+            Param.eBitmapAlphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
             m_D2D.Create(Param);
         }
         break;
         case PresentMode::FlipSwapChain:
         {
-            auto Param = EZD2D_PARAM::MakeFlip(Handle, g_pDxgiFactory, g_pDxgiDevice,
-                g_pD2DDevice, cx, cy, fDpi);
-            Param.uBmpAlphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
+            auto Param = EZD2D_PARAM::MakeFlip(Handle, cx, cy, fDpi);
+            Param.eBitmapAlphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
             Param.uFlags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+            Param.cBuffer = m_cFlipBuffer;
             m_D2D.Create(Param);
             ComPtr<IDXGISwapChain2> pSwapChain2;
-            m_D2D.GetSwapChain()->QueryInterface(IID_PPV_ARGS(&pSwapChain2));
-            if (pSwapChain2.Get())
+            m_D2D.GetSwapChain().As(pSwapChain2);
+            if (pSwapChain2)
             {
                 pSwapChain2->SetMaximumFrameLatency(0);
                 m_hEvtSwapChain = pSwapChain2->GetFrameLatencyWaitableObject();
@@ -932,10 +941,7 @@ private:
         break;
         case PresentMode::DCompositionSurface:
         {
-            g_pD2DDevice->CreateDeviceContext(
-                EZD2D_PARAM::MakeFlip(0, nullptr, nullptr, nullptr, 0, 0).uDcOptions,
-                &m_D2D.m_pDC);
-
+            m_D2D.CreateDeviceContext();
             DCompositionCreateDevice3(g_pDxgiDevice, IID_PPV_ARGS(&m_pDcDevice));
             m_pDcDevice->CreateTargetForHwnd(Handle, true, &m_pDcTarget);
             m_pDcDevice->CreateVisual(&m_pDcVisual);
@@ -963,16 +969,13 @@ private:
             HwRtProp.pixelSize = { cx, cy };
             HwRtProp.presentOptions = D2D1_PRESENT_OPTIONS_IMMEDIATELY;
             g_pD2DFactory->CreateHwndRenderTarget(RtProp, HwRtProp, &m_pRtHwnd);
-            const auto hr = m_pRtHwnd->QueryInterface(&m_D2D.m_pDC);
+            const auto hr = m_pRtHwnd->QueryInterface(m_D2D.GetDC().AtClear());
             EckAssert(SUCCEEDED(hr));
         }
         break;
         case PresentMode::DCompositionVisual:
         {
-            g_pD2DDevice->CreateDeviceContext(
-                D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
-                &m_D2D.m_pDC);
-
+            m_D2D.CreateDeviceContext();
             m_pDcDevice->CreateSurface(cx, cy,
                 DXGI_FORMAT_B8G8R8A8_UNORM,
                 DXGI_ALPHA_MODE_PREMULTIPLIED,
@@ -986,20 +989,9 @@ private:
         break;
         case PresentMode::UpdateLayeredWindow:
         {
-            g_pD2DDevice->CreateDeviceContext(
-                D2D1_DEVICE_CONTEXT_OPTIONS_ENABLE_MULTITHREADED_OPTIMIZATIONS,
-                &m_D2D.m_pDC);
-            const D2D1_BITMAP_PROPERTIES1 BmpProp
-            {
-                { DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED },
-                fDpi, fDpi,
-                D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW |
-                D2D1_BITMAP_OPTIONS_GDI_COMPATIBLE,
-            };
-            RdGetDC()->CreateBitmap({ cx, cy },
-                nullptr, 0, BmpProp, &m_D2D.m_pBitmap);
-            RdGetDC()->SetTarget(m_D2D.m_pBitmap);
+            m_D2D.CreateDeviceContext();
             RdGetDC()->QueryInterface(&m_pGdiInterop);
+            RdpCreateGdiInteropBitmap(cx, cy, fDpi);
         }
         break;
         default:
@@ -1016,7 +1008,7 @@ private:
     }
     void RdUninitialize() noexcept
     {
-        m_D2D.Destroy();
+        m_D2D.Clear();
         switch (m_ePresentMode)
         {
         case PresentMode::FlipSwapChain:
@@ -1220,12 +1212,24 @@ public:
     }
 
     // 必须在创建窗口之前调用
-    EckInline void SetPresentMode(PresentMode ePresentMode) noexcept
+    EckInline void RdSetPresentMode(PresentMode ePresentMode) noexcept
     {
         EckAssert(!IsValid());
         m_ePresentMode = ePresentMode;
     }
-    EckInlineNdCe PresentMode GetPresentMode() const noexcept { return m_ePresentMode; }
+    EckInlineNdCe PresentMode RdGetPresentMode() const noexcept { return m_ePresentMode; }
+
+    // 必须在创建窗口之前调用
+    EckInline void RdSetFlipSwapChainBufferCount(UINT c) noexcept
+    {
+        EckAssert(!IsValid());
+        EckAssert(c >= 2 && c <= 16);
+        m_cFlipBuffer = (BYTE)c;
+    }
+    EckInlineNdCe UINT RdGetFlipSwapChainBufferCount() const noexcept
+    {
+        return m_cFlipBuffer;
+    }
 
     EckInlineNdCe ID2D1Bitmap1* CcGetBitmap() const noexcept { return m_Stock.pCacheBitmap.Get(); }
 
@@ -1293,7 +1297,7 @@ public:
         m_pDcDevice->AddRef();
     }
 
-    EckInlineNdCe ID2D1DeviceContext* RdGetDC() const noexcept { return m_D2D.GetDC(); }
+    EckInlineNdCe ID2D1DeviceContext* RdGetDC() const noexcept { return m_D2D.GetDC().Get(); }
 
     void RdInvalidate(const Kw::Rect& rc, bool bUpdateNow = true)
     {
