@@ -338,8 +338,6 @@ struct Picture
 
     EckInlineNdCe bool IsLink() const noexcept { return std::holds_alternative<CStringW>(Data); }
 
-    // 从当前内容创建图片数据字节流
-    // 若bLink为假，调用方必须保证在当前实例析构前销毁返回的流
     HRESULT CreateStream(
         _Out_ IStream*& pStream,
         bool bCopy = false) const noexcept
