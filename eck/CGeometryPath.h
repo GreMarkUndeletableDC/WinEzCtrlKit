@@ -53,7 +53,7 @@ class CGeometryPath final : public CUnknown<CGeometryPath,
 public:
     struct PORTABLE_DATA
     {
-        CTrivialBuffer<Kw::Vec2> vPoint{};
+        CTrivialBuffer<Kw::Vector2> vPoint{};
         CTrivialBuffer<PathType> vType{};
         Kw::Rect rcBounds{};
         float fTolerance{};
@@ -66,9 +66,9 @@ public:
         }
     };
 private:
-    CTrivialBuffer<Kw::Vec2> m_vPoint{};
+    CTrivialBuffer<Kw::Vector2> m_vPoint{};
     CTrivialBuffer<PathType> m_vType{};
-    Kw::Vec2 m_ptOffset{};
+    Kw::Vector2 m_ptOffset{};
     PathType m_eSegFlags{ PathType::SgDefault };
     BYTE m_eFillMode{ D2D1_FILL_MODE_WINDING };
     // 指定贝塞尔曲线展平生成的线段以何种方式联接
@@ -159,13 +159,13 @@ public:
             return;
         }
         m_bDbgInFigure = false;
-
-        if (m_vPoint.Size() < 2)
-            return;
-        auto eType = PathType::GmLine | PathType::FgEnd;
-        if (eFigureEnd == D2D1_FIGURE_END_CLOSED)
-            eType |= PathType::FgClose;
-        m_vType.Back() |= eType;
+        if (!m_vType.IsEmpty())
+        {
+            auto eType = PathType::FgEnd;
+            if (eFigureEnd == D2D1_FIGURE_END_CLOSED)
+                eType |= PathType::FgClose;
+            m_vType.Back() |= eType;
+        }
     }
 
     STDMETHOD(Close)() override
@@ -209,7 +209,7 @@ public:
 
     // 将裸路径数据写入D2D简单几何接收器
     static void Stream(
-        std::span<const Kw::Vec2> spPoint,
+        std::span<const Kw::Vector2> spPoint,
         std::span<const PathType> spType,
         _In_ ID2D1SimplifiedGeometrySink* pSink) noexcept
     {
@@ -255,13 +255,13 @@ public:
                     eType = spType[i];
                     break;
                 }
-
-                if (IsBitSet(eType, PathType::FgEnd))
-                    if (IsBitSet(eType, PathType::FgClose))
-                        pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
-                    else
-                        pSink->EndFigure(D2D1_FIGURE_END_OPEN);
             }
+
+            if (IsBitSet(eType, PathType::FgEnd))
+                if (IsBitSet(eType, PathType::FgClose))
+                    pSink->EndFigure(D2D1_FIGURE_END_CLOSED);
+                else
+                    pSink->EndFigure(D2D1_FIGURE_END_OPEN);
         }
     }
 
@@ -273,7 +273,7 @@ public:
     }
 
     void Flatten(
-        CTrivialBuffer<Kw::Vec2>& vPoint,
+        CTrivialBuffer<Kw::Vector2>& vPoint,
         CTrivialBuffer<PathType>& vType,
         float fTolerance = Kw::DefaultTolerance) const noexcept
     {

@@ -286,6 +286,6 @@ public:
     }
 };
 
-EckInlineNdCe Kw::Vec2& LpPoint(LPARAM lParam) noexcept { return *(Kw::Vec2*)lParam; }
+EckInlineNdCe Kw::Vector2& LpPoint(LPARAM lParam) noexcept { return *(Kw::Vector2*)lParam; }
 ECK_DUI_NAMESPACE_END
 ECK_NAMESPACE_END

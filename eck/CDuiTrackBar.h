@@ -436,7 +436,7 @@ public:
     EckInlineCe void SetThumbSize(float cxy) noexcept { m_cxyThumb = cxy; }
     EckInlineNdCe float GetThumbSize() const noexcept { return m_cxyThumb; }
 
-    constexpr float HitTest(Kw::Vec2 pt) noexcept
+    constexpr float HitTest(Kw::Vector2 pt) noexcept
     {
         Kw::Rect rcTrack;
         GetTrackRect(rcTrack);

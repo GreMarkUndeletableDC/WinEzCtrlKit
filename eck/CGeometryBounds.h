@@ -18,7 +18,7 @@ private:
             + p3 * t * t * t;
     }
 
-    Kw::Vec2 Bzr3CalculateExtrema(
+    Kw::Vector2 Bzr3CalculateExtrema(
         float p0, float p1, float p2, float p3) noexcept
     {
         const auto a = -p0 + 3.f * p1 - 3.f * p2 + p3;
@@ -29,7 +29,10 @@ private:
         {
             if (fabsf(b) < 1e-6f)// a = 0且b = 0，无解
                 return {};
-            return { -c / b };
+            const auto t = -c / b;
+            if (t > 0.f && t < 1.f)
+                return { t };
+            return {};
         }
         const auto d = b * b - 4.f * a * c;
         if (d < 0.f)// delta < 0，无解
@@ -37,7 +40,7 @@ private:
         const auto s = sqrtf(d);
         const auto t1 = (-b + s) / (2.f * a);
         const auto t2 = (-b - s) / (2.f * a);
-        Kw::Vec2 r{};
+        Kw::Vector2 r{};
         if (t1 > 0.f && t1 < 1.f)
             r.x = t1;
         if (t2 > 0.f && t2 < 1.f)
@@ -62,7 +65,7 @@ private:
         return 0.f;
     }
 public:
-    EckInline void AddPoint(Kw::Vec2 pt) noexcept
+    EckInline void AddPoint(Kw::Vector2 pt) noexcept
     {
         if (pt.x < m_rcBounds.left)
             m_rcBounds.left = pt.x;
@@ -74,13 +77,13 @@ public:
             m_rcBounds.bottom = pt.y;
     }
 
-    void AddPoint(_In_reads_(cPt) const Kw::Vec2* pPt, size_t cPt) noexcept
+    void AddPoint(_In_reads_(cPt) const Kw::Vector2* pPt, size_t cPt) noexcept
     {
         EckCounter(cPt, i)
             AddPoint(pPt[i]);
     }
 
-    void AddLine(Kw::Vec2 pt1, Kw::Vec2 pt2) noexcept
+    void AddLine(Kw::Vector2 pt1, Kw::Vector2 pt2) noexcept
     {
         AddPoint(pt1);
         AddPoint(pt2);
@@ -98,7 +101,9 @@ public:
             m_rcBounds.bottom = rc.bottom;
     }
 
-    void AddCubicBezier(Kw::Vec2 p0, Kw::Vec2 p1, Kw::Vec2 p2, Kw::Vec2 p3) noexcept
+    void AddCubicBezier(
+        Kw::Vector2 p0, Kw::Vector2 p1,
+        Kw::Vector2 p2, Kw::Vector2 p3) noexcept
     {
         // 端点
         auto x0 = p0.x;
@@ -156,7 +161,7 @@ public:
         }
     }
 
-    void AddQuadraticBezier(Kw::Vec2 p0, Kw::Vec2 p1, Kw::Vec2 p2) noexcept
+    void AddQuadraticBezier(Kw::Vector2 p0, Kw::Vector2 p1, Kw::Vector2 p2) noexcept
     {
         // 端点
         auto x0 = p0.x;
@@ -198,7 +203,7 @@ public:
         }
     }
 
-    void AddArc(Kw::Vec2 ptCenter, float a, float b,
+    void AddArc(Kw::Vector2 ptCenter, float a, float b,
         TAngle agStart, TAngle agSweep) noexcept
     {
         if (abs(agSweep) >= Pi * 2.)

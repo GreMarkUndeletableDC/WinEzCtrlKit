@@ -13,14 +13,14 @@ class CHfdCubicBezier
 public:
     using T = float;
 private:
-    Vec2 e0;
-    Vec2 e1;
-    Vec2 e2;
-    Vec2 e3;
+    Vector2 e0;
+    Vector2 e1;
+    Vector2 e2;
+    Vector2 e3;
 
     constexpr CHfdCubicBezier(
-        const Vec2& b0, const Vec2& b1,
-        const Vec2& b2, const Vec2& b3) noexcept :
+        const Vector2& b0, const Vector2& b1,
+        const Vector2& b2, const Vector2& b3) noexcept :
         e0{ b0 },
         e1{ b3 - b0 },
         e2{ (b3 - b2 * 2.f + b1) * 6.f },
@@ -78,9 +78,9 @@ private:
     }
 public:
     static void Flatten(
-        CTrivialBuffer<Vec2>& vResult,
-        const Vec2& b0, const Vec2& b1,
-        const Vec2& b2, const Vec2& b3,
+        CTrivialBuffer<Vector2>& vResult,
+        const Vector2& b0, const Vector2& b1,
+        const Vector2& b2, const Vector2& b3,
         T fTolerance = DefaultTolerance) noexcept
     {
         vResult.PushBack(b0);
@@ -124,14 +124,14 @@ class CHfdQuadraticBezier
 public:
     using T = float;
 private:
-    Vec2 e0;
-    Vec2 e1;
-    Vec2 e2;
+    Vector2 e0;
+    Vector2 e1;
+    Vector2 e2;
 
     constexpr CHfdQuadraticBezier(
-        const Vec2& b0,
-        const Vec2& b1,
-        const Vec2& b2) noexcept :
+        const Vector2& b0,
+        const Vector2& b1,
+        const Vector2& b2) noexcept :
         e0{ b0 },
         e1{ b2 - b0 },
         e2{ (b2 - b1 * 2.0f + b0) * 2.f }
@@ -170,8 +170,8 @@ private:
     //}
 public:
     static void Flatten(
-        CTrivialBuffer<Vec2>& vResult,
-        const Vec2& b0, const Vec2& b1, const Vec2& b2,
+        CTrivialBuffer<Vector2>& vResult,
+        const Vector2& b0, const Vector2& b1, const Vector2& b2,
         T fTolerance = DefaultTolerance) noexcept
     {
         vResult.PushBack(b0);
@@ -204,8 +204,8 @@ public:
 
 
 inline void FlattenArc(
-    CTrivialBuffer<Vec2>& vResult,
-    Vec2 ptCenter, float r,
+    CTrivialBuffer<Vector2>& vResult,
+    Vector2 ptCenter, float r,
     double agStart, double agSweep,
     float fTolerance = DefaultTolerance) noexcept
 {
@@ -236,8 +236,8 @@ inline void FlattenArc(
 }
 
 inline void FlattenEllipticalArc(
-    CTrivialBuffer<Vec2>& vResult,
-    Vec2 ptCenter, float a, float b,
+    CTrivialBuffer<Vector2>& vResult,
+    Vector2 ptCenter, float a, float b,
     double agStart, double agSweep,
     float fTolerance = DefaultTolerance) noexcept
 {

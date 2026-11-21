@@ -999,7 +999,7 @@ public:
     using THost = THost_;
     using TCoord = std::conditional_t<IsFloat, float, int>;
     using TRect = std::conditional_t<IsFloat, Kw::Rect, RECT>;
-    using TPoint = std::conditional_t<IsFloat, Kw::Vec2, POINT>;
+    using TPoint = std::conditional_t<IsFloat, Kw::Vector2, POINT>;
 
     const static inline CElement* EtTop{};
     const static inline CElement* EtBottom{ (CElement*)(UINT_PTR)1 };

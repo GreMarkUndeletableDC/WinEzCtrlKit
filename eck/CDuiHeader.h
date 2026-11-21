@@ -17,7 +17,7 @@ public:
 
     struct HITTEST
     {
-        Kw::Vec2 pt;
+        Kw::Vector2 pt;
         bool bHitDivider;
         int io;
     };

@@ -68,7 +68,7 @@ public:
     TEST_METHOD(TestAddPoint_Array)
     {
         CGeometryBounds bounds;
-        Kw::Vec2 points[] = {
+        Kw::Vector2 points[] = {
             { 0.f, 0.f },
             { 100.f, 50.f },
             { 50.f, 100.f },
@@ -238,6 +238,26 @@ public:
         Assert::IsTrue(FloatEqual(rc.top, 0.f));
         Assert::IsTrue(FloatEqual(rc.right, 100.f));
         Assert::IsTrue(FloatEqual(rc.bottom, 100.f));
+    }
+
+    TEST_METHOD(TestAddCubicBezier_LinearDerivativeRootOutsideInterval)
+    {
+        CGeometryBounds bounds;
+        // x的导数根为-0.5，y的导数根为1.5，均不在曲线的参数区间内。
+        bounds.AddCubicBezier(
+            { 0.f, 6.f }, { 1.f, 3.f }, { 3.f, 1.f }, { 6.f, 0.f });
+
+        Assert::IsTrue(RectEqual(bounds.GetBounds(), { 0.f, 0.f, 6.f, 6.f }));
+    }
+
+    TEST_METHOD(TestAddCubicBezier_LinearDerivativeRootInsideInterval)
+    {
+        CGeometryBounds bounds;
+        // 两个坐标的导数根均为0.5，仍须计入内部极值。
+        bounds.AddCubicBezier(
+            { 0.f, 0.f }, { 1.f, -1.f }, { 1.f, -1.f }, { 0.f, 0.f });
+
+        Assert::IsTrue(RectEqual(bounds.GetBounds(), { 0.f, -0.75f, 0.75f, 0.f }));
     }
 
     TEST_METHOD(TestAddCubicBezier_MultipleExtrema)

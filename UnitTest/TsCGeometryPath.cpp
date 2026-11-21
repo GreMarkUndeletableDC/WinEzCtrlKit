@@ -21,6 +21,46 @@ private:
         return (static_cast<BYTE>(type) & static_cast<BYTE>(flag)) == static_cast<BYTE>(flag);
     }
 
+    class RecordingSink final : public CUnknown<RecordingSink, ID2D1SimplifiedGeometrySink>
+    {
+    public:
+        size_t cBegin{};
+        size_t cLine{};
+        size_t cBezier{};
+        bool bInFigure{};
+        bool bInvalidSequence{};
+        CTrivialBuffer<D2D1_FIGURE_END> vEnd{};
+
+        STDMETHOD_(void, SetFillMode)(D2D1_FILL_MODE) override {}
+        STDMETHOD_(void, SetSegmentFlags)(D2D1_PATH_SEGMENT) override {}
+        STDMETHOD_(void, BeginFigure)(D2D1_POINT_2F, D2D1_FIGURE_BEGIN) override
+        {
+            bInvalidSequence |= bInFigure;
+            bInFigure = true;
+            ++cBegin;
+        }
+        STDMETHOD_(void, AddLines)(const D2D1_POINT_2F*, UINT32 cPt) override
+        {
+            bInvalidSequence |= !bInFigure;
+            cLine += cPt;
+        }
+        STDMETHOD_(void, AddBeziers)(const D2D1_BEZIER_SEGMENT*, UINT32 cSeg) override
+        {
+            bInvalidSequence |= !bInFigure;
+            cBezier += cSeg;
+        }
+        STDMETHOD_(void, EndFigure)(D2D1_FIGURE_END eEnd) override
+        {
+            bInvalidSequence |= !bInFigure;
+            bInFigure = false;
+            vEnd.PushBack(eEnd);
+        }
+        STDMETHOD(Close)() override
+        {
+            return bInvalidSequence || bInFigure ? E_FAIL : S_OK;
+        }
+    };
+
 public:
     TEST_METHOD(TestSetFillMode)
     {
@@ -357,20 +397,78 @@ public:
         Assert::IsTrue(HasFlag(vType[3], PathType::SgRoundJoin), L"Third segment should have SgRoundJoin");
     }
 
-    TEST_METHOD(TestEmptyFigure_ShouldBeIgnored)
+    TEST_METHOD(TestSinglePointFigure_Closed)
     {
         CGeometryPath path;
-
-        // 创建一个空子图形（只有起点，没有其他点）
-        path.BeginFigure({ 0.0f, 0.0f }, D2D1_FIGURE_BEGIN_FILLED);
+        path.BeginFigure({ 0.f, 0.f }, D2D1_FIGURE_BEGIN_FILLED);
         path.EndFigure(D2D1_FIGURE_END_CLOSED);
 
         auto& vPoint = path.DbgGetPointList();
         auto& vType = path.DbgGetTypeList();
+        Assert::AreEqual((size_t)1, vPoint.Size());
+        Assert::IsTrue(HasFlag(vType[0], PathType::FgBegin));
+        Assert::IsTrue(HasFlag(vType[0], PathType::FgEnd));
+        Assert::IsTrue(HasFlag(vType[0], PathType::FgClose));
+        Assert::IsFalse(HasFlag(vType[0], PathType::GmLine));
+    }
 
-        // 空子图形应该只有起点，且不添加FgEnd标志
-        Assert::AreEqual((size_t)1, vPoint.Size(), L"Empty figure should only have start point");
-        Assert::IsFalse(HasFlag(vType[0], PathType::FgEnd), L"Empty figure should not have FgEnd flag");
+    TEST_METHOD(TestSinglePointFigure_Open)
+    {
+        CGeometryPath path;
+        path.BeginFigure({ 10.f, 20.f }, D2D1_FIGURE_BEGIN_HOLLOW);
+        path.EndFigure(D2D1_FIGURE_END_OPEN);
+
+        const auto eType = path.DbgGetTypeList()[0];
+        Assert::IsTrue(HasFlag(eType, PathType::FgBegin));
+        Assert::IsTrue(HasFlag(eType, PathType::FgEnd));
+        Assert::IsFalse(HasFlag(eType, PathType::FgClose));
+    }
+
+    TEST_METHOD(TestStream_SinglePointFigure)
+    {
+        const D2D1_FIGURE_END ends[]{ D2D1_FIGURE_END_OPEN, D2D1_FIGURE_END_CLOSED };
+        for (const auto eEnd : ends)
+        {
+            CGeometryPath path;
+            path.BeginFigure({ 10.f, 20.f }, D2D1_FIGURE_BEGIN_FILLED);
+            path.EndFigure(eEnd);
+            Assert::AreEqual(S_OK, path.Close());
+
+            RecordingSink sink;
+            path.Stream(&sink);
+            Assert::AreEqual(S_OK, sink.Close());
+            Assert::AreEqual((size_t)1, sink.cBegin);
+            Assert::AreEqual((size_t)1, sink.vEnd.Size());
+            Assert::AreEqual((int)eEnd, (int)sink.vEnd[0]);
+            Assert::AreEqual((size_t)0, sink.cLine);
+            Assert::AreEqual((size_t)0, sink.cBezier);
+        }
+    }
+
+    TEST_METHOD(TestStream_MixedSinglePointFigures)
+    {
+        CGeometryPath path;
+        path.BeginFigure({ 0.f, 0.f }, D2D1_FIGURE_BEGIN_FILLED);
+        path.EndFigure(D2D1_FIGURE_END_CLOSED);
+        path.BeginFigure({ 10.f, 10.f }, D2D1_FIGURE_BEGIN_HOLLOW);
+        const D2D1_POINT_2F pt{ 20.f, 20.f };
+        path.AddLines(&pt, 1);
+        path.EndFigure(D2D1_FIGURE_END_OPEN);
+        path.BeginFigure({ 30.f, 30.f }, D2D1_FIGURE_BEGIN_FILLED);
+        path.EndFigure(D2D1_FIGURE_END_OPEN);
+        Assert::AreEqual(S_OK, path.Close());
+
+        CGeometryPath::PORTABLE_DATA data;
+        path.Flatten(data);
+        RecordingSink sink;
+        data.Stream(&sink);
+        Assert::AreEqual(S_OK, sink.Close());
+        Assert::AreEqual((size_t)3, sink.cBegin);
+        Assert::AreEqual((size_t)3, sink.vEnd.Size());
+        Assert::AreEqual((size_t)1, sink.cLine);
+        Assert::AreEqual((int)D2D1_FIGURE_END_CLOSED, (int)sink.vEnd[0]);
+        Assert::AreEqual((int)D2D1_FIGURE_END_OPEN, (int)sink.vEnd[1]);
+        Assert::AreEqual((int)D2D1_FIGURE_END_OPEN, (int)sink.vEnd[2]);
     }
 
     TEST_METHOD(TestMultipleFigures)
