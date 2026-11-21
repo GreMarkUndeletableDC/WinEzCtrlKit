@@ -25,7 +25,7 @@ private:
     float m_kIconOpacity{ 1.f };
     float m_kBackOpacity{ 1.f };
 
-    Kw::Vec2 CalculateIconSize(float cxText) const noexcept
+    Kw::Vector2 CalculateIconSize(float cxText) const noexcept
     {
         EckAssert(m_BitmapIcon.Get());
         const auto rc = m_BitmapIcon.GetActualSourceRect();

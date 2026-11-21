@@ -59,7 +59,7 @@ public:
     }
 
     // 坐标相对元素
-    virtual void TransformPoint(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept {}
+    virtual void TransformPoint(_Inout_ Kw::Vector2& pt, bool bNormalToComposited) noexcept {}
 
     /// <summary>
     /// 计算混合后矩形。
@@ -95,7 +95,7 @@ public:
     }
 };
 /*
-    void TransformPoint(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept override
+    void TransformPoint(_Inout_ Kw::Vector2& pt, bool bNormalToComposited) noexcept override
     {}
     void CalculateCompositedRect(_Out_ D2D1_RECT_F& rc, bool bInClientOrParent) noexcept override
     {}

@@ -231,7 +231,7 @@ public:
         {
             POINT ptInScr ECK_GET_PT_LPARAM(lParam);
             ScreenToClient(GetWindow().Handle, &ptInScr);
-            Kw::Vec2 pt{ (float)ptInScr.x, (float)ptInScr.y };
+            Kw::Vector2 pt{ (float)ptInScr.x, (float)ptInScr.y };
             PixelToLogical(pt);
             ClientToElement(pt);
 
@@ -253,7 +253,7 @@ public:
             {
                 POINT ptInScr ECK_GET_PT_LPARAM(lParam);
                 ScreenToClient(GetWindow().Handle, &ptInScr);
-                Kw::Vec2 pt{ (float)ptInScr.x, (float)ptInScr.y };
+                Kw::Vector2 pt{ (float)ptInScr.x, (float)ptInScr.y };
                 PixelToLogical(pt);
                 ClientToElement(pt);
 
@@ -288,7 +288,7 @@ public:
         {
             POINT ptInScr ECK_GET_PT_LPARAM(lParam);
             ScreenToClient(GetWindow().Handle, &ptInScr);
-            Kw::Vec2 pt{ (float)ptInScr.x, (float)ptInScr.y };
+            Kw::Vector2 pt{ (float)ptInScr.x, (float)ptInScr.y };
             PixelToLogical(pt);
             ClientToElement(pt);
 
@@ -388,7 +388,7 @@ public:
     }
 
     // 函数永不返回UdwPart::Restore，使用UdwPart::Maximize代替
-    UdwPart HitTest(Kw::Vec2 ptInEle) const noexcept
+    UdwPart HitTest(Kw::Vector2 ptInEle) const noexcept
     {
         if (ptInEle.x < 0 || ptInEle.x > GetWidth() ||
             ptInEle.y < 0 || ptInEle.y > std::min(GetHeight(), m_cyBtn))

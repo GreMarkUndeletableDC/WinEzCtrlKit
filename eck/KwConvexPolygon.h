@@ -9,25 +9,25 @@ using namespace DirectX;
 
 struct ConvexPolygon
 {
-    CTrivialBuffer<Vec2> vPoint{};
+    CTrivialBuffer<Vector2> vPoint{};
 
-    EckInline void Begin(Vec2 ptBegin) noexcept
+    EckInline void Begin(Vector2 ptBegin) noexcept
     {
         vPoint.ReSizeExtra(1);
         vPoint[0] = ptBegin;
     }
-    EckInline void AddPoint(Vec2 pt) noexcept
+    EckInline void AddPoint(Vector2 pt) noexcept
     {
         vPoint.PushBack(pt);
     }
 
-    EckInline void MakeLine(Vec2 pt1, Vec2 pt2) noexcept
+    EckInline void MakeLine(Vector2 pt1, Vector2 pt2) noexcept
     {
         vPoint.ReSizeExtra(2);
         vPoint[0] = pt1;
         vPoint[1] = pt2;
     }
-    EckInline void MakeTriangle(Vec2 pt1, Vec2 pt2, Vec2 pt3) noexcept
+    EckInline void MakeTriangle(Vector2 pt1, Vector2 pt2, Vector2 pt3) noexcept
     {
         vPoint.ReSizeExtra(3);
         vPoint[0] = pt1;
@@ -45,7 +45,7 @@ struct ConvexPolygon
 
     // WARNING 如果使用此函数创建完整圆，需要弹出最后一点
     void AddArcAsBezier(
-        Vec2 ptCenter, float a, float b,
+        Vector2 ptCenter, float a, float b,
         float agStart, float agSweep,
         float fTolerance = DefaultTolerance) noexcept
     {
@@ -63,11 +63,11 @@ struct ConvexPolygon
             const auto fCosT2 = cosf(t2);
             const auto fSinT2 = sinf(t2);
 
-            const Vec2 p0{ ptCenter.x + a * fCosT1, ptCenter.y + b * fSinT1 };
-            const Vec2 p3{ ptCenter.x + a * fCosT2, ptCenter.y + b * fSinT2 };
+            const Vector2 p0{ ptCenter.x + a * fCosT1, ptCenter.y + b * fSinT1 };
+            const Vector2 p3{ ptCenter.x + a * fCosT2, ptCenter.y + b * fSinT2 };
 
-            const Vec2 d0{ -a * fSinT1, b * fCosT1 };
-            const Vec2 d1{ -a * fSinT2, b * fCosT2 };
+            const Vector2 d0{ -a * fSinT1, b * fCosT1 };
+            const Vector2 d1{ -a * fSinT2, b * fCosT2 };
 
             CHfdCubicBezier::Flatten(
                 vPoint,
@@ -87,7 +87,7 @@ struct ConvexPolygon
 
     // WARNING 如果使用此函数创建完整圆，需要弹出最后一点
     void AddArc(
-        Vec2 ptCenter, float r,
+        Vector2 ptCenter, float r,
         float agStart, float agSweep,
         float fTolerance = DefaultTolerance) noexcept
     {
@@ -95,7 +95,7 @@ struct ConvexPolygon
     }
 
     EckInline void MakeArcAsBezier(
-        Vec2 ptCenter, float a, float b,
+        Vector2 ptCenter, float a, float b,
         float agStart, float agSweep,
         float fTolerance = DefaultTolerance) noexcept
     {
@@ -103,7 +103,7 @@ struct ConvexPolygon
         AddArcAsBezier(ptCenter, a, b, agStart, agSweep, fTolerance);
     }
     EckInline void MakeArc(
-        Vec2 ptCenter, float r,
+        Vector2 ptCenter, float r,
         float agStart, float agSweep,
         float fTolerance = DefaultTolerance) noexcept
     {
@@ -112,7 +112,7 @@ struct ConvexPolygon
     }
 
     EckInline void MakeEllipse(
-        Vec2 ptCenter, float a, float b,
+        Vector2 ptCenter, float a, float b,
         float fTolerance = DefaultTolerance) noexcept
     {
         vPoint.Clear();
@@ -120,7 +120,7 @@ struct ConvexPolygon
         vPoint.PopBack();// 最后一点不需要
     }
     EckInline void MakeCircle(
-        Vec2 ptCenter, float r,
+        Vector2 ptCenter, float r,
         float fTolerance = DefaultTolerance) noexcept
     {
         vPoint.Clear();

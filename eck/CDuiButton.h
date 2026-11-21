@@ -17,7 +17,7 @@ public:
 private:
     ComPtr<IDWriteTextLayout> m_pLayout{};
     CBitmap m_Bitmap{};
-    Kw::Vec2 m_IconSize{};
+    Kw::Vector2 m_IconSize{};
 
     Alignment m_eAlignH{ Alignment::Center };
     Alignment m_eAlignV{ Alignment::Center };
@@ -39,7 +39,7 @@ private:
         TmsSsMakeDisabled(1.f),
     };
 
-    Kw::Vec2 CalculateIconSize(float cxText) const noexcept
+    Kw::Vector2 CalculateIconSize(float cxText) const noexcept
     {
         EckAssert(m_Bitmap.Get());
         if (m_bUserSize)
@@ -157,7 +157,7 @@ public:
 
             if (m_pLayout)
             {
-                Kw::Vec2 pt{ rc.left };
+                Kw::Vector2 pt{ rc.left };
                 switch (m_eAlignV)
                 {
                 case Alignment::Near:
@@ -333,7 +333,7 @@ public:
     EckInlineCe void SetIconOpacity(float f) noexcept { m_kIconOpacity = f; }
     EckInlineNdCe float GetIconOpacity() const noexcept { return m_kIconOpacity; }
 
-    EckInlineCe void SetIconSize(const Kw::Vec2& sz) noexcept { m_IconSize = sz; }
+    EckInlineCe void SetIconSize(const Kw::Vector2& sz) noexcept { m_IconSize = sz; }
     EckInlineNdCe auto& GetIconSize() const noexcept { return m_IconSize; }
 
     EckInlineCe void SetUserIconSize(bool b) noexcept { m_bUserSize = b; }

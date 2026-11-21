@@ -28,10 +28,10 @@ public:
     };
 private:
     CTrivialBuffer<STOP> m_vStop{};
-    Vec2 m_ptStart{}, m_ptEnd{};
+    Vector2 m_ptStart{}, m_ptEnd{};
     float m_kStart{}, m_kEnd{};
 
-    Vec2 m_vecDirection{};
+    Vector2 m_vecDirection{};
     float m_fDirVecLenSq{};
 
     float m_fGammaUser{ 2.2f };
@@ -107,7 +107,7 @@ public:
         }
     }
 
-    UINT CalculateColor(Vec2 pt) const noexcept
+    UINT CalculateColor(Vector2 pt) const noexcept
     {
         if (m_vStop.IsEmpty())
             return 0;
@@ -148,8 +148,8 @@ public:
     }
 
     void SetStartEndPoint(
-        Vec2 pt0, float k0,
-        Vec2 pt1, float k1) noexcept
+        Vector2 pt0, float k0,
+        Vector2 pt1, float k1) noexcept
     {
         m_ptStart = pt0;
         m_ptEnd = pt1;

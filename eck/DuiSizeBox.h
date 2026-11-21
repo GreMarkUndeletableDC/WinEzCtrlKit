@@ -13,7 +13,7 @@ private:
     float cxBorder{ 3.f };
     bool m_bAllowMove{ true };
     bool m_bAllowSize{ true };
-    Kw::Vec2 m_ptStart{};
+    Kw::Vector2 m_ptStart{};
     Kw::Rect m_rcStart{};
 public:
     ECK_DISABLE_COPY_MOVE_DEF_CONS(CSizeBox);
@@ -47,7 +47,7 @@ public:
         return LoadCursorW(nullptr, pszCursor);
     }
 
-    int HitTestBorder(Kw::Vec2 pt) const noexcept
+    int HitTestBorder(Kw::Vector2 pt) const noexcept
     {
         if (m_bAllowSize)
             if (pt.x < cxBorder)

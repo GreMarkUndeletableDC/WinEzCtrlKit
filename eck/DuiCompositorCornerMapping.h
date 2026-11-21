@@ -13,7 +13,7 @@ private:
     DirectX::XMFLOAT4X4A m_Matrix{};
     DirectX::XMFLOAT4X4A m_MatrixR{};
 public:
-    void TransformPoint(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept override
+    void TransformPoint(_Inout_ Kw::Vector2& pt, bool bNormalToComposited) noexcept override
     {
         const DirectX::XMFLOAT4A v{ pt.x, pt.y, 0.f, 1.f };
         auto p = DirectX::XMVector4Transform(

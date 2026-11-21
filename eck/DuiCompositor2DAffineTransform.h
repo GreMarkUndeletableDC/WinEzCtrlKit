@@ -11,7 +11,7 @@ private:
     float m_kOpacity{ 1.f };
     D2D1_INTERPOLATION_MODE m_eInterMode{ D2D1_INTERPOLATION_MODE_LINEAR };
 public:
-    void TransformPoint(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept override
+    void TransformPoint(_Inout_ Kw::Vector2& pt, bool bNormalToComposited) noexcept override
     {
         D2D1_POINT_2F pt0;
         if (bNormalToComposited)

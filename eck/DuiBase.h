@@ -48,7 +48,7 @@ public:
 
     HRESULT EhUiaMakeInterface() noexcept override;
 
-    bool EhTransform(_Inout_ Kw::Vec2& pt, bool bInClient) noexcept override
+    bool EhTransform(_Inout_ Kw::Vector2& pt, bool bInClient) noexcept override
     {
         if (CompIsNeedCoordinateTransform())
         {
@@ -99,8 +99,8 @@ public:
 
     using TBase::PixelToLogical;
     using TBase::LogicalToPixel;
-    EckInlineCe void PixelToLogical(_Inout_ D2D1_POINT_2F& pt) const noexcept { PixelToLogical((Kw::Vec2&)pt); }
-    EckInlineCe void LogicalToPixel(_Inout_ D2D1_POINT_2F& pt) const noexcept { LogicalToPixel((Kw::Vec2&)pt); }
+    EckInlineCe void PixelToLogical(_Inout_ D2D1_POINT_2F& pt) const noexcept { PixelToLogical((Kw::Vector2&)pt); }
+    EckInlineCe void LogicalToPixel(_Inout_ D2D1_POINT_2F& pt) const noexcept { LogicalToPixel((Kw::Vector2&)pt); }
 
     EckInlineNdCe D2D1_RECT_F GetRectInClientD2D() const noexcept { return Kw::MakeD2DRectF(GetRectInClient()); }
     EckInlineNdCe D2D1_RECT_F GetViewRectD2D() const noexcept { return Kw::MakeD2DRectF(GetViewRect()); }
@@ -248,7 +248,7 @@ public:
     }
 
     // 坐标相对元素
-    void CompTransformCoordinate(_Inout_ Kw::Vec2& pt, bool bNormalToComposited) noexcept
+    void CompTransformCoordinate(_Inout_ Kw::Vector2& pt, bool bNormalToComposited) noexcept
     {
         if (m_pCompositor && !(GetStyle() & DES_PARENT_COMP))// OPTIMIZATION
         {

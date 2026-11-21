@@ -30,6 +30,9 @@
     <ClCompile Include="TsRandom.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TsKwDefine.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="TsMathHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
