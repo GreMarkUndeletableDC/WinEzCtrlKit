@@ -44,9 +44,6 @@ public:
     TEST_METHOD(TsLineLength)
     {
         Assert::AreEqual(5.0f, CalculateLineLength<float>(0, 0, 3, 4), 1e-6f);
-
-        POINT p1{ 0,0 }, p2{ 3,4 };
-        Assert::AreEqual(5.0f, CalculateLineLength<float>(p1, p2), 1e-6f);
     }
 
     TEST_METHOD(TsLineScalePos)

@@ -39,11 +39,6 @@ EckInline T CalculateLineLength(auto x1, auto y1, auto x2, auto y2) noexcept
     return (T)sqrt(((double)x1 - x2) * ((double)x1 - x2) +
         ((double)y1 - y2) * ((double)y1 - y2));
 }
-template<class T = float>
-EckInline T CalculateLineLength(POINT pt1, POINT pt2) noexcept
-{
-    return CalculateLineLength<T>(pt1.x, pt1.y, pt2.x, pt2.y);
-}
 
 template<class T>
 EckInline void CalculatePointFromLineScale(auto x1, auto y1, auto x2, auto y2,
