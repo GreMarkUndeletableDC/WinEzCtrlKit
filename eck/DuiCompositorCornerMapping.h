@@ -4,7 +4,7 @@
 
 ECK_NAMESPACE_BEGIN
 ECK_DUI_NAMESPACE_BEGIN
-// 必须使用CalculateDistortMatrix/CalculateInverseDistortMatrix计算矩阵
+// 必须使用CalculateDistortMatrix计算矩阵
 class CCompositorCornerMapping : public CCompositor
 {
 private:
