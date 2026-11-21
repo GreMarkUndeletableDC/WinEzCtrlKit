@@ -174,10 +174,7 @@ EckInlineNdCe float LengthSquared(const T& v) noexcept { return Dot(v, v); }
 template<CcpVector T>
 EckInlineNd float Length(const T& v) noexcept
 {
-    if constexpr (T::N == 2)
-        return hypot(v.x, v.y);
-    else
-        return hypot(v.x, v.y, v.z);
+    return (float)sqrt(LengthSquared(v));
 }
 
 #undef ECK_VEC_LOOP
