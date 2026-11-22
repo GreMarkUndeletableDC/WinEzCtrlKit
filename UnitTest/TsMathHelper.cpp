@@ -335,12 +335,23 @@ public:
         }
     }
 
-    // 相邻点重合时不应产生 NaN
+    // 相邻点完全重合时不产生 NaN 控制点（两段长度均为0时也不能除零）
     TEST_METHOD(TsDuplicatePoints_FiniteResult)
     {
-        const Kw::Vector2 pt[]{ { 0.f, 0.f }, { 0.f, 0.f }, { 1.f, 0.f } };
+        const Kw::Vector2 pt[]
+        {
+            { 2.f, 2.f }, { 2.f, 2.f }, { 2.f, 2.f }, { 5.f, 1.f }
+        };
         std::vector<Kw::Vector2> v;
-        CalculateBezierControlPoints(v, pt, 3);
+        CalculateBezierControlPoints(v, pt, 4);
+        Assert::AreEqual(size_t(10), v.size());
+        for (const auto& p : v)
+            Assert::IsTrue(std::isfinite(p.x) && std::isfinite(p.y));
+
+        // 只有一段为 0 长度时同样有限
+        const Kw::Vector2 pt2[]{ { 0.f, 0.f }, { 0.f, 0.f }, { 1.f, 0.f } };
+        v.clear();
+        CalculateBezierControlPoints(v, pt2, 3);
         Assert::AreEqual(size_t(7), v.size());
         for (const auto& p : v)
             Assert::IsTrue(std::isfinite(p.x) && std::isfinite(p.y));

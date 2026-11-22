@@ -334,8 +334,10 @@ inline void CalculateBezierControlPoints(
         const auto fLen = Kw::Length(pt1 - pt2);
         const auto ptMid1 = PointFromLineScale(pt1, ptMidLast, K);
         const auto ptMid2 = PointFromLineScale(pt1, ptMid, K);
-        const auto ptLine = pt1 - PointFromLineScale(
-            ptMidLast, ptMid, fLastLen / (fLen + fLastLen));
+        // 相邻线段全为 0 长度时避免除零产生 NaN 控制点
+        const auto fLenTotal = fLen + fLastLen;
+        const auto fRatio = fLenTotal > 0.f ? fLastLen / fLenTotal : 0.5f;
+        const auto ptLine = pt1 - PointFromLineScale(ptMidLast, ptMid, fRatio);
         *p++ = ptMid1 + ptLine;// 控点2
         *p++ = pt1;// 终点
         *p++ = ptMid2 + ptLine;// 下一段曲线的控点1
