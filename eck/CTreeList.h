@@ -1088,7 +1088,7 @@ private:
                                 // mark设为离光标最远的选中项（标准ListView的行为）
                                 if (bIntersectNew && !(msg.wParam & (MK_CONTROL | MK_SHIFT)))
                                 {
-                                    const int d = Abs(pt.y - rcItem.top);
+                                    const int d = Absolute(pt.y - rcItem.top);
                                     if (d > dCursorToItemMax)
                                     {
                                         dCursorToItemMax = d;
@@ -1978,7 +1978,7 @@ public:
                 goto FallToHWheel;
             const int cVisible = (m_cyClient - m_cyHeader) / m_cyItem;
             const int dLine = -GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA * m_cScrollLine;
-            if (Abs(dLine) > cVisible)
+            if (Absolute(dLine) > cVisible)
                 ScrollV(SignValue(dLine) * ScbGetPage(SB_VERT));
             else
                 ScrollV(dLine);
@@ -1990,7 +1990,7 @@ public:
         {
         FallToHWheel:
             const int dx = -GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA * m_cCharPreScrollH * m_cxCharAve;
-            if (Abs(dx) > m_cxClient)
+            if (Absolute(dx) > m_cxClient)
                 ScrollH(SignValue(dx) * m_cxClient);
             else
                 ScrollH(dx);

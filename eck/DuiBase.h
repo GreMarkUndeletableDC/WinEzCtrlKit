@@ -1244,7 +1244,7 @@ public:
     }
     void CcReserveBitmapLogical(float cx, float cy) noexcept
     {
-        CcReserveBitmap((UINT)ceilf(LogicalToPixel(cx)), (UINT)ceilf(LogicalToPixel(cy)));
+        CcReserveBitmap(Ceil<UINT>(LogicalToPixel(cx)), Ceil<UINT>(LogicalToPixel(cy)));
     }
     void CcDeleteBitmap() noexcept
     {
@@ -1274,8 +1274,8 @@ public:
     HRESULT RdCreateBitmapLogical(float cx, float cy, _Out_ ID2D1Bitmap1*& pBitmap) noexcept
     {
         return RdCreateBitmap(
-            (int)ceilf(LogicalToPixel(cx)),
-            (int)ceilf(LogicalToPixel(cy)),
+            Ceil<int>(LogicalToPixel(cx)),
+            Ceil<int>(LogicalToPixel(cy)),
             pBitmap);
     }
 
@@ -1577,8 +1577,8 @@ inline HRESULT CElement::CompUpdateCacheBitmap(float cx, float cy) noexcept
     }
 
     HRESULT hr;
-    const int cxPixel = (int)ceilf(LogicalToPixel((float)cx));
-    const int cyPixel = (int)ceilf(LogicalToPixel((float)cy));
+    const int cxPixel = Ceil<int>(LogicalToPixel((float)cx));
+    const int cyPixel = Ceil<int>(LogicalToPixel((float)cy));
     CBitmap Bitmap{};
     if (GetStyle() & DES_OWNER_COMP_CACHE)
         hr = m_pCompositor->CreateCacheBitmap(cxPixel, cyPixel, Bitmap);

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "KwDefine.h"
 #include "CTrivialBuffer.h"
+#include "Utility.h"
 
 ECK_NAMESPACE_BEGIN
 KW2D_NAMESPACE_BEGIN
@@ -27,16 +28,11 @@ private:
         e3{ (b2 - b1 * 2.f + b0) * 6.f }
     {}
 
-    EckInlineNdCe static T Abs(T f) noexcept
-    {
-        return f >= 0 ? f : -f;
-    }
-
     EckInlineNdCe bool IsFlatEnough(T Tol) const noexcept
     {
         return std::max(
-            std::max(Abs(e2.x), Abs(e2.y)),
-            std::max(Abs(e3.x), Abs(e3.y))) <= Tol;
+            std::max(Absolute(e2.x), Absolute(e2.y)),
+            std::max(Absolute(e3.x), Absolute(e3.y))) <= Tol;
     }
 
     EckInlineNdCe bool IsLastFlatEnough(T Tol) const noexcept
@@ -44,8 +40,8 @@ private:
         const auto oe2 = e3;
         const auto oe3 = e2 + e2 - e3;
         return std::max(
-            std::max(Abs(oe2.x), Abs(oe2.y)),
-            std::max(Abs(oe3.x), Abs(oe3.y))) <= Tol;
+            std::max(Absolute(oe2.x), Absolute(oe2.y)),
+            std::max(Absolute(oe3.x), Absolute(oe3.y))) <= Tol;
     }
 
     EckInlineCe void AdjustDown() noexcept
@@ -137,14 +133,9 @@ private:
         e2{ (b2 - b1 * 2.0f + b0) * 2.f }
     {}
 
-    EckInlineNdCe static T Abs(T v) noexcept
-    {
-        return v >= 0 ? v : -v;
-    }
-
     EckInlineNdCe bool IsFlatEnough(T Tol) const noexcept
     {
-        return std::max(Abs(e2.x), Abs(e2.y)) <= Tol;
+        return std::max(Absolute(e2.x), Absolute(e2.y)) <= Tol;
     }
 
     EckInlineCe void AdjustDown() noexcept
@@ -211,7 +202,7 @@ inline void FlattenArc(
 {
     const auto e = fTolerance / r;
     const auto dt = sqrt(48.f * e / (6.f - e));
-    const auto n = std::max(1u, UINT(ceil(abs(agSweep) / dt)));
+    const auto n = std::max(1u, Ceil<UINT>(Absolute(agSweep) / dt));
     const auto fTheta = agSweep / n;
 
     const auto fCosT = cos(fTheta);

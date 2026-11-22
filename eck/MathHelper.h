@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "KwDefine.h"
+#include "Utility.h"
 
 #include <DirectXMath.h>
 
@@ -15,120 +16,98 @@ EckInlineNdCe T RadianToDegree(T fRad) noexcept { return fRad * 180 / (T)Pi; }
 template<std::floating_point T>
 EckInlineNd T DegreeIn0To360(T f) noexcept
 {
-    f = fmod(f, 360);
-    return f < 0 ? f + 360 : f;
+    constexpr auto Full = T(360);
+    f = (T)fmod(f, Full);
+    return f < 0 ? f + Full : f;
 }
 template<std::floating_point T>
 EckInlineNd T RadianIn0To2Pi(T f) noexcept
 {
-    f = fmod(f, Pi * 2.f);
-    return f < 0 ? (f + Pi * 2.f) : f;
+    constexpr auto TwoPi = T(Pi * 2.);
+    f = (T)fmod(f, TwoPi);
+    return f < 0 ? f + TwoPi : f;
 }
 
-template<class T>
-EckInline void CalculatePointFromCircleAngle(auto r, TAngle ag,
-    _Out_ T& xRet, _Out_ T& yRet) noexcept
+EckInline Kw::Vector2 PointFromCircleAngle(float r, TAngle ag) noexcept
 {
-    xRet = T(r * cos(ag));
-    yRet = T(r * sin(ag));
+    return { float(r * cos(ag)), float(r * sin(ag)) };
 }
 
-template<class T = float>
-EckInline T CalculateLineLength(auto x1, auto y1, auto x2, auto y2) noexcept
+EckInline float LineLength(
+    const Kw::Vector2& pt1, const Kw::Vector2& pt2) noexcept
 {
-    return (T)sqrt(((double)x1 - x2) * ((double)x1 - x2) +
-        ((double)y1 - y2) * ((double)y1 - y2));
+    return Kw::Length(pt1 - pt2);
 }
 
-template<class T>
-EckInline void CalculatePointFromLineScale(auto x1, auto y1, auto x2, auto y2,
-    float fScale, _Out_ T& x, _Out_ T& y) noexcept
+EckInlineCe Kw::Vector2 PointFromLineScale(
+    const Kw::Vector2& pt1, const Kw::Vector2& pt2, float k) noexcept
 {
-    x = T(x1 - (x1 - x2) * fScale);
-    y = T(y1 - (y1 - y2) * fScale);
+    return { pt1.x - (pt1.x - pt2.x) * k, pt1.y - (pt1.y - pt2.y) * k };
 }
 
-// 从角度计算椭圆上一段弧的端点
-template<class T>
-void CalculateArcFromEllipseAngle(auto x, auto y, auto xr, auto yr,
-    TAngle agStart, TAngle agSweep,
-    _Out_ T& x1, _Out_ T& y1, _Out_ T& x2, _Out_ T& y2) noexcept
-{
-    T x10, y10, x20, y20;
-    const auto a = T((xr - x) / 2), b = T((yr - y) / 2);
-    CalculatePointFromEllipseAngle(a, b, agStart, x10, y10);
-    CalculatePointFromEllipseAngle(a, b, agStart + agSweep, x20, y20);
-    x1 = x10 + a + x;
-    y1 = -y10 + b + y;
-    x2 = x20 + a + x;
-    y2 = -y20 + b + y;
-}
-
-// 从两点计算直线方程
-template<std::floating_point T>
-EckInlineCe void CalculateLineEquation(auto x1, auto y1, auto x2, auto y2,
-    _Out_ T& A, _Out_ T& B, _Out_ T& C) noexcept
-{
-    const auto m = y1 - y2;
-    const auto n = x1 - x2;
-    A = T(m);
-    B = T(-n);
-    C = T(-m * x2 + n * y2);
-}
-// 从一点和斜率计算直线方程
-template<std::floating_point T>
-EckInlineCe void CalculateLineEquation(auto x, auto y, auto k,
-    _Out_ T& A, _Out_ T& B, _Out_ T& C) noexcept
-{
-    A = T(k);
-    B = T(-1);
-    C = T(y - k * x);
-}
-
-template<class T>
-EckInline void PolarToRect(auto fRho, auto fTheta,
-    _Out_ T& x, _Out_ T& y) noexcept
-{
-    x = T(fRho * cos(fTheta));
-    y = T(fRho * sin(fTheta));
-}
-template<class T>
-EckInline void RectToPolar(auto x, auto y,
-    _Out_ T& fRho, _Out_ T& fTheta) noexcept
-{
-    fRho = (T)sqrt(x * x + y * y);
-    fTheta = (T)atan2(y, x);
-}
-
-/// <summary>
-/// 计算椭圆上一点
-/// </summary>
-/// <param name="a">半长轴</param>
-/// <param name="b">半短轴</param>
-/// <param name="ag">角度，圆心角</param>
-/// <param name="xRet">点X坐标</param>
-/// <param name="yRet">点Y坐标</param>
-template<class T>
-EckInline void CalculatePointFromEllipseAngle(auto a, auto b,
-    TAngle ag, _Out_ T& xRet, _Out_ T& yRet) noexcept
+// 计算椭圆上一点
+EckInline Kw::Vector2 PointFromEllipseAngle(float a, float b, TAngle ag) noexcept
 {
     const auto agEccentric = atan2(a * sin(ag), b * cos(ag));
-    xRet = T(a * cos(agEccentric));
-    yRet = T(b * sin(agEccentric));
+    return { float(a * cos(agEccentric)), float(b * sin(agEccentric)) };
 }
 
-template<std::floating_point T = float, CcpPointStruct TPt>
-EckInlineNd T CalculatePointToLineDistance(TPt pt, TPt pt1, TPt pt2) noexcept
+EckInlineNd std::array<Kw::Vector2, 2> ArcFromEllipseAngle(
+    const Kw::Vector2& ptCenter,
+    float a, float b,
+    TAngle agStart, TAngle agSweep) noexcept
 {
-    return T(fabs((pt2.y - pt1.y) * pt.x - (pt2.x - pt1.x) * pt.y + pt2.x * pt1.y - pt2.y * pt1.x) /
-        sqrt((pt2.x - pt1.x) * (pt2.x - pt1.x) + (pt2.y - pt1.y) * (pt2.y - pt1.y)));
+    return
+    {
+        PointFromEllipseAngle(a, b, agStart) + ptCenter,
+        PointFromEllipseAngle(a, b, agStart + agSweep) + ptCenter
+    };
+}
+// 从外接矩形和角度计算一段弧的端点
+EckInlineNd std::array<Kw::Vector2, 2> ArcFromEllipseAngle(
+    const Kw::Rect& rc, TAngle agStart, TAngle agSweep) noexcept
+{
+    const auto a = (rc.right - rc.left) / 2.f;
+    const auto b = (rc.bottom - rc.top) / 2.f;
+    const Kw::Vector2 ptCenter{ (rc.left + rc.right) / 2.f, (rc.top + rc.bottom) / 2.f };
+    return ArcFromEllipseAngle(ptCenter, a, b, agStart, agSweep);
+}
+
+// 从两点计算直线方程，返回系数
+EckInlineCe Kw::Vector3 CalculateLineEquation(
+    const Kw::Vector2& pt1, const Kw::Vector2& pt2) noexcept
+{
+    const auto m = pt1.y - pt2.y;
+    const auto n = pt1.x - pt2.x;
+    return { m, -n, -m * pt2.x + n * pt2.y };
+}
+// 从一点和斜率计算直线方程，返回系数
+EckInlineCe Kw::Vector3 CalculateLineEquation(
+    const Kw::Vector2& pt, float k) noexcept
+{
+    return { k, -1.f, pt.y - k * pt.x };
+}
+
+EckInline Kw::Vector2 PolarToRect(const Kw::PolarPoint& p) noexcept
+{
+    return { float(p.Rho * cos(p.Theta)), float(p.Rho * sin(p.Theta)) };
+}
+EckInline Kw::PolarPoint RectToPolar(const Kw::Vector2& p) noexcept
+{
+    return { Kw::Length(p), atan2(p.y, p.x) };
+}
+
+EckInlineNd float PointToLineDistance(
+    const Kw::Vector2& pt, const Kw::Vector2& pt1, const Kw::Vector2& pt2) noexcept
+{
+    return Absolute(Kw::Cross(pt2 - pt1, pt - pt1)) / Kw::Length(pt2 - pt1);
 }
 
 namespace Detail
 {
     // 计算一个单应变换，将单位正方形变换为四边形
     // 返回矩阵遵循点为行向量的约定
-    inline Kw::Matrix3x3 HomographyUnitSquareToQuadrilaterals(
+    inline Kw::Matrix3x3 HomographyUnitSquareToQuadrilateral(
         _In_reads_(4) const Kw::Vector2* pt) noexcept
     {
         const auto x0 = pt[0].x, y0 = pt[0].y;
@@ -167,8 +146,8 @@ EckInline void CalculateDistortMatrix(
     _In_reads_(4) const Kw::Vector2* ptDst,
     _Out_ DirectX::XMFLOAT4X4& Matrix) noexcept
 {
-    const auto H1 = Detail::HomographyUnitSquareToQuadrilaterals(ptSrc);
-    const auto H2 = Detail::HomographyUnitSquareToQuadrilaterals(ptDst);
+    const auto H1 = Detail::HomographyUnitSquareToQuadrilateral(ptSrc);
+    const auto H2 = Detail::HomographyUnitSquareToQuadrilateral(ptDst);
     const auto H = Kw::Inverse(H1) * H2;
     Matrix =
     {
@@ -232,13 +211,15 @@ EckInlineNd D2D1::Matrix3x2F D2DMatrixReflection(float A, float B, float C) noex
 {
     const float t = A * A + B * B;
     const float u = -2.f * A * B / t;
-    return D2D1::Matrix3x2F(
+    return
+    {
         1.f - 2.f * A * A / t,
         u,
         u,
         1.f - 2.f * B * B / t,
         -2.f * A * C / t,
-        -2.f * B * C / t);
+        -2.f * B * C / t
+    };
 }
 
 EckInlineNdCe XFORM XFormTranslate(float dx, float dy) noexcept
@@ -250,29 +231,25 @@ EckInlineNdCe XFORM XFormTranslate(float dx, float dy) noexcept
         dx, dy
     };
 }
-EckInlineNd XFORM XFormRotate(float fAngle) noexcept
+EckInlineNd XFORM XFormRotate(TAngle fAngle) noexcept
 {
+    const auto c = cos(fAngle), s = sin(fAngle);
     return
     {
-        cosf(fAngle), sinf(fAngle),
-        -sinf(fAngle), cosf(fAngle),
+        float(c),  float(s),
+        float(-s), float(c),
         0.f, 0.f
     };
 }
-EckInlineNd XFORM XFormRotate(float fAngle, float x, float y) noexcept
+EckInlineNd XFORM XFormRotate(TAngle fAngle, float x, float y) noexcept
 {
-    /*
-    |1   0   0|   |m11 m12 0|   |1   0   0|   |m11                m12                0|
-    |0   1   0| * |m21 m22 0| * |0   1   0| = |m21                m22                0|
-    |-dx -dy 1|   |0   0   1|   |dx  dy  1|   |-dx*m11-dy*m21+dx  -dx*m12-dy*m22+dy  1|
-    应用到XFORM时m12与m21应互换位置
-    */
+    const auto c = cos(fAngle), s = sin(fAngle);
     return
     {
-        cosf(fAngle), sinf(fAngle),
-        -sinf(fAngle), cosf(fAngle),
-        -x * cosf(fAngle) - y * sinf(fAngle) + x,
-        x * sinf(fAngle) - y * cosf(fAngle) + y
+        float(c),  float(s),
+        float(-s), float(c),
+        float(x * (1. - c) + y * s),
+        float(y * (1. - c) - x * s)
     };
 }
 EckInlineNdCe XFORM XFormScale(float xScale, float yScale) noexcept
@@ -333,48 +310,43 @@ EckInlineNdCe XFORM XFormReflection(float A, float B, float C) noexcept
 /// <param name="pPt">离散点</param>
 /// <param name="cPt">离散点数量</param>
 /// <param name="K">张力</param>
-template<class TPt>
 inline void CalculateBezierControlPoints(
-    std::vector<TPt>& vPt,
-    _In_reads_(cPt) const TPt* pPt,
+    Eck_Append_buffer_ std::vector<Kw::Vector2>& vPt,
+    _In_reads_(cPt) const Kw::Vector2* pPt,
     size_t cPt,
     float K = 1.f) noexcept
 {
-    vPt.resize((cPt - 1) * 3 + 1);
-    auto itResult = vPt.begin();
-    *itResult++ = *pPt;// 起点
-    *itResult++ = *pPt;// 控点1
+    if (cPt < 2)
+        return;
+    const auto cOld = vPt.size();
+    vPt.resize(vPt.size() + (cPt - 1) * 3 + 1);
+    auto p = vPt.data() + cOld;
+    *p++ = *pPt;// 起点
+    *p++ = *pPt;// 控点1
 
-    const auto [x2, y2] = pPt[1];
-    const auto [x1, y1] = pPt[0];
-    using T = std::remove_cvref_t<decltype(x1)>;
-
-    T xMid1, yMid1, xMid2, yMid2, dx, dy;
-    TPt ptMidLast{ (x1 + x2) / 2,(y1 + y2) / 2 };
-    float LineLenLast = CalculateLineLength(x1, y1, x2, y2);
-    for (int i = 1; i < cPt - 1; ++i)
+    Kw::Vector2 ptMidLast{ (pPt[0].x + pPt[1].x) / 2, (pPt[0].y + pPt[1].y) / 2 };
+    float fLastLen = LineLength(pPt[0], pPt[1]);
+    for (size_t i = 1; i < cPt - 1; ++i)
     {
-        const auto [x2, y2] = pPt[i + 1];
-        const auto [x1, y1] = pPt[i];
-        const TPt ptMid{ (x1 + x2) / 2,(y1 + y2) / 2 };
-        const float LineLen = CalculateLineLength(x1, y1, x2, y2);
-        const auto [x00, y00] = ptMidLast;
-        const auto [x01, y01] = ptMid;
-        CalculatePointFromLineScale(x1, y1, x00, y00, K, xMid1, yMid1);
-        CalculatePointFromLineScale(x1, y1, x01, y01, K, xMid2, yMid2);
-        CalculatePointFromLineScale(x00, y00, x01, y01,
-            LineLenLast / (LineLen + LineLenLast), dx, dy);
-        dx = x1 - dx;
-        dy = y1 - dy;
-        *itResult++ = { xMid1 + dx, yMid1 + dy };// 控点2
-        *itResult++ = { x1, y1 };// 终点
-        *itResult++ = { xMid2 + dx, yMid2 + dy };// 下一段曲线的控点1
+        const auto& pt1 = pPt[i];
+        const auto& pt2 = pPt[i + 1];
+        const Kw::Vector2 ptMid{ (pt1.x + pt2.x) / 2, (pt1.y + pt2.y) / 2 };
+        const auto fLen = Kw::Length(pt1 - pt2);
+        const auto ptMid1 = PointFromLineScale(pt1, ptMidLast, K);
+        const auto ptMid2 = PointFromLineScale(pt1, ptMid, K);
+        // 相邻线段全为 0 长度时避免除零产生 NaN 控制点
+        const auto fLenTotal = fLen + fLastLen;
+        const auto fRatio = fLenTotal > 0.f ? fLastLen / fLenTotal : 0.5f;
+        const auto ptLine = pt1 - PointFromLineScale(ptMidLast, ptMid, fRatio);
+        *p++ = ptMid1 + ptLine;// 控点2
+        *p++ = pt1;// 终点
+        *p++ = ptMid2 + ptLine;// 下一段曲线的控点1
 
         ptMidLast = ptMid;
-        LineLenLast = LineLen;
+        fLastLen = fLen;
     }
-    *itResult++ = pPt[cPt - 1];// 控点2
-    *itResult++ = pPt[cPt - 1];// 终点
+    *p++ = pPt[cPt - 1];// 控点2
+    *p++ = pPt[cPt - 1];// 终点
 }
 
 template<std::floating_point T>
@@ -386,7 +358,7 @@ inline bool RadianInArc(T ag, T agStart, T agSweep) noexcept
     if (agSweep < 0)
     {
         agStart += agSweep;
-        agSweep = abs(agSweep);
+        agSweep = Absolute(agSweep);
     }
 
     auto d = (T)fmod(ag - agStart, TwoPi);

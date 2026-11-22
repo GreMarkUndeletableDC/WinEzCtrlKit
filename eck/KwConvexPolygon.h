@@ -49,7 +49,7 @@ struct ConvexPolygon
         float agStart, float agSweep,
         float fTolerance = DefaultTolerance) noexcept
     {
-        const auto n = (int)ceilf(fabsf(agSweep) / XM_PIDIV2);
+        const auto n = Ceil<int>(Absolute(agSweep) / XM_PIDIV2);
         const auto d = agSweep / n;
         const auto k = 4.f / 3.f * tanf(d * 0.25f);
 

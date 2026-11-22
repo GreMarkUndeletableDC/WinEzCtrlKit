@@ -3,6 +3,29 @@
 
 using namespace eck;
 
+namespace
+{
+    void AssertPoint(const Kw::Vector2& pt, float x, float y, float tol = 1e-5f)
+    {
+        Assert::AreEqual(x, pt.x, tol);
+        Assert::AreEqual(y, pt.y, tol);
+    }
+
+    // 直线方程 A x + B y + C = 0 的左端取值，点位于直线上时结果应为 0
+    float EvalLineEquation(const Kw::Vector3& ln, float x, float y) noexcept
+    {
+        return ln.x * x + ln.y * y + ln.z;
+    }
+
+    // XFORM 采用行向量约定：X' = x*eM11 + y*eM21 + eDx，Y' = x*eM12 + y*eM22 + eDy
+    void ApplyXForm(const XFORM& tf, float x, float y,
+        _Out_ float& ox, _Out_ float& oy) noexcept
+    {
+        ox = x * tf.eM11 + y * tf.eM21 + tf.eDx;
+        oy = x * tf.eM12 + y * tf.eM22 + tf.eDy;
+    }
+}
+
 TS_NS_BEGIN
 TEST_CLASS(TsAngles)
 {
@@ -12,6 +35,8 @@ public:
     {
         Assert::AreEqual((T)Pi, DegreeToRadian<T>((T)180), (T)1e-6);
         Assert::AreEqual((T)180, RadianToDegree<T>((T)Pi), (T)1e-6);
+        Assert::AreEqual((T)(Pi / 2), DegreeToRadian<T>((T)90), (T)1e-6);
+        Assert::AreEqual((T)(-Pi / 2), DegreeToRadian<T>((T)-90), (T)1e-6);
     }
 
     TEST_METHOD(TsDegRad_float) { TsDegRad<float>(); }
@@ -21,95 +46,424 @@ public:
     {
         Assert::AreEqual(350.0, DegreeIn0To360<double>(-10.0), 1e-12);
         Assert::AreEqual(10.0, DegreeIn0To360<double>(370.0), 1e-12);
+        Assert::AreEqual(0.0, DegreeIn0To360<double>(0.0), 1e-12);
+        Assert::AreEqual(45.0, DegreeIn0To360<double>(360.0 + 45.0), 1e-12);
+        Assert::AreEqual(315.f, DegreeIn0To360<float>(-45.f), 1e-4f);
+    }
+
+    // 负角度应映射到 [0, 2π)，超出 2π 的角度按周期归一化
+    TEST_METHOD(TsRadIn0To2Pi)
+    {
+        Assert::AreEqual(Pi * 1.5, RadianIn0To2Pi<double>(-Pi / 2), 1e-12);
+        Assert::AreEqual(Pi, RadianIn0To2Pi<double>(3 * Pi), 1e-12);
+        Assert::AreEqual(0.0, RadianIn0To2Pi<double>(0.0), 1e-12);
+        Assert::AreEqual(PiF * 1.5f, RadianIn0To2Pi<float>(-PiF / 2.f), 1e-5f);
     }
 };
 
 TEST_CLASS(TsCircle)
 {
 public:
-
-    TEST_METHOD(TsCalcPointFromCircleAngle)
+    // 四个象限方向上的点
+    TEST_METHOD(TsPointFromCircleAngle_Cardinal)
     {
-        float x, y;
-        CalculatePointFromCircleAngle(1.0f, 0.0f, x, y);
-        Assert::AreEqual(1.0f, x, 1e-6f);
-        Assert::AreEqual(0.0f, y, 1e-6f);
+        AssertPoint(PointFromCircleAngle(1.f, 0.0), 1.f, 0.f);
+        AssertPoint(PointFromCircleAngle(2.f, Pi / 2), 0.f, 2.f);
+        AssertPoint(PointFromCircleAngle(1.f, Pi), -1.f, 0.f);
+        AssertPoint(PointFromCircleAngle(3.f, -Pi / 2), 0.f, -3.f);
+    }
+
+    // 任意角度：点应始终落在半径圆上，且极角等于输入角度
+    TEST_METHOD(TsPointFromCircleAngle_OnCircle)
+    {
+        const float r = 5.f, ag = PiF / 6.f;
+        const auto pt = PointFromCircleAngle(r, ag);
+        AssertPoint(pt, r * cosf(ag), r * sinf(ag));
+        Assert::AreEqual(r, Kw::Length(pt), 1e-5f);
+        Assert::AreEqual(ag, atan2f(pt.y, pt.x), 1e-5f);
+    }
+
+    TEST_METHOD(TsPointFromCircleAngle_ZeroRadius)
+    {
+        AssertPoint(PointFromCircleAngle(0.f, PiF / 3), 0.f, 0.f);
     }
 };
 
 TEST_CLASS(TsLine)
 {
 public:
-
     TEST_METHOD(TsLineLength)
     {
-        Assert::AreEqual(5.0f, CalculateLineLength<float>(0, 0, 3, 4), 1e-6f);
+        Assert::AreEqual(5.f, LineLength({ 0.f, 0.f }, { 3.f, 4.f }), 1e-5f);
+        Assert::AreEqual(0.f, LineLength({ 7.f, -2.f }, { 7.f, -2.f }), 1e-6f);
+        // 与方向无关
+        Assert::AreEqual(5.f, LineLength({ 3.f, 4.f }, { 0.f, 0.f }), 1e-5f);
     }
 
-    TEST_METHOD(TsLineScalePos)
+    // k=0 返回 pt1，k=1 返回 pt2，允许外插
+    TEST_METHOD(TsPointFromLineScale)
     {
-        double x, y;
-        CalculatePointFromLineScale(0, 0, 10, 0, 0.5f, x, y);
-        Assert::AreEqual(5.0, x, 1e-12);
-        Assert::AreEqual(0.0, y, 1e-12);
+        const Kw::Vector2 pt1{ 0.f, 0.f }, pt2{ 10.f, 20.f };
+        AssertPoint(PointFromLineScale(pt1, pt2, 0.f), 0.f, 0.f);
+        AssertPoint(PointFromLineScale(pt1, pt2, 1.f), 10.f, 20.f);
+        AssertPoint(PointFromLineScale(pt1, pt2, 0.5f), 5.f, 10.f);
+        AssertPoint(PointFromLineScale(pt1, pt2, 2.f), 20.f, 40.f);
+        AssertPoint(PointFromLineScale(pt2, pt1, 0.25f), 7.5f, 15.f);
     }
 
-    TEST_METHOD(TsLineEquationPointSlope)
+    TEST_METHOD(TsLineEquation_TwoPoints)
     {
-        double A, B, C;
-        CalculateLineEquation(0, 0, 1.0, A, B, C);
-        // y = x => -x + y = 0 => A=1,B=-1,C=0
-        Assert::AreEqual(1.0, A, 1e-12);
-        Assert::AreEqual(-1.0, B, 1e-12);
-        Assert::AreEqual(0.0, C, 1e-12);
+        const auto ln = CalculateLineEquation(
+            Kw::Vector2{ 0.f, 0.f }, Kw::Vector2{ 1.f, 1.f });
+        // y = x 上的点都应满足方程
+        Assert::AreEqual(0.f, EvalLineEquation(ln, 0.f, 0.f), 1e-6f);
+        Assert::AreEqual(0.f, EvalLineEquation(ln, 2.f, 2.f), 1e-6f);
+        Assert::AreEqual(0.f, EvalLineEquation(ln, -3.f, -3.f), 1e-6f);
+        // 系数为 (y1-y2, x2-x1, ...) 的等价形式：A + B = 0
+        Assert::AreEqual(-ln.x, ln.y, 1e-6f);
     }
 
-    TEST_METHOD(TsLineEquationTwoPoints)
+    // 竖直线：B = 0
+    TEST_METHOD(TsLineEquation_Vertical)
     {
-        double A, B, C;
-        CalculateLineEquation(0, 0, 1, 1, A, B, C);
-        // Same line: y=x => x - y = 0 => A=-1,B=1,C=0 (scale OK)
-        Assert::IsTrue(fabs(A + 1) < 1e-12);
-        Assert::IsTrue(fabs(B - 1) < 1e-12);
+        const auto ln = CalculateLineEquation(
+            Kw::Vector2{ 2.f, 0.f }, Kw::Vector2{ 2.f, 5.f });
+        Assert::AreEqual(0.f, ln.y, 1e-6f);
+        Assert::AreEqual(0.f, EvalLineEquation(ln, 2.f, 3.f), 1e-6f);
+        Assert::AreEqual(0.f, EvalLineEquation(ln, 2.f, -7.f), 1e-6f);
     }
 
+    // 水平线：A = 0
+    TEST_METHOD(TsLineEquation_Horizontal)
+    {
+        const auto ln = CalculateLineEquation(
+            Kw::Vector2{ -1.f, 3.f }, Kw::Vector2{ 4.f, 3.f });
+        Assert::AreEqual(0.f, ln.x, 1e-6f);
+        Assert::AreEqual(0.f, EvalLineEquation(ln, 0.f, 3.f), 1e-6f);
+        Assert::AreEqual(0.f, EvalLineEquation(ln, 100.f, 3.f), 1e-6f);
+    }
+
+    // 一点 + 斜率：y = 2x + 3 => 2x - y + 3 = 0
+    TEST_METHOD(TsLineEquation_PointSlope)
+    {
+        const auto ln = CalculateLineEquation(Kw::Vector2{ 0.f, 3.f }, 2.f);
+        Assert::AreEqual(2.f, ln.x, 1e-6f);
+        Assert::AreEqual(-1.f, ln.y, 1e-6f);
+        Assert::AreEqual(3.f, ln.z, 1e-6f);
+        Assert::AreEqual(0.f, EvalLineEquation(ln, 1.f, 5.f), 1e-6f);
+        Assert::AreEqual(0.f, EvalLineEquation(ln, -3.f, -3.f), 1e-6f);
+    }
+
+    // 距离取绝对值：点位于直线两侧时结果相同；按无限长直线计算
     TEST_METHOD(TsPointToLineDistance)
     {
-        POINT p{ 0,1 }, p1{ 0,0 }, p2{ 1,0 };
-        Assert::AreEqual(1.0f, CalculatePointToLineDistance<float>(p, p1, p2), 1e-6f);
+        const Kw::Vector2 a{ 0.f, 0.f }, b{ 4.f, 0.f };
+        Assert::AreEqual(3.f, PointToLineDistance({ 0.f, 3.f }, a, b), 1e-5f);
+        Assert::AreEqual(3.f, PointToLineDistance({ 0.f, -3.f }, a, b), 1e-5f);
+        Assert::AreEqual(0.f, PointToLineDistance({ 7.f, 0.f }, a, b), 1e-6f);
+        // 竖直线 x = 2
+        Assert::AreEqual(1.f, PointToLineDistance(
+            { 1.f, 1.f }, { 2.f, 0.f }, { 2.f, 6.f }), 1e-5f);
     }
 };
 
 TEST_CLASS(TsPolarRect)
 {
 public:
-
-    TEST_METHOD(TsPolar2Rect_Rect2Polar)
+    TEST_METHOD(TsPolarToRect)
     {
-        double x, y, r, theta;
+        AssertPoint(PolarToRect(Kw::PolarPoint{ 2.0, 0.0 }), 2.f, 0.f);
+        AssertPoint(PolarToRect(Kw::PolarPoint{ 2.0, Pi / 2 }), 0.f, 2.f);
+        AssertPoint(PolarToRect(Kw::PolarPoint{ 0.0, 1.0 }), 0.f, 0.f);
+    }
 
-        PolarToRect(1.0, Pi / 2, x, y);
-        Assert::AreEqual(0.0, x, 1e-12);
-        Assert::AreEqual(1.0, y, 1e-12);
+    TEST_METHOD(TsRectToPolar)
+    {
+        auto p = RectToPolar(Kw::Vector2{ 0.f, 1.f });
+        Assert::AreEqual(1.0, p.Rho, 1e-6);
+        Assert::AreEqual(Pi / 2, p.Theta, 1e-6);
 
-        RectToPolar(0.0, 1.0, r, theta);
-        Assert::AreEqual(1.0, r, 1e-12);
-        Assert::AreEqual(Pi / 2, theta, 1e-12);
+        p = RectToPolar(Kw::Vector2{ 3.f, 4.f });
+        Assert::AreEqual(5.0, p.Rho, 1e-5);
+        Assert::AreEqual(atan2(4.0, 3.0), p.Theta, 1e-6);
+    }
+
+    TEST_METHOD(TsPolarRect_RoundTrip)
+    {
+        const double ags[]{ 0.0, 0.3, Pi / 4, 2.7, -1.2 };
+        for (const auto ag : ags)
+        {
+            const auto p = RectToPolar(PolarToRect(Kw::PolarPoint{ 3.5, ag }));
+            Assert::AreEqual(3.5, p.Rho, 1e-5);
+            Assert::AreEqual(ag, p.Theta, 1e-5);
+        }
     }
 };
 
 TEST_CLASS(TsEllipse)
 {
 public:
-
-    TEST_METHOD(TsCalcPointFromEllipseAngle)
+    // 四个象限方向上的点：长轴/短轴端点
+    TEST_METHOD(TsPointFromEllipseAngle_Cardinal)
     {
-        double x, y;
-        CalculatePointFromEllipseAngle(2.0, 1.0, 0.0, x, y);
+        AssertPoint(PointFromEllipseAngle(2.f, 1.f, 0.0), 2.f, 0.f);
+        AssertPoint(PointFromEllipseAngle(2.f, 1.f, Pi / 2), 0.f, 1.f);
+        AssertPoint(PointFromEllipseAngle(2.f, 1.f, Pi), -2.f, 0.f);
+        AssertPoint(PointFromEllipseAngle(2.f, 1.f, Pi * 1.5), 0.f, -1.f);
+    }
 
-        // angle=0 时，应在长轴右端点附近：x≈2
-        Assert::IsTrue(fabs(x - 2.0) < 1e-6);
-        Assert::IsTrue(fabs(y - 0.0) < 1e-6);
+    // ag 为圆心角：点必须落在该方向的射线上，同时落在椭圆上
+    TEST_METHOD(TsPointFromEllipseAngle_OnRayAndEllipse)
+    {
+        const float a = 2.f, b = 1.f;
+        const double ags[]{ 0.3, Pi / 4, 1.2, 2.5 };
+        for (const auto ag : ags)
+        {
+            const auto pt = PointFromEllipseAngle(a, b, ag);
+            Assert::AreEqual(float(ag), atan2f(pt.y, pt.x), 1e-5f);
+            const float f = pt.x * pt.x / (a * a) + pt.y * pt.y / (b * b);
+            Assert::AreEqual(1.f, f, 1e-5f);
+        }
+    }
+
+    TEST_METHOD(TsArcFromEllipseAngle_Center)
+    {
+        const Kw::Vector2 c{ 10.f, 20.f };
+        const auto arc = ArcFromEllipseAngle(c, 2.f, 1.f, 0.0, Pi / 2);
+        AssertPoint(arc[0], 12.f, 20.f);
+        AssertPoint(arc[1], 10.f, 21.f);
+    }
+
+    // 矩形内切椭圆的中心为矩形中心，半轴为矩形半宽/半高
+    TEST_METHOD(TsArcFromEllipseAngle_Rect)
+    {
+        const Kw::Rect rc{ 0.f, 0.f, 4.f, 2.f };
+        const auto arc = ArcFromEllipseAngle(rc, 0.0, Pi / 2);
+        AssertPoint(arc[0], 4.f, 1.f);
+        AssertPoint(arc[1], 2.f, 2.f);
+    }
+};
+
+TEST_CLASS(TsBezier)
+{
+public:
+    // 少于两点不会产生任何输出（也不会越界写入）
+    TEST_METHOD(TsTooFewPoints_NoChange)
+    {
+        std::vector<Kw::Vector2> v;
+        CalculateBezierControlPoints(v, nullptr, 0);
+        Assert::AreEqual(size_t(0), v.size());
+
+        const Kw::Vector2 pt{ 1.f, 2.f };
+        CalculateBezierControlPoints(v, &pt, 1);
+        Assert::AreEqual(size_t(0), v.size());
+    }
+
+    // 两点时退化为直线：{p0, p0, p1, p1}
+    TEST_METHOD(TsTwoPoints)
+    {
+        const Kw::Vector2 pt[]{ { 1.f, 2.f }, { 5.f, 6.f } };
+        std::vector<Kw::Vector2> v;
+        CalculateBezierControlPoints(v, pt, 2);
+        Assert::AreEqual(size_t(4), v.size());
+        AssertPoint(v[0], 1.f, 2.f);
+        AssertPoint(v[1], 1.f, 2.f);
+        AssertPoint(v[2], 5.f, 6.f);
+        AssertPoint(v[3], 5.f, 6.f);
+    }
+
+    // 共线等距三点、K=1 时，控制点落在相邻线段的中点
+    TEST_METHOD(TsCollinear_K1)
+    {
+        const Kw::Vector2 pt[]{ { 0.f, 0.f }, { 1.f, 0.f }, { 2.f, 0.f } };
+        std::vector<Kw::Vector2> v;
+        CalculateBezierControlPoints(v, pt, 3, 1.f);
+        Assert::AreEqual(size_t(7), v.size());
+        const float xExp[]{ 0.f, 0.f, 0.5f, 1.f, 1.5f, 2.f, 2.f };
+        for (size_t i = 0; i < v.size(); ++i)
+        {
+            Assert::AreEqual(xExp[i], v[i].x, 1e-5f);
+            Assert::AreEqual(0.f, v[i].y, 1e-5f);
+        }
+    }
+
+    // 对称输入应产生对称的控制点
+    TEST_METHOD(TsSymmetric)
+    {
+        const Kw::Vector2 pt[]{ { 0.f, 0.f }, { 1.f, 2.f }, { 2.f, 0.f } };
+        std::vector<Kw::Vector2> v;
+        CalculateBezierControlPoints(v, pt, 3, 1.f);
+        Assert::AreEqual(size_t(7), v.size());
+        const Kw::Vector2 exp[]
+        {
+            { 0.f, 0.f }, { 0.f, 0.f }, { 0.5f, 2.f }, { 1.f, 2.f },
+            { 1.5f, 2.f }, { 2.f, 0.f }, { 2.f, 0.f }
+        };
+        for (size_t i = 0; i < v.size(); ++i)
+            AssertPoint(v[i], exp[i].x, exp[i].y);
+    }
+
+    // 结果追加到既有内容之后
+    TEST_METHOD(TsAppendToExisting)
+    {
+        const Kw::Vector2 pt[]{ { 1.f, 2.f }, { 5.f, 6.f } };
+        std::vector<Kw::Vector2> v{ { 99.f, 99.f } };
+        CalculateBezierControlPoints(v, pt, 2);
+        Assert::AreEqual(size_t(5), v.size());
+        AssertPoint(v[0], 99.f, 99.f);
+        AssertPoint(v[1], 1.f, 2.f);
+        AssertPoint(v[2], 1.f, 2.f);
+        AssertPoint(v[3], 5.f, 6.f);
+        AssertPoint(v[4], 5.f, 6.f);
+    }
+
+    // 曲线的锚点必须依次落在输入的离散点上
+    TEST_METHOD(TsAnchorsMatchInput)
+    {
+        const Kw::Vector2 pt[]
+        {
+            { 0.f, 0.f }, { 10.f, 5.f }, { 20.f, -5.f }, { 30.f, 0.f }, { 40.f, 10.f }
+        };
+        const size_t cPt = std::size(pt);
+        std::vector<Kw::Vector2> v;
+        CalculateBezierControlPoints(v, pt, cPt);
+        Assert::AreEqual((cPt - 1) * 3 + 1, v.size());
+        for (size_t i = 0; i < cPt; ++i)
+        {
+            const size_t idx = (i == 0) ? 0 : (i == cPt - 1) ? v.size() - 2 : 3 * i;
+            AssertPoint(v[idx], pt[i].x, pt[i].y);
+        }
+    }
+
+    // 相邻点完全重合时不产生 NaN 控制点（两段长度均为0时也不能除零）
+    TEST_METHOD(TsDuplicatePoints_FiniteResult)
+    {
+        const Kw::Vector2 pt[]
+        {
+            { 2.f, 2.f }, { 2.f, 2.f }, { 2.f, 2.f }, { 5.f, 1.f }
+        };
+        std::vector<Kw::Vector2> v;
+        CalculateBezierControlPoints(v, pt, 4);
+        Assert::AreEqual(size_t(10), v.size());
+        for (const auto& p : v)
+            Assert::IsTrue(std::isfinite(p.x) && std::isfinite(p.y));
+
+        // 只有一段为 0 长度时同样有限
+        const Kw::Vector2 pt2[]{ { 0.f, 0.f }, { 0.f, 0.f }, { 1.f, 0.f } };
+        v.clear();
+        CalculateBezierControlPoints(v, pt2, 3);
+        Assert::AreEqual(size_t(7), v.size());
+        for (const auto& p : v)
+            Assert::IsTrue(std::isfinite(p.x) && std::isfinite(p.y));
+    }
+};
+
+TEST_CLASS(TsXForm)
+{
+public:
+    TEST_METHOD(TsTranslate)
+    {
+        float x, y;
+        ApplyXForm(XFormTranslate(10.f, -20.f), 1.f, 1.f, x, y);
+        Assert::AreEqual(11.f, x, 1e-6f);
+        Assert::AreEqual(-19.f, y, 1e-6f);
+    }
+
+    TEST_METHOD(TsRotate)
+    {
+        const auto tf = XFormRotate(Pi / 2);
+        Assert::AreEqual(0.f, tf.eM11, 1e-6f);
+        Assert::AreEqual(1.f, tf.eM12, 1e-6f);
+        Assert::AreEqual(-1.f, tf.eM21, 1e-6f);
+        Assert::AreEqual(0.f, tf.eM22, 1e-6f);
+        Assert::AreEqual(0.f, tf.eDx, 1e-6f);
+        Assert::AreEqual(0.f, tf.eDy, 1e-6f);
+
+        float x, y;
+        ApplyXForm(tf, 1.f, 0.f, x, y);   // +X 轴 -> +Y 轴
+        Assert::AreEqual(0.f, x, 1e-6f);
+        Assert::AreEqual(1.f, y, 1e-6f);
+        ApplyXForm(tf, 0.f, 1.f, x, y);   // +Y 轴 -> -X 轴
+        Assert::AreEqual(-1.f, x, 1e-6f);
+        Assert::AreEqual(0.f, y, 1e-6f);
+        ApplyXForm(tf, 0.f, 0.f, x, y);   // 原点不动
+        Assert::AreEqual(0.f, x, 1e-6f);
+        Assert::AreEqual(0.f, y, 1e-6f);
+    }
+
+    TEST_METHOD(TsRotateAboutPoint)
+    {
+        const auto tf = XFormRotate(Pi / 2, 5.f, 5.f);
+        float x, y;
+        ApplyXForm(tf, 5.f, 5.f, x, y);
+        Assert::AreEqual(5.f, x, 1e-5f);
+        Assert::AreEqual(5.f, y, 1e-5f);
+        ApplyXForm(tf, 6.f, 5.f, x, y);   // 中心右侧1单位 -> 中心下方1单位
+        Assert::AreEqual(5.f, x, 1e-5f);
+        Assert::AreEqual(6.f, y, 1e-5f);
+    }
+
+    TEST_METHOD(TsScale)
+    {
+        float x, y;
+        ApplyXForm(XFormScale(2.f, 3.f), 1.f, 1.f, x, y);
+        Assert::AreEqual(2.f, x, 1e-6f);
+        Assert::AreEqual(3.f, y, 1e-6f);
+
+        const auto tf = XFormScale(2.f, 2.f, 5.f, 5.f);
+        ApplyXForm(tf, 5.f, 5.f, x, y);   // 中心不动
+        Assert::AreEqual(5.f, x, 1e-6f);
+        Assert::AreEqual(5.f, y, 1e-6f);
+        ApplyXForm(tf, 6.f, 7.f, x, y);
+        Assert::AreEqual(7.f, x, 1e-6f);
+        Assert::AreEqual(9.f, y, 1e-6f);
+    }
+
+    TEST_METHOD(TsShear)
+    {
+        float x, y;
+        ApplyXForm(XFormShear(1.f, 0.f), 1.f, 2.f, x, y); // Y' = X + Y
+        Assert::AreEqual(1.f, x, 1e-6f);
+        Assert::AreEqual(3.f, y, 1e-6f);
+
+        const auto tf = XFormShear(1.f, 0.f, 2.f, 3.f);
+        ApplyXForm(tf, 2.f, 3.f, x, y);   // 中心不动
+        Assert::AreEqual(2.f, x, 1e-6f);
+        Assert::AreEqual(3.f, y, 1e-6f);
+        ApplyXForm(tf, 2.f, 4.f, x, y);
+        Assert::AreEqual(2.f, x, 1e-6f);
+        Assert::AreEqual(4.f, y, 1e-6f);
+    }
+
+    // 关于坐标轴和直线 y = x 的反射
+    TEST_METHOD(TsReflection)
+    {
+        float x, y;
+        ApplyXForm(XFormReflection(0.f, 1.f, 0.f), 1.f, 2.f, x, y);
+        Assert::AreEqual(1.f, x, 1e-6f);
+        Assert::AreEqual(-2.f, y, 1e-6f);
+
+        ApplyXForm(XFormReflection(1.f, 0.f, 0.f), 1.f, 2.f, x, y);
+        Assert::AreEqual(-1.f, x, 1e-6f);
+        Assert::AreEqual(2.f, y, 1e-6f);
+
+        ApplyXForm(XFormReflection(1.f, -1.f, 0.f), 1.f, 2.f, x, y);
+        Assert::AreEqual(2.f, x, 1e-6f);
+        Assert::AreEqual(1.f, y, 1e-6f);
+    }
+
+    // D2D 版本与 XFORM 版本系数一致
+    TEST_METHOD(TsD2DMatrixReflection_MatchesXForm)
+    {
+        const float A = 1.f, B = -1.f, C = 0.f;
+        const auto tf = XFormReflection(A, B, C);
+        const auto m = D2DMatrixReflection(A, B, C);
+        Assert::AreEqual(tf.eM11, m._11, 1e-6f);
+        Assert::AreEqual(tf.eM12, m._12, 1e-6f);
+        Assert::AreEqual(tf.eM21, m._21, 1e-6f);
+        Assert::AreEqual(tf.eM22, m._22, 1e-6f);
+        Assert::AreEqual(tf.eDx, m._31, 1e-6f);
+        Assert::AreEqual(tf.eDy, m._32, 1e-6f);
     }
 };
 
@@ -333,7 +687,7 @@ namespace
     }
 }
 
-// CalculateDistortMatrix / HomographyUnitSquareToQuadrilaterals 的行为契约：
+// CalculateDistortMatrix / HomographyUnitSquareToQuadrilateral 的行为契约：
 //   1) 单位正方形的四个规范角点 (0,0)(1,0)(1,1)(0,1) 依次对应四边形四点
 //   2) CalculateDistortMatrix 输出的 4x4 在 Direct2D 行向量语义下
 //      把 ptSrc 的四个点依次映射到 ptDst 的四个点
@@ -348,7 +702,7 @@ public:
         {
             { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f }, { 0.f, 1.f }
         };
-        const auto H = Detail::HomographyUnitSquareToQuadrilaterals(pt);
+        const auto H = Detail::HomographyUnitSquareToQuadrilateral(pt);
         const auto I = Kw::IdentityMatrix<3>();
         for (size_t i = 0; i < 3; ++i)
             for (size_t j = 0; j < 3; ++j)
@@ -367,7 +721,7 @@ public:
             { 0.f, 0.f }, { 1.f, 0.f }, { 1.f, 1.f }, { 0.f, 1.f }
         };
 
-        const auto H = Detail::HomographyUnitSquareToQuadrilaterals(pt);
+        const auto H = Detail::HomographyUnitSquareToQuadrilateral(pt);
         for (int i = 0; i < 4; ++i)
         {
             float x, y;

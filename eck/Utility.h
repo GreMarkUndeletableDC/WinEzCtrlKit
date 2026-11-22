@@ -734,37 +734,37 @@ EckInlineCe void RectCornerToPoint(const D2D1_RECT_F& rc,
 #endif // _D2D1_H_
 
 template<CcpRect T>
-EckInline void CeilRect(_Inout_ T& rc) noexcept
+EckInlineCe void CeilRect(_Inout_ T& rc) noexcept
 {
     if constexpr (RectTraits<T>::IsRcwh)
     {
         if constexpr (std::floating_point<decltype(rc.x)>)
         {
-            rc.x = floorf(rc.x);
-            rc.y = floorf(rc.y);
-            rc.cx = ceilf(rc.cx);
-            rc.cy = ceilf(rc.cy);
+            rc.x = FloorF<int>(rc.x);
+            rc.y = FloorF<int>(rc.y);
+            rc.cx = CeilF<int>(rc.cx);
+            rc.cy = CeilF<int>(rc.cy);
         }
     }
     else
     {
         if constexpr (std::floating_point<decltype(rc.left)>)
         {
-            rc.left = floorf(rc.left);
-            rc.top = floorf(rc.top);
-            rc.right = ceilf(rc.right);
-            rc.bottom = ceilf(rc.bottom);
+            rc.left = FloorF<int>(rc.left);
+            rc.top = FloorF<int>(rc.top);
+            rc.right = CeilF<int>(rc.right);
+            rc.bottom = CeilF<int>(rc.bottom);
         }
     }
 }
 template<CcpRect T>
     requires (!RectTraits<T>::IsRcwh)
-EckInline void CeilRect(const T& rc, _Out_ RECT& rcOut) noexcept
+EckInlineCe void CeilRect(const T& rc, _Out_ RECT& rcOut) noexcept
 {
-    rcOut.left = (LONG)floorf(rc.left);
-    rcOut.top = (LONG)floorf(rc.top);
-    rcOut.right = (LONG)ceilf(rc.right);
-    rcOut.bottom = (LONG)ceilf(rc.bottom);
+    rcOut.left = Floor<LONG>(rc.left);
+    rcOut.top = Floor<LONG>(rc.top);
+    rcOut.right = Ceil<LONG>(rc.right);
+    rcOut.bottom = Ceil<LONG>(rc.bottom);
 }
 
 EckInlineNdCe BLENDFUNCTION MakeBlendFunction(BYTE byAlpha)
@@ -914,15 +914,15 @@ EckInlineNdCe bool Sign(auto v) noexcept { return v >= 0; }
 template<class T>
 EckInlineNdCe T SignValue(T v) noexcept { return (v >= 0 ? 1 : -1); }
 
+EckInlineNdCe auto Absolute(auto x) noexcept { return (x >= 0) ? x : -x; }
+
 template<class T, class U>
 EckInlineNdCe T SetSign(T x, U iSign) noexcept
 {
-    if (iSign > 0) return Abs(x);
-    if (iSign < 0) return -Abs(x);
+    if (iSign > 0) return Absolute(x);
+    if (iSign < 0) return -Absolute(x);
     else return x;
 }
-
-EckInlineNdCe auto Abs(auto x) noexcept { return (x >= 0) ? x : -x; }
 
 template<std::integral T>
 EckInlineNdCe T CeilDivide(T x, T y) noexcept
@@ -936,6 +936,31 @@ EckInlineNdCe T CeilDivide(T x, T y) noexcept
         return x / y;
     }
 }
+
+template<std::integral T, std::floating_point U>
+EckInlineNdCe T Floor(U x) noexcept
+{
+    const auto i = (T)x;
+    return i - (x < i);
+}
+template<std::integral T, std::floating_point U>
+EckInlineNdCe T Ceil(U x) noexcept
+{
+    const auto i = (T)x;
+    return i + (x > i);
+}
+template<std::integral T, std::floating_point U>
+EckInlineNdCe T Round(U x) noexcept
+{
+    return T(x + (x >= 0 ? (U)0.5 : -(U)0.5));
+}
+
+template<std::integral T, std::floating_point U>
+EckInlineNdCe U FloorF(U x) noexcept { return (U)Floor<T, U>(x); }
+template<std::integral T, std::floating_point U>
+EckInlineNdCe U CeilF(U x) noexcept { return (U)Ceil<T, U>(x); }
+template<std::integral T, std::floating_point U>
+EckInlineNdCe U RoundF(U x) noexcept { return (U)Round<T, U>(x); }
 
 #ifdef _WIN64
 constexpr inline size_t FnvOffsetBasis = 14695981039346656037ull;
@@ -957,13 +982,14 @@ EckInlineNdCe size_t Fnv1aHash(PCBYTE p, size_t cb) noexcept
 }
 
 template<std::floating_point T>
-EckInline bool FloatEqual(T f1, T f2, T fEpsilon = std::numeric_limits<T>::epsilon()) noexcept
+EckInlineNdCe bool FloatEqual(
+    T f1, T f2, T fEpsilon = std::numeric_limits<T>::epsilon()) noexcept
 {
-    return abs(f1 - f2) < fEpsilon;
+    return Absolute(f1 - f2) < fEpsilon;
 }
 
 template<CcpNumber T>
-EckInlineNdCe T Distance(T x1, T x2) noexcept { return (x1 > x2) ? (x1 - x2) : (x2 - x1); }
+EckInlineNdCe T Distance(T x1, T x2) noexcept { return (x1 > x2) ? T(x1 - x2) : T(x2 - x1); }
 
 template<CcpNumberOrEnumeration T>
 EckInlineNdCe T DpiScale(T i, int iDpiNew, int iDpiOld = 96) noexcept { return T(i * iDpiNew / iDpiOld); }

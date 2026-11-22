@@ -305,7 +305,7 @@ public:
         const auto bNeg = (fDecimal < 0);
         if (bNeg)
             fDecimal = -fDecimal;
-        const auto fSubPixel = roundf(fDecimal * SubPixelSnapCount);
+        const auto fSubPixel = RoundF<int>(fDecimal * SubPixelSnapCount);
         if (fSubPixel >= SubPixelSnapCount)
         {
             if (bNeg)

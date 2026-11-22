@@ -446,9 +446,6 @@
     <ClCompile Include="eck\GdipEffect.h">
       <Filter>ECK Include</Filter>
     </ClCompile>
-    <ClCompile Include="eck\GeometryRender.h">
-      <Filter>ECK Include</Filter>
-    </ClCompile>
     <ClCompile Include="eck\GraphicsHelper.h">
       <Filter>ECK Include</Filter>
     </ClCompile>

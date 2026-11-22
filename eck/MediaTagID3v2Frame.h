@@ -2016,7 +2016,7 @@ struct EQUA final : public FRAME
         {
             const auto us = (e.usFreq & 0b0111'1111) |
                 ((e.llAdjust >= 0) ? 0b1000'0000 : 0);
-            const auto ull = Abs(e.llAdjust);
+            const auto ull = Absolute(e.llAdjust);
             w.WriteReversed(&us, 2).WriteReversed(&ull, cbField);
         }
         return PostSerialize(rb, Ctx, cbFrame);

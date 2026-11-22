@@ -208,6 +208,7 @@
     <ClCompile Include="TsStringConvert.cpp" />
     <ClCompile Include="TsStringUtility.cpp" />
     <ClCompile Include="TsTrivialBuffer.cpp" />
+    <ClCompile Include="TsUtility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

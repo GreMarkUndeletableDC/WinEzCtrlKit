@@ -51,6 +51,9 @@
     <ClCompile Include="TsTrivialBuffer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="TsUtility.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="TsCString.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

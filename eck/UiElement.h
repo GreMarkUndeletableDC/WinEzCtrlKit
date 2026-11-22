@@ -706,12 +706,12 @@ public:
     template<std::integral T>
     EckInlineNd T PixelToLogicalRound(T v) const noexcept
     {
-        return (T)roundf(v * 96.f / m_iUserDpi);
+        return Round<T>(v * 96.f / m_iUserDpi);
     }
     template<std::integral T>
     EckInlineNd T LogicalToPixelRound(T v) const noexcept
     {
-        return (T)roundf(v * m_iUserDpi / 96.f);
+        return Round<T>(v * m_iUserDpi / 96.f);
     }
 
     EckInlineCe void PixelToLogical(_Inout_ TPoint& pt) const noexcept
