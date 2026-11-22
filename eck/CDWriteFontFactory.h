@@ -55,7 +55,7 @@ public:
         DaSystemParametersInfo(SPI_GETICONTITLELOGFONT,
             sizeof(lf), &lf, 0, iDpi);
         m_Template.rsFace = lf.lfFaceName;
-        m_Template.cy = fabsf((float)lf.lfHeight);
+        m_Template.cy = Absolute((float)lf.lfHeight);
         m_Template.eWeight = (DWRITE_FONT_WEIGHT)lf.lfWeight;
         m_Template.bItalic = lf.lfItalic ? true : false;
     }

@@ -914,15 +914,15 @@ EckInlineNdCe bool Sign(auto v) noexcept { return v >= 0; }
 template<class T>
 EckInlineNdCe T SignValue(T v) noexcept { return (v >= 0 ? 1 : -1); }
 
+EckInlineNdCe auto Absolute(auto x) noexcept { return (x >= 0) ? x : -x; }
+
 template<class T, class U>
 EckInlineNdCe T SetSign(T x, U iSign) noexcept
 {
-    if (iSign > 0) return Abs(x);
-    if (iSign < 0) return -Abs(x);
+    if (iSign > 0) return Absolute(x);
+    if (iSign < 0) return -Absolute(x);
     else return x;
 }
-
-EckInlineNdCe auto Abs(auto x) noexcept { return (x >= 0) ? x : -x; }
 
 template<std::integral T>
 EckInlineNdCe T CeilDivide(T x, T y) noexcept
@@ -957,13 +957,14 @@ EckInlineNdCe size_t Fnv1aHash(PCBYTE p, size_t cb) noexcept
 }
 
 template<std::floating_point T>
-EckInline bool FloatEqual(T f1, T f2, T fEpsilon = std::numeric_limits<T>::epsilon()) noexcept
+EckInlineNdCe bool FloatEqual(
+    T f1, T f2, T fEpsilon = std::numeric_limits<T>::epsilon()) noexcept
 {
-    return abs(f1 - f2) < fEpsilon;
+    return Absolute(f1 - f2) < fEpsilon;
 }
 
 template<CcpNumber T>
-EckInlineNdCe T Distance(T x1, T x2) noexcept { return (x1 > x2) ? (x1 - x2) : (x2 - x1); }
+EckInlineNdCe T Distance(T x1, T x2) noexcept { return (x1 > x2) ? T(x1 - x2) : T(x2 - x1); }
 
 template<CcpNumberOrEnumeration T>
 EckInlineNdCe T DpiScale(T i, int iDpiNew, int iDpiOld = 96) noexcept { return T(i * iDpiNew / iDpiOld); }

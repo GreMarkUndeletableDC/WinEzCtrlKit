@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "KwDefine.h"
 #include "MathHelper.h"
 
 ECK_NAMESPACE_BEGIN
@@ -25,9 +24,9 @@ private:
         const auto b = 2.f * (p0 - 2.f * p1 + p2);
         const auto c = -p0 + p1;
 
-        if (fabsf(a) < 1e-6f)// a = 0，退化为一次方程
+        if (Absolute(a) < 1e-6f)// a = 0，退化为一次方程
         {
-            if (fabsf(b) < 1e-6f)// a = 0且b = 0，无解
+            if (Absolute(b) < 1e-6f)// a = 0且b = 0，无解
                 return {};
             const auto t = -c / b;
             if (t > 0.f && t < 1.f)
@@ -57,7 +56,7 @@ private:
     float Bzr2CalculateExtrema(float p0, float p1, float p2) noexcept
     {
         const auto m = p0 - 2.f * p1 + p2;
-        if (fabs(m) < 1e-6f)
+        if (Absolute(m) < 1e-6f)
             return 0.f;
         const auto t = (p0 - p1) / m;
         if (t > 0.f && t < 1.f)
@@ -206,7 +205,7 @@ public:
     void AddArc(Kw::Vector2 ptCenter, float a, float b,
         TAngle agStart, TAngle agSweep) noexcept
     {
-        if (abs(agSweep) >= Pi * 2.)
+        if (Absolute(agSweep) >= Pi * 2.)
         {
             AddRect({
                     ptCenter.x - a, ptCenter.y - b,
@@ -216,26 +215,21 @@ public:
         }
 
         // 端点
-        float x0, y0;
-        CalculatePointFromEllipseAngle(a, b, agStart, x0, y0);
-        float x1, y1;
-        CalculatePointFromEllipseAngle(a, b, agStart + agSweep, x1, y1);
-        x0 += ptCenter.x;
-        y0 += ptCenter.y;
-        x1 += ptCenter.x;
-        y1 += ptCenter.y;
-        if (x0 > x1)
-            std::swap(x0, x1);
-        if (y0 > y1)
-            std::swap(y0, y1);
-        if (x0 < m_rcBounds.left)
-            m_rcBounds.left = x0;
-        if (x1 > m_rcBounds.right)
-            m_rcBounds.right = x1;
-        if (y0 < m_rcBounds.top)
-            m_rcBounds.top = y0;
-        if (y1 > m_rcBounds.bottom)
-            m_rcBounds.bottom = y1;
+        auto pt0 = ptCenter + PointFromEllipseAngle(a, b, agStart);
+        auto pt1 = ptCenter + PointFromEllipseAngle(a, b, agStart + agSweep);
+        if (pt0.x > pt1.x)
+            std::swap(pt0.x, pt1.x);
+        if (pt0.y > pt1.y)
+            std::swap(pt0.y, pt1.y);
+
+        if (pt0.x < m_rcBounds.left)
+            m_rcBounds.left = pt0.x;
+        if (pt1.x > m_rcBounds.right)
+            m_rcBounds.right = pt1.x;
+        if (pt0.y < m_rcBounds.top)
+            m_rcBounds.top = pt0.y;
+        if (pt1.y > m_rcBounds.bottom)
+            m_rcBounds.bottom = pt1.y;
         // 极值
         constexpr TAngle ExtremeAngles[]
         {

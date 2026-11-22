@@ -571,7 +571,7 @@ inline bool IsMouseMovedBeforeDragging(
                 DispatchMessageW(&msg);
                 return false;
             case WM_MOUSEMOVE:
-                if (Abs(x - msg.pt.x) >= dx && Abs(y - msg.pt.y) >= dx)
+                if (Absolute(x - msg.pt.x) >= dx && Absolute(y - msg.pt.y) >= dx)
                 {
                     ReleaseCapture();
                     return true;
@@ -1111,7 +1111,7 @@ EckNfInlineNd HRESULT DftCreateDWrite(_Out_ IDWriteTextFormat*& pTf, int iDpi = 
     LOGFONTW lf;
     if (!DftGetLogFont(lf, iDpi))
         return HRESULT_FROM_WIN32(NaGetLastError());
-    return Detail::DftpCreate(pTf, lf, fabs((float)lf.lfHeight), 96);
+    return Detail::DftpCreate(pTf, lf, Absolute((float)lf.lfHeight), 96);
 }
 #endif // !ECK_OPT_NO_DWRITE
 #pragma endregion SystemFont

@@ -283,7 +283,7 @@ private:
         float x{};
         EckCounter(cItem, io)
         {
-            d = fabsf(xRef - x);
+            d = Absolute(xRef - x);
             if (d < dBest)
             {
                 dBest = d;
@@ -294,7 +294,7 @@ private:
                 goto End;
             dLast = d;
         }
-        d = fabsf(xRef - x);
+        d = Absolute(xRef - x);
         if (d < dBest)
             ioBest = cItem;
     End:
@@ -310,7 +310,7 @@ private:
                 continue;
             auto& e = m_vItem[i];
             e.xStart = e.x;
-            if (fabsf(e.xTarget - e.x) > 0.1f)
+            if (Absolute(e.xTarget - e.x) > 0.1f)
                 bNeedAnimation = true;
         }
 

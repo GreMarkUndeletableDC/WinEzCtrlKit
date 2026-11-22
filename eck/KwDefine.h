@@ -37,6 +37,10 @@ struct Vector3
         return (i == 0) ? x : (i == 1) ? y : z;
     }
 };
+struct Polar
+{
+    double Rho, Theta;
+};
 
 template<class T>
 concept CcpVector = std::is_same_v<T, Vector2> || std::is_same_v<T, Vector3>;

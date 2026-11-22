@@ -611,7 +611,7 @@ namespace Detail
             sizeof(BITMAPFILEHEADER) +
             sizeof(BITMAPINFOHEADER) +
             sizeof(RGBQUAD) * cPaletteEntry +
-            cbStride * Abs(cy);
+            cbStride * Absolute(cy);
         const auto pfh = (BITMAPFILEHEADER*)rb.PushBackNoExtra(cbTotal);
         const auto pih = (BITMAPINFOHEADER*)(pfh + 1);
         // 制文件头
@@ -629,7 +629,7 @@ namespace Detail
         pih->biPlanes = 1;
         pih->biBitCount = cBitPerPixel;
         pih->biCompression = BI_RGB;
-        pih->biSizeImage = DWORD(cbStride * Abs(cy));
+        pih->biSizeImage = DWORD(cbStride * Absolute(cy));
         pih->biXPelsPerMeter = pih->biYPelsPerMeter = 3780;
         pih->biClrUsed = cPaletteEntry;
         pih->biClrImportant = cPaletteImportant;
@@ -659,7 +659,7 @@ inline bool GdiSaveDib(
         p += cbPalette;
     }
     // 制像素
-    memcpy(p, pBits, cbStride * Abs(cy));
+    memcpy(p, pBits, cbStride * Absolute(cy));
     return true;
 }
 
@@ -688,7 +688,7 @@ inline bool GdiSaveDib(CByteBuffer& rb, HBITMAP hDib) noexcept
     memcpy(
         p,
         ds.dsBm.bmBits,
-        ds.dsBm.bmWidthBytes * Abs(ds.dsBmih.biHeight));
+        ds.dsBm.bmWidthBytes * Absolute(ds.dsBmih.biHeight));
     return true;
 }
 
