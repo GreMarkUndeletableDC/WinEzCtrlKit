@@ -52,7 +52,7 @@ private:
 
     EckInlineNd static UINT CalculateSize(float fSize, float fDpi) noexcept
     {
-        return (UINT(ceilf(fSize * fDpi / 96.f)) + (TextureAlign - 1u)) & ~(TextureAlign - 1u);
+        return (Ceil<UINT>(fSize * fDpi / 96.f) + (TextureAlign - 1u)) & ~(TextureAlign - 1u);
     }
 public:
     /// <summary>

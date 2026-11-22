@@ -155,7 +155,7 @@ public:
         _Out_writes_(cInput) D2D1_RECT_L* prcInput,
         UINT32 cInput) const override
     {
-        const auto r = (LONG)ceil(m_Constants.fRadiusMax);
+        const auto r = Ceil<UINT>(m_Constants.fRadiusMax);
         prcInput[0].left = prcOutput->left - r;
         prcInput[0].top = prcOutput->top - r;
         prcInput[0].right = prcOutput->right + r;

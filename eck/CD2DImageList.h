@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "CRectPackTile.h"
 #include "ComPtr.h"
+#include "Utility.h"
 
 ECK_NAMESPACE_BEGIN
 class CD2DImageList
@@ -31,10 +32,10 @@ public:
         float cxPage = 512, float cyPage = 256,
         DXGI_FORMAT eFormat = DXGI_FORMAT_B8G8R8A8_UNORM) noexcept :
         m_Packer{
-            (TCoord)(ceilf(cxTile* fDpi / 96.f) + 1),
-            (TCoord)(ceilf(cyTile* fDpi / 96.f) + 1),
-            (TCoord)ceilf(cxPage),
-            (TCoord)ceilf(cyPage),
+            TCoord(Ceil<TCoord>(cxTile * fDpi / 96.f) + 1),
+            TCoord(Ceil<TCoord>(cyTile * fDpi / 96.f) + 1),
+            Ceil<TCoord>(cxPage),
+            Ceil<TCoord>(cyPage),
             8192, 8192
         },
         m_eFormat{ eFormat },

@@ -327,14 +327,14 @@ inline bool MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
                     if (kL < 0.f)
                     {
                         bSampleDirectionL = false;
-                        xL = roundf((y - bL) / kL);
-                        xL1 = roundf((y - 1 - bL) / kL);
+                        xL = RoundF<int>((y - bL) / kL);
+                        xL1 = RoundF<int>((y - 1 - bL) / kL);
                     }
                     else
                     {
                         bSampleDirectionL = true;
-                        xL = roundf((y - bL) / kL);
-                        xL1 = roundf((y + 1 - bL) / kL);
+                        xL = RoundF<int>((y - bL) / kL);
+                        xL1 = RoundF<int>((y + 1 - bL) / kL);
                     }
                 }
 
@@ -350,24 +350,24 @@ inline bool MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
                     if (kR < 0.f)
                     {
                         bSampleDirectionR = true;
-                        xR = roundf((y + 1 - bR) / kR);
-                        xR1 = roundf((y - bR) / kR);
+                        xR = RoundF<int>((y + 1 - bR) / kR);
+                        xR1 = RoundF<int>((y - bR) / kR);
                     }
                     else
                     {
                         bSampleDirectionR = false;
-                        xR = roundf((y - 1 - bR) / kR);
-                        xR1 = roundf((y - bR) / kR);
+                        xR = RoundF<int>((y - 1 - bR) / kR);
+                        xR1 = RoundF<int>((y - bR) / kR);
                     }
                 }
 
-                const int xBegin = (int)ceilf(pL->x);
-                const int xEnd = (int)floorf(pR->x);
+                const int xBegin = Ceil<int>(pL->x);
+                const int xEnd = Floor<int>(pR->x);
                 int x = xBegin;
                 for (; x <= xEnd; ++x)
                 {
                     // 已知原图浮点位置(Rxx, Ryy)，插值得到颜色
-                    int x0 = (int)floorf(Rxx);
+                    int x0 = Floor<int>(Rxx);
                     float fRateX = Rxx - x0;
                     if (x0 < 0)
                     {
@@ -379,7 +379,7 @@ inline bool MakeImageFromPolygonToPolygon(TBmpHandler& Bmp, TBmpHandler& NewBmp,
                         x0 = Bmp.GetWidth() - 2;
                         fRateX = 1.f;
                     }
-                    int y0 = (int)floorf(Ryy);
+                    int y0 = Floor<int>(Ryy);
                     float fRateY = Ryy - y0;
                     if (y0 < 0)
                     {

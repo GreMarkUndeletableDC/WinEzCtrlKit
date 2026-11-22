@@ -435,7 +435,7 @@ public:
             m_DefCharFormat.dwMask = CFM_FACE | CFM_SIZE |
                 CFM_WEIGHT | CFM_ITALIC | CFM_CHARSET;
             pTf->GetFontFamilyName(m_DefCharFormat.szFaceName, LF_FACESIZE);
-            m_DefCharFormat.yHeight = (LONG)roundf(LogicalToPixel(
+            m_DefCharFormat.yHeight = Round<LONG>(LogicalToPixel(
                 pTf->GetFontSize() * 1440.f / 96.f));
             m_DefCharFormat.wWeight = (WORD)pTf->GetFontWeight();
             if (pTf->GetFontStyle() != DWRITE_FONT_STYLE_NORMAL)
@@ -1313,8 +1313,8 @@ inline BOOL CEditTextHost::TxSetCaretPos(INT x, INT y)
     const auto cy = rc.bottom - rc.top;
     rc = { (float)x, (float)y, float(x + cx), float(y + cy) };
     m_pEdit->PixelToLogical(rc);
-    rc.left = ceilf(rc.left);
-    rc.right = ceilf(rc.right);
+    rc.left = CeilF<int>(rc.left);
+    rc.right = CeilF<int>(rc.right);
     if (rc.right - rc.left < 1.f)
         rc.right = rc.left + 1.f;
     m_pEdit->ClientToElement(rc);

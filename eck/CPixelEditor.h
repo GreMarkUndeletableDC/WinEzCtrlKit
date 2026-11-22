@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ECK.h"
+#include "Utility.h"
 
 ECK_NAMESPACE_BEGIN
 // https://blog.ivank.net/fastest-gaussian-blur.html
@@ -8,13 +8,13 @@ inline void CalculateBoxBlurFromGaussian(
     _Out_writes_all_(n) UINT* pcxBox,
     UINT n) noexcept
 {
-    auto wl = (UINT)floorf(sqrtf((12.f * fSigma * fSigma / n) + 1.f));
+    auto wl = Floor<UINT>(sqrtf((12.f * fSigma * fSigma / n) + 1.f));
     if (wl % 2 == 0)
         wl--;
     const auto wu = wl + 2;
     const auto mIdeal =
         (12 * fSigma * fSigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4);
-    const auto m = (UINT)roundf(mIdeal);
+    const auto m = Round<UINT>(mIdeal);
     for (UINT i = 0; i < n; i++)
         *pcxBox++ = (i < m ? wl : wu);
 }

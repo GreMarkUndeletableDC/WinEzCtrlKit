@@ -106,10 +106,10 @@ private:
 
     static void SnapToPixel(D2D1_RECT_F& rc) noexcept
     {
-        rc.left = roundf(rc.left);
-        rc.right = roundf(rc.right);
-        rc.top = roundf(rc.top);
-        rc.bottom = roundf(rc.bottom);
+        rc.left = RoundF<int>(rc.left);
+        rc.right = RoundF<int>(rc.right);
+        rc.top = RoundF<int>(rc.top);
+        rc.bottom = RoundF<int>(rc.bottom);
     }
 
     bool PaintButton(UdwPart ePart, const D2D1_RECT_F& rcClip) noexcept
@@ -363,12 +363,12 @@ public:
 
             // -- 计算宽度
             int nSys = DaGetSystemMetrics(SM_CYSIZE, iWndDpi);
-            nSys = (int)floorf(nSys * 0.95454544f + 0.5f);
+            nSys = Floor<int>(nSys * 0.95454544f + 0.5f);
             // 对于标准的4个按钮（关闭、最大化、最小化、帮助）
             // 在两边的使用2.2272727，中间的使用2.1818182，若只有关闭按钮，使用1.6363636
-            m_cxClose = m_cxMin = floorf(nSys * 2.2272727f + 0.5f)
+            m_cxClose = m_cxMin = FloorF<int>(nSys * 2.2272727f + 0.5f)
                 * 96.f / iWndDpi;
-            m_cxMax = floorf(nSys * 2.1818182f + 0.5f)
+            m_cxMax = FloorF<int>(nSys * 2.1818182f + 0.5f)
                 * 96.f / iWndDpi;
             return;
         }

@@ -202,7 +202,7 @@ inline void FlattenArc(
 {
     const auto e = fTolerance / r;
     const auto dt = sqrt(48.f * e / (6.f - e));
-    const auto n = std::max(1u, UINT(ceil(Absolute(agSweep) / dt)));
+    const auto n = std::max(1u, Ceil<UINT>(Absolute(agSweep) / dt));
     const auto fTheta = agSweep / n;
 
     const auto fCosT = cos(fTheta);
