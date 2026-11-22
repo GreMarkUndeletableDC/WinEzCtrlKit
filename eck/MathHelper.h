@@ -88,11 +88,11 @@ EckInlineCe Kw::Vector3 CalculateLineEquation(
     return { k, -1.f, pt.y - k * pt.x };
 }
 
-EckInline Kw::Vector2 PolarToRect(const Kw::Polar& p) noexcept
+EckInline Kw::Vector2 PolarToRect(const Kw::PolarPoint& p) noexcept
 {
     return { float(p.Rho * cos(p.Theta)), float(p.Rho * sin(p.Theta)) };
 }
-EckInline Kw::Polar RectToPolar(const Kw::Vector2& p) noexcept
+EckInline Kw::PolarPoint RectToPolar(const Kw::Vector2& p) noexcept
 {
     return { Kw::Length(p), atan2(p.y, p.x) };
 }

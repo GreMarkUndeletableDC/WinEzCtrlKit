@@ -172,9 +172,9 @@ TEST_CLASS(TsPolarRect)
 public:
     TEST_METHOD(TsPolarToRect)
     {
-        AssertPoint(PolarToRect(Kw::Polar{ 2.0, 0.0 }), 2.f, 0.f);
-        AssertPoint(PolarToRect(Kw::Polar{ 2.0, Pi / 2 }), 0.f, 2.f);
-        AssertPoint(PolarToRect(Kw::Polar{ 0.0, 1.0 }), 0.f, 0.f);
+        AssertPoint(PolarToRect(Kw::PolarPoint{ 2.0, 0.0 }), 2.f, 0.f);
+        AssertPoint(PolarToRect(Kw::PolarPoint{ 2.0, Pi / 2 }), 0.f, 2.f);
+        AssertPoint(PolarToRect(Kw::PolarPoint{ 0.0, 1.0 }), 0.f, 0.f);
     }
 
     TEST_METHOD(TsRectToPolar)
@@ -193,7 +193,7 @@ public:
         const double ags[]{ 0.0, 0.3, Pi / 4, 2.7, -1.2 };
         for (const auto ag : ags)
         {
-            const auto p = RectToPolar(PolarToRect(Kw::Polar{ 3.5, ag }));
+            const auto p = RectToPolar(PolarToRect(Kw::PolarPoint{ 3.5, ag }));
             Assert::AreEqual(3.5, p.Rho, 1e-5);
             Assert::AreEqual(ag, p.Theta, 1e-5);
         }

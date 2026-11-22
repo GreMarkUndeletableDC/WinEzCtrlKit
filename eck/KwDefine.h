@@ -37,7 +37,7 @@ struct Vector3
         return (i == 0) ? x : (i == 1) ? y : z;
     }
 };
-struct Polar
+struct PolarPoint
 {
     double Rho, Theta;
 };
